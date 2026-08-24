@@ -1,2533 +1,9594 @@
-local cloneref = (cloneref or clonereference or function(instance)
-	return instance
-end)
-
-local UserInputService = cloneref(game:GetService("UserInputService"))
-local TweenService = cloneref(game:GetService("TweenService"))
-local CoreGui = cloneref(game:GetService("CoreGui"))
-local Players = cloneref(game:GetService("Players"))
-local RunService = cloneref(game:GetService("RunService"))
-local HttpService = cloneref(game:GetService("HttpService"))
-local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
-
-local LocalPlayer = Players.LocalPlayer
-
-local ConfigFolder = "CloudyConfigs"
-
-local function ensureConfigFolder()
-	if type(makefolder) == "function" and type(isfolder) == "function" then
-		if not isfolder(ConfigFolder) then
-			pcall(makefolder, ConfigFolder)
-		end
-	end
-end
-
-local MemoryConfigs = {}
-
-local function SaveConfigFile(filename, textData)
-	ensureConfigFolder()
-	local path = ConfigFolder .. "/" .. filename .. ".json"
-	if type(writefile) == "function" then
-		pcall(writefile, path, textData)
-	else
-		MemoryConfigs[filename] = textData
-	end
-end
-
-local function ReadConfigFile(filename)
-	ensureConfigFolder()
-	local path = ConfigFolder .. "/" .. filename .. ".json"
-	if type(readfile) == "function" and type(isfile) == "function" and isfile(path) then
-		local ok, data = pcall(readfile, path)
-		if ok then return data end
-	elseif MemoryConfigs[filename] then
-		return MemoryConfigs[filename]
-	end
-	return nil
-end
-
-local function DeleteConfigFile(filename)
-	ensureConfigFolder()
-	local path = ConfigFolder .. "/" .. filename .. ".json"
-	if type(delfile) == "function" and type(isfile) == "function" and isfile(path) then
-		pcall(delfile, path)
-	end
-	MemoryConfigs[filename] = nil
-end
-
-local function DeleteAllConfigFiles()
-	ensureConfigFolder()
-	if type(listfiles) == "function" and type(isfolder) == "function" and isfolder(ConfigFolder) then
-		local ok, files = pcall(listfiles, ConfigFolder)
-		if ok and type(files) == "table" then
-			for _, filePath in ipairs(files) do
-				if type(delfile) == "function" then
-					pcall(delfile, filePath)
-				end
-			end
-		end
-	end
-	MemoryConfigs = {}
-end
-
-local function ListConfigNames()
-	ensureConfigFolder()
-	local names = {}
-	if type(listfiles) == "function" and type(isfolder) == "function" and isfolder(ConfigFolder) then
-		local ok, files = pcall(listfiles, ConfigFolder)
-		if ok and type(files) == "table" then
-			for _, filePath in ipairs(files) do
-				local name = filePath:match("([^/\\]+)%.json$") or filePath:match("([^/\\]+)$")
-				if name then
-					table.insert(names, name)
-				end
-			end
-		end
-	end
-	for memName in pairs(MemoryConfigs) do
-		if not table.find(names, memName) then
-			table.insert(names, memName)
-		end
-	end
-	if #names == 0 then
-		table.insert(names, "Default")
-	end
-	return names
-end
-
-local function GetUrlContent(url, mirrors)
-	mirrors = mirrors or {}
-	local urls = {url}
-	for _, m in ipairs(mirrors) do table.insert(urls, m) end
-
-	for _, targetUrl in ipairs(urls) do
-		for attempt = 1, 3 do
-			local content = nil
-			pcall(function()
-				if type(request) == "function" then
-					local resp = request({Url = targetUrl, Method = "GET"})
-					if resp and resp.Body and #resp.Body > 10 then content = resp.Body end
-				elseif type(http_request) == "function" then
-					local resp = http_request({Url = targetUrl, Method = "GET"})
-					if resp and resp.Body and #resp.Body > 10 then content = resp.Body end
-				elseif type(syn) == "table" and type(syn.request) == "function" then
-					local resp = syn.request({Url = targetUrl, Method = "GET"})
-					if resp and resp.Body and #resp.Body > 10 then content = resp.Body end
-				elseif typeof(game) == "Instance" and typeof(game.HttpGet) == "function" then
-					local ok, res = pcall(function() return game:HttpGet(targetUrl) end)
-					if ok and res and #res > 10 then content = res end
-				else
-					local ok, res = pcall(function() return HttpService:GetAsync(targetUrl) end)
-					if ok and res and #res > 10 then content = res end
-				end
-			end)
-			if content then return content end
-			task.wait(0.2)
-		end
-	end
-	return nil
-end
-
-local function CompileString(src)
-	if not src or type(src) ~= "string" or #src < 10 then
-		return nil
-	end
-	local compiledFn = nil
-	if type(loadstring) == "function" then
-		local ok, res = pcall(loadstring, src)
-		if ok and type(res) == "function" then
-			compiledFn = res
-		end
-	elseif type(getgenv) == "function" and type(getgenv().loadstring) == "function" then
-		local ok, res = pcall(getgenv().loadstring, src)
-		if ok and type(res) == "function" then
-			compiledFn = res
-		end
-	end
-	return compiledFn
-end
-
-local function FetchIconPack(url, mirrors)
-	local rawSrc = GetUrlContent(url, mirrors)
-	if rawSrc then
-		local fn = CompileString(rawSrc)
-		if type(fn) == "function" then
-			local ok, pack = pcall(fn)
-			if ok and type(pack) == "table" then
-				return pack
-			end
-		end
-	end
-	return {}
-end
-
-local IconModule = {
-	IconsType = "solar",
-	New = nil,
-	IconThemeTag = nil,
-
-	Icons = {
-		solar = {},
-		gravity = {},
-	},
+local a, b = {
+    {
+        1,
+        "ModuleScript",
+        {"MainModule"},
+        {
+            {18, "ModuleScript", {"Creator"}},
+            {28, "ModuleScript", {"Icons"}},
+            {
+                47,
+                "ModuleScript",
+                {"Themes"},
+                {
+                    {56, "ModuleScript", {"Cloudy"}},
+                    {50, "ModuleScript", {"Emerald"}},
+                    {49, "ModuleScript", {"HUT RI 81"}},
+                    {52, "ModuleScript", {"Blood Red"}},
+                    {53, "ModuleScript", {"Rimuru Tempest"}},
+                    {54, "ModuleScript", {"Solar"}},
+                    {55, "ModuleScript", {"Neko"}},
+                }
+            },
+            {
+                19,
+                "ModuleScript",
+                {"Elements"},
+                {
+                    {21, "ModuleScript", {"Colorpicker"}},
+                    {27, "ModuleScript", {"Toggle"}},
+                    {23, "ModuleScript", {"Input"}},
+                    {20, "ModuleScript", {"Button"}},
+                    {25, "ModuleScript", {"Paragraph"}},
+                    {61, "ModuleScript", {"Code"}},
+                    {22, "ModuleScript", {"Dropdown"}},
+                    {26, "ModuleScript", {"Slider"}},
+                    {24, "ModuleScript", {"Keybind"}},
+                    {62, "ModuleScript", {"Group"}},
+                    {63, "ModuleScript", {"Space"}},
+                    {64, "ModuleScript", {"Divider"}},
+                    {59, "ModuleScript", {"Image"}},
+                    {60, "ModuleScript", {"Video"}},
+                    {65, "ModuleScript", {"Audio"}}
+                }
+            },
+            {
+                29,
+                "Folder",
+                {"Packages"},
+                {
+                    {
+                        30,
+                        "ModuleScript",
+                        {"Flipper"},
+                        {
+                            {33, "ModuleScript", {"GroupMotor"}},
+                            {39, "ModuleScript", {"Signal"}},
+                            {45, "ModuleScript", {"isMotor"}},
+                            {31, "ModuleScript", {"BaseMotor"}},
+                            {43, "ModuleScript", {"Spring"}},
+                            {35, "ModuleScript", {"Instant"}},
+                            {37, "ModuleScript", {"Linear"}},
+                            {41, "ModuleScript", {"SingleMotor"}},
+                        }
+                    }
+                }
+            },
+            {
+                2,
+                "ModuleScript",
+                {"Acrylic"},
+                {
+                    {3, "ModuleScript", {"AcrylicBlur"}},
+                    {5, "ModuleScript", {"CreateAcrylic"}},
+                    {6, "ModuleScript", {"Utils"}},
+                    {4, "ModuleScript", {"AcrylicPaint"}}
+                }
+            },
+            {
+                7,
+                "Folder",
+                {"Components"},
+                {
+                    {9, "ModuleScript", {"Button"}},
+                    {12, "ModuleScript", {"Notification"}},
+                    {13, "ModuleScript", {"Section"}},
+                    {17, "ModuleScript", {"Window"}},
+                    {14, "ModuleScript", {"Tab"}},
+                    {10, "ModuleScript", {"Dialog"}},
+                    {8, "ModuleScript", {"Assets"}},
+                    {16, "ModuleScript", {"TitleBar"}},
+                    {15, "ModuleScript", {"Textbox"}},
+                    {11, "ModuleScript", {"Element"}}
+                }
+            }
+        }
+    }
 }
 
-task.spawn(function()
-	IconModule.Icons.solar = FetchIconPack(
-		"https://raw.githubusercontent.com/Footagesus/Icons/refs/heads/main/solar/dist/Icons.lua",
-		{"https://cdn.jsdelivr.net/gh/Footagesus/Icons@main/solar/dist/Icons.lua"}
-	) or {}
+local Animation
+do
+    local _RunService = game:GetService("RunService")
+    local _conns = {}
+    local _shineObjs = {}
+    local _strokeObjs = {}
+    local _accum = 0
 
-	IconModule.Icons.gravity = FetchIconPack(
-		"https://raw.githubusercontent.com/Footagesus/Icons/refs/heads/main/gravity/dist/Icons.lua",
-		{"https://cdn.jsdelivr.net/gh/Footagesus/Icons@main/gravity/dist/Icons.lua"}
-	) or {}
-end)
+    Animation = {}
+    function Animation.Apply(theme, root)
+        for _, c in ipairs(_conns) do pcall(function() c:Disconnect() end) end
+        table.clear(_conns)
+        table.clear(_shineObjs)
+        table.clear(_strokeObjs)
 
-local function parseIconString(iconString)
-	if type(iconString) == "string" then
-		local splitIndex = iconString:find(":")
-		if splitIndex then
-			local iconType = iconString:sub(1, splitIndex - 1)
-			local iconName = iconString:sub(splitIndex + 1)
-			return iconType, iconName
-		end
-	end
-	return nil, iconString
+        if not theme or not root or getgenv().ShineEnabled ~= true or not theme.ShineEnabled or not theme.Shine then return end
+        local ShineConfig   = theme.Shine
+        local Speed         = ShineConfig.Speed         or 0.5
+        local RotationSpeed = ShineConfig.RotationSpeed or 25
+        local ColorSeq      = ShineConfig.ColorSequence
+
+        pcall(function()
+            for _, obj in ipairs(root:GetDescendants()) do
+                if obj:IsA("UIGradient") then
+                    table.insert(_shineObjs, obj)
+                elseif obj:IsA("UIStroke") and theme.StrokeShine then
+                    table.insert(_strokeObjs, obj)
+                end
+            end
+        end)
+
+        local from  = theme.StrokeDark or theme.AcrylicBorder
+        local shine = theme.Accent
+
+        local conn
+        conn = _RunService.Heartbeat:Connect(function(dt)
+            if getgenv().ShineEnabled ~= true or (#_shineObjs == 0 and #_strokeObjs == 0) then
+                if conn then conn:Disconnect() end
+                return
+            end
+            _accum = _accum + dt
+            if _accum < 0.05 then return end
+            local step = _accum
+            _accum = 0
+
+            for i = #_shineObjs, 1, -1 do
+                local obj = _shineObjs[i]
+                if obj and obj.Parent then
+                    local t = (obj:GetAttribute("_t") or 0) + step * Speed
+                    obj:SetAttribute("_t", t)
+                    obj.Rotation = (t * RotationSpeed) % 360
+                    if ColorSeq then obj.Color = ColorSeq end
+                else
+                    table.remove(_shineObjs, i)
+                end
+            end
+
+            for i = #_strokeObjs, 1, -1 do
+                local obj = _strokeObjs[i]
+                if obj and obj.Parent then
+                    local t = (obj:GetAttribute("_t") or 0) + step * Speed
+                    obj:SetAttribute("_t", t)
+                    obj.Thickness = 2
+                    if from and shine then
+                        obj.Color = from:Lerp(shine, (math.sin(t) + 1) / 2)
+                    end
+                else
+                    table.remove(_strokeObjs, i)
+                end
+            end
+        end)
+        table.insert(_conns, conn)
+    end
 end
-
-function IconModule.AddIcons(packName, iconsData)
-	if type(packName) ~= "string" or type(iconsData) ~= "table" then
-		return
-	end
-
-	if not IconModule.Icons[packName] then
-		IconModule.Icons[packName] = {
-			Icons = {},
-			Spritesheets = {},
-		}
-	end
-
-	for iconName, iconValue in pairs(iconsData) do
-		if type(iconValue) ~= "table" then
-			local imageId = iconValue
-			if type(iconValue) == "number" then
-				imageId = "rbxassetid://" .. tostring(iconValue)
-			end
-
-			IconModule.Icons[packName].Icons[iconName] = {
-				Image = imageId,
-				ImageRectSize = Vector2.new(0, 0),
-				ImageRectPosition = Vector2.new(0, 0),
-				Parts = nil,
-			}
-			IconModule.Icons[packName].Spritesheets[imageId] = imageId
-		elseif type(iconValue) == "table" then
-			if iconValue.Image and iconValue.ImageRectSize and iconValue.ImageRectPosition then
-				local imageId = iconValue.Image
-				if type(imageId) == "number" then
-					imageId = "rbxassetid://" .. tostring(imageId)
-				end
-
-				IconModule.Icons[packName].Icons[iconName] = {
-					Image = imageId,
-					ImageRectSize = iconValue.ImageRectSize,
-					ImageRectPosition = iconValue.ImageRectPosition,
-					Parts = iconValue.Parts,
-				}
-
-				if not IconModule.Icons[packName].Spritesheets[imageId] then
-					IconModule.Icons[packName].Spritesheets[imageId] = imageId
-				end
-			end
-		end
-	end
-end
-
-function IconModule.SetIconsType(iconType)
-	IconModule.IconsType = iconType
-end
-
-function IconModule.Init(New, IconThemeTag)
-	IconModule.New = New
-	IconModule.IconThemeTag = IconThemeTag
-	return IconModule
-end
-
-function IconModule.Icon(Icon, Type, DefaultFormat)
-	DefaultFormat = DefaultFormat ~= false
-	local iconType, iconName = parseIconString(Icon)
-
-	local targetType = iconType or Type or IconModule.IconsType
-	local targetName = iconName
-
-	if not targetName or targetName == "" then return nil end
-
-	local iconSet = IconModule.Icons[targetType]
-	if not iconSet then return nil end
-
-	if type(iconSet.Icons) == "table" and iconSet.Icons[targetName] then
-		local item = iconSet.Icons[targetName]
-		local sheet = (type(iconSet.Spritesheets) == "table" and iconSet.Spritesheets[tostring(item.Image)]) or item.Image
-		return { sheet, item }
-	end
-
-	local resolvedAsset = nil
-
-	if type(iconSet[targetName]) == "string" and string.find(iconSet[targetName], "rbxassetid://") then
-		resolvedAsset = iconSet[targetName]
-	end
-
-	if not resolvedAsset and targetType == "solar" then
-		local boldName = (targetName:sub(-5) == "-bold") and targetName or (targetName .. "-bold")
-		if type(iconSet[boldName]) == "string" and string.find(iconSet[boldName], "rbxassetid://") then
-			resolvedAsset = iconSet[boldName]
-		end
-
-		if not resolvedAsset then
-			local suffixes = {"-linear", "-outline", "-broken", "-line-duotone", "-bold-duotone"}
-			for _, s in ipairs(suffixes) do
-				if type(iconSet[targetName .. s]) == "string" and string.find(iconSet[targetName .. s], "rbxassetid://") then
-					resolvedAsset = iconSet[targetName .. s]
-					break
-				end
-			end
-		end
-	end
-
-	if not resolvedAsset then
-		local aliases = {
-			["minus"] = "minus",
-			["maximize"] = "chevrons-expand-up-right",
-			["close"] = "xmark",
-			["x"] = "xmark",
-			["alt-arrow-down"] = "alt-arrow-down-bold",
-			["home"] = "home-2-bold",
-			["home-2"] = "home-2-bold",
-			["user"] = "user-bold",
-			["eye"] = "eye-bold",
-			["compass"] = "compass-bold",
-			["server"] = "server-bold",
-			["settings"] = "settings-bold",
-			["cloud"] = "cloud-bold",
-		}
-		if aliases[targetName] and type(iconSet[aliases[targetName]]) == "string" then
-			resolvedAsset = iconSet[aliases[targetName]]
-		end
-	end
-
-	if not resolvedAsset then
-		for k, v in pairs(iconSet) do
-			if type(k) == "string" and k:find(targetName, 1, true) and type(v) == "string" and string.find(v, "rbxassetid://") then
-				resolvedAsset = v
-				break
-			end
-		end
-	end
-
-	if resolvedAsset then
-		return DefaultFormat
-				and {
-					resolvedAsset,
-					{ ImageRectSize = Vector2.new(0, 0), ImageRectPosition = Vector2.new(0, 0) },
-				}
-			or resolvedAsset
-	end
-
-	return nil
-end
-
-function IconModule.GetIcon(Icon, Type)
-	return IconModule.Icon(Icon, Type, false)
-end
-
-function IconModule.Icon2(Icon, Type, DefaultFormat)
-	return IconModule.Icon(Icon, Type, true)
-end
-
-local function applyIcon(imageLabel, iconName)
-	if not imageLabel or not iconName or iconName == "" then
-		if imageLabel then imageLabel.Visible = false end
-		return
-	end
-
-	for _, child in pairs(imageLabel:GetChildren()) do
-		if child:IsA("ImageLabel") then child:Destroy() end
-	end
-
-	local iconData = IconModule.Icon2(iconName, "solar")
-	if iconData then
-		if typeof(iconData) == "string" then
-			imageLabel.Image = iconData
-			imageLabel.ImageRectSize = Vector2.new(0, 0)
-			imageLabel.ImageRectOffset = Vector2.new(0, 0)
-			imageLabel.Visible = true
-		elseif type(iconData) == "table" and iconData[1] and iconData[2] then
-			imageLabel.Image = iconData[1]
-			imageLabel.ImageRectSize = iconData[2].ImageRectSize or Vector2.new(0, 0)
-			imageLabel.ImageRectOffset = iconData[2].ImageRectPosition or iconData[2].ImageRectOffset or Vector2.new(0, 0)
-			imageLabel.Visible = true
-
-			if iconData[2].Parts then
-				for idx, part in ipairs(iconData[2].Parts) do
-					local partData = IconModule.Icon(part, "solar")
-					if partData and partData[1] and partData[2] then
-						local partLabel = Instance.new("ImageLabel")
-						partLabel.Size = UDim2.new(1, 0, 1, 0)
-						partLabel.BackgroundTransparency = 1
-						partLabel.Image = partData[1]
-						partLabel.ImageRectSize = partData[2].ImageRectSize
-						partLabel.ImageRectOffset = partData[2].ImageRectPosition or partData[2].ImageRectOffset
-						partLabel.Parent = imageLabel
-					end
-				end
-			end
-		end
-	elseif type(iconName) == "string" and (iconName:sub(1, 13) == "rbxassetid://" or iconName:sub(1, 4) == "http") then
-		imageLabel.Image = iconName
-		imageLabel.ImageRectSize = Vector2.new(0, 0)
-		imageLabel.ImageRectOffset = Vector2.new(0, 0)
-		imageLabel.Visible = true
-	else
-		imageLabel.Visible = false
-	end
-end
-
-local function createCustomCloud(parentFrame, size, position, scaleFactor)
-	scaleFactor = scaleFactor or 1
-
-	local CloudContainer = Instance.new("Frame")
-	CloudContainer.Name = "CustomCloud"
-	CloudContainer.Size = size
-	CloudContainer.Position = position
-	CloudContainer.AnchorPoint = Vector2.new(0.5, 0.5)
-	CloudContainer.BackgroundTransparency = 1
-	CloudContainer.Parent = parentFrame
-
-	local ShadowLayer = Instance.new("Frame")
-	ShadowLayer.Name = "ShadowLayer"
-	ShadowLayer.Size = UDim2.new(1, 0, 1, 0)
-	ShadowLayer.Position = UDim2.new(0, 4 * scaleFactor, 0, 6 * scaleFactor)
-	ShadowLayer.BackgroundTransparency = 1
-	ShadowLayer.Parent = CloudContainer
-
-	local shadowPuffs = {
-		{UDim2.new(0.72, 0, 0.44, 0), UDim2.new(0.14, 0, 0.5, 0)},
-		{UDim2.new(0.42, 0, 0.62, 0), UDim2.new(0.08, 0, 0.3, 0)},
-		{UDim2.new(0.52, 0, 0.74, 0), UDim2.new(0.24, 0, 0.08, 0)},
-		{UDim2.new(0.44, 0, 0.64, 0), UDim2.new(0.5, 0, 0.22, 0)}
-	}
-
-	for _, pData in ipairs(shadowPuffs) do
-		local puff = Instance.new("Frame")
-		puff.Size = pData[1]
-		puff.Position = pData[2]
-		puff.BackgroundColor3 = Color3.fromRGB(40, 40, 52)
-		puff.BackgroundTransparency = 0.55
-		puff.BorderSizePixel = 0
-		puff.Parent = ShadowLayer
-
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(1, 0)
-		corner.Parent = puff
-	end
-
-	local BodyLayer = Instance.new("Frame")
-	BodyLayer.Name = "BodyLayer"
-	BodyLayer.Size = UDim2.new(1, 0, 1, 0)
-	BodyLayer.BackgroundTransparency = 1
-	BodyLayer.Parent = CloudContainer
-
-	local bodyPuffs = {
-		{UDim2.new(0.74, 0, 0.44, 0), UDim2.new(0.13, 0, 0.5, 0), Color3.fromRGB(240, 242, 248), Color3.fromRGB(200, 204, 218)},
-		{UDim2.new(0.42, 0, 0.62, 0), UDim2.new(0.07, 0, 0.3, 0), Color3.fromRGB(245, 246, 252), Color3.fromRGB(210, 215, 228)},
-		{UDim2.new(0.54, 0, 0.76, 0), UDim2.new(0.23, 0, 0.06, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(225, 230, 242)},
-		{UDim2.new(0.46, 0, 0.66, 0), UDim2.new(0.49, 0, 0.2, 0), Color3.fromRGB(248, 250, 255), Color3.fromRGB(215, 220, 234)},
-		{UDim2.new(0.36, 0, 0.54, 0), UDim2.new(0.27, 0, 0.08, 0), Color3.fromRGB(255, 255, 255), Color3.fromRGB(235, 240, 250)}
-	}
-
-	for _, pData in ipairs(bodyPuffs) do
-		local puff = Instance.new("Frame")
-		puff.Size = pData[1]
-		puff.Position = pData[2]
-		puff.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		puff.BorderSizePixel = 0
-		puff.Parent = BodyLayer
-
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(1, 0)
-		corner.Parent = puff
-
-		local grad = Instance.new("UIGradient")
-		grad.Rotation = 90
-		grad.Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, pData[3]),
-			ColorSequenceKeypoint.new(1, pData[4])
-		})
-		grad.Parent = puff
-	end
-
-	return CloudContainer
-end
-
-local CloudyLib = {}
-CloudyLib.__index = CloudyLib
-
-local function getGuiParent()
-	local success, result = pcall(function()
-		return CoreGui
-	end)
-	if success and result then
-		return result
-	end
-	return LocalPlayer:WaitForChild("PlayerGui")
-end
-
-local function playIntroAnimation(screenGui, titleText, onComplete)
-	local IntroFrame = Instance.new("Frame")
-	IntroFrame.Name = "CloudyIntro"
-	IntroFrame.Size = UDim2.new(1, 0, 1, 0)
-	IntroFrame.Position = UDim2.new(0, 0, 0, 0)
-	IntroFrame.BackgroundTransparency = 1
-	IntroFrame.ClipsDescendants = true
-	IntroFrame.ZIndex = 999
-	IntroFrame.Parent = screenGui
-
-	local cloud1 = createCustomCloud(IntroFrame, UDim2.new(0, 110, 0, 70), UDim2.new(1, 100, 0, -100), 1)
-	local cloud2 = createCustomCloud(IntroFrame, UDim2.new(0, 110, 0, 70), UDim2.new(0, -100, 1, 100), 1)
-	local cloud3 = createCustomCloud(IntroFrame, UDim2.new(0, 110, 0, 70), UDim2.new(0, -100, 0, -100), 1)
-
-	local centerGroup
-	local okCanvas, canvasInst = pcall(function()
-		return Instance.new("CanvasGroup")
-	end)
-	if okCanvas and canvasInst then
-		centerGroup = canvasInst
-	else
-		centerGroup = Instance.new("Frame")
-	end
-
-	centerGroup.Name = "CenterCloudGroup"
-	centerGroup.Size = UDim2.new(0, 30, 0, 20)
-	centerGroup.Position = UDim2.new(0.5, 0, 0.5, 0)
-	centerGroup.AnchorPoint = Vector2.new(0.5, 0.5)
-	centerGroup.BackgroundTransparency = 1
-	if centerGroup:IsA("CanvasGroup") then
-		centerGroup.GroupTransparency = 0
-	end
-	centerGroup.Visible = false
-	centerGroup.Parent = IntroFrame
-
-	local centerCloud = createCustomCloud(centerGroup, UDim2.new(1, 0, 1, 0), UDim2.new(0.5, 0, 0.5, 0), 1.5)
-
-	local splashText = Instance.new("TextLabel")
-	splashText.Size = UDim2.new(0, 260, 0, 70)
-	splashText.Position = UDim2.new(0.5, 40, 0.5, -35)
-	splashText.BackgroundTransparency = 1
-	splashText.Text = titleText
-	splashText.Font = Enum.Font.GothamBold
-	splashText.TextSize = 44
-	splashText.TextColor3 = Color3.fromRGB(255, 255, 255)
-	splashText.TextTransparency = 1
-	splashText.TextXAlignment = Enum.TextXAlignment.Left
-	splashText.Parent = IntroFrame
-
-	local textGradient = Instance.new("UIGradient")
-	textGradient.Rotation = 45
-	textGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 150, 180))
-	})
-	textGradient.Parent = splashText
-
-	local tweenInfoMerge = TweenInfo.new(0.75, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-	TweenService:Create(cloud1, tweenInfoMerge, {Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-	TweenService:Create(cloud2, tweenInfoMerge, {Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-	TweenService:Create(cloud3, tweenInfoMerge, {Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-
-	task.delay(0.7, function()
-		cloud1:Destroy()
-		cloud2:Destroy()
-		cloud3:Destroy()
-
-		centerGroup.Visible = true
-		centerGroup.Size = UDim2.new(0, 30, 0, 20)
-
-		local tweenInfoGrow = TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-		TweenService:Create(centerGroup, tweenInfoGrow, {Size = UDim2.new(0, 170, 0, 110)}):Play()
-
-		task.delay(0.5, function()
-			local tweenInfoMoveLeft = TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-			TweenService:Create(centerGroup, tweenInfoMoveLeft, {Position = UDim2.new(0.5, -135, 0.5, 0)}):Play()
-			TweenService:Create(splashText, tweenInfoMoveLeft, {TextTransparency = 0, Position = UDim2.new(0.5, -25, 0.5, -35)}):Play()
-
-			task.delay(0.9, function()
-				local tweenInfoFadeOut = TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-				
-				if centerGroup:IsA("CanvasGroup") then
-					TweenService:Create(centerGroup, tweenInfoFadeOut, {
-						GroupTransparency = 1,
-						Size = UDim2.new(0, 145, 0, 90)
-					}):Play()
-				else
-					for _, child in pairs(centerGroup:GetDescendants()) do
-						if child:IsA("Frame") then
-							TweenService:Create(child, tweenInfoFadeOut, {BackgroundTransparency = 1}):Play()
-						end
-					end
-					TweenService:Create(centerGroup, tweenInfoFadeOut, {
-						Size = UDim2.new(0, 145, 0, 90)
-					}):Play()
-				end
-
-				TweenService:Create(splashText, tweenInfoFadeOut, {TextTransparency = 1}):Play()
-
-				task.delay(0.5, function()
-					IntroFrame:Destroy()
-					if onComplete then
-						onComplete()
-					end
-				end)
-			end)
-		end)
-	end)
-end
-
-function CloudyLib:CreateWindow(options)
-	options = options or {}
-	local titleText = options.Title or "Cloudy"
-	local versionText = options.Version or "v2.5.0 Premium"
-	local logoIcon = options.Logo or "cloud-bold"
-
-	local parentFolder = getGuiParent()
-	if parentFolder:FindFirstChild("CloudyUI") then
-		parentFolder:FindFirstChild("CloudyUI"):Destroy()
-	end
-
-	local ScreenGui = Instance.new("ScreenGui")
-	ScreenGui.Name = "CloudyUI"
-	ScreenGui.ResetOnSpawn = false
-	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-	ScreenGui.Parent = parentFolder
-
-	local MainFrame = Instance.new("Frame")
-	MainFrame.Name = "MainFrame"
-	MainFrame.Size = UDim2.new(0, 540, 0, 340)
-	MainFrame.Position = UDim2.new(0.5, -270, 0.5, -170)
-	MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
-	MainFrame.BorderSizePixel = 0
-	MainFrame.ClipsDescendants = true
-	MainFrame.Visible = false
-	MainFrame.Parent = ScreenGui
-
-	local MainCorner = Instance.new("UICorner")
-	MainCorner.CornerRadius = UDim.new(0, 10)
-	MainCorner.Parent = MainFrame
-
-	local MainStroke = Instance.new("UIStroke")
-	MainStroke.Color = Color3.fromRGB(38, 38, 50)
-	MainStroke.Thickness = 1
-	MainStroke.Parent = MainFrame
-
-	local Sidebar = Instance.new("Frame")
-	Sidebar.Name = "Sidebar"
-	Sidebar.Size = UDim2.new(0, 155, 1, 0)
-	Sidebar.Position = UDim2.new(0, 0, 0, 0)
-	Sidebar.BackgroundColor3 = Color3.fromRGB(16, 16, 22)
-	Sidebar.BorderSizePixel = 0
-	Sidebar.ClipsDescendants = true
-	Sidebar.Parent = MainFrame
-
-	local SidebarCorner = Instance.new("UICorner")
-	SidebarCorner.CornerRadius = UDim.new(0, 10)
-	SidebarCorner.Parent = Sidebar
-
-	local SidebarHeader = Instance.new("Frame")
-	SidebarHeader.Name = "SidebarHeader"
-	SidebarHeader.Size = UDim2.new(1, 0, 0, 44)
-	SidebarHeader.Position = UDim2.new(0, 0, 0, 0)
-	SidebarHeader.BackgroundTransparency = 1
-	SidebarHeader.Parent = Sidebar
-
-	local HeaderContainer = Instance.new("Frame")
-	HeaderContainer.Size = UDim2.new(1, -16, 1, 0)
-	HeaderContainer.Position = UDim2.new(0, 12, 0, 0)
-	HeaderContainer.BackgroundTransparency = 1
-	HeaderContainer.Parent = SidebarHeader
-
-	local HeaderLayout = Instance.new("UIListLayout")
-	HeaderLayout.FillDirection = Enum.FillDirection.Horizontal
-	HeaderLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	HeaderLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	HeaderLayout.Padding = UDim.new(0, 8)
-	HeaderLayout.Parent = HeaderContainer
-
-	local LogoImage = Instance.new("ImageLabel")
-	LogoImage.Size = UDim2.new(0, 24, 0, 24)
-	LogoImage.BackgroundTransparency = 1
-	LogoImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
-	LogoImage.LayoutOrder = 1
-	LogoImage.Parent = HeaderContainer
-	applyIcon(LogoImage, logoIcon)
-
-	local TitleContainer = Instance.new("Frame")
-	TitleContainer.Size = UDim2.new(1, -34, 1, 0)
-	TitleContainer.BackgroundTransparency = 1
-	TitleContainer.LayoutOrder = 2
-	TitleContainer.Parent = HeaderContainer
-
-	local TitleVLayout = Instance.new("UIListLayout")
-	TitleVLayout.FillDirection = Enum.FillDirection.Vertical
-	TitleVLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	TitleVLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	TitleVLayout.Padding = UDim.new(0, 0)
-	TitleVLayout.Parent = TitleContainer
-
-	local TitleLabel = Instance.new("TextLabel")
-	TitleLabel.Size = UDim2.new(1, 0, 0, 16)
-	TitleLabel.BackgroundTransparency = 1
-	TitleLabel.Text = titleText
-	TitleLabel.Font = Enum.Font.GothamBold
-	TitleLabel.TextSize = 15
-	TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-	TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	TitleLabel.LayoutOrder = 1
-	TitleLabel.Parent = TitleContainer
-
-	local TitleGradient = Instance.new("UIGradient")
-	TitleGradient.Rotation = 45
-	TitleGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 150, 170))
-	})
-	TitleGradient.Parent = TitleLabel
-
-	local VersionLabel = Instance.new("TextLabel")
-	VersionLabel.Size = UDim2.new(1, 0, 0, 12)
-	VersionLabel.BackgroundTransparency = 1
-	VersionLabel.Text = versionText
-	VersionLabel.Font = Enum.Font.GothamBold
-	VersionLabel.TextSize = 9
-	VersionLabel.TextColor3 = Color3.fromRGB(140, 140, 175)
-	VersionLabel.TextXAlignment = Enum.TextXAlignment.Left
-	VersionLabel.LayoutOrder = 2
-	VersionLabel.Parent = TitleContainer
-
-	local VersionGradient = Instance.new("UIGradient")
-	VersionGradient.Rotation = 45
-	VersionGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(170, 170, 230)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(110, 110, 160))
-	})
-	VersionGradient.Parent = VersionLabel
-
-	local SidebarDivider = Instance.new("Frame")
-	SidebarDivider.Name = "SidebarDivider"
-	SidebarDivider.Size = UDim2.new(0, 1, 1, 0)
-	SidebarDivider.Position = UDim2.new(0, 155, 0, 0)
-	SidebarDivider.BackgroundColor3 = Color3.fromRGB(38, 38, 50)
-	SidebarDivider.BorderSizePixel = 0
-	SidebarDivider.ZIndex = 3
-	SidebarDivider.Parent = MainFrame
-
-	local MainContent = Instance.new("Frame")
-	MainContent.Name = "MainContent"
-	MainContent.Size = UDim2.new(1, -156, 1, 0)
-	MainContent.Position = UDim2.new(0, 156, 0, 0)
-	MainContent.BackgroundTransparency = 1
-	MainContent.ClipsDescendants = true
-	MainContent.Parent = MainFrame
-
-	local Topbar = Instance.new("Frame")
-	Topbar.Name = "Topbar"
-	Topbar.Size = UDim2.new(1, 0, 0, 44)
-	Topbar.Position = UDim2.new(0, 0, 0, 0)
-	Topbar.BackgroundColor3 = Color3.fromRGB(16, 16, 22)
-	Topbar.BorderSizePixel = 0
-	Topbar.Parent = MainContent
-
-	local TopbarCorner = Instance.new("UICorner")
-	TopbarCorner.CornerRadius = UDim.new(0, 10)
-	TopbarCorner.Parent = Topbar
-
-	local RightContainer = Instance.new("Frame")
-	RightContainer.Size = UDim2.new(0, 110, 1, 0)
-	RightContainer.Position = UDim2.new(1, -118, 0, 0)
-	RightContainer.BackgroundTransparency = 1
-	RightContainer.Parent = Topbar
-
-	local RightLayout = Instance.new("UIListLayout")
-	RightLayout.FillDirection = Enum.FillDirection.Horizontal
-	RightLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-	RightLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	RightLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	RightLayout.Padding = UDim.new(0, 8)
-	RightLayout.Parent = RightContainer
-
-	local MinimizeBtn = Instance.new("TextButton")
-	MinimizeBtn.Size = UDim2.new(0, 26, 0, 26)
-	MinimizeBtn.BackgroundTransparency = 1
-	MinimizeBtn.Text = ""
-	MinimizeBtn.AutoButtonColor = false
-	MinimizeBtn.LayoutOrder = 1
-	MinimizeBtn.Parent = RightContainer
-
-	local MinimizeIcon = Instance.new("ImageLabel")
-	MinimizeIcon.Size = UDim2.new(0, 16, 0, 16)
-	MinimizeIcon.Position = UDim2.new(0.5, -8, 0.5, -8)
-	MinimizeIcon.BackgroundTransparency = 1
-	MinimizeIcon.ImageColor3 = Color3.fromRGB(200, 200, 215)
-	MinimizeIcon.Parent = MinimizeBtn
-	applyIcon(MinimizeIcon, "gravity:minus")
-
-	local ResizeBtn = Instance.new("TextButton")
-	ResizeBtn.Size = UDim2.new(0, 26, 0, 26)
-	ResizeBtn.BackgroundTransparency = 1
-	ResizeBtn.Text = ""
-	ResizeBtn.AutoButtonColor = false
-	ResizeBtn.LayoutOrder = 2
-	ResizeBtn.Parent = RightContainer
-
-	local ResizeIcon = Instance.new("ImageLabel")
-	ResizeIcon.Size = UDim2.new(0, 16, 0, 16)
-	ResizeIcon.Position = UDim2.new(0.5, -8, 0.5, -8)
-	ResizeIcon.BackgroundTransparency = 1
-	ResizeIcon.ImageColor3 = Color3.fromRGB(200, 200, 215)
-	ResizeIcon.Parent = ResizeBtn
-	applyIcon(ResizeIcon, "gravity:chevrons-expand-up-right")
-
-	local CloseBtn = Instance.new("TextButton")
-	CloseBtn.Size = UDim2.new(0, 26, 0, 26)
-	CloseBtn.BackgroundTransparency = 1
-	CloseBtn.Text = ""
-	CloseBtn.AutoButtonColor = false
-	CloseBtn.LayoutOrder = 3
-	CloseBtn.Parent = RightContainer
-
-	local CloseIcon = Instance.new("ImageLabel")
-	CloseIcon.Size = UDim2.new(0, 16, 0, 16)
-	CloseIcon.Position = UDim2.new(0.5, -8, 0.5, -8)
-	CloseIcon.BackgroundTransparency = 1
-	CloseIcon.ImageColor3 = Color3.fromRGB(200, 200, 215)
-	CloseIcon.Parent = CloseBtn
-	applyIcon(CloseIcon, "gravity:xmark")
-
-	local dragging, dragInput, dragStart, startPos
-	local function onDragBegan(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = MainFrame.Position
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-				end
-			end)
-		end
-	end
-
-	Topbar.InputBegan:Connect(onDragBegan)
-	SidebarHeader.InputBegan:Connect(onDragBegan)
-
-	Topbar.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-
-	SidebarHeader.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-
-	UserInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
-			local delta = input.Position - dragStart
-			MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-		end
-	end)
-
-	local RestoreBtn = Instance.new("ImageButton")
-	RestoreBtn.Name = "CloudyRestoreBtn"
-	RestoreBtn.Size = UDim2.new(0, 80, 0, 80)
-	RestoreBtn.Position = UDim2.new(0, 20, 0.5, -40)
-	RestoreBtn.BackgroundTransparency = 1
-	RestoreBtn.Image = "rbxassetid://88244237473485"
-	RestoreBtn.AutoButtonColor = false
-	RestoreBtn.Visible = true
-	RestoreBtn.ZIndex = 9999
-	RestoreBtn.Parent = ScreenGui
-
-	local floatDragging, floatDragInput, floatDragStart, floatStartPos
-	local floatDragMoved = false
-
-	RestoreBtn.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			floatDragging = true
-			floatDragMoved = false
-			floatDragStart = input.Position
-			floatStartPos = RestoreBtn.Position
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					floatDragging = false
-				end
-			end)
-		end
-	end)
-
-	RestoreBtn.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			floatDragInput = input
-		end
-	end)
-
-	UserInputService.InputChanged:Connect(function(input)
-		if input == floatDragInput and floatDragging then
-			local delta = input.Position - floatDragStart
-			if math.abs(delta.X) > 3 or math.abs(delta.Y) > 3 then
-				floatDragMoved = true
-			end
-			RestoreBtn.Position = UDim2.new(floatStartPos.X.Scale, floatStartPos.X.Offset + delta.X, floatStartPos.Y.Scale, floatStartPos.Y.Offset + delta.Y)
-		end
-	end)
-
-	local function toggleMinimize()
-		MainFrame.Visible = not MainFrame.Visible
-	end
-
-	MinimizeBtn.MouseButton1Click:Connect(toggleMinimize)
-	RestoreBtn.MouseButton1Up:Connect(function()
-		if not floatDragMoved then
-			toggleMinimize()
-		end
-	end)
-
-	local isExpanded = false
-	ResizeBtn.MouseButton1Click:Connect(function()
-		isExpanded = not isExpanded
-		local targetSize = isExpanded and UDim2.new(0, 700, 0, 430) or UDim2.new(0, 540, 0, 340)
-		local targetPos = isExpanded and UDim2.new(0.5, -350, 0.5, -215) or UDim2.new(0.5, -270, 0.5, -170)
-
-		local tweenInfo = TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-		TweenService:Create(MainFrame, tweenInfo, {
-			Size = targetSize,
-			Position = targetPos
-		}):Play()
-	end)
-
-	local ConfirmOverlay = Instance.new("Frame")
-	ConfirmOverlay.Name = "ExitConfirmOverlay"
-	ConfirmOverlay.Size = UDim2.new(1, 0, 1, 0)
-	ConfirmOverlay.Position = UDim2.new(0, 0, 0, 0)
-	ConfirmOverlay.BackgroundColor3 = Color3.fromRGB(8, 8, 12)
-	ConfirmOverlay.BackgroundTransparency = 1
-	ConfirmOverlay.ZIndex = 9999
-	ConfirmOverlay.Visible = false
-	ConfirmOverlay.Parent = MainFrame
-
-	local OverlayCorner = Instance.new("UICorner")
-	OverlayCorner.CornerRadius = UDim.new(0, 10)
-	OverlayCorner.Parent = ConfirmOverlay
-
-	local ConfirmCard = Instance.new("Frame")
-	ConfirmCard.Name = "ExitConfirmCard"
-	ConfirmCard.Size = UDim2.new(0, 310, 0, 160)
-	ConfirmCard.Position = UDim2.new(0.5, 0, 0.5, 0)
-	ConfirmCard.AnchorPoint = Vector2.new(0.5, 0.5)
-	ConfirmCard.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
-	ConfirmCard.BorderSizePixel = 0
-	ConfirmCard.ClipsDescendants = true
-	ConfirmCard.ZIndex = 10000
-	ConfirmCard.Parent = ConfirmOverlay
-
-	local CardCorner = Instance.new("UICorner")
-	CardCorner.CornerRadius = UDim.new(0, 12)
-	CardCorner.Parent = ConfirmCard
-
-	local CardStroke = Instance.new("UIStroke")
-	CardStroke.Color = Color3.fromRGB(55, 55, 75)
-	CardStroke.Thickness = 1.5
-	CardStroke.Parent = ConfirmCard
-
-	local CardTopGlow = Instance.new("Frame")
-	CardTopGlow.Size = UDim2.new(1, 0, 0, 3)
-	CardTopGlow.Position = UDim2.new(0, 0, 0, 0)
-	CardTopGlow.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	CardTopGlow.BorderSizePixel = 0
-	CardTopGlow.ZIndex = 10001
-	CardTopGlow.Parent = ConfirmCard
-
-	local GlowGradient = Instance.new("UIGradient")
-	GlowGradient.Rotation = 0
-	GlowGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 200, 220)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(130, 130, 150))
-	})
-	GlowGradient.Parent = CardTopGlow
-
-	local ConfirmTitle = Instance.new("TextLabel")
-	ConfirmTitle.Size = UDim2.new(1, -32, 0, 26)
-	ConfirmTitle.Position = UDim2.new(0, 16, 0, 18)
-	ConfirmTitle.BackgroundTransparency = 1
-	ConfirmTitle.Text = "Konfirmasi Keluar"
-	ConfirmTitle.Font = Enum.Font.GothamBold
-	ConfirmTitle.TextSize = 16
-	ConfirmTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-	ConfirmTitle.TextXAlignment = Enum.TextXAlignment.Center
-	ConfirmTitle.ZIndex = 10001
-	ConfirmTitle.Parent = ConfirmCard
-
-	local TitleGradient = Instance.new("UIGradient")
-	TitleGradient.Rotation = 45
-	TitleGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 160, 180))
-	})
-	TitleGradient.Parent = ConfirmTitle
-
-	local ConfirmDesc = Instance.new("TextLabel")
-	ConfirmDesc.Size = UDim2.new(1, -32, 0, 36)
-	ConfirmDesc.Position = UDim2.new(0, 16, 0, 48)
-	ConfirmDesc.BackgroundTransparency = 1
-	ConfirmDesc.Text = "Apakah kamu yakin ingin menutup CloudyUI?"
-	ConfirmDesc.Font = Enum.Font.GothamMedium
-	ConfirmDesc.TextSize = 12
-	ConfirmDesc.TextColor3 = Color3.fromRGB(170, 170, 195)
-	ConfirmDesc.TextWrapped = true
-	ConfirmDesc.TextXAlignment = Enum.TextXAlignment.Center
-	ConfirmDesc.ZIndex = 10001
-	ConfirmDesc.Parent = ConfirmCard
-
-	local BtnContainer = Instance.new("Frame")
-	BtnContainer.Size = UDim2.new(1, -24, 0, 38)
-	BtnContainer.Position = UDim2.new(0, 12, 1, -50)
-	BtnContainer.BackgroundTransparency = 1
-	BtnContainer.ZIndex = 10001
-	BtnContainer.Parent = ConfirmCard
-
-	local CancelBtn = Instance.new("TextButton")
-	CancelBtn.Size = UDim2.new(0.5, -6, 1, 0)
-	CancelBtn.Position = UDim2.new(0, 0, 0, 0)
-	CancelBtn.BackgroundColor3 = Color3.fromRGB(32, 32, 44)
-	CancelBtn.Text = "Batal"
-	CancelBtn.Font = Enum.Font.GothamBold
-	CancelBtn.TextSize = 12
-	CancelBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
-	CancelBtn.AutoButtonColor = false
-	CancelBtn.ZIndex = 10002
-	CancelBtn.Parent = BtnContainer
-
-	local CancelCorner = Instance.new("UICorner")
-	CancelCorner.CornerRadius = UDim.new(0, 8)
-	CancelCorner.Parent = CancelBtn
-
-	local CancelStroke = Instance.new("UIStroke")
-	CancelStroke.Color = Color3.fromRGB(50, 50, 65)
-	CancelStroke.Thickness = 1
-	CancelStroke.Parent = CancelBtn
-
-	local ExitBtn = Instance.new("Frame")
-	ExitBtn.Size = UDim2.new(0.5, -6, 1, 0)
-	ExitBtn.Position = UDim2.new(0.5, 6, 0, 0)
-	ExitBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	ExitBtn.ZIndex = 10002
-	ExitBtn.Parent = BtnContainer
-
-	local ExitCorner = Instance.new("UICorner")
-	ExitCorner.CornerRadius = UDim.new(0, 8)
-	ExitCorner.Parent = ExitBtn
-
-	local ExitGradient = Instance.new("UIGradient")
-	ExitGradient.Rotation = 45
-	ExitGradient.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 160, 180))
-	})
-	ExitGradient.Parent = ExitBtn
-
-	local ExitActionBtn = Instance.new("TextButton")
-	ExitActionBtn.Size = UDim2.new(1, 0, 1, 0)
-	ExitActionBtn.BackgroundTransparency = 1
-	ExitActionBtn.Text = "Ya, Keluar"
-	ExitActionBtn.Font = Enum.Font.GothamBold
-	ExitActionBtn.TextSize = 12
-	ExitActionBtn.TextColor3 = Color3.fromRGB(20, 20, 26)
-	ExitActionBtn.ZIndex = 10003
-	ExitActionBtn.Parent = ExitBtn
-
-	local isModalAnimating = false
-
-	local function openExitModal()
-		if isModalAnimating then return end
-		isModalAnimating = true
-
-		ConfirmOverlay.Visible = true
-		ConfirmOverlay.BackgroundTransparency = 1
-		ConfirmCard.Size = UDim2.new(0, 260, 0, 135)
-
-		TweenService:Create(ConfirmOverlay, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-			BackgroundTransparency = 0.55
-		}):Play()
-
-		local tweenGrow = TweenService:Create(ConfirmCard, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-			Size = UDim2.new(0, 310, 0, 160)
-		})
-		tweenGrow:Play()
-		tweenGrow.Completed:Connect(function()
-			isModalAnimating = false
-		end)
-	end
-
-	local function closeExitModal()
-		if isModalAnimating then return end
-		isModalAnimating = true
-
-		TweenService:Create(ConfirmOverlay, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-			BackgroundTransparency = 1
-		}):Play()
-
-		local tweenShrink = TweenService:Create(ConfirmCard, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-			Size = UDim2.new(0, 260, 0, 135)
-		})
-		tweenShrink:Play()
-		tweenShrink.Completed:Connect(function()
-			ConfirmOverlay.Visible = false
-			isModalAnimating = false
-		end)
-	end
-
-	CloseBtn.MouseButton1Click:Connect(openExitModal)
-	CancelBtn.MouseButton1Click:Connect(closeExitModal)
-
-	ExitActionBtn.MouseButton1Click:Connect(function()
-		ScreenGui:Destroy()
-	end)
-
-	CancelBtn.MouseEnter:Connect(function()
-		TweenService:Create(CancelBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(42, 42, 58)}):Play()
-	end)
-	CancelBtn.MouseLeave:Connect(function()
-		TweenService:Create(CancelBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(32, 32, 44)}):Play()
-	end)
-
-	ExitActionBtn.MouseEnter:Connect(function()
-		TweenService:Create(ExitGradient, TweenInfo.new(0.15), {Rotation = 90}):Play()
-	end)
-	ExitActionBtn.MouseLeave:Connect(function()
-		TweenService:Create(ExitGradient, TweenInfo.new(0.15), {Rotation = 45}):Play()
-	end)
-
-	CloseBtn.MouseEnter:Connect(function()
-		TweenService:Create(CloseIcon, TweenInfo.new(0.15), {ImageColor3 = Color3.fromRGB(255, 75, 75)}):Play()
-	end)
-	CloseBtn.MouseLeave:Connect(function()
-		TweenService:Create(CloseIcon, TweenInfo.new(0.15), {ImageColor3 = Color3.fromRGB(200, 200, 215)}):Play()
-	end)
-
-	MinimizeBtn.MouseEnter:Connect(function()
-		TweenService:Create(MinimizeIcon, TweenInfo.new(0.15), {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-	end)
-	MinimizeBtn.MouseLeave:Connect(function()
-		TweenService:Create(MinimizeIcon, TweenInfo.new(0.15), {ImageColor3 = Color3.fromRGB(200, 200, 215)}):Play()
-	end)
-
-	ResizeBtn.MouseEnter:Connect(function()
-		TweenService:Create(ResizeIcon, TweenInfo.new(0.15), {ImageColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-	end)
-	ResizeBtn.MouseLeave:Connect(function()
-		TweenService:Create(ResizeIcon, TweenInfo.new(0.15), {ImageColor3 = Color3.fromRGB(200, 200, 215)}):Play()
-	end)
-
-	local TabIndicator = Instance.new("Frame")
-	TabIndicator.Name = "TabIndicator"
-	TabIndicator.Size = UDim2.new(0, 139, 0, 36)
-	TabIndicator.Position = UDim2.new(0, 8, 0, 52)
-	TabIndicator.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
-	TabIndicator.BackgroundTransparency = 0.2
-	TabIndicator.BorderSizePixel = 0
-	TabIndicator.Visible = false
-	TabIndicator.ZIndex = 1
-	TabIndicator.Parent = Sidebar
-
-	local IndCorner = Instance.new("UICorner")
-	IndCorner.CornerRadius = UDim.new(0, 8)
-	IndCorner.Parent = TabIndicator
-
-	local IndLine = Instance.new("Frame")
-	IndLine.Name = "WhiteIndicatorLine"
-	IndLine.Size = UDim2.new(0, 3, 0, 18)
-	IndLine.Position = UDim2.new(0, 2, 0.5, -9)
-	IndLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	IndLine.BorderSizePixel = 0
-	IndLine.Parent = TabIndicator
-
-	local LineCorner = Instance.new("UICorner")
-	LineCorner.CornerRadius = UDim.new(1, 0)
-	LineCorner.Parent = IndLine
-
-	local TabScroll = Instance.new("ScrollingFrame")
-	TabScroll.Size = UDim2.new(1, 0, 1, -96)
-	TabScroll.Position = UDim2.new(0, 0, 0, 44)
-	TabScroll.BackgroundTransparency = 1
-	TabScroll.BorderSizePixel = 0
-	TabScroll.ScrollBarThickness = 2
-	TabScroll.ScrollBarImageColor3 = Color3.fromRGB(45, 45, 58)
-	TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-	TabScroll.ZIndex = 2
-	TabScroll.Parent = Sidebar
-
-	local TabListLayout = Instance.new("UIListLayout")
-	TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	TabListLayout.Padding = UDim.new(0, 4)
-	TabListLayout.Parent = TabScroll
-
-	local TabPadding = Instance.new("UIPadding")
-	TabPadding.PaddingTop = UDim.new(0, 6)
-	TabPadding.PaddingLeft = UDim.new(0, 8)
-	TabPadding.PaddingRight = UDim.new(0, 8)
-	TabPadding.PaddingBottom = UDim.new(0, 6)
-	TabPadding.Parent = TabScroll
-
-	TabListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		TabScroll.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 12)
-	end)
-
-	local SidebarProfile = Instance.new("Frame")
-	SidebarProfile.Name = "SidebarProfile"
-	SidebarProfile.Size = UDim2.new(1, 0, 0, 52)
-	SidebarProfile.Position = UDim2.new(0, 0, 1, -52)
-	SidebarProfile.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-	SidebarProfile.BorderSizePixel = 0
-	SidebarProfile.ZIndex = 3
-	SidebarProfile.Parent = Sidebar
-
-	local ProfileTopDivider = Instance.new("Frame")
-	ProfileTopDivider.Size = UDim2.new(1, 0, 0, 1)
-	ProfileTopDivider.Position = UDim2.new(0, 0, 0, 0)
-	ProfileTopDivider.BackgroundColor3 = Color3.fromRGB(34, 34, 46)
-	ProfileTopDivider.BorderSizePixel = 0
-	ProfileTopDivider.Parent = SidebarProfile
-
-	local AvatarFrame = Instance.new("Frame")
-	AvatarFrame.Size = UDim2.new(0, 30, 0, 30)
-	AvatarFrame.Position = UDim2.new(0, 10, 0.5, -15)
-	AvatarFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-	AvatarFrame.BorderSizePixel = 0
-	AvatarFrame.Parent = SidebarProfile
-
-	local AvatarCorner = Instance.new("UICorner")
-	AvatarCorner.CornerRadius = UDim.new(1, 0)
-	AvatarCorner.Parent = AvatarFrame
-
-	local AvatarStroke = Instance.new("UIStroke")
-	AvatarStroke.Color = Color3.fromRGB(50, 50, 68)
-	AvatarStroke.Thickness = 1
-	AvatarStroke.Parent = AvatarFrame
-
-	local AvatarImage = Instance.new("ImageLabel")
-	AvatarImage.Size = UDim2.new(1, 0, 1, 0)
-	AvatarImage.BackgroundTransparency = 1
-	local playerUserId = (LocalPlayer and LocalPlayer.UserId) or 1
-	AvatarImage.Image = "rbxthumb://type=AvatarHeadShot&id=" .. tostring(playerUserId) .. "&w=150&h=150"
-	AvatarImage.Parent = AvatarFrame
-
-	local AvatarImgCorner = Instance.new("UICorner")
-	AvatarImgCorner.CornerRadius = UDim.new(1, 0)
-	AvatarImgCorner.Parent = AvatarImage
-
-	local StatusDot = Instance.new("Frame")
-	StatusDot.Size = UDim2.new(0, 9, 0, 9)
-	StatusDot.Position = UDim2.new(0, 31, 0.5, 6)
-	StatusDot.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
-	StatusDot.BorderSizePixel = 0
-	StatusDot.ZIndex = 4
-	StatusDot.Parent = SidebarProfile
-
-	local StatusCorner = Instance.new("UICorner")
-	StatusCorner.CornerRadius = UDim.new(1, 0)
-	StatusCorner.Parent = StatusDot
-
-	local StatusStroke = Instance.new("UIStroke")
-	StatusStroke.Color = Color3.fromRGB(18, 18, 24)
-	StatusStroke.Thickness = 1.5
-	StatusStroke.Parent = StatusDot
-
-	local rawUsername = (LocalPlayer and (LocalPlayer.DisplayName ~= "" and LocalPlayer.DisplayName or LocalPlayer.Name)) or "CloudyUser"
-
-	local function maskName(str)
-		str = tostring(str or "CloudyUser")
-		if #str <= 3 then
-			return str:sub(1, 1) .. string.rep("*", math.max(2, #str - 1))
-		else
-			return str:sub(1, 3) .. "***"
-		end
-	end
-
-	local isCensored = true
-	local ProfileBtn = Instance.new("TextButton")
-	ProfileBtn.Size = UDim2.new(1, -48, 1, -12)
-	ProfileBtn.Position = UDim2.new(0, 44, 0, 6)
-	ProfileBtn.BackgroundTransparency = 1
-	ProfileBtn.Text = ""
-	ProfileBtn.Parent = SidebarProfile
-
-	local UsernameLabel = Instance.new("TextLabel")
-	UsernameLabel.Size = UDim2.new(1, 0, 0, 16)
-	UsernameLabel.Position = UDim2.new(0, 0, 0, 2)
-	UsernameLabel.BackgroundTransparency = 1
-	UsernameLabel.Text = maskName(rawUsername)
-	UsernameLabel.Font = Enum.Font.GothamBold
-	UsernameLabel.TextSize = 12
-	UsernameLabel.TextColor3 = Color3.fromRGB(240, 240, 255)
-	UsernameLabel.TextXAlignment = Enum.TextXAlignment.Left
-	UsernameLabel.TextTruncate = Enum.TextTruncate.AtEnd
-	UsernameLabel.Parent = ProfileBtn
-
-	local UserRoleLabel = Instance.new("TextLabel")
-	UserRoleLabel.Size = UDim2.new(1, 0, 0, 14)
-	UserRoleLabel.Position = UDim2.new(0, 0, 0, 18)
-	UserRoleLabel.BackgroundTransparency = 1
-	UserRoleLabel.Text = "Premium User"
-	UserRoleLabel.Font = Enum.Font.GothamMedium
-	UserRoleLabel.TextSize = 9
-	UserRoleLabel.TextColor3 = Color3.fromRGB(130, 130, 160)
-	UserRoleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	UserRoleLabel.TextTruncate = Enum.TextTruncate.AtEnd
-	UserRoleLabel.Parent = ProfileBtn
-
-	ProfileBtn.MouseButton1Click:Connect(function()
-		isCensored = not isCensored
-		local targetText = isCensored and maskName(rawUsername) or rawUsername
-		TweenService:Create(UsernameLabel, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0.5}):Play()
-		task.delay(0.15, function()
-			UsernameLabel.Text = targetText
-			TweenService:Create(UsernameLabel, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-		end)
-	end)
-
-	local ContentContainer = Instance.new("Frame")
-	ContentContainer.Name = "ContentContainer"
-	ContentContainer.Size = UDim2.new(1, -156, 1, -44)
-	ContentContainer.Position = UDim2.new(0, 156, 0, 44)
-	ContentContainer.BackgroundTransparency = 1
-	ContentContainer.Parent = MainFrame
-
-	-- Dropdown Side Drawer Frame
-	local DropdownDrawer = Instance.new("Frame")
-	DropdownDrawer.Name = "DropdownDrawer"
-	DropdownDrawer.Size = UDim2.new(0, 230, 1, -48)
-	DropdownDrawer.Position = UDim2.new(1, 0, 0, 48)
-	DropdownDrawer.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
-	DropdownDrawer.BorderSizePixel = 0
-	DropdownDrawer.ZIndex = 50
-	DropdownDrawer.Visible = false
-	DropdownDrawer.Parent = MainFrame
-
-	local DrawerCorner = Instance.new("UICorner")
-	DrawerCorner.CornerRadius = UDim.new(0, 10)
-	DrawerCorner.Parent = DropdownDrawer
-
-	local DrawerStroke = Instance.new("UIStroke")
-	DrawerStroke.Color = Color3.fromRGB(45, 45, 60)
-	DrawerStroke.Thickness = 1
-	DrawerStroke.Parent = DropdownDrawer
-
-	local DrawerHeader = Instance.new("Frame")
-	DrawerHeader.Name = "DrawerHeader"
-	DrawerHeader.Size = UDim2.new(1, 0, 0, 42)
-	DrawerHeader.Position = UDim2.new(0, 0, 0, 0)
-	DrawerHeader.BackgroundTransparency = 1
-	DrawerHeader.Parent = DropdownDrawer
-
-	local DrawerTitle = Instance.new("TextLabel")
-	DrawerTitle.Size = UDim2.new(1, -48, 1, 0)
-	DrawerTitle.Position = UDim2.new(0, 14, 0, 0)
-	DrawerTitle.BackgroundTransparency = 1
-	DrawerTitle.Text = "Opsi Dropdown"
-	DrawerTitle.Font = Enum.Font.GothamBold
-	DrawerTitle.TextSize = 13
-	DrawerTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-	DrawerTitle.TextXAlignment = Enum.TextXAlignment.Left
-	DrawerTitle.TextTruncate = Enum.TextTruncate.AtEnd
-	DrawerTitle.Parent = DrawerHeader
-
-	local DrawerCloseBtn = Instance.new("TextButton")
-	DrawerCloseBtn.Size = UDim2.new(0, 28, 0, 28)
-	DrawerCloseBtn.Position = UDim2.new(1, -34, 0.5, -14)
-	DrawerCloseBtn.BackgroundTransparency = 1
-	DrawerCloseBtn.Text = ""
-	DrawerCloseBtn.Parent = DrawerHeader
-
-	local DrawerCloseIcon = Instance.new("ImageLabel")
-	DrawerCloseIcon.Size = UDim2.new(0, 14, 0, 14)
-	DrawerCloseIcon.Position = UDim2.new(0.5, -7, 0.5, -7)
-	DrawerCloseIcon.BackgroundTransparency = 1
-	DrawerCloseIcon.ImageColor3 = Color3.fromRGB(200, 200, 215)
-	DrawerCloseIcon.Parent = DrawerCloseBtn
-	applyIcon(DrawerCloseIcon, "gravity:xmark")
-
-	local DrawerDivider = Instance.new("Frame")
-	DrawerDivider.Size = UDim2.new(1, 0, 0, 1)
-	DrawerDivider.Position = UDim2.new(0, 0, 0, 42)
-	DrawerDivider.BackgroundColor3 = Color3.fromRGB(38, 38, 50)
-	DrawerDivider.BorderSizePixel = 0
-	DrawerDivider.Parent = DropdownDrawer
-
-	local DrawerScroll = Instance.new("ScrollingFrame")
-	DrawerScroll.Size = UDim2.new(1, 0, 1, -44)
-	DrawerScroll.Position = UDim2.new(0, 0, 0, 44)
-	DrawerScroll.BackgroundTransparency = 1
-	DrawerScroll.BorderSizePixel = 0
-	DrawerScroll.ScrollBarThickness = 3
-	DrawerScroll.ScrollBarImageColor3 = Color3.fromRGB(45, 45, 58)
-	DrawerScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-	DrawerScroll.Parent = DropdownDrawer
-
-	local DrawerLayout = Instance.new("UIListLayout")
-	DrawerLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	DrawerLayout.Padding = UDim.new(0, 6)
-	DrawerLayout.Parent = DrawerScroll
-
-	local DrawerPadding = Instance.new("UIPadding")
-	DrawerPadding.PaddingTop = UDim.new(0, 8)
-	DrawerPadding.PaddingLeft = UDim.new(0, 10)
-	DrawerPadding.PaddingRight = UDim.new(0, 10)
-	DrawerPadding.PaddingBottom = UDim.new(0, 8)
-	DrawerPadding.Parent = DrawerScroll
-
-	DrawerLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-		DrawerScroll.CanvasSize = UDim2.new(0, 0, 0, DrawerLayout.AbsoluteContentSize.Y + 16)
-	end)
-
-	local currentActiveDrawerOwner = nil
-
-	local function closeDrawer()
-		if not DropdownDrawer.Visible then return end
-		local ownerToReset = currentActiveDrawerOwner
-		currentActiveDrawerOwner = nil
-
-		local tweenOut = TweenService:Create(DropdownDrawer, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-			Position = UDim2.new(1, 0, 0, 48)
-		})
-		tweenOut:Play()
-		tweenOut.Completed:Connect(function()
-			if currentActiveDrawerOwner == nil then
-				DropdownDrawer.Visible = false
-			end
-		end)
-
-		if ownerToReset and ownerToReset.ArrowIcon then
-			TweenService:Create(ownerToReset.ArrowIcon, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Rotation = 0}):Play()
-		end
-	end
-
-	DrawerCloseBtn.MouseButton1Click:Connect(function()
-		closeDrawer()
-	end)
-
-	playIntroAnimation(ScreenGui, titleText, function()
-		MainFrame.Visible = true
-	end)
-
-	local WindowObj = {
-		Tabs = {},
-		ActiveTab = nil,
-		TabCount = 0,
-		Flags = {},
-		Elements = {},
-	}
-
-	function WindowObj:SaveConfig(configName)
-		if not configName or configName == "" then configName = "Default" end
-		local textData = HttpService:JSONEncode(WindowObj.Flags)
-		SaveConfigFile(configName, textData)
-	end
-
-	function WindowObj:LoadConfig(configName)
-		if not configName or configName == "" then configName = "Default" end
-		local textData = ReadConfigFile(configName)
-		if textData then
-			local ok, decoded = pcall(function() return HttpService:JSONDecode(textData) end)
-			if ok and type(decoded) == "table" then
-				for flagKey, val in pairs(decoded) do
-					if WindowObj.Elements[flagKey] and WindowObj.Elements[flagKey].Set then
-						WindowObj.Elements[flagKey]:Set(val)
-					end
-				end
-			end
-		end
-	end
-
-	function WindowObj:DeleteConfig(configName)
-		DeleteConfigFile(configName)
-	end
-
-	function WindowObj:DeleteAllConfigs()
-		DeleteAllConfigFiles()
-	end
-
-	function WindowObj:GetConfigList()
-		return ListConfigNames()
-	end
-
-	function WindowObj:CreateTab(tabName, iconName)
-		WindowObj.TabCount = WindowObj.TabCount + 1
-		iconName = iconName or "settings-bold"
-
-		local TabBtn = Instance.new("TextButton")
-		TabBtn.Name = "Tab_" .. tabName
-		TabBtn.Size = UDim2.new(1, 0, 0, 38)
-		TabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
-		TabBtn.BackgroundTransparency = 1
-		TabBtn.Text = ""
-		TabBtn.AutoButtonColor = false
-		TabBtn.ZIndex = 3
-		TabBtn.LayoutOrder = WindowObj.TabCount
-		TabBtn.Parent = TabScroll
-
-		local TabCorner = Instance.new("UICorner")
-		TabCorner.CornerRadius = UDim.new(0, 8)
-		TabCorner.Parent = TabBtn
-
-		local TabContentLayout = Instance.new("UIListLayout")
-		TabContentLayout.FillDirection = Enum.FillDirection.Horizontal
-		TabContentLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-		TabContentLayout.Padding = UDim.new(0, 10)
-		TabContentLayout.Parent = TabBtn
-
-		local TabContentPadding = Instance.new("UIPadding")
-		TabContentPadding.PaddingLeft = UDim.new(0, 10)
-		TabContentPadding.Parent = TabBtn
-
-		local TabIcon = Instance.new("ImageLabel")
-		TabIcon.Size = UDim2.new(0, 18, 0, 18)
-		TabIcon.BackgroundTransparency = 1
-		TabIcon.ImageColor3 = Color3.fromRGB(160, 160, 175)
-		TabIcon.LayoutOrder = 1
-		TabIcon.ZIndex = 3
-		TabIcon.Parent = TabBtn
-		applyIcon(TabIcon, iconName)
-
-		local TabText = Instance.new("TextLabel")
-		TabText.Size = UDim2.new(1, -30, 1, 0)
-		TabText.BackgroundTransparency = 1
-		TabText.Text = tabName
-		TabText.Font = Enum.Font.GothamMedium
-		TabText.TextSize = 13
-		TabText.TextColor3 = Color3.fromRGB(160, 160, 175)
-		TabText.TextXAlignment = Enum.TextXAlignment.Left
-		TabText.LayoutOrder = 2
-		TabText.ZIndex = 3
-		TabText.Parent = TabBtn
-
-		local TabPage = Instance.new("ScrollingFrame")
-		TabPage.Name = "Page_" .. tabName
-		TabPage.Size = UDim2.new(1, 0, 1, 0)
-		TabPage.BackgroundTransparency = 1
-		TabPage.BorderSizePixel = 0
-		TabPage.ScrollBarThickness = 3
-		TabPage.ScrollBarImageColor3 = Color3.fromRGB(45, 45, 58)
-		TabPage.Visible = false
-		TabPage.Parent = ContentContainer
-
-		local PageLayout = Instance.new("UIListLayout")
-		PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-		PageLayout.Padding = UDim.new(0, 8)
-		PageLayout.Parent = TabPage
-
-		local PagePadding = Instance.new("UIPadding")
-		PagePadding.PaddingTop = UDim.new(0, 12)
-		PagePadding.PaddingLeft = UDim.new(0, 14)
-		PagePadding.PaddingRight = UDim.new(0, 14)
-		PagePadding.PaddingBottom = UDim.new(0, 12)
-		PagePadding.Parent = TabPage
-
-		PageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-			TabPage.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 24)
-		end)
-
-		local TabObj = {
-			Button = TabBtn,
-			Page = TabPage,
-			ElementCount = 0
-		}
-
-		local function selectTab(animated)
-			local prevTab = WindowObj.ActiveTab
-			WindowObj.ActiveTab = TabObj
-
-			closeDrawer()
-
-			local targetY = TabBtn.AbsolutePosition.Y - Sidebar.AbsolutePosition.Y
-			local targetPos = UDim2.new(0, 8, 0, targetY)
-
-			TabIndicator.Visible = true
-
-			if animated ~= false and prevTab then
-				TweenService:Create(TabIndicator, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-					Position = targetPos
-				}):Play()
-			else
-				TabIndicator.Position = targetPos
-			end
-
-			for _, t in pairs(WindowObj.Tabs) do
-				local isSelected = (t == TabObj)
-				local icon = t.Button:FindFirstChildOfClass("ImageLabel")
-				local text = t.Button:FindFirstChildOfClass("TextLabel")
-
-				local targetIconColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(160, 160, 175)
-				local targetTextColor = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(160, 160, 175)
-
-				if icon then
-					TweenService:Create(icon, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {ImageColor3 = targetIconColor}):Play()
-				end
-				if text then
-					TweenService:Create(text, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {TextColor3 = targetTextColor}):Play()
-				end
-
-				if not isSelected then
-					t.Page.Visible = false
-				end
-			end
-
-			TabPage.Position = UDim2.new(0, 10, 0, 0)
-			TabPage.Visible = true
-			TweenService:Create(TabPage, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-				Position = UDim2.new(0, 0, 0, 0)
-			}):Play()
-		end
-
-		TabBtn.MouseButton1Click:Connect(function()
-			selectTab(true)
-		end)
-
-		if WindowObj.TabCount == 1 then
-			task.delay(0.1, function()
-				selectTab(false)
-			end)
-		end
-
-		table.insert(WindowObj.Tabs, TabObj)
-
-		function TabObj:AddSection(text, defaultOpen)
-			TabObj.ElementCount = TabObj.ElementCount + 1
-			local isOpen = (defaultOpen == nil) and true or defaultOpen
-
-			local SectionHolder = Instance.new("Frame")
-			SectionHolder.Size = UDim2.new(1, 0, 0, 32)
-			SectionHolder.BackgroundTransparency = 1
-			SectionHolder.LayoutOrder = TabObj.ElementCount
-			SectionHolder.ClipsDescendants = true
-			SectionHolder.Parent = TabPage
-
-			local HeaderBtn = Instance.new("TextButton")
-			HeaderBtn.Size = UDim2.new(1, 0, 0, 28)
-			HeaderBtn.BackgroundTransparency = 1
-			HeaderBtn.Text = ""
-			HeaderBtn.Parent = SectionHolder
-
-			local SectionText = Instance.new("TextLabel")
-			SectionText.Size = UDim2.new(1, -30, 1, 0)
-			SectionText.BackgroundTransparency = 1
-			SectionText.Text = text
-			SectionText.Font = Enum.Font.GothamBold
-			SectionText.TextSize = 14
-			SectionText.TextColor3 = Color3.fromRGB(255, 255, 255)
-			SectionText.TextXAlignment = Enum.TextXAlignment.Left
-			SectionText.Parent = HeaderBtn
-
-			local ArrowIcon = Instance.new("ImageLabel")
-			ArrowIcon.Name = "ArrowIcon"
-			ArrowIcon.Size = UDim2.new(0, 16, 0, 16)
-			ArrowIcon.Position = UDim2.new(1, -20, 0.5, -8)
-			ArrowIcon.BackgroundTransparency = 1
-			ArrowIcon.ImageColor3 = Color3.fromRGB(200, 200, 215)
-			ArrowIcon.Rotation = isOpen and 0 or -90
-			ArrowIcon.Parent = HeaderBtn
-			applyIcon(ArrowIcon, "alt-arrow-down-bold")
-
-			local Underline = Instance.new("Frame")
-			Underline.Size = UDim2.new(1, 0, 0, 1)
-			Underline.Position = UDim2.new(0, 0, 1, -1)
-			Underline.BackgroundColor3 = Color3.fromRGB(38, 38, 50)
-			Underline.BorderSizePixel = 0
-			Underline.Parent = SectionHolder
-
-			local ItemsContainer = Instance.new("Frame")
-			ItemsContainer.Size = UDim2.new(1, 0, 0, 0)
-			ItemsContainer.Position = UDim2.new(0, 0, 0, 32)
-			ItemsContainer.BackgroundTransparency = 1
-			ItemsContainer.ClipsDescendants = true
-			ItemsContainer.Visible = isOpen
-			ItemsContainer.Parent = SectionHolder
-
-			local ItemsLayout = Instance.new("UIListLayout")
-			ItemsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-			ItemsLayout.Padding = UDim.new(0, 8)
-			ItemsLayout.Parent = ItemsContainer
-
-			local activeSectionTween = nil
-
-			local function updateSectionState(animated)
-				local targetContentHeight = ItemsLayout.AbsoluteContentSize.Y
-				local targetHolderHeight = isOpen and (32 + targetContentHeight + 6) or 32
-				local targetItemsHeight = isOpen and targetContentHeight or 0
-				local targetRotation = isOpen and 0 or -90
-
-				if animated ~= false then
-					if activeSectionTween then
-						activeSectionTween:Cancel()
-					end
-
-					ItemsContainer.Visible = true
-
-					local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
-
-					TweenService:Create(ArrowIcon, tweenInfo, {Rotation = targetRotation}):Play()
-					TweenService:Create(ItemsContainer, tweenInfo, {Size = UDim2.new(1, 0, 0, targetItemsHeight)}):Play()
-
-					activeSectionTween = TweenService:Create(SectionHolder, tweenInfo, {Size = UDim2.new(1, 0, 0, targetHolderHeight)})
-					activeSectionTween:Play()
-
-					activeSectionTween.Completed:Connect(function()
-						if not isOpen then
-							ItemsContainer.Visible = false
-						end
-					end)
-				else
-					ArrowIcon.Rotation = targetRotation
-					ItemsContainer.Size = UDim2.new(1, 0, 0, targetItemsHeight)
-					SectionHolder.Size = UDim2.new(1, 0, 0, targetHolderHeight)
-					ItemsContainer.Visible = isOpen
-				end
-			end
-
-			ItemsLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-				if isOpen then
-					updateSectionState(false)
-				end
-			end)
-
-			HeaderBtn.MouseButton1Click:Connect(function()
-				isOpen = not isOpen
-				updateSectionState(true)
-			end)
-
-			if not isOpen then
-				updateSectionState(false)
-			end
-
-			local SectionObj = {}
-
-			function SectionObj:AddButton(btnText, callback)
-				local res = TabObj:AddButton(btnText, callback, ItemsContainer)
-				if isOpen then updateSectionState(false) end
-				return res
-			end
-
-			function SectionObj:AddButtonGroup2x2(buttonsData)
-				local res = TabObj:AddButtonGroup2x2(buttonsData, ItemsContainer)
-				if isOpen then updateSectionState(false) end
-				return res
-			end
-
-			function SectionObj:AddToggle(toggleText, defaultVal, callback, flagName)
-				local res = TabObj:AddToggle(toggleText, defaultVal, callback, flagName, ItemsContainer)
-				if isOpen then updateSectionState(false) end
-				return res
-			end
-
-			function SectionObj:AddSlider(sliderText, minV, maxV, defV, callback, flagName)
-				local res = TabObj:AddSlider(sliderText, minV, maxV, defV, callback, flagName, ItemsContainer)
-				if isOpen then updateSectionState(false) end
-				return res
-			end
-
-			function SectionObj:AddDropdown(dropText, optList, defOpt, callback, flagName)
-				local res = TabObj:AddDropdown(dropText, optList, defOpt, callback, flagName, ItemsContainer)
-				if isOpen then updateSectionState(false) end
-				return res
-			end
-
-			function SectionObj:AddMultiDropdown(text, optionsList, defaultSelected, callback, flagName)
-				local res = TabObj:AddMultiDropdown(text, optionsList, defaultSelected, callback, flagName, ItemsContainer)
-				if isOpen then updateSectionState(false) end
-				return res
-			end
-
-			function SectionObj:AddTextBox(text, placeholder, callback, flagName)
-				local res = TabObj:AddTextBox(text, placeholder, callback, flagName, ItemsContainer)
-				if isOpen then updateSectionState(false) end
-				return res
-			end
-
-			return SectionObj
-		end
-
-		function TabObj:AddButton(text, callback, targetParent)
-			TabObj.ElementCount = TabObj.ElementCount + 1
-			callback = callback or function() end
-			targetParent = targetParent or TabPage
-
-			local BtnFrame = Instance.new("Frame")
-			BtnFrame.Size = UDim2.new(1, 0, 0, 38)
-			BtnFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
-			BtnFrame.LayoutOrder = TabObj.ElementCount
-			BtnFrame.Parent = targetParent
-
-			local Corner = Instance.new("UICorner")
-			Corner.CornerRadius = UDim.new(0, 8)
-			Corner.Parent = BtnFrame
-
-			local Stroke = Instance.new("UIStroke")
-			Stroke.Color = Color3.fromRGB(42, 42, 54)
-			Stroke.Thickness = 1
-			Stroke.Parent = BtnFrame
-
-			local ActionBtn = Instance.new("TextButton")
-			ActionBtn.Size = UDim2.new(1, 0, 1, 0)
-			ActionBtn.BackgroundTransparency = 1
-			ActionBtn.Text = text
-			ActionBtn.Font = Enum.Font.GothamMedium
-			ActionBtn.TextSize = 13
-			ActionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-			ActionBtn.Parent = BtnFrame
-
-			ActionBtn.MouseEnter:Connect(function()
-				BtnFrame.BackgroundColor3 = Color3.fromRGB(36, 36, 46)
-			end)
-			ActionBtn.MouseLeave:Connect(function()
-				BtnFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
-			end)
-			ActionBtn.MouseButton1Click:Connect(function()
-				pcall(callback)
-			end)
-		end
-
-		function TabObj:AddButtonGroup2x2(buttonsData, targetParent)
-			TabObj.ElementCount = TabObj.ElementCount + 1
-			buttonsData = buttonsData or {}
-			targetParent = targetParent or TabPage
-
-			local GridContainer = Instance.new("Frame")
-			GridContainer.Size = UDim2.new(1, 0, 0, 82)
-			GridContainer.BackgroundTransparency = 1
-			GridContainer.LayoutOrder = TabObj.ElementCount
-			GridContainer.Parent = targetParent
-
-			local Row1 = Instance.new("Frame")
-			Row1.Size = UDim2.new(1, 0, 0, 38)
-			Row1.Position = UDim2.new(0, 0, 0, 0)
-			Row1.BackgroundTransparency = 1
-			Row1.Parent = GridContainer
-
-			local Row2 = Instance.new("Frame")
-			Row2.Size = UDim2.new(1, 0, 0, 38)
-			Row2.Position = UDim2.new(0, 0, 0, 44)
-			Row2.BackgroundTransparency = 1
-			Row2.Parent = GridContainer
-
-			local function createGridBtn(btnData, rowParent, posXScale)
-				local btnFrame = Instance.new("Frame")
-				btnFrame.Size = UDim2.new(0.5, -4, 1, 0)
-				btnFrame.Position = UDim2.new(posXScale, posXScale == 0 and 0 or 4, 0, 0)
-				btnFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-				btnFrame.Parent = rowParent
-
-				local corner = Instance.new("UICorner")
-				corner.CornerRadius = UDim.new(0, 8)
-				corner.Parent = btnFrame
-
-				local stroke = Instance.new("UIStroke")
-				stroke.Color = Color3.fromRGB(48, 48, 65)
-				stroke.Thickness = 1
-				stroke.Parent = btnFrame
-
-				local grad = Instance.new("UIGradient")
-				grad.Rotation = 45
-				grad.Color = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(42, 42, 58)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(22, 22, 32))
-				})
-				grad.Parent = btnFrame
-
-				local textBtn = Instance.new("TextButton")
-				textBtn.Size = UDim2.new(1, 0, 1, 0)
-				textBtn.BackgroundTransparency = 1
-				textBtn.Text = btnData.Text or "Button"
-				textBtn.Font = Enum.Font.GothamBold
-				textBtn.TextSize = 12
-				textBtn.TextColor3 = Color3.fromRGB(240, 240, 255)
-				textBtn.Parent = btnFrame
-
-				textBtn.MouseEnter:Connect(function()
-					TweenService:Create(stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(120, 120, 180)}):Play()
-					TweenService:Create(textBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-				end)
-				textBtn.MouseLeave:Connect(function()
-					TweenService:Create(stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(48, 48, 65)}):Play()
-					TweenService:Create(textBtn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(240, 240, 255)}):Play()
-				end)
-
-				textBtn.MouseButton1Click:Connect(function()
-					if btnData.Callback then
-						pcall(btnData.Callback)
-					end
-				end)
-			end
-
-			if buttonsData[1] then createGridBtn(buttonsData[1], Row1, 0) end
-			if buttonsData[2] then createGridBtn(buttonsData[2], Row1, 0.5) end
-			if buttonsData[3] then createGridBtn(buttonsData[3], Row2, 0) end
-			if buttonsData[4] then createGridBtn(buttonsData[4], Row2, 0.5) end
-		end
-
-		function TabObj:AddToggle(text, defaultState, callback, flagName, targetParent)
-			TabObj.ElementCount = TabObj.ElementCount + 1
-			flagName = flagName or text
-			local state = defaultState or false
-			callback = callback or function() end
-			targetParent = targetParent or TabPage
-
-			WindowObj.Flags[flagName] = state
-
-			local ToggleFrame = Instance.new("Frame")
-			ToggleFrame.Size = UDim2.new(1, 0, 0, 40)
-			ToggleFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
-			ToggleFrame.LayoutOrder = TabObj.ElementCount
-			ToggleFrame.Parent = targetParent
-
-			local Corner = Instance.new("UICorner")
-			Corner.CornerRadius = UDim.new(0, 8)
-			Corner.Parent = ToggleFrame
-
-			local Stroke = Instance.new("UIStroke")
-			Stroke.Color = Color3.fromRGB(42, 42, 54)
-			Stroke.Thickness = 1
-			Stroke.Parent = ToggleFrame
-
-			local Label = Instance.new("TextLabel")
-			Label.Size = UDim2.new(1, -70, 1, 0)
-			Label.Position = UDim2.new(0, 12, 0, 0)
-			Label.BackgroundTransparency = 1
-			Label.Text = text
-			Label.Font = Enum.Font.GothamMedium
-			Label.TextSize = 13
-			Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-			Label.TextXAlignment = Enum.TextXAlignment.Left
-			Label.Parent = ToggleFrame
-
-			local SwitchBg = Instance.new("Frame")
-			SwitchBg.Size = UDim2.new(0, 42, 0, 20)
-			SwitchBg.Position = UDim2.new(1, -54, 0.5, -10)
-			SwitchBg.BackgroundColor3 = state and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(48, 48, 62)
-			SwitchBg.Parent = ToggleFrame
-
-			local SwitchCorner = Instance.new("UICorner")
-			SwitchCorner.CornerRadius = UDim.new(1, 0)
-			SwitchCorner.Parent = SwitchBg
-
-			local Dot = Instance.new("Frame")
-			Dot.Size = UDim2.new(0, 14, 0, 14)
-			Dot.Position = state and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
-			Dot.BackgroundColor3 = state and Color3.fromRGB(20, 20, 26) or Color3.fromRGB(255, 255, 255)
-			Dot.Parent = SwitchBg
-
-			local DotCorner = Instance.new("UICorner")
-			DotCorner.CornerRadius = UDim.new(1, 0)
-			DotCorner.Parent = Dot
-
-			local ClickArea = Instance.new("TextButton")
-			ClickArea.Size = UDim2.new(1, 0, 1, 0)
-			ClickArea.BackgroundTransparency = 1
-			ClickArea.Text = ""
-			ClickArea.Parent = ToggleFrame
-
-			local function updateToggle(animated)
-				WindowObj.Flags[flagName] = state
-				local switchColor = state and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(48, 48, 62)
-				local dotPos = state and UDim2.new(1, -17, 0.5, -7) or UDim2.new(0, 3, 0.5, -7)
-				local dotColor = state and Color3.fromRGB(20, 20, 26) or Color3.fromRGB(255, 255, 255)
-
-				if animated ~= false then
-					TweenService:Create(SwitchBg, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-						BackgroundColor3 = switchColor
-					}):Play()
-					TweenService:Create(Dot, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-						Position = dotPos,
-						BackgroundColor3 = dotColor
-					}):Play()
-				else
-					SwitchBg.BackgroundColor3 = switchColor
-					Dot.Position = dotPos
-					Dot.BackgroundColor3 = dotColor
-				end
-			end
-
-			ClickArea.MouseButton1Click:Connect(function()
-				state = not state
-				updateToggle(true)
-				pcall(callback, state)
-			end)
-
-			local toggleElement = {}
-			function toggleElement:Set(val, skipCallback)
-				state = not not val
-				updateToggle(true)
-				if not skipCallback then
-					pcall(callback, state)
-				end
-			end
-
-			WindowObj.Elements[flagName] = toggleElement
-			return toggleElement
-		end
-
-		function TabObj:AddSlider(text, minVal, maxVal, defaultVal, callback, flagName, targetParent)
-			TabObj.ElementCount = TabObj.ElementCount + 1
-			flagName = flagName or text
-			minVal = minVal or 0
-			maxVal = maxVal or 100
-			defaultVal = defaultVal or minVal
-			callback = callback or function() end
-			targetParent = targetParent or TabPage
-
-			local currentVal = math.clamp(defaultVal, minVal, maxVal)
-			WindowObj.Flags[flagName] = currentVal
-
-			local SliderFrame = Instance.new("Frame")
-			SliderFrame.Size = UDim2.new(1, 0, 0, 50)
-			SliderFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
-			SliderFrame.LayoutOrder = TabObj.ElementCount
-			SliderFrame.Parent = targetParent
-
-			local Corner = Instance.new("UICorner")
-			Corner.CornerRadius = UDim.new(0, 8)
-			Corner.Parent = SliderFrame
-
-			local Stroke = Instance.new("UIStroke")
-			Stroke.Color = Color3.fromRGB(42, 42, 54)
-			Stroke.Thickness = 1
-			Stroke.Parent = SliderFrame
-
-			local Label = Instance.new("TextLabel")
-			Label.Size = UDim2.new(1, -80, 0, 22)
-			Label.Position = UDim2.new(0, 12, 0, 4)
-			Label.BackgroundTransparency = 1
-			Label.Text = text
-			Label.Font = Enum.Font.GothamMedium
-			Label.TextSize = 13
-			Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-			Label.TextXAlignment = Enum.TextXAlignment.Left
-			Label.Parent = SliderFrame
-
-			local ValLabel = Instance.new("TextLabel")
-			ValLabel.Size = UDim2.new(0, 60, 0, 22)
-			ValLabel.Position = UDim2.new(1, -72, 0, 4)
-			ValLabel.BackgroundTransparency = 1
-			ValLabel.Text = tostring(currentVal)
-			ValLabel.Font = Enum.Font.GothamBold
-			ValLabel.TextSize = 13
-			ValLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-			ValLabel.TextXAlignment = Enum.TextXAlignment.Right
-			ValLabel.Parent = SliderFrame
-
-			local Track = Instance.new("Frame")
-			Track.Size = UDim2.new(1, -24, 0, 6)
-			Track.Position = UDim2.new(0, 12, 0, 33)
-			Track.BackgroundColor3 = Color3.fromRGB(48, 48, 62)
-			Track.Parent = SliderFrame
-
-			local TrackCorner = Instance.new("UICorner")
-			TrackCorner.CornerRadius = UDim.new(1, 0)
-			TrackCorner.Parent = Track
-
-			local Fill = Instance.new("Frame")
-			Fill.Size = UDim2.new((currentVal - minVal) / (maxVal - minVal), 0, 1, 0)
-			Fill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			Fill.Parent = Track
-
-			local FillCorner = Instance.new("UICorner")
-			FillCorner.CornerRadius = UDim.new(1, 0)
-			FillCorner.Parent = Fill
-
-			local Knob = Instance.new("Frame")
-			Knob.Size = UDim2.new(0, 12, 0, 12)
-			Knob.AnchorPoint = Vector2.new(0.5, 0.5)
-			Knob.Position = UDim2.new((currentVal - minVal) / (maxVal - minVal), 0, 0.5, 0)
-			Knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			Knob.Parent = Track
-
-			local KnobCorner = Instance.new("UICorner")
-			KnobCorner.CornerRadius = UDim.new(1, 0)
-			KnobCorner.Parent = Knob
-
-			local isDragging = false
-
-			local function updateSliderVisual(val)
-				currentVal = math.clamp(val, minVal, maxVal)
-				WindowObj.Flags[flagName] = currentVal
-				ValLabel.Text = tostring(currentVal)
-				local ratio = (currentVal - minVal) / (maxVal - minVal)
-				Fill.Size = UDim2.new(ratio, 0, 1, 0)
-				Knob.Position = UDim2.new(ratio, 0, 0.5, 0)
-			end
-
-			local function updateSlider(input)
-				local trackAbsPos = Track.AbsolutePosition.X
-				local trackAbsSize = Track.AbsoluteSize.X
-				local mouseX = input.Position.X
-				local ratio = math.clamp((mouseX - trackAbsPos) / trackAbsSize, 0, 1)
-				local val = math.floor(minVal + (maxVal - minVal) * ratio)
-				updateSliderVisual(val)
-				pcall(callback, currentVal)
-			end
-
-			Track.InputBegan:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-					isDragging = true
-					updateSlider(input)
-				end
-			end)
-
-			UserInputService.InputChanged:Connect(function(input)
-				if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-					updateSlider(input)
-				end
-			end)
-
-			UserInputService.InputEnded:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-					isDragging = false
-				end
-			end)
-
-			local sliderElement = {}
-			function sliderElement:Set(val, skipCallback)
-				updateSliderVisual(val)
-				if not skipCallback then
-					pcall(callback, currentVal)
-				end
-			end
-
-			WindowObj.Elements[flagName] = sliderElement
-			return sliderElement
-		end
-
-		function TabObj:AddDropdown(text, optionsList, defaultOpt, callback, flagName, targetParent)
-			TabObj.ElementCount = TabObj.ElementCount + 1
-			flagName = flagName or text
-			optionsList = optionsList or {}
-			defaultOpt = defaultOpt or optionsList[1] or ""
-			callback = callback or function() end
-			targetParent = targetParent or TabPage
-
-			local selectedOption = defaultOpt
-			WindowObj.Flags[flagName] = selectedOption
-
-			local DropdownFrame = Instance.new("Frame")
-			DropdownFrame.Size = UDim2.new(1, 0, 0, 40)
-			DropdownFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
-			DropdownFrame.LayoutOrder = TabObj.ElementCount
-			DropdownFrame.Parent = targetParent
-
-			local Corner = Instance.new("UICorner")
-			Corner.CornerRadius = UDim.new(0, 8)
-			Corner.Parent = DropdownFrame
-
-			local Stroke = Instance.new("UIStroke")
-			Stroke.Color = Color3.fromRGB(42, 42, 54)
-			Stroke.Thickness = 1
-			Stroke.Parent = DropdownFrame
-
-			local HeaderBtn = Instance.new("TextButton")
-			HeaderBtn.Size = UDim2.new(1, 0, 1, 0)
-			HeaderBtn.BackgroundTransparency = 1
-			HeaderBtn.Text = ""
-			HeaderBtn.Parent = DropdownFrame
-
-			local Label = Instance.new("TextLabel")
-			Label.Size = UDim2.new(0.4, 0, 1, 0)
-			Label.Position = UDim2.new(0, 12, 0, 0)
-			Label.BackgroundTransparency = 1
-			Label.Text = text
-			Label.Font = Enum.Font.GothamMedium
-			Label.TextSize = 13
-			Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-			Label.TextXAlignment = Enum.TextXAlignment.Left
-			Label.Parent = HeaderBtn
-
-			local ValueBox = Instance.new("Frame")
-			ValueBox.Size = UDim2.new(0, 160, 0, 26)
-			ValueBox.Position = UDim2.new(1, -172, 0.5, -13)
-			ValueBox.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
-			ValueBox.Parent = HeaderBtn
-
-			local ValCorner = Instance.new("UICorner")
-			ValCorner.CornerRadius = UDim.new(0, 6)
-			ValCorner.Parent = ValueBox
-
-			local ValText = Instance.new("TextLabel")
-			ValText.Size = UDim2.new(1, -24, 1, 0)
-			ValText.Position = UDim2.new(0, 8, 0, 0)
-			ValText.BackgroundTransparency = 1
-			ValText.Text = selectedOption
-			ValText.Font = Enum.Font.Gotham
-			ValText.TextSize = 12
-			ValText.TextColor3 = Color3.fromRGB(255, 255, 255)
-			ValText.TextXAlignment = Enum.TextXAlignment.Left
-			ValText.TextTruncate = Enum.TextTruncate.AtEnd
-			ValText.Parent = ValueBox
-
-			local ArrowIcon = Instance.new("ImageLabel")
-			ArrowIcon.Name = "ArrowIcon"
-			ArrowIcon.Size = UDim2.new(0, 14, 0, 14)
-			ArrowIcon.Position = UDim2.new(1, -18, 0.5, -7)
-			ArrowIcon.BackgroundTransparency = 1
-			ArrowIcon.ImageColor3 = Color3.fromRGB(200, 200, 215)
-			ArrowIcon.Rotation = 0
-			ArrowIcon.Parent = ValueBox
-			applyIcon(ArrowIcon, "alt-arrow-down-bold")
-
-			local dropdownOwner = { ArrowIcon = ArrowIcon }
-
-			local function openThisDropdownDrawer()
-				if currentActiveDrawerOwner == dropdownOwner then
-					closeDrawer()
-					return
-				end
-
-				currentActiveDrawerOwner = dropdownOwner
-				DrawerTitle.Text = text
-
-				for _, child in pairs(DrawerScroll:GetChildren()) do
-					if child:IsA("TextButton") then child:Destroy() end
-				end
-
-				for idx, opt in ipairs(optionsList) do
-					local isSelected = (opt == selectedOption)
-					local ItemBtn = Instance.new("TextButton")
-					ItemBtn.Size = UDim2.new(1, 0, 0, 32)
-					ItemBtn.BackgroundColor3 = isSelected and Color3.fromRGB(45, 45, 60) or Color3.fromRGB(28, 28, 38)
-					ItemBtn.Text = "  " .. opt
-					ItemBtn.Font = Enum.Font.GothamMedium
-					ItemBtn.TextSize = 12
-					ItemBtn.TextColor3 = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 180, 195)
-					ItemBtn.TextXAlignment = Enum.TextXAlignment.Left
-					ItemBtn.LayoutOrder = idx
-					ItemBtn.Parent = DrawerScroll
-
-					local ItemCorner = Instance.new("UICorner")
-					ItemCorner.CornerRadius = UDim.new(0, 6)
-					ItemCorner.Parent = ItemBtn
-
-					ItemBtn.MouseEnter:Connect(function()
-						if opt ~= selectedOption then
-							ItemBtn.BackgroundColor3 = Color3.fromRGB(36, 36, 48)
-						end
-					end)
-					ItemBtn.MouseLeave:Connect(function()
-						if opt ~= selectedOption then
-							ItemBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-						end
-					end)
-
-					ItemBtn.MouseButton1Click:Connect(function()
-						selectedOption = opt
-						WindowObj.Flags[flagName] = selectedOption
-						ValText.Text = selectedOption
-						closeDrawer()
-						pcall(callback, selectedOption)
-					end)
-				end
-
-				DropdownDrawer.Visible = true
-				DropdownDrawer.Position = UDim2.new(1, 0, 0, 48)
-				TweenService:Create(DropdownDrawer, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-					Position = UDim2.new(1, -230, 0, 48)
-				}):Play()
-
-				TweenService:Create(ArrowIcon, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Rotation = 180}):Play()
-			end
-
-			HeaderBtn.MouseButton1Click:Connect(openThisDropdownDrawer)
-
-			local dropdownElement = {}
-			function dropdownElement:Set(val, skipCallback)
-				selectedOption = val
-				WindowObj.Flags[flagName] = selectedOption
-				ValText.Text = selectedOption
-				if not skipCallback then
-					pcall(callback, selectedOption)
-				end
-			end
-
-			function dropdownElement:Refresh(newList, newDefault)
-				optionsList = newList or optionsList
-				if newDefault then
-					selectedOption = newDefault
-					WindowObj.Flags[flagName] = selectedOption
-					ValText.Text = selectedOption
-				end
-			end
-
-			WindowObj.Elements[flagName] = dropdownElement
-			return dropdownElement
-		end
-
-		function TabObj:AddMultiDropdown(text, optionsList, defaultSelected, callback, flagName, targetParent)
-			TabObj.ElementCount = TabObj.ElementCount + 1
-			flagName = flagName or text
-			optionsList = optionsList or {}
-			defaultSelected = defaultSelected or {}
-			callback = callback or function() end
-			targetParent = targetParent or TabPage
-
-			local selectedMap = {}
-			for _, val in ipairs(defaultSelected) do
-				selectedMap[val] = true
-			end
-
-			local DropdownFrame = Instance.new("Frame")
-			DropdownFrame.Size = UDim2.new(1, 0, 0, 40)
-			DropdownFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
-			DropdownFrame.LayoutOrder = TabObj.ElementCount
-			DropdownFrame.Parent = targetParent
-
-			local Corner = Instance.new("UICorner")
-			Corner.CornerRadius = UDim.new(0, 8)
-			Corner.Parent = DropdownFrame
-
-			local Stroke = Instance.new("UIStroke")
-			Stroke.Color = Color3.fromRGB(42, 42, 54)
-			Stroke.Thickness = 1
-			Stroke.Parent = DropdownFrame
-
-			local HeaderBtn = Instance.new("TextButton")
-			HeaderBtn.Size = UDim2.new(1, 0, 1, 0)
-			HeaderBtn.BackgroundTransparency = 1
-			HeaderBtn.Text = ""
-			HeaderBtn.Parent = DropdownFrame
-
-			local Label = Instance.new("TextLabel")
-			Label.Size = UDim2.new(0.4, 0, 1, 0)
-			Label.Position = UDim2.new(0, 12, 0, 0)
-			Label.BackgroundTransparency = 1
-			Label.Text = text
-			Label.Font = Enum.Font.GothamMedium
-			Label.TextSize = 13
-			Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-			Label.TextXAlignment = Enum.TextXAlignment.Left
-			Label.Parent = HeaderBtn
-
-			local ValueBox = Instance.new("Frame")
-			ValueBox.Size = UDim2.new(0, 160, 0, 26)
-			ValueBox.Position = UDim2.new(1, -172, 0.5, -13)
-			ValueBox.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
-			ValueBox.Parent = HeaderBtn
-
-			local ValCorner = Instance.new("UICorner")
-			ValCorner.CornerRadius = UDim.new(0, 6)
-			ValCorner.Parent = ValueBox
-
-			local ValText = Instance.new("TextLabel")
-			ValText.Size = UDim2.new(1, -24, 1, 0)
-			ValText.Position = UDim2.new(0, 8, 0, 0)
-			ValText.BackgroundTransparency = 1
-			ValText.Font = Enum.Font.Gotham
-			ValText.TextSize = 12
-			ValText.TextColor3 = Color3.fromRGB(255, 255, 255)
-			ValText.TextXAlignment = Enum.TextXAlignment.Left
-			ValText.TextTruncate = Enum.TextTruncate.AtEnd
-			ValText.Parent = ValueBox
-
-			local ArrowIcon = Instance.new("ImageLabel")
-			ArrowIcon.Name = "ArrowIcon"
-			ArrowIcon.Size = UDim2.new(0, 14, 0, 14)
-			ArrowIcon.Position = UDim2.new(1, -18, 0.5, -7)
-			ArrowIcon.BackgroundTransparency = 1
-			ArrowIcon.ImageColor3 = Color3.fromRGB(200, 200, 215)
-			ArrowIcon.Rotation = 0
-			ArrowIcon.Parent = ValueBox
-			applyIcon(ArrowIcon, "alt-arrow-down-bold")
-
-			local function getSelectedList()
-				local result = {}
-				for _, opt in ipairs(optionsList) do
-					if selectedMap[opt] then
-						table.insert(result, opt)
-					end
-				end
-				return result
-			end
-
-			local function updateHeaderLabel()
-				local list = getSelectedList()
-				WindowObj.Flags[flagName] = list
-				if #list == 0 then
-					ValText.Text = "Pilih..."
-				else
-					ValText.Text = table.concat(list, ", ")
-				end
-			end
-
-			updateHeaderLabel()
-
-			local dropdownOwner = { ArrowIcon = ArrowIcon }
-
-			local function renderDrawerItems()
-				for _, child in pairs(DrawerScroll:GetChildren()) do
-					if child:IsA("TextButton") then child:Destroy() end
-				end
-
-				for idx, opt in ipairs(optionsList) do
-					local isSel = selectedMap[opt] or false
-
-					local ItemBtn = Instance.new("TextButton")
-					ItemBtn.Size = UDim2.new(1, 0, 0, 32)
-					ItemBtn.BackgroundColor3 = isSel and Color3.fromRGB(45, 45, 60) or Color3.fromRGB(28, 28, 38)
-					ItemBtn.Text = (isSel and "  [x]  " or "  [  ]  ") .. opt
-					ItemBtn.Font = Enum.Font.GothamMedium
-					ItemBtn.TextSize = 12
-					ItemBtn.TextColor3 = isSel and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 180, 195)
-					ItemBtn.TextXAlignment = Enum.TextXAlignment.Left
-					ItemBtn.LayoutOrder = idx
-					ItemBtn.Parent = DrawerScroll
-
-					local ItemCorner = Instance.new("UICorner")
-					ItemCorner.CornerRadius = UDim.new(0, 6)
-					ItemCorner.Parent = ItemBtn
-
-					ItemBtn.MouseButton1Click:Connect(function()
-						selectedMap[opt] = not selectedMap[opt]
-						updateHeaderLabel()
-						renderDrawerItems()
-						pcall(callback, getSelectedList())
-					end)
-				end
-			end
-
-			local function openThisMultiDropdownDrawer()
-				if currentActiveDrawerOwner == dropdownOwner then
-					closeDrawer()
-					return
-				end
-
-				currentActiveDrawerOwner = dropdownOwner
-				DrawerTitle.Text = text
-
-				renderDrawerItems()
-
-				DropdownDrawer.Visible = true
-				DropdownDrawer.Position = UDim2.new(1, 0, 0, 48)
-				TweenService:Create(DropdownDrawer, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-					Position = UDim2.new(1, -230, 0, 48)
-				}):Play()
-
-				TweenService:Create(ArrowIcon, TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Rotation = 180}):Play()
-			end
-
-			HeaderBtn.MouseButton1Click:Connect(openThisMultiDropdownDrawer)
-
-			local multiElement = {}
-			function multiElement:Set(valList, skipCallback)
-				selectedMap = {}
-				if type(valList) == "table" then
-					for _, opt in ipairs(valList) do
-						selectedMap[opt] = true
-					end
-				end
-				updateHeaderLabel()
-				if not skipCallback then
-					pcall(callback, getSelectedList())
-				end
-			end
-
-			WindowObj.Elements[flagName] = multiElement
-			return multiElement
-		end
-
-		function TabObj:AddTextBox(text, placeholder, callback, flagName, targetParent)
-			TabObj.ElementCount = TabObj.ElementCount + 1
-			flagName = flagName or text
-			placeholder = placeholder or "Ketik di sini..."
-			callback = callback or function() end
-			targetParent = targetParent or TabPage
-
-			WindowObj.Flags[flagName] = ""
-
-			local BoxFrame = Instance.new("Frame")
-			BoxFrame.Size = UDim2.new(1, 0, 0, 40)
-			BoxFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
-			BoxFrame.LayoutOrder = TabObj.ElementCount
-			BoxFrame.Parent = targetParent
-
-			local Corner = Instance.new("UICorner")
-			Corner.CornerRadius = UDim.new(0, 8)
-			Corner.Parent = BoxFrame
-
-			local Stroke = Instance.new("UIStroke")
-			Stroke.Color = Color3.fromRGB(42, 42, 54)
-			Stroke.Thickness = 1
-			Stroke.Parent = BoxFrame
-
-			local Label = Instance.new("TextLabel")
-			Label.Size = UDim2.new(0.4, 0, 1, 0)
-			Label.Position = UDim2.new(0, 12, 0, 0)
-			Label.BackgroundTransparency = 1
-			Label.Text = text
-			Label.Font = Enum.Font.GothamMedium
-			Label.TextSize = 13
-			Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-			Label.TextXAlignment = Enum.TextXAlignment.Left
-			Label.Parent = BoxFrame
-
-			local InputBox = Instance.new("TextBox")
-			InputBox.Size = UDim2.new(0, 160, 0, 26)
-			InputBox.Position = UDim2.new(1, -172, 0.5, -13)
-			InputBox.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
-			InputBox.Text = ""
-			InputBox.PlaceholderText = placeholder
-			InputBox.PlaceholderColor3 = Color3.fromRGB(130, 130, 145)
-			InputBox.Font = Enum.Font.Gotham
-			InputBox.TextSize = 12
-			InputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-			InputBox.ClearTextOnFocus = false
-			InputBox.Parent = BoxFrame
-
-			local InputCorner = Instance.new("UICorner")
-			InputCorner.CornerRadius = UDim.new(0, 6)
-			InputCorner.Parent = InputBox
-
-			InputBox.FocusLost:Connect(function(enterPressed)
-				WindowObj.Flags[flagName] = InputBox.Text
-				pcall(callback, InputBox.Text, enterPressed)
-			end)
-
-			local boxElement = {}
-			function boxElement:Set(val, skipCallback)
-				InputBox.Text = tostring(val or "")
-				WindowObj.Flags[flagName] = InputBox.Text
-				if not skipCallback then
-					pcall(callback, InputBox.Text, true)
-				end
-			end
-
-			WindowObj.Elements[flagName] = boxElement
-			return boxElement
-		end
-
-		return TabObj
-	end
-
-	return WindowObj
-end
-
-if type(getgenv) == "function" then
-	getgenv().CloudyLib = CloudyLib
-end
-
-return CloudyLib
+if not Animation then Animation = {Apply = function() end} end
+getgenv().ShineEnabled = false
+getgenv().WindowTransparent = getgenv().WindowTransparent or false
+getgenv()._FluentProRefreshOpenDropdownShine = nil
+getgenv()._FluentProManagerDropdowns = {}
+getgenv().ButtonGradients = {
+    Background = ColorSequence.new {
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 20, 30)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 16, 24))
+    },
+    Stroke = ColorSequence.new {
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 40, 50)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 20, 30))
+    }
+}
+
+local aa = {
+    function()
+        local c, d, e, f, g = b(1)
+        local h, i, j, k, l, m =
+            game:GetService "Lighting",
+            game:GetService "RunService",
+            game:GetService "Players".LocalPlayer,
+            game:GetService "UserInputService",
+            game:GetService "TweenService",
+            game:GetService "Workspace".CurrentCamera
+        local n, o = j and j:GetMouse() or nil, d
+        local p, q, r, s = e(o.Creator), e(o.Elements), e(o.Acrylic), o.Components
+        local t, u = e(s.Notification), p.New
+        local function safeProtect(gui)
+            pcall(function()
+                if protectgui then
+                    protectgui(gui)
+                elseif syn and syn.protect_gui then
+                    syn.protect_gui(gui)
+                end
+            end)
+        end
+        local function getGuiContainer()
+            local success, core = pcall(function() return game:GetService("CoreGui") end)
+            if success and core and not i:IsStudio() then
+                local ok, hui = pcall(gethui)
+                if ok and hui then return hui end
+                return core
+            end
+            local lp = j or game:GetService("Players").LocalPlayer
+            return (lp and lp:FindFirstChildOfClass("PlayerGui")) or (lp and lp:WaitForChild("PlayerGui", 3)) or core
+        end
+        local targetParent = getGuiContainer()
+        local w = u("ScreenGui", {Parent = targetParent, ResetOnSpawn = false, IgnoreGuiInset = true})
+        safeProtect(w)
+        local sw = u("ScreenGui", {Parent = targetParent, ResetOnSpawn = false, DisplayOrder = 50, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true})
+        safeProtect(sw)
+        local nw = u("ScreenGui", {Parent = targetParent, ResetOnSpawn = false, DisplayOrder = 999, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true})
+        safeProtect(nw)
+        t:Init(nw)
+        local x = {
+            Version = "1.4.0 Overhaul",
+            Name = "FluentPro",
+            OpenFrames = {},
+            Options = {},
+            Themes = e(o.Themes).Names,
+            Window = nil,
+            WindowFrame = nil,
+            Unloaded = false,
+            Theme = "Cloudy",
+            FischBypass = (game and game.GameId == 5750914919) or false,
+            DialogOpen = false,
+            UseAcrylic = false,
+            Acrylic = false,
+            Transparency = true,
+            MinimizeKeybind = nil,
+            MinimizeKey = Enum.KeyCode.LeftControl,
+            GUI = w,
+            ScrollGUI = sw,
+            PopupGUI = nw,
+            ErrorHandler = nil,
+        }
+        function x.SetErrorHandler(y, z)
+            x.ErrorHandler = z
+        end
+        local function fallbackError(_ftitle, _fmsg)
+            pcall(function()
+                local lp = game:GetService("Players").LocalPlayer
+                local sg = Instance.new("ScreenGui")
+                sg.Name = "BFErrorNotify"
+                sg.ResetOnSpawn = false
+                sg.DisplayOrder = 99999
+                sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+                sg.Parent = (lp and lp:FindFirstChildOfClass("PlayerGui")) or game:GetService("CoreGui")
+                local fr = Instance.new("Frame")
+                fr.Size = UDim2.fromOffset(310, 76)
+                fr.Position = UDim2.new(1, -320, 0, 24)
+                fr.BackgroundColor3 = Color3.fromRGB(18, 6, 6)
+                fr.BorderSizePixel = 0
+                fr.Parent = sg
+                Instance.new("UICorner", fr).CornerRadius = UDim.new(0, 8)
+                local stroke = Instance.new("UIStroke", fr)
+                stroke.Color = Color3.fromRGB(220, 55, 55)
+                stroke.Thickness = 1.5
+                local stripe = Instance.new("Frame", fr)
+                stripe.Size = UDim2.new(0, 3, 1, -14)
+                stripe.Position = UDim2.new(0, 7, 0, 7)
+                stripe.BackgroundColor3 = Color3.fromRGB(220, 55, 55)
+                stripe.BorderSizePixel = 0
+                Instance.new("UICorner", stripe).CornerRadius = UDim.new(1, 0)
+                local t1 = Instance.new("TextLabel", fr)
+                t1.Size = UDim2.new(1, -20, 0, 18)
+                t1.Position = UDim2.new(0, 18, 0, 8)
+                t1.BackgroundTransparency = 1
+                t1.Text = "[BetterFluent] " .. tostring(_ftitle)
+                t1.TextColor3 = Color3.fromRGB(255, 80, 80)
+                t1.TextSize = 12
+                t1.Font = Enum.Font.GothamBold
+                t1.TextXAlignment = Enum.TextXAlignment.Left
+                local t2 = Instance.new("TextLabel", fr)
+                t2.Size = UDim2.new(1, -20, 0, 38)
+                t2.Position = UDim2.new(0, 18, 0, 28)
+                t2.BackgroundTransparency = 1
+                t2.Text = tostring(_fmsg)
+                t2.TextColor3 = Color3.fromRGB(220, 185, 185)
+                t2.TextSize = 11
+                t2.Font = Enum.Font.Gotham
+                t2.TextWrapped = true
+                t2.TextXAlignment = Enum.TextXAlignment.Left
+                game:GetService("Debris"):AddItem(sg, 10)
+            end)
+        end
+        function x.SafeCallback(y, z, ...)
+            if not z then return end
+            local A, B = pcall(z, ...)
+            if not A then
+                local C, D = B:find ":%d+: "
+                local msg = D and B:sub(D + 1) or B
+                if x.ErrorHandler then pcall(x.ErrorHandler, msg, B) end
+                local notifyOk = pcall(function()
+                    x:Notify {Title = "Callback error", Content = msg, Type = "Error", Duration = 5}
+                end)
+                if not notifyOk then
+                    fallbackError("Callback error", msg)
+                end
+            end
+        end
+        function x.Round(y, z, A)
+            if not z then return 0 end
+            z = tonumber(z) or 0
+            A = tonumber(A) or 0
+            if A == 0 then
+                return math.round(z)
+            end
+            local mult = 10 ^ A
+            return math.round(z * mult) / mult
+        end
+        local IconCache = {}
+        local IconURLs = {
+            lucide    = "https://raw.githubusercontent.com/StyearX/Icons/refs/heads/main/lucide/dist/Icons.lua",
+            gravity   = "https://raw.githubusercontent.com/StyearX/Icons/refs/heads/main/gravity/dist/Icons.lua",
+            solar     = "https://raw.githubusercontent.com/StyearX/Icons/refs/heads/main/solar/dist/Icons.lua",
+            sfsymbols = "https://raw.githubusercontent.com/StyearX/Icons/refs/heads/main/sfsymbols/dist/Icons.lua",
+            craft     = "https://raw.githubusercontent.com/StyearX/Icons/refs/heads/main/craft/dist/Icons.lua",
+            geist     = "https://raw.githubusercontent.com/StyearX/Icons/refs/heads/main/geist/dist/Icons.lua",
+            hero      = "https://raw.githubusercontent.com/StyearX/Icons/refs/heads/main/hero/dist/Icons.lua",
+            gmi       = "https://raw.githubusercontent.com/StyearX/Icons/refs/heads/main/GoogleMaterialIcons/dist/Icons.lua",
+        }
+        local function LoadIconSource(prefix)
+            if not prefix or prefix == "" then return nil end
+            prefix = prefix:lower()
+            if IconCache[prefix] then return IconCache[prefix] end
+            local url = IconURLs[prefix]
+            if not url then return nil end
+            local ok, result = pcall(function()
+                return loadstring(game:HttpGet(url, true))()
+            end)
+            if not ok or not result then
+                warn("[Fluent Icons] Failed to load icon library '" .. prefix .. "': " .. tostring(result))
+                return nil
+            end
+            if type(result) == "table" then
+                local sprites = result.Spritesheets or result.Sprites or result.spritesheets or result.sprites or {}
+                local icons = result.Icons or result.icons or result
+                IconCache[prefix] = { _sprites = sprites, _icons = icons, _raw = result }
+            else
+                IconCache[prefix] = result
+            end
+            return IconCache[prefix]
+        end
+
+        function x.GetIcon(z, A)
+            if A == nil or A == "" then return nil end
+            if type(A) == "table" then return A end
+            if type(A) == "string" then
+                if A:match("^rbxassetid://") or A:match("^rbxasset://") or A:match("^https?://") then
+                    return A
+                end
+                if A:match("^%d+$") then
+                    return "rbxassetid://" .. A
+                end
+            end
+
+            local rawStr = tostring(A)
+            local prefix, name = rawStr:match("^([^/:]+)[/:](.+)$")
+            if not prefix then
+                prefix = "lucide"
+                name = rawStr
+            end
+            prefix = prefix:lower()
+            local lowerName = name:lower()
+
+            -- 1. Try resolving directly from requested Icon Library (solar, lucide, gravity, sfsymbols, craft, geist, hero, gmi)
+            local src = LoadIconSource(prefix)
+            if src and type(src) == "table" then
+                local icons = src._icons or src
+                local sprites = src._sprites or {}
+                local entry = icons[lowerName]
+                    or icons[name]
+                    or icons[lowerName .. "-bold"]
+                    or icons[lowerName:gsub("%-bold$", "")]
+                    or icons[lowerName:gsub("%-", "")]
+                    or icons[lowerName:gsub("_", "-")]
+                if entry then
+                    if type(entry) == "table" and (entry.Image or entry.ImageRectPosition or entry.ImageRectOffset) then
+                        local sheet = sprites[tostring(entry.Image)] or entry.Image
+                        local offset = entry.ImageRectPosition or entry.ImageRectOffset or Vector2.new()
+                        local size = entry.ImageRectSize or Vector2.new()
+                        return {
+                            Image = sheet,
+                            ImageRectOffset = offset,
+                            ImageRectSize = size
+                        }
+                    elseif type(entry) == "string" or type(entry) == "number" then
+                        local s = tostring(entry)
+                        return s:match("^%d+$") and ("rbxassetid://" .. s) or s
+                    end
+                end
+            end
+
+            -- 2. Fallback to built-in Fluent Lucide library (Module 28)
+            local legacy = e(o.Icons) and e(o.Icons).assets
+            if legacy then
+                local cleanName = lowerName:gsub("%-bold$", ""):gsub("_", "-")
+                if legacy["lucide-" .. lowerName] then return legacy["lucide-" .. lowerName] end
+                if legacy[lowerName] then return legacy[lowerName] end
+                if legacy["lucide-" .. cleanName] then return legacy["lucide-" .. cleanName] end
+                if legacy[cleanName] then return legacy[cleanName] end
+            end
+
+            -- 3. If requested from another library and not found, try resolving via Lucide library
+            if prefix ~= "lucide" then
+                local lucideSrc = LoadIconSource("lucide")
+                if lucideSrc and type(lucideSrc) == "table" then
+                    local icons = lucideSrc._icons or lucideSrc
+                    local sprites = lucideSrc._sprites or {}
+                    local cleanName = lowerName:gsub("%-bold$", ""):gsub("_", "-")
+                    local entry = icons[cleanName] or icons[lowerName]
+                    if entry and type(entry) == "table" then
+                        local sheet = sprites[tostring(entry.Image)] or entry.Image
+                        return {
+                            Image = sheet,
+                            ImageRectOffset = entry.ImageRectPosition or entry.ImageRectOffset or Vector2.new(),
+                            ImageRectSize = entry.ImageRectSize or Vector2.new()
+                        }
+                    end
+                end
+            end
+
+            return "rbxassetid://10709752996"
+        end
+        local z = {}
+        z.__index = z
+        z.__namecall = function(A, B, ...)
+            local fn = z[B]
+            if fn then return fn(A, ...) end
+        end
+
+        local _marqueeConns = {}
+        local _TS_svc = game:GetService("TextService")
+        local function _measureText(label)
+            local w = 0
+            pcall(function() w = label.TextBounds.X end)
+            if w <= 0 then
+                pcall(function()
+                    local p2 = _TS_svc:GetTextSize(
+                        label.Text, label.TextSize, label.Font, Vector2.new(9999, 9999))
+                    w = p2.X
+                end)
+            end
+            return w
+        end
+        local function StartMarquee(label, containerWidth)
+            if not label then return end
+            pcall(function()
+                label.TextTruncate = Enum.TextTruncate.AtEnd
+            end)
+        end
+        x.StartMarquee = StartMarquee
+        for A, B in ipairs(q) do
+            z["Add" .. B.__type] = function(C, D, E)
+                local _container   = C.Container
+                local _type        = C.Type
+                local _scrollFrame = C.ScrollFrame
+                B.Container   = _container
+                B.Type        = _type
+                B.ScrollFrame = _scrollFrame
+                B.Library     = x
+                local result = B:New(D, E)
+                B.Container   = nil
+                B.Type        = nil
+                B.ScrollFrame = nil
+                if result and result.Frame then
+                    C._elementCount = (C._elementCount or 0) + 1
+                    result.Frame.LayoutOrder = C._elementCount
+                end
+                if result and result.SetSection then
+                    result:SetSection(C)
+                end
+                if result and E and type(E) == "table" and E.Icon and x.GetIcon then
+                    local ic = x:GetIcon(E.Icon)
+                    if ic and result.Frame then
+                        local icImg = ic
+                        local ico = Instance.new("ImageLabel")
+                        ico.Name = "_ElemIcon"
+                        ico.BackgroundTransparency = 1
+                        ico.Size = UDim2.fromOffset(15, 15)
+                        ico.Position = UDim2.new(0, -3, 0.5, 0)
+                        ico.AnchorPoint = Vector2.new(1, 0.5)
+                        ico.ZIndex = 2
+                        if type(icImg) == "table" then
+                            ico.Image = icImg.Image or ""
+                            ico.ImageRectOffset = icImg.ImageRectOffset or Vector2.new(0,0)
+                            ico.ImageRectSize  = icImg.ImageRectSize  or Vector2.new(0,0)
+                        else
+                            ico.Image = tostring(icImg)
+                        end
+                        if E.IconColor then
+                            ico.ImageColor3 = E.IconColor
+                        else
+                            local Creator = x.Creator or e(x.CreatorRef or p)
+                            pcall(function()
+                                Creator.AddTag(ico, {ImageColor3 = "Text"})
+                            end)
+                        end
+                        if result.LabelHolder then
+                            ico.Parent = result.Frame
+                            result.LabelHolder.Position = UDim2.fromOffset(26, 0)
+                        end
+                    end
+                end
+                local win = x.Window
+                if win and win.AllElements and result then
+                    local frame = result.Frame or result
+                    local label = (type(D) == "string" and D) or (type(E) == "table" and (E.Title or "")) or (type(D) == "table" and (D.Title or "")) or ""
+                    if frame and label ~= "" then
+                        win.AllElements[frame] = tostring(label):lower()
+                    end
+                end
+                return result
+            end
+        end
+
+        z["AddTextBox"] = function(C, D, E)
+            return C:AddInput(D, E)
+        end
+        local function _addElementToSection(C, result)
+            if result and result.Frame then
+                C._elementCount = (C._elementCount or 0) + 1
+                result.Frame.LayoutOrder = C._elementCount
+                local win = x.Window
+                if win and win.AllElements then
+                    win.AllElements[result.Frame] = ""
+                end
+            end
+            return result
+        end
+
+        z["AddDiscord"] = function(C, cfg)
+            cfg = (type(cfg) == "table") and cfg or {}
+            local parent = C.Container
+            if not parent then return end
+            local u = p.New
+            local inviteCode = tostring(cfg.InviteCode or cfg.Invite or ""):match("[%w%-]+$") or ""
+            local wrap = u("Frame",{
+                Size=UDim2.new(1,0,0,78),
+                BackgroundTransparency=0.82,
+                BorderSizePixel=0,
+                Parent=parent,
+                ThemeTag={BackgroundColor3="Element"},
+            })
+            u("UICorner",{CornerRadius=UDim.new(0,12),Parent=wrap})
+            u("UIStroke",{Transparency=0.45,Thickness=1,ThemeTag={Color="InElementBorder"},Parent=wrap})
+            local iconBg = u("Frame",{
+                Size=UDim2.fromOffset(50,50),
+                Position=UDim2.new(0,12,0.5,0),
+                AnchorPoint=Vector2.new(0,0.5),
+                BackgroundColor3=Color3.fromRGB(88,101,242),
+                Parent=wrap,
+                ClipsDescendants=true,
+            })
+            u("UICorner",{CornerRadius=UDim.new(0.2,0),Parent=iconBg})
+            local iconImg = u("ImageLabel",{Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Parent=iconBg})
+            u("UICorner",{CornerRadius=UDim.new(0.2,0),Parent=iconImg})
+            local defaultIco = x.GetIcon and x:GetIcon("solar/chat-round-bold")
+            if defaultIco and type(defaultIco)=="table" then
+                iconImg.Image=defaultIco.Image or ""
+                iconImg.ImageRectOffset=defaultIco.ImageRectOffset or Vector2.new()
+                iconImg.ImageRectSize=defaultIco.ImageRectSize or Vector2.new()
+                iconImg.ImageColor3=Color3.fromRGB(255,255,255)
+            end
+            local nameLabel = u("TextLabel",{
+                FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json",Enum.FontWeight.SemiBold),
+                Text="Loading...",
+                TextSize=13,
+                TextXAlignment=Enum.TextXAlignment.Left,
+                TextTruncate=Enum.TextTruncate.AtEnd,
+                BackgroundTransparency=1,
+                Size=UDim2.new(1,-140,0,16),
+                Position=UDim2.new(0,70,0,13),
+                ThemeTag={TextColor3="Text"},
+                Parent=wrap,
+            })
+            local memberLabel = u("TextLabel",{
+                FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json"),
+                Text="Fetching info...",
+                TextSize=11,
+                TextXAlignment=Enum.TextXAlignment.Left,
+                BackgroundTransparency=1,
+                Size=UDim2.new(1,-140,0,13),
+                Position=UDim2.new(0,70,0,31),
+                ThemeTag={TextColor3="SubText"},
+                Parent=wrap,
+            })
+            local joinBtn = u("TextButton",{
+                Text="Join",
+                Size=UDim2.fromOffset(52,28),
+                Position=UDim2.new(1,-12,0.5,0),
+                AnchorPoint=Vector2.new(1,0.5),
+                BackgroundColor3=Color3.fromRGB(88,101,242),
+                TextColor3=Color3.fromRGB(255,255,255),
+                FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json",Enum.FontWeight.SemiBold),
+                TextSize=12,
+                Parent=wrap,
+            })
+            u("UICorner",{CornerRadius=UDim.new(0,8),Parent=joinBtn})
+            local dot = u("Frame",{
+                Size=UDim2.fromOffset(7,7),
+                Position=UDim2.new(0,70,0,51),
+                BackgroundColor3=Color3.fromRGB(80,80,90),
+                BorderSizePixel=0,
+                Parent=wrap,
+            })
+            u("UICorner",{CornerRadius=UDim.new(1,0),Parent=dot})
+            local onlineLabel = u("TextLabel",{
+                FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json"),
+                Text="",
+                TextSize=10,
+                TextXAlignment=Enum.TextXAlignment.Left,
+                BackgroundTransparency=1,
+                Size=UDim2.new(1,-100,0,12),
+                Position=UDim2.new(0,82,0,47),
+                ThemeTag={TextColor3="SubText"},
+                Parent=wrap,
+            })
+            local function applyFallbackLetter(guildName)
+                iconImg.Image = ""
+                iconBg.BackgroundTransparency = 0
+                local existing = iconBg:FindFirstChild("_FbLbl")
+                if existing then existing:Destroy() end
+                u("TextLabel",{
+                    Name="_FbLbl",
+                    Size=UDim2.fromScale(1,1),
+                    BackgroundTransparency=1,
+                    Text=(guildName or "?"):sub(1,1):upper(),
+                    TextColor3=Color3.fromRGB(255,255,255),
+                    TextSize=22,
+                    FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json",Enum.FontWeight.Bold),
+                    Parent=iconBg,
+                })
+            end
+            local function fetchData(code)
+                if code == "" then
+                    nameLabel.Text = "Invalid Invite"
+                    memberLabel.Text = "Check your invite code"
+                    return
+                end
+                nameLabel.Text = "Loading..."
+                memberLabel.Text = "Fetching info..."
+                dot.BackgroundColor3 = Color3.fromRGB(80,80,90)
+                onlineLabel.Text = ""
+                task.spawn(function()
+                    local DiscordAPI = "https://discord.com/api/v10/invites/" .. code .. "?with_counts=true&with_expiration=true"
+                    local ok, data = pcall(function()
+                        local RS = game:GetService("ReplicatedStorage")
+                        local remote = RS:FindFirstChild("GetDiscordInviteData")
+                        if remote then return remote:InvokeServer(code) end
+                        local req = (syn and syn.request) or (http and http.request) or http_request or request
+                        if req then
+                            local res = req({Url=DiscordAPI, Method="GET", Headers={["User-Agent"]="RobloxBot/1.0",["Accept"]="application/json"}})
+                            if res and res.Body and #res.Body > 2 then
+                                return game:GetService("HttpService"):JSONDecode(res.Body)
+                            end
+                        end
+                        local body = game:GetService("HttpService"):GetAsync(DiscordAPI, true)
+                        if body then return game:GetService("HttpService"):JSONDecode(body) end
+                    end)
+                    if ok and data and data.guild then
+                        local guild = data.guild
+                        nameLabel.Text = guild.name or "Unknown Server"
+                        memberLabel.Text = data.approximate_member_count and (tostring(data.approximate_member_count).." members") or "Members unavailable"
+                        onlineLabel.Text = data.approximate_presence_count and (tostring(data.approximate_presence_count).." online") or ""
+                        dot.BackgroundColor3 = Color3.fromRGB(67,181,129)
+                        local ih = guild.icon
+                        if ih and ih ~= "" then
+                            local iconUrl = "https://cdn.discordapp.com/icons/"..tostring(guild.id).."/"..ih..".png?size=128"
+                            local fileName = "discord_icon_"..tostring(guild.id)..".png"
+                            local loadOk, asset = pcall(function()
+                                local req2 = (syn and syn.request) or (http and http.request) or http_request or request
+                                if not req2 then error("no req") end
+                                local imgRes = req2({Url=iconUrl, Method="GET", Headers={["User-Agent"]="Mozilla/5.0",["Accept"]="image/png"}})
+                                if not imgRes or not imgRes.Body or #imgRes.Body < 100 then error("bad img") end
+                                writefile(fileName, imgRes.Body)
+                                return getcustomasset(fileName)
+                            end)
+                            if loadOk and asset and asset ~= "" then
+                                iconImg.Image = asset
+                                iconImg.ImageColor3 = Color3.fromRGB(255,255,255)
+                                iconBg.BackgroundTransparency = 1
+                                local existing = iconBg:FindFirstChild("_FbLbl")
+                                if existing then existing:Destroy() end
+                            else
+                                applyFallbackLetter(guild.name)
+                            end
+                        else
+                            applyFallbackLetter(guild.name)
+                        end
+                    else
+                        nameLabel.Text = "Failed to Load"
+                        memberLabel.Text = "Check invite code or connection"
+                        dot.BackgroundColor3 = Color3.fromRGB(240,71,71)
+                        onlineLabel.Text = ""
+                    end
+                end)
+            end
+            joinBtn.MouseButton1Click:Connect(function()
+                if inviteCode ~= "" then
+                    local full = "https://discord.gg/" .. inviteCode
+                    pcall(function() setclipboard(full) end)
+                    x:Notify({Title="Discord",Content="Copied: "..full,Type="Info",Duration=3})
+                end
+            end)
+            fetchData(inviteCode)
+            local mod = {Frame=wrap, Type="Discord"}
+            function mod:SetInvite(code)
+                inviteCode = code:match("[%w%-]+$") or ""
+                fetchData(inviteCode)
+            end
+            function mod:Destroy() wrap:Destroy() end
+            return _addElementToSection(C, mod)
+        end
+
+                x.Elements = z
+
+        z.__type_Viewport = "Viewport"
+        z.AddViewport = function(C, Config)
+            Config = Config or {}
+            local lib = x
+            local _UIS = game:GetService("UserInputService")
+            local _Creator = p
+
+            local height     = Config.Height      or 200
+            local focused    = Config.Focused     ~= false
+            local interactive= Config.Interactive or false
+            local camera     = Config.Camera      or Instance.new("Camera")
+            local obj        = Config.Object
+            local aspectRatio= Config.AspectRatio
+
+            assert(obj, "Viewport - Missing Object")
+
+            local vp = {
+                __type      = "Viewport",
+                Object      = obj,
+                Camera      = camera,
+                Interactive = interactive,
+                Height      = height,
+                Focused     = focused,
+            }
+
+            local cornerR = (x.Window and x.Window.ElementConfig and x.Window.ElementConfig.UICorner) or 8
+
+            local _Dragging, _Pinching = false, false
+            local _LastMousePos, _LastPinchDist = nil, 0
+
+            local function _parseAspect(r)
+                if type(r) == "number" then return r end
+                if type(r) == "string" then
+                    local rw, rh = r:match("(%d+):(%d+)")
+                    if rw and rh and tonumber(rh) ~= 0 then return tonumber(rw) / tonumber(rh) end
+                end
+                return nil
+            end
+
+            local vpFrame = Instance.new("Frame")
+            vpFrame.Name = "ViewportHolder"
+            vpFrame.Size = UDim2.new(1, 0, 0, height)
+            vpFrame.BackgroundTransparency = 1
+            vpFrame.BorderSizePixel = 0
+            vpFrame.Parent = C.Container
+
+            local _ratioNum = _parseAspect(aspectRatio)
+            local function _recalcAspectVp()
+                if not _ratioNum or _ratioNum <= 0 then return end
+                local w = vpFrame.AbsoluteSize.X
+                if w > 0 then
+                    vpFrame.Size = UDim2.new(1, 0, 0, math.floor(w / _ratioNum))
+                end
+            end
+            vpFrame:GetPropertyChangedSignal("AbsoluteSize"):Connect(_recalcAspectVp)
+            if _ratioNum then
+                task.defer(_recalcAspectVp)
+            end
+
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, cornerR)
+            corner.Parent = vpFrame
+
+            local bg = Instance.new("ImageLabel")
+            bg.Size = UDim2.fromScale(1, 1)
+            bg.BackgroundTransparency = 0.1
+            bg.BorderSizePixel = 0
+            bg.Image = ""
+            bg.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+            bg.Parent = vpFrame
+            local bgCorner = Instance.new("UICorner")
+            bgCorner.CornerRadius = UDim.new(0, cornerR)
+            bgCorner.Parent = bg
+            _Creator.AddThemeObject(bg, {BackgroundColor3 = "ViewportBackground"})
+
+            local bgNoise = Instance.new("ImageLabel")
+            bgNoise.Name = "_ViewportNoise"
+            bgNoise.Image = "rbxassetid://9968344227"
+            bgNoise.ScaleType = Enum.ScaleType.Tile
+            bgNoise.TileSize = UDim2.new(0, 128, 0, 128)
+            bgNoise.Size = UDim2.fromScale(1, 1)
+            bgNoise.BackgroundTransparency = 1
+            bgNoise.ImageTransparency = 0.92
+            bgNoise.Visible = _Creator.GetThemeProperty("ViewportBackgroundImages") ~= false
+            bgNoise.Parent = bg
+            local bgNoiseCorner = Instance.new("UICorner")
+            bgNoiseCorner.CornerRadius = UDim.new(0, cornerR)
+            bgNoiseCorner.Parent = bgNoise
+            _Creator.AddThemeObject(bgNoise, {Visible = "ViewportBackgroundImages"})
+
+            local canvas = Instance.new("CanvasGroup")
+            canvas.Size = UDim2.fromScale(1, 1)
+            canvas.BackgroundTransparency = 1
+            canvas.Parent = vpFrame
+            local canvasCorner = Instance.new("UICorner")
+            canvasCorner.CornerRadius = UDim.new(0, cornerR)
+            canvasCorner.Parent = canvas
+
+            local vpInner = Instance.new("ViewportFrame")
+            vpInner.Name = "Viewport"
+            vpInner.Size = UDim2.fromScale(1, 1)
+            vpInner.BackgroundTransparency = 1
+            vpInner.CurrentCamera = vp.Camera
+            vpInner.Active = vp.Interactive
+            vpInner.Parent = canvas
+            vp.Object.Parent = vpInner
+
+            local stroke = Instance.new("UIStroke")
+            stroke.Transparency = 0.6
+            stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            stroke.Parent = vpFrame
+            _Creator.AddThemeObject(stroke, {Color = "InElementBorder"})
+
+            local function _posInViewport(pos)
+                local fp, fs = vpInner.AbsolutePosition, vpInner.AbsoluteSize
+                return pos.X >= fp.X and pos.X <= fp.X + fs.X and pos.Y >= fp.Y and pos.Y <= fp.Y + fs.Y
+            end
+
+            _Creator.AddSignal(vpInner.MouseEnter, function()
+                if vp.Interactive then
+                    local sf = C.ScrollFrame
+                    if sf then sf.ScrollingEnabled = false end
+                end
+            end)
+            _Creator.AddSignal(vpInner.InputEnded, function(inp)
+                if inp.UserInputType == Enum.UserInputType.MouseMovement
+                    or inp.UserInputType == Enum.UserInputType.Touch then
+                    local sf = C.ScrollFrame
+                    if sf then sf.ScrollingEnabled = true end
+                end
+            end)
+            _Creator.AddSignal(vpInner.InputBegan, function(inp)
+                if vp.Interactive then
+                    if inp.UserInputType == Enum.UserInputType.MouseButton1
+                        or (inp.UserInputType == Enum.UserInputType.Touch and not _Pinching) then
+                        _Dragging = true
+                        _LastMousePos = inp.Position
+                    end
+                end
+            end)
+            _Creator.AddSignal(_UIS.InputEnded, function(inp)
+                if vp.Interactive then
+                    if inp.UserInputType == Enum.UserInputType.MouseButton1
+                        or inp.UserInputType == Enum.UserInputType.Touch then
+                        _Dragging = false
+                    end
+                end
+            end)
+            _Creator.AddSignal(_UIS.InputChanged, function(inp)
+                if vp.Interactive and _Dragging and not _Pinching then
+                    if inp.UserInputType == Enum.UserInputType.MouseMovement
+                        or inp.UserInputType == Enum.UserInputType.Touch then
+                        local delta = inp.Position - _LastMousePos
+                        _LastMousePos = inp.Position
+                        local pos = vp.Object:GetPivot().Position
+                        local cam = vp.Camera
+                        local ry = CFrame.fromAxisAngle(Vector3.new(0,1,0), -delta.X * 0.02)
+                        cam.CFrame = CFrame.new(pos) * ry * CFrame.new(-pos) * cam.CFrame
+                        local rx = CFrame.fromAxisAngle(cam.CFrame.RightVector, -delta.Y * 0.02)
+                        local pitched = CFrame.new(pos) * rx * CFrame.new(-pos) * cam.CFrame
+                        if pitched.UpVector.Y > 0.1 then cam.CFrame = pitched end
+                    end
+                end
+            end)
+            _Creator.AddSignal(vpInner.InputChanged, function(inp)
+                if vp.Interactive then
+                    if inp.UserInputType == Enum.UserInputType.MouseWheel then
+                        if not _posInViewport(_UIS:GetMouseLocation()) then return end
+                        local zoom = inp.Position.Z * 2
+                        vp.Camera.CFrame = vp.Camera.CFrame + vp.Camera.CFrame.LookVector * zoom
+                    end
+                end
+            end)
+            _Creator.AddSignal(_UIS.TouchPinch, function(touches, scale, vel, state)
+                if vp.Interactive then
+                    if state == Enum.UserInputState.Begin then
+                        local mid = (touches[1] + touches[2]) / 2
+                        if not _posInViewport(mid) then return end
+                        _Pinching = true; _Dragging = false
+                        _LastPinchDist = (touches[1]-touches[2]).Magnitude
+                    elseif state == Enum.UserInputState.Change then
+                        if not _Pinching then return end
+                        local cur = (touches[1]-touches[2]).Magnitude
+                        local d = (cur - _LastPinchDist)*0.03
+                        _LastPinchDist = cur
+                        vp.Camera.CFrame = vp.Camera.CFrame + vp.Camera.CFrame.LookVector * d
+                    elseif state == Enum.UserInputState.End or state == Enum.UserInputState.Cancel then
+                        _Pinching = false
+                    end
+                end
+            end)
+
+            local function focusCamera()
+                local sz = vp.Object:IsA("BasePart") and vp.Object.Size
+                    or select(2, vp.Object:GetBoundingBox(0))
+                local ext = math.max(sz.X, sz.Y, sz.Z)
+                local mpos = vp.Object:GetPivot().Position
+                vp.Camera.CFrame = CFrame.new(mpos + Vector3.new(0, ext/2, ext*2), mpos)
+            end
+            if vp.Focused then focusCamera() end
+
+            function vp:SetObject(obj, clone)
+                if clone then obj = obj:Clone() end
+                if vp.Object then vp.Object:Destroy() end
+                vp.Object = obj
+                vp.Object.Parent = vpInner
+            end
+            function vp:SetHeight(h)
+                vp.Height = h
+                vpFrame.Size = UDim2.new(1, 0, 0, h)
+            end
+            function vp:SetAspectRatio(ratio)
+                local rNum = _parseAspect(ratio)
+                _ratioNum = rNum
+                if rNum then
+                    _recalcAspectVp()
+                else
+                    vpFrame.Size = UDim2.new(1, 0, 0, vp.Height)
+                end
+            end
+            function vp:Focus()
+                if vp.Object then focusCamera() end
+            end
+            function vp:SetCamera(cam)
+                vp.Camera = cam
+                vpInner.CurrentCamera = cam
+            end
+            function vp:SetInteractive(val)
+                vp.Interactive = val
+                vpInner.Active = val
+            end
+            vp.Frame = vpFrame
+            return vp
+        end
+        function x.CreateWindow(C, D)
+            if type(C) == "table" and not D then D = C end
+            assert(D.Title, "Window - Missing Title")
+            if x.Window then
+                print "You cannot create more than one window."
+                return
+            end
+            local FIXED_SIZE = UDim2.fromOffset(525, 290)
+            local FIXED_VEC = Vector2.new(525, 290)
+            local sidebarW = 145
+            local topbarH  = 38
+            D.SidebarWidth = sidebarW
+            D.TabWidth = sidebarW
+            D.TopbarHeight = topbarH
+            D.MinWindowSize = FIXED_VEC
+            D.MinSize = FIXED_VEC
+            D.Size = FIXED_SIZE
+            x.MinimizeKey = D.MinimizeKey
+            x.UseAcrylic = false
+            x.Acrylic = false
+            local E =
+                e(s.Window) {
+                    Parent = w, Size = FIXED_SIZE, Title = D.Title, SubTitle = D.SubTitle,
+                    TabWidth = D.TabWidth, SidebarWidth = D.SidebarWidth,
+                    TopbarHeight = D.TopbarHeight, MinWindowSize = FIXED_VEC, MinSize = FIXED_VEC,
+                    UserInfo = D.UserInfo, UserInfoTop = D.UserInfoTop,
+                    UserInfoTitle = D.UserInfoTitle, UserInfoSubtitle = D.UserInfoSubtitle,
+                    UserInfoColor = D.UserInfoColor,
+                    Search = D.Search,
+                    TabLogo = D.Icons or D.TabLogo,
+                    TitleIcon = D.TitleIcon,
+                }
+            x.Window = E
+            x:SetTheme(D.Theme or "Cloudy")
+            if D.Font then
+                task.defer(function()
+                    x.InterfaceManager:ApplyFont(D.Font)
+                end)
+            end
+            return E
+        end
+        function x.SetTheme(C, D)
+            if not D then return end
+            local thmKey = D
+            local thms = e(o.Themes)
+            if not thms[thmKey] then
+                local lower = tostring(D):lower():gsub("[%s_%-]+", "")
+                if lower:find("cloudy") then
+                    thmKey = "Cloudy"
+                elseif lower:find("hut") or lower:find("81") or lower:find("ri") then
+                    thmKey = "HUT RI 81"
+                elseif lower:find("emerald") then
+                    thmKey = "Emerald"
+                elseif lower:find("blood") or lower:find("red") then
+                    thmKey = "Blood Red"
+                elseif lower:find("rimuru") or lower:find("tempest") then
+                    thmKey = "Rimuru Tempest"
+                elseif lower:find("solar") then
+                    thmKey = "Solar"
+                elseif lower:find("neko") or lower:find("pink") then
+                    thmKey = "Neko"
+                else
+                    thmKey = "Cloudy"
+                end
+            end
+            if x.Window and (thms[thmKey] or type(thmKey) == "table") then
+                x.Theme = thmKey
+                p.UpdateTheme()
+                local thm = thms[thmKey]
+                if thm then
+                    if thm.IconColor then
+                        pcall(function()
+                            for _, img in pairs(x.GUI:GetDescendants()) do
+                                if img:IsA("ImageLabel") and img:GetAttribute("IsThemeIcon") then
+                                    img.ImageColor3 = thm.IconColor
+                                end
+                            end
+                        end)
+                    end
+                    if thm.IconSize then
+                        pcall(function()
+                            for _, img in pairs(x.GUI:GetDescendants()) do
+                                if img:IsA("ImageLabel") and img:GetAttribute("IsThemeIcon") then
+                                    img.Size = UDim2.fromOffset(thm.IconSize, thm.IconSize)
+                                end
+                            end
+                        end)
+                    end
+                end
+            end
+        end
+        function x.Destroy(C)
+            if x.Window then
+                x.Unloaded = true
+                if x.UseAcrylic and x.Window.AcrylicPaint and x.Window.AcrylicPaint.Model then
+                    pcall(function() x.Window.AcrylicPaint.Model:Destroy() end)
+                end
+                p.Disconnect()
+                if x._SBOverlayTeardowns then
+                    for _, fn in ipairs(x._SBOverlayTeardowns) do
+                        pcall(fn)
+                    end
+                    table.clear(x._SBOverlayTeardowns)
+                end
+                if x._SBOverlays then
+                    for _, ov in ipairs(x._SBOverlays) do
+                        pcall(function() ov:Destroy() end)
+                    end
+                    table.clear(x._SBOverlays)
+                end
+                if x.ScrollGUI then
+                    pcall(function() x.ScrollGUI:Destroy() end)
+                    x.ScrollGUI = nil
+                end
+                if x.PopupGUI then
+                    pcall(function() x.PopupGUI:Destroy() end)
+                    x.PopupGUI = nil
+                end
+                if x.GUI then
+                    pcall(function() x.GUI:Destroy() end)
+                    x.GUI = nil
+                end
+            end
+        end
+        function x.ToggleAcrylic(C, D)
+            x.Acrylic = false
+            x.UseAcrylic = false
+        end
+        function x.ToggleTransparency(C, D)
+            if x.Window and x.Window.AcrylicPaint and x.Window.AcrylicPaint.Frame then
+                pcall(function()
+                    local frm = x.Window.AcrylicPaint.Frame
+                    if frm:FindFirstChild("Background") then
+                        frm.Background.BackgroundTransparency = D and 0.25 or 0.05
+                    else
+                        frm.BackgroundTransparency = D and 0.25 or 0.05
+                    end
+                    local bgImg = frm:FindFirstChild("__ThemeBG")
+                    if bgImg then
+                        local curThm = x.Theme and e(o.Themes)[x.Theme]
+                        local baseTrans = (curThm and curThm.BackgroundTransparency) or 0.68
+                        bgImg.ImageTransparency = D and math.clamp(baseTrans + 0.06, 0, 0.85) or baseTrans
+                    end
+                end)
+            end
+            getgenv().WindowTransparent = D and true or false
+        end
+        local errorHints = {
+            {"attempt to index nil",             "Did you forget to define a variable?"},
+            {"attempt to index a nil",            "Did you forget to define a variable?"},
+            {"attempt to call nil",               "Did you forget to define or return a function?"},
+            {"attempt to call a nil",             "Did you forget to define or return a function?"},
+            {"attempt to call a ",                "Did you forget to define or return this?"},
+            {"'end' expected",                    "Did you forget to close a block with 'end'?"},
+            {"expected 'end'",                    "Did you forget to close a block with 'end'?"},
+            {"<eof>",                             "Unexpected end — did you forget 'end' or ')'?"},
+            {"unexpected symbol",                 "Syntax error — check for typos near this symbol"},
+            {"attempt to perform arithmetic",     "Did you use a non-number value here?"},
+            {"attempt to concatenate",            "Did you forget to convert a value to string?"},
+            {"stack overflow",                    "Possible infinite recursion detected"},
+            {"attempt to get length",             "Did you use # on a nil or non-table value?"},
+            {"attempt to compare",                "Did you compare two incompatible types?"},
+            {"bad argument",                      "Wrong argument type passed to a function"},
+            {"attempt to yield",                  "Cannot yield in this callback context"},
+            {"no value",                          "Did you forget to return a value?"},
+            {"attempt to index",                  "Tried to index a non-table value"},
+        }
+        local function parseNotifyError(D)
+            if not D or (D.Type ~= "Error" and D.Type ~= "Warning") then return D end
+            local msg = tostring(D.Content or "") .. " " .. tostring(D.SubContent or "")
+            local line = tonumber(msg:match(":(%d+):")) or tonumber(msg:match("[Ll]ine%s+(%d+)"))
+            local hint
+            local ml = msg:lower()
+            for _, pair in ipairs(errorHints) do
+                if ml:find(pair[1], 1, true) then hint = pair[2]; break end
+            end
+            if not hint and not line then return D end
+            local smart
+            if hint and line then
+                smart = hint .. " (Line " .. line .. ")"
+            elseif hint then
+                smart = hint
+            else
+                smart = "Check your code (Line " .. line .. ")"
+            end
+            local nd = {}
+            for k, v in next, D do nd[k] = v end
+            local existing = (type(nd.SubContent) == "string" and nd.SubContent ~= "") and nd.SubContent or nil
+            nd.SubContent = existing and (smart .. "\n" .. existing) or smart
+            return nd
+        end
+        function x.Notify(C, D)
+            return t:New(parseNotifyError(D))
+        end
+
+        local httpService = game:GetService("HttpService")
+        local SaveManager = {}
+        SaveManager.Folder = "FluentSettings"
+        SaveManager.Ignore = {}
+        SaveManager.Parser = {
+            Toggle    = { Save=function(idx,o) return{type="Toggle",idx=idx,value=o.Value} end, Load=function(idx,d) if SaveManager.Options[idx] then SaveManager.Options[idx]:SetValue(d.value) end end },
+            Slider    = { Save=function(idx,o) return{type="Slider",idx=idx,value=tostring(o.Value)} end, Load=function(idx,d) if SaveManager.Options[idx] then SaveManager.Options[idx]:SetValue(d.value) end end },
+            Dropdown  = { Save=function(idx,o) return{type="Dropdown",idx=idx,value=o.Value,mutli=o.Multi} end, Load=function(idx,d) if SaveManager.Options[idx] then SaveManager.Options[idx]:SetValue(d.value) end end },
+            Colorpicker={ Save=function(idx,o) return{type="Colorpicker",idx=idx,value=o.Value:ToHex(),transparency=o.Transparency} end, Load=function(idx,d) if SaveManager.Options[idx] then SaveManager.Options[idx]:SetValueRGB(Color3.fromHex(d.value),d.transparency) end end },
+            Keybind   = { Save=function(idx,o) return{type="Keybind",idx=idx,mode=o.Mode,key=o.Value} end, Load=function(idx,d) if SaveManager.Options[idx] then SaveManager.Options[idx]:SetValue(d.key,d.mode) end end },
+            Input     = { Save=function(idx,o) return{type="Input",idx=idx,text=o.Value} end, Load=function(idx,d) if SaveManager.Options[idx] and type(d.text)=="string" then SaveManager.Options[idx]:SetValue(d.text) end end },
+        }
+        function SaveManager:SetIgnoreIndexes(list) for _,k in next,list do self.Ignore[k]=true end end
+        function SaveManager:IgnoreIndexes(list) self:SetIgnoreIndexes(list) end
+        function SaveManager:SetFolder(folder) self.Folder=folder; self:BuildFolderTree() end
+        function SaveManager:BuildFolderTree()
+            local paths={self.Folder, self.Folder.."/settings"}
+            for _,p2 in ipairs(paths) do if not isfolder(p2) then makefolder(p2) end end
+        end
+        function SaveManager:SetLibrary(lib) self.Library=lib; self.Options=lib.Options end
+        function SaveManager:IgnoreThemeSettings() self:SetIgnoreIndexes({"InterfaceTheme","AcrylicToggle","TransparentToggle","MenuKeybind","AnimationToggle"}) end
+        function SaveManager:Save(name)
+            if not name then return false,"no config selected" end
+            local data={objects={}}
+            for idx,opt in next,SaveManager.Options do
+                if self.Parser[opt.Type] and not self.Ignore[idx] then
+                    table.insert(data.objects, self.Parser[opt.Type].Save(idx,opt))
+                end
+            end
+            local ok,enc=pcall(httpService.JSONEncode,httpService,data)
+            if not ok then return false,"encode failed" end
+            writefile(self.Folder.."/settings/"..name..".json",enc)
+            return true
+        end
+        function SaveManager:Load(name)
+            if not name then return false,"no config selected" end
+            local f=self.Folder.."/settings/"..name..".json"
+            if not isfile(f) then return false,"invalid file" end
+            local ok,dec=pcall(httpService.JSONDecode,httpService,readfile(f))
+            if not ok then return false,"decode error" end
+            for _,opt in next,dec.objects do
+                if self.Parser[opt.type] then task.spawn(function() self.Parser[opt.type].Load(opt.idx,opt) end) end
+            end
+            return true
+        end
+        function SaveManager:RefreshConfigList()
+            local list=listfiles(self.Folder.."/settings"); local out={}
+            for _,file in ipairs(list) do
+                if file:sub(-5)==".json" then
+                    local pos=file:find(".json",1,true); local start=pos
+                    local char=file:sub(pos,pos)
+                    while char~="/" and char~="\\" and char~="" do pos=pos-1; char=file:sub(pos,pos) end
+                    if char=="/" or char=="\\" then
+                        local name=file:sub(pos+1,start-1)
+                        if name~="options" then table.insert(out,name) end
+                    end
+                end
+            end
+            return out
+        end
+        function SaveManager:LoadAutoloadConfig()
+            local ap=self.Folder.."/settings/autoload.txt"
+            if isfile(ap) then
+                local name=readfile(ap)
+                local ok,err=self:Load(name)
+                if not ok then return self.Library:Notify({Title="Interface",Content="Config loader",SubContent="Failed to load: "..err,Duration=7}) end
+                self.Library:Notify({Title="Interface",Content="Config loader",SubContent=string.format("Auto loaded %q",name),Duration=7})
+            end
+        end
+        function SaveManager:BuildConfigSection(tab)
+            assert(self.Library,"Must set SaveManager.Library")
+            local sec=tab:AddSection("Configuration","lucide/file-text")
+            sec:AddInput("SaveManager_ConfigName",{Title="Config name", Icon="solar/pen-new-round-bold"})
+            sec:AddDropdown("SaveManager_ConfigList",{Title="Config list",Values=self:RefreshConfigList(),AllowNull=true,NoSearch=true,Icon="solar/list-bold",DropdownOutsideWindow=true,IsManagerDropdown=true})
+            sec:AddButton({Title="Create config", Icon="solar/diskette-bold", Callback=function()
+                local name=SaveManager.Options.SaveManager_ConfigName.Value
+                if name:gsub(" ","")=="" then return self.Library:Notify({Title="Interface",Content="Config loader",SubContent="Invalid name",Duration=7}) end
+                local ok,err=self:Save(name)
+                if not ok then return self.Library:Notify({Title="Interface",Content="Config loader",SubContent="Failed: "..err,Duration=7}) end
+                self.Library:Notify({Title="Interface",Content="Config loader",SubContent=string.format("Created %q",name),Duration=7})
+                SaveManager.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+                SaveManager.Options.SaveManager_ConfigList:SetValue(nil)
+            end})
+            sec:AddButton({Title="Load config", Icon="solar/upload-minimalistic-bold", Callback=function()
+                local name=SaveManager.Options.SaveManager_ConfigList.Value
+                local ok,err=self:Load(name)
+                if not ok then return self.Library:Notify({Title="Interface",Content="Config loader",SubContent="Failed: "..err,Duration=7}) end
+                self.Library:Notify({Title="Interface",Content="Config loader",SubContent=string.format("Loaded %q",name),Duration=7})
+            end})
+            sec:AddButton({Title="Overwrite config", Icon="solar/refresh-bold", Callback=function()
+                local name=SaveManager.Options.SaveManager_ConfigList.Value
+                local ok,err=self:Save(name)
+                if not ok then return self.Library:Notify({Title="Interface",Content="Config loader",SubContent="Failed: "..err,Duration=7}) end
+                self.Library:Notify({Title="Interface",Content="Config loader",SubContent=string.format("Overwrote %q",name),Duration=7})
+            end})
+            sec:AddButton({Title="Refresh list", Icon="solar/restart-bold", Callback=function()
+                SaveManager.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
+                SaveManager.Options.SaveManager_ConfigList:SetValue(nil)
+            end})
+            local autoBtn,_autoPath=nil,self.Folder.."/settings/autoload.txt"
+            autoBtn=sec:AddButton({Title="Set as autoload", Icon="solar/star-bold", Description="Current autoload: none",Callback=function()
+                local name=SaveManager.Options.SaveManager_ConfigList.Value
+                if isfile(_autoPath) and readfile(_autoPath)==name then
+                    delfile(_autoPath)
+                    autoBtn:SetDesc("Current autoload: none")
+                    self.Library:Notify({Title="Interface",Content="Config loader",SubContent="Autoload disabled",Duration=7})
+                else
+                    if not name or name=="" then return self.Library:Notify({Title="Interface",Content="Config loader",SubContent="No config selected",Duration=7}) end
+                    writefile(_autoPath,name)
+                    autoBtn:SetDesc("Current autoload: "..name)
+                    self.Library:Notify({Title="Interface",Content="Config loader",SubContent=string.format("Set %q to autoload",name),Duration=7})
+                end
+            end})
+            if isfile(_autoPath) then
+                autoBtn:SetDesc("Current autoload: "..readfile(_autoPath))
+            end
+            SaveManager:SetIgnoreIndexes({"SaveManager_ConfigList","SaveManager_ConfigName"})
+        end
+        SaveManager:BuildFolderTree()
+        x.SaveManager = SaveManager
+
+        local InterfaceManager = {}
+        InterfaceManager.Folder = "FluentSettings"
+        InterfaceManager.Settings = { Theme="Cloudy", Acrylic=false, Transparency=true, Animated=false, MenuKeybind="LeftControl", Font="GothamSSm", DisableBG=false, Favorites={} }
+        function InterfaceManager:SetFolder(folder) self.Folder=folder; self:BuildFolderTree() end
+        function InterfaceManager:SetLibrary(lib) self.Library=lib end
+        function InterfaceManager:BuildFolderTree()
+            local parts=self.Folder:split("/"); local paths={}
+            for idx=1,#parts do paths[#paths+1]=table.concat(parts,"/",1,idx) end
+            table.insert(paths,self.Folder); table.insert(paths,self.Folder.."/settings")
+            for _,str in ipairs(paths) do if not isfolder(str) then makefolder(str) end end
+        end
+        function InterfaceManager:GetFavorites()
+            if type(self.Settings.Favorites) ~= "table" then self.Settings.Favorites = {} end
+            return self.Settings.Favorites
+        end
+        function InterfaceManager:IsFavorite(name)
+            for _, v in ipairs(self:GetFavorites()) do
+                if v == name then return true end
+            end
+            return false
+        end
+        function InterfaceManager:SetFavorite(name, isFav)
+            local favs = self:GetFavorites()
+            if isFav then
+                if not self:IsFavorite(name) then table.insert(favs, 1, name) end
+            else
+                for i, v in ipairs(favs) do if v == name then table.remove(favs, i); break end end
+            end
+            pcall(function() self:SaveSettings() end)
+        end
+        function InterfaceManager:SaveSettings() writefile(self.Folder.."/options.json",httpService:JSONEncode(InterfaceManager.Settings)) end
+        function InterfaceManager:LoadSettings()
+            local path=self.Folder.."/options.json"
+            if isfile(path) then
+                local ok,dec=pcall(httpService.JSONDecode,httpService,readfile(path))
+                if ok and type(dec)=="table" then
+                    for i,v in next,dec do
+                        if i=="Favorites" then
+                            InterfaceManager.Settings.Favorites = type(v)=="table" and v or {}
+                        else
+                            InterfaceManager.Settings[i]=v
+                        end
+                    end
+                end
+            end
+            local lib = self.Library
+            if lib and lib.Window and lib.Window.TabsAPI then
+                pcall(function() lib.Window.TabsAPI:ReapplyFavoriteOrder() end)
+            end
+        end
+        InterfaceManager.Fonts = {
+            "GothamSSm","Gotham","Arial","ArialBold","Roboto","RobotoMono",
+            "SourceSans","SourceSansBold","SourceSansItalic","SourceSansSemibold",
+            "SourceSansLight","Silkscreen","Nunito","Ubuntu","LuckiestGuy",
+            "IndieFlower","TitilliumWeb","Oswald","Balthazar","Jura",
+        }
+        InterfaceManager.FontPaths = {
+            GothamSSm  = "rbxasset://fonts/families/GothamSSm.json",
+            Gotham     = "rbxasset://fonts/families/Gotham.json",
+            Arial      = "rbxasset://fonts/families/Arial.json",
+            ArialBold  = "rbxasset://fonts/families/Arial.json",
+            Roboto     = "rbxasset://fonts/families/Roboto.json",
+            RobotoMono = "rbxasset://fonts/families/RobotoMono.json",
+            SourceSans      = "rbxasset://fonts/families/SourceSansPro.json",
+            SourceSansBold  = "rbxasset://fonts/families/SourceSansPro.json",
+            SourceSansItalic= "rbxasset://fonts/families/SourceSansPro.json",
+            SourceSansSemibold="rbxasset://fonts/families/SourceSansPro.json",
+            SourceSansLight = "rbxasset://fonts/families/SourceSansPro.json",
+            Silkscreen = "rbxasset://fonts/families/Silkscreen.json",
+            Nunito     = "rbxasset://fonts/families/Nunito.json",
+            Ubuntu     = "rbxasset://fonts/families/Ubuntu.json",
+            LuckiestGuy= "rbxasset://fonts/families/LuckiestGuy.json",
+            IndieFlower= "rbxasset://fonts/families/IndieFlower.json",
+            TitilliumWeb="rbxasset://fonts/families/TitilliumWeb.json",
+            Oswald     = "rbxasset://fonts/families/Oswald.json",
+            Balthazar  = "rbxasset://fonts/families/Balthazar.json",
+            Jura       = "rbxasset://fonts/families/Jura.json",
+        }
+        InterfaceManager.FontWeights = {
+            ArialBold       = Enum.FontWeight.Bold,
+            SourceSansBold  = Enum.FontWeight.Bold,
+            SourceSansItalic= Enum.FontWeight.Regular,
+            SourceSansSemibold=Enum.FontWeight.SemiBold,
+            SourceSansLight = Enum.FontWeight.Light,
+        }
+        InterfaceManager.FontStyles = {
+            SourceSansItalic = Enum.FontStyle.Italic,
+        }
+        function InterfaceManager:ApplyFont(name)
+            local path = self.FontPaths[name]
+            if not path then return end
+            local weight = self.FontWeights[name] or Enum.FontWeight.Regular
+            local style  = self.FontStyles[name]  or Enum.FontStyle.Normal
+            local newFont = Font.new(path, weight, style)
+            local gui = self.Library and self.Library.GUI
+            if not gui then return end
+            local function apply(inst, depth)
+                if depth > 12 then return end
+                for _, ch in ipairs(inst:GetChildren()) do
+                    if ch:IsA("TextLabel") or ch:IsA("TextButton") or ch:IsA("TextBox") then
+                        pcall(function() ch.FontFace = newFont end)
+                    end
+                    apply(ch, depth + 1)
+                end
+            end
+            apply(gui, 0)
+            self.Settings.Font = name
+            self:SaveSettings()
+        end
+        function InterfaceManager:ApplyCustomFont(source, weight, style)
+            local newFont
+            local ok = pcall(function()
+                local src = tostring(source or "")
+                local fw  = weight or Enum.FontWeight.Regular
+                local fs  = style  or Enum.FontStyle.Normal
+                if src:match("^rbxasset://") then
+                    newFont = Font.new(src, fw, fs)
+                elseif src:match("^rbxassetid://") then
+                    local id = tonumber(src:match("%d+"))
+                    newFont = Font.fromId(id, fw, fs)
+                elseif tonumber(src) then
+                    newFont = Font.fromId(tonumber(src), fw, fs)
+                elseif self.FontPaths[src] then
+                    newFont = Font.new(self.FontPaths[src], fw, fs)
+                else
+                    newFont = Font.new(
+                        "rbxasset://fonts/families/" .. src .. ".json", fw, fs)
+                end
+            end)
+            if not ok or not newFont then return end
+            local gui = self.Library and self.Library.GUI
+            if not gui then return end
+            local function apply(inst, depth)
+                if depth > 12 then return end
+                for _, ch in ipairs(inst:GetChildren()) do
+                    if ch:IsA("TextLabel") or ch:IsA("TextButton") or ch:IsA("TextBox") then
+                        pcall(function() ch.FontFace = newFont end)
+                    end
+                    apply(ch, depth + 1)
+                end
+            end
+            apply(gui, 0)
+            self.Settings.CustomFont = tostring(source)
+            self:SaveSettings()
+        end
+        function InterfaceManager:BuildInterfaceSection(tab)
+            assert(self.Library,"Must set InterfaceManager.Library")
+            local Library=self.Library
+            local Settings=InterfaceManager.Settings
+            InterfaceManager:LoadSettings()
+            local section=tab:AddSection("Interface","lucide/tv-minimal")
+            section:AddSpace({Height=6})
+            local InterfaceTheme=section:AddDropdown("InterfaceTheme",{
+                Title="Theme", Description="Changes the interface theme.",
+                Icon="solar/palette-bold",
+                Values=Library.Themes, Default=Settings.Theme,
+                IsThemeSelector=true,
+                DropdownOutsideWindow=true,
+                IsManagerDropdown=true,
+                Callback=function(Value)
+                    Library:SetTheme(Value); Settings.Theme=Value; InterfaceManager:SaveSettings()
+                end
+            })
+            InterfaceTheme:SetValue(Settings.Theme)
+            section:AddToggle("AnimationToggle",{Title="Animated Window",Description="Enables shine/stroke animation on theme.",Icon="solar/stars-bold",Default=Settings.Animated,Callback=function(Value)
+                getgenv().ShineEnabled=Value; Settings.Animated=Value; InterfaceManager:SaveSettings()
+                Library:SetTheme(Library.Theme)
+                if getgenv()._FluentProRefreshOpenDropdownShine then getgenv()._FluentProRefreshOpenDropdownShine() end
+            end})
+            section:AddToggle("TransparentToggle",{Title="Transparency",Description="Makes the interface transparent.",Icon="solar/eye-bold",Default=Settings.Transparency,Callback=function(Value)
+                Library:ToggleTransparency(Value); Settings.Transparency=Value; InterfaceManager:SaveSettings()
+                if getgenv()._FluentProManagerDropdowns then
+                    for _, fn in ipairs(getgenv()._FluentProManagerDropdowns) do pcall(fn) end
+                end
+            end})
+            section:AddToggle("DisableBGToggle",{Title="Disable Background Images",Description="Hides theme background images.",Icon="solar/eye-closed-bold",Default=Settings.DisableBG or false,Callback=function(Value)
+                Settings.DisableBG=Value; InterfaceManager:SaveSettings()
+                local gui=Library and Library.Window and Library.Window.AcrylicPaint
+                if gui then local bg=gui.Frame:FindFirstChild("__ThemeBG"); if bg then bg.Visible=not Value end end
+            end})
+            if Library.UseAcrylic then
+                section:AddToggle("AcrylicToggle",{Title="Acrylic",Description="Requires graphic quality 8+.",Icon="solar/layers-bold",Default=Settings.Acrylic,Callback=function(Value)
+                    Library:ToggleAcrylic(Value); Settings.Acrylic=Value; InterfaceManager:SaveSettings()
+                end})
+            end
+            local FontDropdown=section:AddDropdown("InterfaceFont",{
+                Title="Font Manager", Description="Changes the UI font.",
+                Icon="solar/text-bold",
+                Values=InterfaceManager.Fonts, Default=Settings.Font or "GothamSSm",
+                DropdownOutsideWindow=true,
+                IsManagerDropdown=true,
+                Callback=function(Value) InterfaceManager:ApplyFont(Value) end
+            })
+            FontDropdown:SetValue(Settings.Font or "GothamSSm")
+            section:AddSpace({Height=6})
+            local MenuKeybind=section:AddKeybind("MenuKeybind",{Title="Minimize Bind",Icon="solar/keyboard-bold",Default=Settings.MenuKeybind})
+            MenuKeybind:OnChanged(function() Settings.MenuKeybind=MenuKeybind.Value; InterfaceManager:SaveSettings() end)
+            Library.MinimizeKeybind=MenuKeybind
+        end
+        InterfaceManager:BuildFolderTree()
+        x.InterfaceManager = InterfaceManager
+
+        local FloatingButtonManager = {}
+        FloatingButtonManager.Folder = "FloatingButtons"
+        FloatingButtonManager.Buttons = {}
+        FloatingButtonManager.Library = nil
+        local function serUDim2(u) return{ScaleX=u.X.Scale,OffsetX=u.X.Offset,ScaleY=u.Y.Scale,OffsetY=u.Y.Offset} end
+        local function desUDim2(t2) return UDim2.new(t2.ScaleX or 0,t2.OffsetX or 0,t2.ScaleY or 0,t2.OffsetY or 0) end
+        function FloatingButtonManager:SetLibrary(lib) self.Library=lib end
+        function FloatingButtonManager:SetFolder(folder) self.Folder=folder; self:BuildFolderTree() end
+        function FloatingButtonManager:SetIgnoreIndexes(list) end
+        function FloatingButtonManager:BuildFolderTree()
+            local paths={self.Folder,self.Folder.."/settings"}
+            for _,p2 in ipairs(paths) do if not isfolder(p2) then makefolder(p2) end end
+        end
+        FloatingButtonManager:BuildFolderTree()
+
+        function FloatingButtonManager:AddButton(id, frameOrButton, locked, isCircle, applyShapeCallback, frame)
+            local targetFrame = frame or frameOrButton
+
+            if frameOrButton:IsA("TextButton") and not frame then
+                local p = frameOrButton.Parent
+                if p and p:IsA("Frame") then targetFrame = p end
+            end
+            self.Buttons[id] = {
+                frame        = targetFrame,
+                button       = frameOrButton,
+                applyShape   = applyShapeCallback,
+            }
+            targetFrame:SetAttribute("Locked",   locked   or false)
+            targetFrame:SetAttribute("IsCircle",  isCircle or false)
+        end
+        function FloatingButtonManager:Save(name)
+            local path=self.Folder.."/settings/"..name..".json"
+            local data={}
+            for id,entry in pairs(self.Buttons) do
+                local f = entry.frame or entry
+                data[id]={
+                    size     = serUDim2(f.Size),
+                    position = serUDim2(f.Position),
+                    locked   = f:GetAttribute("Locked")   or false,
+                    isCircle = f:GetAttribute("IsCircle") or false,
+                }
+            end
+            local ok,enc=pcall(httpService.JSONEncode,httpService,data)
+            if not ok then return false,"encode failed" end
+            writefile(path,enc)
+            return true
+        end
+        function FloatingButtonManager:Load(name)
+            local path=self.Folder.."/settings/"..name..".json"
+            if not isfile(path) then return false,"no such file" end
+            local ok,dec=pcall(httpService.JSONDecode,httpService,readfile(path))
+            if not ok then return false,"decode failed" end
+            for id,saved in pairs(dec) do
+                local entry=self.Buttons[id]
+                if entry then
+                    local f = entry.frame or entry
+                    if saved.position then f.Position = desUDim2(saved.position) end
+                    if saved.size     then f.Size     = desUDim2(saved.size)     end
+                    f:SetAttribute("Locked",   saved.locked   or false)
+                    f:SetAttribute("IsCircle", saved.isCircle or false)
+
+                    if entry.applyShape then
+                        task.defer(function()
+                            pcall(entry.applyShape, saved.isCircle or false)
+                        end)
+                    end
+                end
+            end
+            return true
+        end
+        function FloatingButtonManager:RefreshConfigList()
+            local list=listfiles(self.Folder.."/settings")
+            local out={}
+            for _,file in ipairs(list) do
+                if file:sub(-5)==".json" then
+                    local nm=file:match("([^/\\]+)%.json$")
+                    if nm then table.insert(out,nm) end
+                end
+            end
+            return out
+        end
+        function FloatingButtonManager:LoadAutoloadConfig()
+            local autoPath=self.Folder.."/settings/autoload.txt"
+            if isfile(autoPath) then
+                local name=readfile(autoPath)
+                local ok,err=self:Load(name)
+                if not ok then
+                    return self.Library:Notify({Title="Floating Buttons",Content="Failed to load autoload layout: "..tostring(err),Duration=5})
+                end
+                self.Library:Notify({Title="Floating Buttons",Content=string.format("Auto loaded layout %q",name),Duration=5})
+            end
+        end
+        function FloatingButtonManager:BuildConfigSection(tab)
+            assert(self.Library,"Must set FloatingButtonManager.Library")
+            local section=tab:AddSection("Floating Buttons Config","lucide/file-type-corner")
+            section:AddInput("FB_ConfigName",{Title="Layout name",Icon="solar/widget-bold",Placeholder="Enter name..."})
+            section:AddDropdown("FB_ConfigList",{Title="Layouts list",Values=self:RefreshConfigList(),AllowNull=true,NoSearch=true,Icon="solar/list-bold",DropdownOutsideWindow=true,IsManagerDropdown=true})
+            section:AddButton({Title="Create layout",Icon="solar/diskette-bold",Callback=function()
+                local name=self.Library.Options.FB_ConfigName.Value
+                if not name or name:gsub(" ","")=="" then
+                    return self.Library:Notify({Title="Floating Buttons",Content="Invalid layout name",Duration=5})
+                end
+                local ok,err=self:Save(name)
+                if not ok then return self.Library:Notify({Title="Floating Buttons",Content="Failed to save: "..tostring(err),Duration=5}) end
+                self.Library:Notify({Title="Floating Buttons",Content=string.format("Saved layout %q",name),Duration=5})
+                self.Library.Options.FB_ConfigList:SetValues(self:RefreshConfigList())
+                self.Library.Options.FB_ConfigList:SetValue(nil)
+            end})
+            section:AddButton({Title="Load layout",Icon="solar/upload-minimalistic-bold",Callback=function()
+                local name=self.Library.Options.FB_ConfigList.Value
+                if not name or name=="" then return self.Library:Notify({Title="Floating Buttons",Content="No layout selected",Duration=5}) end
+                local ok,err=self:Load(name)
+                if not ok then return self.Library:Notify({Title="Floating Buttons",Content="Failed to load: "..tostring(err),Duration=5}) end
+                self.Library:Notify({Title="Floating Buttons",Content=string.format("Loaded layout %q",name),Duration=5})
+            end})
+            section:AddButton({Title="Overwrite layout",Icon="solar/refresh-bold",Callback=function()
+                local name=self.Library.Options.FB_ConfigList.Value
+                if not name or name=="" then return self.Library:Notify({Title="Floating Buttons",Content="No layout selected",Duration=5}) end
+                local ok,err=self:Save(name)
+                if not ok then return self.Library:Notify({Title="Floating Buttons",Content="Failed to overwrite: "..tostring(err),Duration=5}) end
+                self.Library:Notify({Title="Floating Buttons",Content=string.format("Overwrote layout %q",name),Duration=5})
+            end})
+            section:AddButton({Title="Delete layout",Icon="solar/close-circle-bold",Callback=function()
+                local name=self.Library.Options.FB_ConfigList.Value
+                if not name or name=="" then return self.Library:Notify({Title="Floating Buttons",Content="No layout selected",Duration=5}) end
+                local path=self.Folder.."/settings/"..name..".json"
+                if isfile(path) then delfile(path) end
+                self.Library:Notify({Title="Floating Buttons",Content=string.format("Deleted layout %q",name),Duration=5})
+                self.Library.Options.FB_ConfigList:SetValues(self:RefreshConfigList())
+                self.Library.Options.FB_ConfigList:SetValue(nil)
+            end})
+            section:AddButton({Title="Refresh list",Icon="solar/restart-bold",Callback=function()
+                self.Library.Options.FB_ConfigList:SetValues(self:RefreshConfigList())
+                self.Library.Options.FB_ConfigList:SetValue(nil)
+            end})
+            local autoPath=self.Folder.."/settings/autoload.txt"
+            local AutoloadButton
+            AutoloadButton=section:AddButton({Title="Set as autoload",Icon="solar/star-bold",Description="Current autoload layout: none",Callback=function()
+                local name=self.Library.Options.FB_ConfigList.Value
+                if isfile(autoPath) then
+                    delfile(autoPath)
+                    AutoloadButton:SetDesc("Current autoload layout: none")
+                    self.Library:Notify({Title="Floating Buttons",Content="Autoload disabled",Duration=5})
+                else
+                    if not name or name=="" then return self.Library:Notify({Title="Floating Buttons",Content="No layout selected",Duration=5}) end
+                    writefile(autoPath,name)
+                    AutoloadButton:SetDesc("Current autoload layout: "..name)
+                    self.Library:Notify({Title="Floating Buttons",Content=string.format("Set %q to autoload",name),Duration=5})
+                end
+            end})
+            if isfile(autoPath) then
+                local nm=readfile(autoPath)
+                if nm and nm~="" then AutoloadButton:SetDesc("Current autoload layout: "..nm) end
+            end
+            self:SetIgnoreIndexes({"FB_ConfigList","FB_ConfigName"})
+        end
+        x.FloatingButtonManager = FloatingButtonManager
+
+        local _MM = {}
+        _MM.Folder = "BetterFluentCache"
+
+        function _MM:SetFolder(f)
+            self.Folder = f
+        end
+
+        function _MM:_init(sub)
+            pcall(function()
+                if not isfolder(self.Folder) then makefolder(self.Folder) end
+                local p = self.Folder.."/"..sub
+                if not isfolder(p) then makefolder(p) end
+            end)
+        end
+
+        function _MM:_rname(ext)
+            local s = "abcdefghijklmnopqrstuvwxyz0123456789"
+            local n = ""
+            for _=1,12 do local i=math.random(1,#s); n=n..s:sub(i,i) end
+            return n.."."..ext
+        end
+
+        function _MM:_fetch(src, sub, exts, defExt, noDownload)
+            if type(src)~="string" or src=="" then return "" end
+            if src:match("^rbxassetid://") or src:match("^rbxasset://") then return src end
+            if src:match("^%d+$") then return "rbxassetid://"..src end
+            if not src:match("^https?://") then return "" end
+            local cleanPath = src:match("^[^?#]+") or src
+            local ext = (cleanPath:match("%.([^%.%/]+)$") or defExt):lower()
+            if not exts[ext] then ext = defExt end
+            local hs = game:GetService("HttpService")
+            local mapPath = "bfc_"..sub.."_map.json"
+            local map = {}
+            pcall(function()
+                if isfile(mapPath) then
+                    local ok,d = pcall(hs.JSONDecode, hs, readfile(mapPath))
+                    if ok and type(d)=="table" then map=d end
+                end
+            end)
+            local key = tostring(#src).."_"..src:sub(1,40):gsub("[^%w]","")
+            if map[key] then
+                local cp = map[key]
+                if isfile(cp) then
+                    local ok,a = pcall(getcustomasset, cp)
+                    if ok and a and a~="" then return a end
+                end
+                map[key] = nil
+            end
+            if noDownload then return nil end
+            local body = nil
+            local dlOk = pcall(function()
+                local req = (syn and syn.request) or http_request or request
+                local r = req({Url=src,Method="GET",Headers={["User-Agent"]="Roblox/WinInet"}})
+                if r and r.Body and #r.Body > 128 then body = r.Body end
+            end)
+            if not (dlOk and body) then return "" end
+            local isFtyp = #body >= 8 and body:sub(5,8) == "ftyp"
+            local fname = self:_rname(isFtyp and "ogg" or ext)
+            writefile(fname, body)
+            if isfile(fname) then
+                local ok2,a = pcall(getcustomasset, fname)
+                if ok2 and a and a~="" then
+                    map[key] = fname
+                    pcall(function()
+                        local ok3,enc = pcall(hs.JSONEncode, hs, map)
+                        if ok3 then writefile(mapPath, enc) end
+                    end)
+                    return a
+                end
+            end
+            return ""
+        end
+
+        function _MM:Video(src)
+            if type(src)~="string" or src=="" then return "" end
+            if src:match("^rbxassetid://") or src:match("^rbxasset://") then return src end
+            if src:match("^%d+$") then return "rbxassetid://"..src end
+            if not src:match("^https?://") then return "" end
+            local ext = (src:match("%.(%a+)%??[^/]*$") or "webm"):lower()
+            if not ({webm=1,mp4=1,ogg=1,mov=1})[ext] then ext="webm" end
+            if ext == "mp4" or ext == "mov" then ext = "webm" end
+            self:_init("videos")
+            local dir = self.Folder.."/videos"
+            local mapPath = dir.."/_map.json"
+            local hs = game:GetService("HttpService")
+            local map = {}
+            pcall(function()
+                if isfile(mapPath) then
+                    local ok,d = pcall(hs.JSONDecode, hs, readfile(mapPath))
+                    if ok and type(d)=="table" then map=d end
+                end
+            end)
+            local key = tostring(#src).."_"..src:sub(1,40):gsub("[^%w]","")
+            if map[key] then
+                local cp = dir.."/"..map[key]
+                if isfile(cp) then
+                    local ok,a = pcall(getcustomasset, cp)
+                    if ok and a and a~="" then return a end
+                end
+                map[key] = nil
+            end
+            local fname = self:_rname(ext)
+            local path  = dir.."/"..fname
+            local body  = nil
+            local reqOk = pcall(function()
+                local req = (syn and syn.request) or http_request or request
+                local r = req({Url=src,Method="GET",Headers={["User-Agent"]="Roblox/WinInet"}})
+                if r and r.Body and #r.Body > 512 then
+                    local peek = r.Body:sub(1,15):lower()
+                    if peek:find("<!doctype") or peek:find("<html") then return end
+                    body = r.Body
+                    writefile(path, body)
+                end
+            end)
+            if reqOk and body and isfile(path) then
+                local ok2,a = pcall(getcustomasset, path)
+                if ok2 and a and a~="" then
+                    map[key] = fname
+                    pcall(function()
+                        local ok3,enc = pcall(hs.JSONEncode, hs, map)
+                        if ok3 then writefile(mapPath, enc) end
+                    end)
+                    return a
+                end
+            end
+            return ""
+        end
+        function _MM:Image(src) return self:_fetch(src,"images",{png=1,jpg=1,jpeg=1,webp=1,gif=1},"png") end
+        function _MM:Audio(src, noDownload) return self:_fetch(src,"audio", {mp3=1,ogg=1,wav=1,flac=1},"mp3", noDownload) end
+
+        x.MediaManager = _MM
+
+        function x.RegisterCustomTheme(C, D, E)
+            if type(D) ~= "string" or type(E) ~= "table" then return false end
+            E.Name = D
+            if not E.ThemeAccentColors and E.Accent then E.ThemeAccentColors = {E.Accent} end
+            if E.Background == nil then E.Background = nil end
+            if E.BackgroundTransparency == nil then E.BackgroundTransparency = 0 end
+            e(o.Themes)[D] = E
+            local found = false
+            for _, v in ipairs(x.Themes) do if v == D then found = true; break end end
+            if not found then table.insert(x.Themes, D) end
+            return true
+        end
+        x.AddCustomTheme = x.RegisterCustomTheme
+
+        if getgenv then
+            pcall(function() getgenv().Fluent_Themes = e(o.Themes) end)
+            getgenv().Fluent = x
+            pcall(function()
+                getgenv().SaveManager           = x.SaveManager
+                getgenv().InterfaceManager      = x.InterfaceManager
+                getgenv().FloatingButtonManager = x.FloatingButtonManager
+                getgenv().FBM                   = x.FloatingButtonManager
+                getgenv().MediaManager          = x.MediaManager
+            end)
+        end
+        return x
+    end,
+    function()
+        local c, d, e, f, g = b(2)
+        local h = {AcrylicBlur = e(d.AcrylicBlur), CreateAcrylic = e(d.CreateAcrylic), AcrylicPaint = e(d.AcrylicPaint)}
+        function h.init() end
+        function h.Enable() end
+        function h.Disable() end
+        return h
+    end,
+    function()
+        local c, d, e, f, g = b(3)
+        return function()
+            local n = {}
+            local q = Instance.new("Frame")
+            q.BackgroundTransparency = 1
+            q.Size = UDim2.fromScale(1, 1)
+            n.Frame = q
+            n.Model = nil
+            n.AddParent = function() end
+            n.SetVisibility = function() end
+            return function() end, nil, function() end
+        end
+    end,
+    function()
+        local c, d, e, f, g = b(4)
+        local h = e(d.Parent.Parent.Creator)
+        local j = h.New
+        return function(k)
+            local l = {}
+            l.Frame =
+                j(
+                "Frame",
+                {
+                    Size = UDim2.fromScale(1, 1),
+                    BackgroundTransparency = 0.05,
+                    BorderSizePixel = 0,
+                    ThemeTag = {BackgroundColor3 = "AcrylicMain"}
+                },
+                {
+                    j("UICorner", {CornerRadius = UDim.new(0, 10)}),
+                    j("UIStroke", {Transparency = 0.5, Thickness = 1, ThemeTag = {Color = "AcrylicBorder"}})
+                }
+            )
+            l.Model = nil
+            l.AddParent = function() end
+            l.SetVisibility = function() end
+            return l
+        end
+    end,
+    function()
+        local c, d, e, f, g = b(5)
+        return function()
+            return nil
+        end
+    end,
+    function()
+        local c, d, e, f, g = b(6)
+        local i = function()
+            return Vector3.new()
+        end
+        local j = function()
+            return 0
+        end
+        return {i, j}
+    end,
+    [8] = function()
+        local c, d, e, f, g = b(8)
+        return {
+            Close = "rbxassetid://9886659671",
+            Min = "rbxassetid://9886659276",
+            Max = "rbxassetid://9886659406",
+            Restore = "rbxassetid://9886659001"
+        }
+    end,
+    [9] = function()
+        local c, d, e, f, g = b(9)
+        local h = d.Parent.Parent
+        local i, j = e(h.Packages.Flipper), e(h.Creator)
+        local k, l = j.New, i.Spring.new
+        return function(m, n, o)
+            o = o or false
+            local p = {}
+            p.Title =
+                k(
+                "TextLabel",
+                {
+                    FontFace = Font.new "rbxasset://fonts/families/GothamSSm.json",
+                    TextColor3 = Color3.fromRGB(200, 200, 200),
+                    TextSize = 14,
+                    TextWrapped = true,
+                    TextXAlignment = Enum.TextXAlignment.Center,
+                    TextYAlignment = Enum.TextYAlignment.Center,
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 1),
+                    ThemeTag = {TextColor3 = "Text"}
+                }
+            )
+            p.HoverFrame =
+                k(
+                "Frame",
+                {Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, ThemeTag = {BackgroundColor3 = "Hover"}},
+                {k("UICorner", {CornerRadius = UDim.new(0, 4)})}
+            )
+            p.Frame =
+                k(
+                "TextButton",
+                {Size = UDim2.new(0, 0, 0, 32), Parent = n, ThemeTag = {BackgroundColor3 = "DialogButton"}},
+                {
+                    k("UICorner", {CornerRadius = UDim.new(0, 4)}),
+                    k(
+                        "UIStroke",
+                        {
+                            ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                            Transparency = 0.65,
+                            ThemeTag = {Color = "DialogButtonBorder"}
+                        }
+                    ),
+                    p.HoverFrame,
+                    p.Title
+                }
+            )
+            local q, r = j.SpringMotor(1, p.HoverFrame, "BackgroundTransparency", o)
+            j.AddSignal(
+                p.Frame.MouseEnter,
+                function()
+                    r(0.97)
+                end
+            )
+            j.AddSignal(
+                p.Frame.MouseLeave,
+                function()
+                    r(1)
+                end
+            )
+            j.AddSignal(
+                p.Frame.MouseButton1Down,
+                function()
+                    r(1)
+                end
+            )
+            j.AddSignal(
+                p.Frame.MouseButton1Up,
+                function()
+                    r(0.97)
+                end
+            )
+            return p
+        end
+    end,
+    [10] = function()
+        local c, d, e, f, g = b(10)
+        local h, i, j, k =
+            game:GetService "UserInputService",
+            game:GetService "Players".LocalPlayer:GetMouse(),
+            game:GetService "Workspace".CurrentCamera,
+            d.Parent.Parent
+        local l, m = e(k.Packages.Flipper), e(k.Creator)
+        local n, o, p, q = l.Spring.new, l.Instant.new, m.New, {Window = nil}
+        function q.Init(r, s)
+            q.Window = s
+            return q
+        end
+        function q.Create(r)
+            local s = {Buttons = 0}
+            s.TintFrame =
+                p(
+                "TextButton",
+                {
+                    Text = "",
+                    Size = UDim2.fromScale(1, 1),
+                    BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+                    BackgroundTransparency = 1,
+                    Parent = q.Window.Root
+                },
+                {p("UICorner", {CornerRadius = UDim.new(0, 8)})}
+            )
+            local t, u = m.SpringMotor(1, s.TintFrame, "BackgroundTransparency", true)
+            s.ButtonHolder =
+                p(
+                "Frame",
+                {
+                    Size = UDim2.new(1, -40, 1, -40),
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.fromScale(0.5, 0.5),
+                    BackgroundTransparency = 1
+                },
+                {
+                    p(
+                        "UIListLayout",
+                        {
+                            Padding = UDim.new(0, 10),
+                            FillDirection = Enum.FillDirection.Horizontal,
+                            HorizontalAlignment = Enum.HorizontalAlignment.Center,
+                            SortOrder = Enum.SortOrder.LayoutOrder
+                        }
+                    )
+                }
+            )
+            s.ButtonHolderFrame =
+                p(
+                "Frame",
+                {
+                    Size = UDim2.new(1, 0, 0, 70),
+                    Position = UDim2.new(0, 0, 1, -70),
+                    ThemeTag = {BackgroundColor3 = "DialogHolder"}
+                },
+                {
+                    p("Frame", {Size = UDim2.new(1, 0, 0, 1), ThemeTag = {BackgroundColor3 = "DialogHolderLine"}}),
+                    s.ButtonHolder
+                }
+            )
+            s.Title =
+                p(
+                "TextLabel",
+                {
+                    FontFace = Font.new(
+                        "rbxasset://fonts/families/GothamSSm.json",
+                        Enum.FontWeight.SemiBold,
+                        Enum.FontStyle.Normal
+                    ),
+                    Text = "Dialog",
+                    TextColor3 = Color3.fromRGB(240, 240, 240),
+                    TextSize = 22,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Size = UDim2.new(1, 0, 0, 22),
+                    Position = UDim2.fromOffset(20, 25),
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    BackgroundTransparency = 1,
+                    ThemeTag = {TextColor3 = "Text"}
+                }
+            )
+            s.Scale = p("UIScale", {Scale = 1})
+            local v, w = m.SpringMotor(1.1, s.Scale, "Scale")
+            s.Root =
+                p(
+                "CanvasGroup",
+                {
+                    Size = UDim2.fromOffset(300, 165),
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.fromScale(0.5, 0.5),
+                    GroupTransparency = 1,
+                    Parent = s.TintFrame,
+                    ThemeTag = {BackgroundColor3 = "Dialog"}
+                },
+                {
+                    p("UICorner", {CornerRadius = UDim.new(0, 8)}),
+                    p("UIStroke", {Transparency = 0.5, ThemeTag = {Color = "DialogBorder"}}),
+                    s.Scale,
+                    s.Title,
+                    s.ButtonHolderFrame
+                }
+            )
+            local x, y = m.SpringMotor(1, s.Root, "GroupTransparency")
+            function s.Open(z)
+                e(k).DialogOpen = true
+                s.Scale.Scale = 1.1
+                u(0.75)
+                y(0)
+                w(1)
+            end
+            function s.Close(z)
+                e(k).DialogOpen = false
+                u(1)
+                y(1)
+                w(1.1)
+                s.Root.UIStroke:Destroy()
+                task.wait(0.15)
+                s.TintFrame:Destroy()
+            end
+            function s.Button(z, A, B)
+                s.Buttons = s.Buttons + 1
+                A = A or "Button"
+                B = B or function()
+                    end
+                local C = e(k.Components.Button)("", s.ButtonHolder, true)
+                C.Title.Text = A
+                for D, E in next, s.ButtonHolder:GetChildren() do
+                    if E:IsA "TextButton" then
+                        E.Size = UDim2.new(1 / s.Buttons, -(((s.Buttons - 1) * 10) / s.Buttons), 0, 32)
+                    end
+                end
+                m.AddSignal(
+                    C.Frame.MouseButton1Click,
+                    function()
+                        e(k):SafeCallback(B)
+                        pcall(
+                            function()
+                                s:Close()
+                            end
+                        )
+                    end
+                )
+                return C
+            end
+            return s
+        end
+        return q
+    end,
+    [11] = function()
+        local c, d, e, f, g = b(11)
+        local h = d.Parent.Parent
+        local i, j = e(h.Packages.Flipper), e(h.Creator)
+        local k, l = j.New, i.Spring.new
+        local _TS_svc = game:GetService("TextService")
+        local _RS_svc = game:GetService("RunService")
+        local function _startMarquee(label)
+            if not label then return end
+            pcall(function()
+                label.TextTruncate = Enum.TextTruncate.AtEnd
+            end)
+        end
+        return function(m, n, o, p, q)
+            local q_icon = (type(q) == "table") and q or nil
+            local q = {}
+            local iconOffset = 0
+            q.TitleLabel =
+                k(
+                "TextLabel",
+                {
+                    FontFace = Font.new(
+                        "rbxasset://fonts/families/GothamSSm.json",
+                        Enum.FontWeight.Medium,
+                        Enum.FontStyle.Normal
+                    ),
+                    Text = m,
+                    RichText = true,
+                    TextColor3 = Color3.fromRGB(240, 240, 240),
+                    TextSize = 13,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    Size = UDim2.new(1, 0, 0, 14),
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    BackgroundTransparency = 1,
+                    ThemeTag = {TextColor3 = "Text"}
+                }
+            )
+            q.DescLabel =
+                k(
+                "TextLabel",
+                {
+                    FontFace = Font.new "rbxasset://fonts/families/GothamSSm.json",
+                    Text = n,
+                    RichText = true,
+                    TextColor3 = Color3.fromRGB(200, 200, 200),
+                    TextSize = 12,
+                    TextWrapped = true,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 0, 14),
+                    ThemeTag = {TextColor3 = "SubText"}
+                }
+            )
+            q.LabelHolder =
+                k(
+                "Frame",
+                {
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    BackgroundTransparency = 1,
+                    ClipsDescendants = true,
+                    Position = UDim2.fromOffset(10, 0),
+                    Size = UDim2.new(1, -28, 0, 0)
+                },
+                {
+                    k(
+                        "UIListLayout",
+                        {SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Center}
+                    ),
+                    k("UIPadding", {PaddingBottom = UDim.new(0, 13), PaddingTop = UDim.new(0, 13)}),
+                    q.TitleLabel,
+                    q.DescLabel
+                }
+            )
+            q.Border =
+                k(
+                "UIStroke",
+                {
+                    Transparency = 0.5,
+                    ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                    Color = Color3.fromRGB(0, 0, 0),
+                    ThemeTag = {Color = "ElementBorder"}
+                }
+            )
+            q.Frame =
+                k(
+                "TextButton",
+                {
+                    Size = UDim2.new(1, 0, 0, 0),
+                    BackgroundTransparency = 0.89,
+                    BackgroundColor3 = Color3.fromRGB(130, 130, 130),
+                    Parent = o,
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    Text = "",
+                    LayoutOrder = 7,
+                    ThemeTag = {BackgroundColor3 = "Element", BackgroundTransparency = "ElementTransparency"}
+                },
+                {k("UICorner", {CornerRadius = UDim.new(0, 4)}), q.Border, q.LabelHolder}
+            )
+            function q.SetTitle(r, s)
+                q.TitleLabel.RichText = true
+                q.TitleLabel.Text = s
+                _startMarquee(q.TitleLabel)
+            end
+            function q.SetDesc(r, s)
+                if s == nil then
+                    s = ""
+                end
+                if s == "" then
+                    q.DescLabel.Visible = false
+                else
+                    q.DescLabel.Visible = true
+                end
+                q.DescLabel.RichText = true
+                q.DescLabel.Text = s
+            end
+            function q.Destroy(r)
+                q.Frame:Destroy()
+            end
+            q:SetTitle(m)
+            q:SetDesc(n)
+
+            if p then
+                local r, s, t =
+                    h.Themes,
+                    j.SpringMotor(
+                        j.GetThemeProperty "ElementTransparency",
+                        q.Frame,
+                        "BackgroundTransparency",
+                        false,
+                        true
+                    )
+                j.AddSignal(
+                    q.Frame.MouseEnter,
+                    function()
+                        t(j.GetThemeProperty "ElementTransparency" - j.GetThemeProperty "HoverChange")
+                    end
+                )
+                j.AddSignal(
+                    q.Frame.MouseLeave,
+                    function()
+                        t(j.GetThemeProperty "ElementTransparency")
+                    end
+                )
+                j.AddSignal(
+                    q.Frame.MouseButton1Down,
+                    function()
+                        t(j.GetThemeProperty "ElementTransparency" + j.GetThemeProperty "HoverChange")
+                    end
+                )
+                j.AddSignal(
+                    q.Frame.MouseButton1Up,
+                    function()
+                        t(j.GetThemeProperty "ElementTransparency" - j.GetThemeProperty "HoverChange")
+                    end
+                )
+            end
+            return q
+        end
+    end,
+    [12] = function()
+        local c, d, e, f, g = b(12)
+        local h = d.Parent.Parent
+        local i, j, k = e(h.Packages.Flipper), e(h.Creator), e(h.Acrylic)
+        local l, m, n, o = i.Spring.new, i.Instant.new, j.New, {}
+        function o.Init(p, q)
+            o.Holder =
+                n(
+                "Frame",
+                {
+                    Position = UDim2.new(1, -30, 1, -30),
+                    Size = UDim2.new(0, 310, 1, -30),
+                    AnchorPoint = Vector2.new(1, 1),
+                    BackgroundTransparency = 1,
+                    Parent = q
+                },
+                {
+                    n(
+                        "UIListLayout",
+                        {
+                            HorizontalAlignment = Enum.HorizontalAlignment.Center,
+                            SortOrder = Enum.SortOrder.LayoutOrder,
+                            VerticalAlignment = Enum.VerticalAlignment.Bottom,
+                            Padding = UDim.new(0, 20)
+                        }
+                    )
+                }
+            )
+        end
+        function o.New(p, q)
+            q.Title = q.Title or "Title"
+            q.Content = q.Content or "Content"
+            q.SubContent = q.SubContent or ""
+            q.Duration = q.Duration or nil
+            q.Buttons = q.Buttons or {}
+            local r = {Closed = false}
+            r.AcrylicPaint = k.AcrylicPaint()
+            r.Title =
+                n(
+                "TextLabel",
+                {
+                    Position = UDim2.new(0, 14, 0, 17),
+                    Text = q.Title,
+                    RichText = true,
+                    TextColor3 = Color3.fromRGB(255, 255, 255),
+                    TextTransparency = 0,
+                    FontFace = Font.new "rbxasset://fonts/families/GothamSSm.json",
+                    TextSize = 13,
+                    TextXAlignment = "Left",
+                    TextYAlignment = "Center",
+                    Size = UDim2.new(1, -12, 0, 12),
+                    TextWrapped = true,
+                    BackgroundTransparency = 1,
+                    ThemeTag = {TextColor3 = "Text"}
+                }
+            )
+            r.ContentLabel =
+                n(
+                "TextLabel",
+                {
+                    FontFace = Font.new "rbxasset://fonts/families/GothamSSm.json",
+                    Text = q.Content,
+                    TextColor3 = Color3.fromRGB(240, 240, 240),
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    Size = UDim2.new(1, 0, 0, 14),
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    BackgroundTransparency = 1,
+                    TextWrapped = true,
+                    ThemeTag = {TextColor3 = "Text"}
+                }
+            )
+            r.SubContentLabel =
+                n(
+                "TextLabel",
+                {
+                    FontFace = Font.new "rbxasset://fonts/families/GothamSSm.json",
+                    Text = q.SubContent,
+                    TextColor3 = Color3.fromRGB(240, 240, 240),
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    Size = UDim2.new(1, 0, 0, 14),
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    BackgroundTransparency = 1,
+                    TextWrapped = true,
+                    ThemeTag = {TextColor3 = "SubText"}
+                }
+            )
+            r.LabelHolder =
+                n(
+                "Frame",
+                {
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    BackgroundTransparency = 1,
+                    Position = UDim2.fromOffset(14, 40),
+                    Size = UDim2.new(1, -28, 0, 0)
+                },
+                {
+                    n(
+                        "UIListLayout",
+                        {
+                            SortOrder = Enum.SortOrder.LayoutOrder,
+                            VerticalAlignment = Enum.VerticalAlignment.Center,
+                            Padding = UDim.new(0, 3)
+                        }
+                    ),
+                    r.ContentLabel,
+                    r.SubContentLabel
+                }
+            )
+            r.CloseButton =
+                n(
+                "TextButton",
+                {
+                    Text = "",
+                    Position = UDim2.new(1, -14, 0, 13),
+                    Size = UDim2.fromOffset(20, 20),
+                    AnchorPoint = Vector2.new(1, 0),
+                    BackgroundTransparency = 1
+                },
+                {
+                    n(
+                        "ImageLabel",
+                        {
+                            Image = e(d.Parent.Assets).Close,
+                            Size = UDim2.fromOffset(16, 16),
+                            Position = UDim2.fromScale(0.5, 0.5),
+                            AnchorPoint = Vector2.new(0.5, 0.5),
+                            BackgroundTransparency = 1,
+                            ThemeTag = {ImageColor3 = "Text"}
+                        }
+                    )
+                }
+            )
+            local notifCopyBtn = n("TextButton",{
+                Text="",
+                Position=UDim2.new(1,-38,0,13),
+                Size=UDim2.fromOffset(20,20),
+                AnchorPoint=Vector2.new(1,0),
+                BackgroundTransparency=1,
+            },{
+                n("ImageLabel",{
+                    Image="rbxassetid://10709798574",
+                    Size=UDim2.fromOffset(14,14),
+                    Position=UDim2.fromScale(0.5,0.5),
+                    AnchorPoint=Vector2.new(0.5,0.5),
+                    BackgroundTransparency=1,
+                    ThemeTag={ImageColor3="SubText"},
+                })
+            })
+            j.AddSignal(notifCopyBtn.MouseButton1Click,function()
+                pcall(function()
+                    local txt = tostring(q.Content or "")
+                    if tostring(q.SubContent or "")~="" then txt = txt.."\n"..q.SubContent end
+                    toclipboard(txt)
+                end)
+            end)
+            local stripeCol = ({Warning=Color3.fromRGB(255,185,30),Success=Color3.fromRGB(50,205,80),Error=Color3.fromRGB(220,55,55),Info=Color3.fromRGB(76,194,255)})[q.Type or "Info"] or Color3.fromRGB(76,194,255)
+            local stripe = n("Frame",{Size=UDim2.new(0,3,1,-16),Position=UDim2.new(0,6,0,8),BackgroundColor3=stripeCol,BorderSizePixel=0,ZIndex=10})
+            n("UICorner",{CornerRadius=UDim.new(1,0),Parent=stripe})
+            local notifRootChildren = {r.AcrylicPaint.Frame, r.Title, r.CloseButton, notifCopyBtn, r.LabelHolder, stripe}
+            if q.Icon then
+                local lib = e(h)
+                local ic = lib and lib.GetIcon and lib:GetIcon(q.Icon)
+                if ic then
+                    local nicoImg = n("ImageLabel",{Size=UDim2.fromOffset(18,18),Position=UDim2.fromOffset(14,14),BackgroundTransparency=1,ZIndex=10,ThemeTag={ImageColor3="SubText"}})
+                    if type(ic)=="table" then nicoImg.Image=ic.Image or ""; nicoImg.ImageRectOffset=ic.ImageRectOffset or Vector2.new(); nicoImg.ImageRectSize=ic.ImageRectSize or Vector2.new() else nicoImg.Image=tostring(ic) end
+                    table.insert(notifRootChildren, nicoImg)
+                    r.Title.Position = UDim2.new(0,38,0,17)
+                    r.Title.Size = UDim2.new(1,-50,0,12)
+                end
+            end
+            r.Root =
+                n(
+                "Frame",
+                {BackgroundTransparency = 1, Size = UDim2.new(1, 0, 1, 0), Position = UDim2.fromScale(1, 0)},
+                notifRootChildren
+            )
+            if q.Content == "" then
+                r.ContentLabel.Visible = false
+            end
+            if q.SubContent == "" then
+                r.SubContentLabel.Visible = false
+            end
+            r.Holder =
+                n("Frame", {BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 200), Parent = o.Holder}, {r.Root})
+            local twSvc = game:GetService("TweenService")
+            r.Root.Position = UDim2.new(1, 40, 0, 0)
+            j.AddSignal(
+                r.CloseButton.MouseButton1Click,
+                function()
+                    r:Close()
+                end
+            )
+            function r.Open(t)
+                task.defer(function()
+                    local u = r.LabelHolder.AbsoluteSize.Y
+                    if u <= 0 then u = 24 end
+                    r.Holder.Size = UDim2.new(1, 0, 0, 58 + u)
+                    local tw = twSvc:Create(r.Root, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                        Position = UDim2.new(0, 0, 0, 0)
+                    })
+                    tw:Play()
+                end)
+            end
+            function r.Close(t)
+                if not r.Closed then
+                    r.Closed = true
+                    local tw = twSvc:Create(r.Root, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+                        Position = UDim2.new(1, 40, 0, 0)
+                    })
+                    tw:Play()
+                    task.delay(0.28, function()
+                        if e(h).UseAcrylic then
+                            pcall(function() r.AcrylicPaint.Model:Destroy() end)
+                        end
+                        pcall(function() r.Holder:Destroy() end)
+                    end)
+                end
+            end
+            r:Open()
+            if q.Duration then
+                task.delay(
+                    q.Duration,
+                    function()
+                        r:Close()
+                    end
+                )
+            end
+            return r
+        end
+        return o
+    end,
+    [13] = function()
+        local c, d, e, f, g = b(13)
+        local h = d.Parent.Parent
+        local i = e(h.Creator)
+        local j = i.New
+        return function(k, iconKey, l)
+            if type(iconKey) ~= "string" then l = iconKey; iconKey = nil end
+            local m = {}
+            m.Layout = j("UIListLayout", {Padding = UDim.new(0, 5), SortOrder = Enum.SortOrder.LayoutOrder})
+            m.Container =
+                j(
+                "Frame",
+                {Size = UDim2.new(1, 0, 0, 26), Position = UDim2.fromOffset(0, 24), BackgroundTransparency = 1},
+                {m.Layout}
+            )
+            local secHeaderChildren = {}
+            if iconKey then
+                local secIco = j("ImageLabel", {
+                    Name = "_SecIcon",
+                    Size = UDim2.fromOffset(14, 14),
+                    Position = UDim2.fromOffset(0, 3),
+                    BackgroundTransparency = 1,
+                    ImageColor3 = Color3.fromRGB(255, 255, 255),
+                    ImageTransparency = 0.25,
+                })
+                table.insert(secHeaderChildren, secIco)
+                task.defer(function()
+                    local lib = e(h)
+                    local ic = lib and lib.GetIcon and lib:GetIcon(iconKey)
+                    if ic then
+                        if type(ic) == "table" then
+                            secIco.Image = ic.Image or ""
+                            secIco.ImageRectOffset = ic.ImageRectOffset or Vector2.new()
+                            secIco.ImageRectSize   = ic.ImageRectSize   or Vector2.new()
+                        else
+                            secIco.Image = tostring(ic)
+                        end
+                    end
+                end)
+            end
+            local titleOffX = iconKey and 22 or 0
+            table.insert(secHeaderChildren, j("TextLabel", {RichText=true,Text=k,TextTransparency=0,FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json",Enum.FontWeight.SemiBold,Enum.FontStyle.Normal),TextSize=18,TextXAlignment="Left",TextYAlignment="Center",Size=UDim2.new(1,-16,0,18),Position=UDim2.fromOffset(titleOffX,2),ThemeTag={TextColor3="Text"}}))
+            table.insert(secHeaderChildren, m.Container)
+            m.Root =
+                j(
+                "Frame",
+                {BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 26), LayoutOrder = 7, Parent = l},
+                secHeaderChildren
+            )
+            i.AddSignal(
+                m.Layout:GetPropertyChangedSignal "AbsoluteContentSize",
+                function()
+                    m.Container.Size = UDim2.new(1, 0, 0, m.Layout.AbsoluteContentSize.Y)
+                    m.Root.Size = UDim2.new(1, 0, 0, m.Layout.AbsoluteContentSize.Y + 25)
+                end
+            )
+            return m
+        end
+    end,
+    [14] = function()
+        local c, d, e, f, g = b(14)
+        local h = d.Parent.Parent
+        local i, j = e(h.Packages.Flipper), e(h.Creator)
+        local k, l, m, n, o =
+            j.New,
+            i.Spring.new,
+            i.Instant.new,
+            h.Components,
+            {Window = nil, Tabs = {}, Containers = {}, SelectedTab = 0, TabCount = 0}
+        function o.Init(p, q)
+            o.Window = q
+            return o
+        end
+        function o.GetTab(p, q)
+            if type(q) == "number" then
+                if o.Tabs[q] then return o.Tabs[q], q end
+            elseif type(q) == "string" then
+                for idx, tab in ipairs(o.Tabs) do
+                    if tab.Name == q or tab.Name:lower() == q:lower() then
+                        return tab, idx
+                    end
+                end
+            elseif type(q) == "table" then
+                for idx, tab in ipairs(o.Tabs) do
+                    if tab == q then
+                        return tab, idx
+                    end
+                end
+            end
+            return o.Tabs[1], 1
+        end
+        function o.GetCurrentTabPos(p)
+            local sel = o.Tabs[o.SelectedTab]
+            if not sel or not sel.Frame then return 17 end
+            local tlc = o.Window and o.Window.TabListContainer
+            if not tlc then return 17 end
+            local tabH = sel.Frame.AbsoluteSize.Y
+            if tabH <= 0 then tabH = 34 end
+            if sel.Frame.AbsolutePosition.Y > 0 and tlc.AbsolutePosition.Y > 0 then
+                local tabY = sel.Frame.AbsolutePosition.Y - tlc.AbsolutePosition.Y
+                return tabY + (tabH / 2)
+            end
+            local ord = sel.Frame.LayoutOrder
+            if ord and ord < 0 then
+                return (math.abs(ord) - 1000000) * 38 + 17
+            end
+            return (o.SelectedTab - 1) * 38 + 17
+        end
+        function o.ReapplyFavoriteOrder(p)
+            local im = e(h).InterfaceManager
+            local favs = (im and im.GetFavorites and im:GetFavorites()) or {}
+            local favIndex = {}
+            for idx, nm in ipairs(favs) do favIndex[nm] = idx end
+            for _, tab in ipairs(o.Tabs) do
+                if tab.Frame then
+                    local fi = favIndex[tab.Name]
+                    if fi then
+                        tab.Frame.LayoutOrder = -1000000 + (fi - 1)
+                    else
+                        tab.Frame.LayoutOrder = tab._origOrder or 0
+                    end
+                    if tab._refreshFavIcon then tab._refreshFavIcon() end
+                end
+            end
+            task.defer(function()
+                local win = o.Window
+                if win and win.SelectorPosMotor then
+                    local pos = o.GetCurrentTabPos(o)
+                    if pos then
+                        pcall(function() win.SelectorPosMotor:setGoal(l(pos, {frequency = 8})) end)
+                    end
+                end
+            end)
+        end
+        function o.New(p, q, r, s)
+            local t, u = e(h), o.Window
+            local v = t.Elements
+            o.TabCount = o.TabCount + 1
+            local w, x = o.TabCount, {Selected = false, Name = q, Type = "Tab", _origOrder = o.TabCount}
+            local icResolved = t:GetIcon(r)
+            if icResolved then
+                r = icResolved
+            elseif type(r) == "string" then
+                if not (r:find("rbxassetid://") or r:find("rbxasset://") or r:find("http://") or r:find("https://")) then
+                    r = nil
+                end
+            else
+                r = nil
+            end
+            x.Frame =
+                k(
+                "TextButton",
+                {
+                    Size = UDim2.new(1, 0, 0, 34),
+                    BackgroundTransparency = 1,
+                    Parent = s,
+                    ThemeTag = {BackgroundColor3 = "Tab"}
+                },
+                {
+                    k("UICorner", {CornerRadius = UDim.new(0, 6)}),
+                    k(
+                        "TextLabel",
+                        {
+                            AnchorPoint = Vector2.new(0, 0.5),
+                            Position = (r ~= nil) and UDim2.new(0, 30, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
+                            Text = q,
+                            RichText = true,
+                            TextColor3 = Color3.fromRGB(255, 255, 255),
+                            TextTransparency = 0,
+                            FontFace = Font.new(
+                                "rbxasset://fonts/families/GothamSSm.json",
+                                Enum.FontWeight.Regular,
+                                Enum.FontStyle.Normal
+                            ),
+                            TextSize = 13,
+                            TextXAlignment = "Left",
+                            TextYAlignment = "Center",
+                            Size = UDim2.new(1, -30, 1, 0),
+                            TextTruncate = Enum.TextTruncate.AtEnd,
+                            BackgroundTransparency = 1,
+                            ThemeTag = {TextColor3 = "Text"}
+                        }
+                    ),
+                    k(
+                        "ImageLabel",
+                        {
+                            AnchorPoint = Vector2.new(0, 0.5),
+                            Size = UDim2.fromOffset(16, 16),
+                            Position = UDim2.new(0, 8, 0.5, 0),
+                            BackgroundTransparency = 1,
+                            Image = r and (type(r) == "table" and r.Image or r) or nil,
+                            ImageRectOffset = (r and type(r) == "table") and r.ImageRectOffset or Vector2.new(0,0),
+                            ImageRectSize = (r and type(r) == "table") and r.ImageRectSize or Vector2.new(0,0),
+                            ThemeTag = {ImageColor3 = "Text"}
+                        }
+                    )
+                }
+            )
+            local y = k("UIListLayout", {Padding = UDim.new(0, 5), SortOrder = Enum.SortOrder.LayoutOrder})
+            x.ContainerFrame =
+                k(
+                "ScrollingFrame",
+                {
+                    Size = UDim2.fromScale(1, 1),
+                    BackgroundTransparency = 1,
+                    Parent = u.ContainerClip,
+                    Visible = false,
+                    BottomImage = "rbxassetid://6889812791",
+                    MidImage = "rbxassetid://6889812721",
+                    TopImage = "rbxassetid://6276641225",
+                    ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255),
+                    ScrollBarImageTransparency = 1,
+                    ScrollBarThickness = 0,
+                    ElasticBehavior = Enum.ElasticBehavior.Never,
+                    BorderSizePixel = 0,
+                    CanvasSize = UDim2.fromScale(0, 0),
+                    ScrollingDirection = Enum.ScrollingDirection.Y
+                },
+                {
+                    y,
+                    k(
+                        "UIPadding",
+                        {
+                            PaddingRight = UDim.new(0, 8),
+                            PaddingLeft = UDim.new(0, 4),
+                            PaddingTop = UDim.new(0, 4),
+                            PaddingBottom = UDim.new(0, 4)
+                        }
+                    )
+                }
+            )
+            do
+                local sf = x.ContainerFrame
+                local parentClip = u.ContainerClip or sf.Parent
+                local sbHolder = Instance.new("Frame")
+                sbHolder.Name = "_SBOverlay"
+                sbHolder.BackgroundTransparency = 1
+                sbHolder.Position = UDim2.new(1, -6, 0, 4)
+                sbHolder.Size = UDim2.new(0, 6, 1, -8)
+                sbHolder.ClipsDescendants = true
+                sbHolder.ZIndex = 10
+                sbHolder.Parent = parentClip
+                local sbBar = Instance.new("Frame")
+                sbBar.Name = "_SBBar"
+                sbBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                sbBar.BackgroundTransparency = 0.75
+                sbBar.BorderSizePixel = 0
+                sbBar.Size = UDim2.fromOffset(3, 50)
+                sbBar.Parent = sbHolder
+                local sbCorner = Instance.new("UICorner")
+                sbCorner.CornerRadius = UDim.new(1, 0)
+                sbCorner.Parent = sbBar
+                local _alive = true
+                local _conns = {}
+                local function updateScrollbar()
+                    if not _alive then return end
+                    if not sf or not sf.Parent or not sf.Visible or o.SelectedTab ~= w then
+                        if sbHolder then sbHolder.Visible = false end
+                        return
+                    end
+                    local _libCheck = e(h)
+                    if not _libCheck or _libCheck.Unloaded then
+                        if sbHolder then sbHolder.Visible = false end
+                        task.defer(_teardown)
+                        return
+                    end
+                    local win = _libCheck.Window
+                    if (win and win.Minimized) or _libCheck.DialogOpen then
+                        if sbHolder then sbHolder.Visible = false end
+                        return
+                    end
+                    local canvasH = sf.CanvasSize.Y.Offset
+                    local frameH = sf.AbsoluteSize.Y
+                    if canvasH <= frameH + 4 or frameH <= 0 then
+                        if sbHolder then sbHolder.Visible = false end
+                        return
+                    end
+                    sbHolder.Visible = true
+                    local ratio = math.clamp(frameH / canvasH, 0.05, 1)
+                    local totalTrackH = math.max(frameH - 8, 1)
+                    local barH = math.max(math.floor(totalTrackH * ratio), 20)
+                    local maxScrollY = math.max(canvasH - frameH, 1)
+                    local scrollRatio = math.clamp(sf.CanvasPosition.Y / maxScrollY, 0, 1)
+                    local maxY = math.max(totalTrackH - barH, 0)
+                    local barY = math.floor(scrollRatio * maxY)
+                    sbBar.Size = UDim2.fromOffset(3, barH)
+                    sbBar.Position = UDim2.fromOffset(1.5, barY)
+                end
+                x._updateScrollbar = updateScrollbar
+                local function _teardown()
+                    if not _alive then return end
+                    _alive = false
+                    pcall(function() sbHolder.Visible = false end)
+                    for _, conn in ipairs(_conns) do
+                        pcall(function() conn:Disconnect() end)
+                    end
+                    table.clear(_conns)
+                    task.defer(function()
+                        pcall(function() sbHolder:Destroy() end)
+                    end)
+                end
+                table.insert(_conns, sf:GetPropertyChangedSignal("CanvasPosition"):Connect(updateScrollbar))
+                table.insert(_conns, sf:GetPropertyChangedSignal("Visible"):Connect(updateScrollbar))
+                local _lib = e(h)
+                if _lib and _lib.GUI then
+                    table.insert(_conns, _lib.GUI.Destroying:Connect(_teardown))
+                end
+                if _lib and _lib.ScrollGUI then
+                    table.insert(_conns, _lib.ScrollGUI.Destroying:Connect(_teardown))
+                end
+                table.insert(_conns, sf.AncestryChanged:Connect(function(_, newParent)
+                    if not newParent then task.defer(_teardown) end
+                end))
+                task.defer(updateScrollbar)
+                local uis = game:GetService("UserInputService")
+                local dragging = false
+                local dragStartY, dragStartCanvasY
+                table.insert(_conns, sbBar.InputBegan:Connect(function(inp)
+                    if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+                        dragging = true
+                        dragStartY = inp.Position.Y
+                        dragStartCanvasY = sf.CanvasPosition.Y
+                    end
+                end))
+                table.insert(_conns, uis.InputChanged:Connect(function(inp)
+                    if not dragging then return end
+                    if inp.UserInputType == Enum.UserInputType.MouseMovement then
+                        local dy = inp.Position.Y - dragStartY
+                        local canvasH = sf.CanvasSize.Y.Offset
+                        local frameH = sf.AbsoluteSize.Y
+                        local maxY = (sf.AbsoluteSize.Y - 8) - sbBar.AbsoluteSize.Y
+                        if maxY > 0 then
+                            local scrollDelta = dy / maxY * (canvasH - frameH)
+                            sf.CanvasPosition = Vector2.new(0, math.clamp(dragStartCanvasY + scrollDelta, 0, canvasH - frameH))
+                        end
+                    end
+                end))
+                table.insert(_conns, uis.InputEnded:Connect(function(inp)
+                    if not dragging then return end
+                    if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+                        dragging = false
+                    end
+                end))
+                x._SBOverlay = sbHolder
+                x._SBOverlayTeardown = _teardown
+                pcall(function()
+                    local lib = e(h)
+                    lib._SBOverlays = lib._SBOverlays or {}
+                    table.insert(lib._SBOverlays, sbHolder)
+                    lib._SBOverlayTeardowns = lib._SBOverlayTeardowns or {}
+                    table.insert(lib._SBOverlayTeardowns, _teardown)
+                end)
+            end
+            j.AddSignal(
+                y:GetPropertyChangedSignal "AbsoluteContentSize",
+                function()
+                    x.ContainerFrame.CanvasSize = UDim2.new(0, 0, 0, y.AbsoluteContentSize.Y + 2)
+                end
+            )
+            x.Motor, x.SetTransparency = j.SpringMotor(1, x.Frame, "BackgroundTransparency")
+            j.AddSignal(
+                x.Frame.MouseEnter,
+                function()
+                    x.SetTransparency(x.Selected and 0.85 or 0.89)
+                end
+            )
+            j.AddSignal(
+                x.Frame.MouseLeave,
+                function()
+                    x.SetTransparency(x.Selected and 0.89 or 1)
+                end
+            )
+            j.AddSignal(
+                x.Frame.MouseButton1Down,
+                function()
+                    x.SetTransparency(0.92)
+                end
+            )
+            j.AddSignal(
+                x.Frame.MouseButton1Up,
+                function()
+                    x.SetTransparency(x.Selected and 0.85 or 0.89)
+                end
+            )
+            j.AddSignal(
+                x.Frame.MouseButton1Click,
+                function()
+                    o:SelectTab(w)
+                end
+            )
+            local _lib = t
+            local _favStar = k("TextButton", {
+                Size = UDim2.fromOffset(20, 20),
+                Position = UDim2.new(1, -6, 0.5, 0),
+                AnchorPoint = Vector2.new(1, 0.5),
+                BackgroundTransparency = 1,
+                Text = "",
+                ZIndex = 3,
+                Parent = x.Frame,
+            })
+            local _favIco = k("ImageLabel", {
+                Size = UDim2.fromScale(1, 1),
+                BackgroundTransparency = 1,
+                ZIndex = 4,
+                Parent = _favStar,
+            })
+            local function _setFavImage(active)
+                local iconName = active and "lucide/bookmark-check" or "lucide/bookmark"
+                local lib2 = _lib
+                local ic = lib2 and lib2.GetIcon and lib2:GetIcon(iconName)
+                if ic and type(ic) == "table" then
+                    _favIco.Image = ic.Image or ""
+                    _favIco.ImageRectOffset = ic.ImageRectOffset or Vector2.new()
+                    _favIco.ImageRectSize = ic.ImageRectSize or Vector2.new()
+                elseif ic then
+                    _favIco.Image = tostring(ic)
+                else
+                    _favIco.Image = active and "rbxassetid://10747363809" or "rbxassetid://10747364139"
+                end
+                if active then
+                    _favIco.ImageColor3 = Color3.fromRGB(255, 210, 0)
+                    _favIco.ImageTransparency = 0
+                else
+                    _favIco.ImageColor3 = Color3.fromRGB(255, 255, 255)
+                    _favIco.ImageTransparency = 0.35
+                end
+            end
+            local function _updateFavIcon(active)
+                _setFavImage(active)
+            end
+            local _im = _lib and _lib.InterfaceManager
+            if _im then _updateFavIcon(_im:IsFavorite(q)) end
+            x._refreshFavIcon = function()
+                local im2 = _lib and _lib.InterfaceManager
+                if im2 then _updateFavIcon(im2:IsFavorite(q)) end
+            end
+            j.AddSignal(_favStar.MouseButton1Click, function()
+                local im = _lib and _lib.InterfaceManager
+                if not im then return end
+                local nowFav = im:IsFavorite(q)
+                im:SetFavorite(q, not nowFav)
+                _updateFavIcon(not nowFav)
+                o:ReapplyFavoriteOrder()
+            end)
+            o.Containers[w] = x.ContainerFrame
+            o.Tabs[w] = x
+            x.Container = x.ContainerFrame
+            x.ScrollFrame = x.Container
+            function x.AddSection(z, A, iconKey)
+                if not iconKey or iconKey == "" then iconKey = "solar/fire-bold" end
+                return z:AddCollapsibleSection(A, iconKey)
+            end
+            function x.AddCollapsibleSection(z, A, iconKey, openState)
+
+                local cfg = {}
+                if type(A) == "table" then
+                    cfg = A
+                else
+                    cfg.Title = A
+                    if type(iconKey) == "boolean" then
+                        cfg.Open = iconKey
+                    else
+                        cfg.Icon = iconKey
+                        if openState ~= nil then cfg.Open = openState end
+                    end
+                end
+                x._elementCount = (x._elementCount or 0) + 1
+                local _order = x._elementCount
+                local tabLib = t
+                local title2     = tostring(cfg.Title or "Section")
+                local iconKey2   = cfg.Icon
+                local startOpen2 = cfg.Open == true
+                local pad2 = 5
+                local sectionMargin = 12
+                local ts2 = game:GetService("TweenService")
+
+                local outerWrap2 = k("Frame", {
+                    Size = UDim2.new(1, 0, 0, 26 + sectionMargin),
+                    BackgroundTransparency = 1,
+                    LayoutOrder = _order,
+                    Parent = x.Container,
+                })
+
+                local header2 = k("TextButton", {
+                    Size = UDim2.new(1, 0, 0, 26),
+                    BackgroundTransparency = 1,
+                    Text = "",
+                    AutoButtonColor = false,
+                    Parent = outerWrap2,
+                })
+
+                local titleOffX2 = iconKey2 and 22 or 0
+                if iconKey2 then
+                    local hIco2 = k("ImageLabel", {
+                        Name = "_SecIcon",
+                        Size = UDim2.fromOffset(14, 14),
+                        Position = UDim2.fromOffset(0, 4),
+                        BackgroundTransparency = 1,
+                        ImageColor3 = Color3.fromRGB(255, 255, 255),
+                        ImageTransparency = 0.2,
+                        Parent = header2,
+                    })
+                    task.defer(function()
+                        local ic2 = tabLib.GetIcon and tabLib:GetIcon(iconKey2)
+                        if ic2 then
+                            if type(ic2) == "table" then
+                                hIco2.Image = ic2.Image or ""
+                                hIco2.ImageRectOffset = ic2.ImageRectOffset or Vector2.new()
+                                hIco2.ImageRectSize = ic2.ImageRectSize or Vector2.new()
+                            else
+                                hIco2.Image = tostring(ic2)
+                            end
+                        end
+                    end)
+                end
+
+                local titleLbl2 = k("TextLabel", {
+                    RichText = true,
+                    Text = title2,
+                    TextTransparency = 0,
+                    FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+                    TextSize = 15,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextYAlignment = Enum.TextYAlignment.Center,
+                    Size = UDim2.new(1, -36, 0, 20),
+                    Position = UDim2.fromOffset(titleOffX2, 3),
+                    BackgroundTransparency = 1,
+                    ThemeTag = {TextColor3 = "Text"},
+                    Parent = header2,
+                })
+
+                local arrowIco2 = k("ImageLabel", {
+                    Name = "_SecChevron",
+                    Size = UDim2.fromOffset(16, 16),
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    Position = UDim2.new(1, 0, 0, 13),
+                    BackgroundTransparency = 1,
+                    ImageColor3 = Color3.fromRGB(255, 255, 255),
+                    ImageTransparency = 0.2,
+                    ThemeTag = {ImageColor3 = "Text"},
+                    Parent = header2,
+                })
+                do
+                    local arIc = tabLib.GetIcon and tabLib:GetIcon("lucide/chevron-down")
+                    if arIc and type(arIc) == "table" then
+                        arrowIco2.Image = arIc.Image or "rbxassetid://10709790948"
+                        arrowIco2.ImageRectOffset = arIc.ImageRectOffset or Vector2.new()
+                        arrowIco2.ImageRectSize = arIc.ImageRectSize or Vector2.new()
+                    else
+                        arrowIco2.Image = "rbxassetid://10709790948"
+                    end
+                end
+
+                local contentBg2 = k("Frame", {
+                    Size = UDim2.new(1, 0, 0, 0),
+                    Position = UDim2.fromOffset(0, 26),
+                    BackgroundTransparency = 1,
+                    ClipsDescendants = true,
+                    LayoutOrder = 2,
+                    Parent = outerWrap2,
+                })
+                local innerLayout2 = k("UIListLayout", {
+                    Padding = UDim.new(0, pad2),
+                    SortOrder = Enum.SortOrder.LayoutOrder,
+                    Parent = contentBg2,
+                })
+                k("UIPadding", {
+                    PaddingTop = UDim.new(0, pad2),
+                    PaddingBottom = UDim.new(0, pad2),
+                    PaddingLeft = UDim.new(0, 4),
+                    PaddingRight = UDim.new(0, 4),
+                    Parent = contentBg2,
+                })
+
+                local isOpen2 = startOpen2
+                local innerH2 = 0
+                local dur2 = 0.16
+                local ti2 = TweenInfo.new(dur2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                local _animating = false
+                local _curTween1, _curTween2 = nil, nil
+
+                local function calcContentH()
+                    local h = innerLayout2.AbsoluteContentSize.Y
+                    if h and h > 0 then return h end
+                    local total = 0
+                    for _, child in ipairs(contentBg2:GetChildren()) do
+                        if child:IsA("GuiObject") and child.Name ~= "_ElemIcon" and not child:IsA("UIListLayout") and not child:IsA("UIPadding") then
+                            local chH = child.Size.Y.Offset
+                            if chH <= 0 then chH = child.AbsoluteSize.Y end
+                            if chH <= 0 then chH = 38 end
+                            total = total + chH + pad2
+                        end
+                    end
+                    return total
+                end
+
+                local function applyArrow2(open, anim)
+                    local rot = open and 180 or 0
+                    if anim then
+                        ts2:Create(arrowIco2, TweenInfo.new(dur2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = rot}):Play()
+                    else
+                        arrowIco2.Rotation = rot
+                    end
+                end
+
+                local function setOpen2(open, anim)
+                    isOpen2 = open
+                    applyArrow2(open, anim)
+                    if _curTween1 then pcall(function() _curTween1:Cancel() end) end
+                    if _curTween2 then pcall(function() _curTween2:Cancel() end) end
+
+                    if open then
+                        contentBg2.Visible = true
+                    end
+
+                    local curContentH = calcContentH()
+                    if curContentH > 0 then innerH2 = curContentH end
+                    local ch = open and (innerH2 + pad2 * 2) or 0
+                    local oh = 26 + ch + sectionMargin
+
+                    if anim then
+                        _animating = true
+                        _curTween1 = ts2:Create(contentBg2, ti2, {Size = UDim2.new(1, 0, 0, ch)})
+                        _curTween2 = ts2:Create(outerWrap2, ti2, {Size = UDim2.new(1, 0, 0, oh)})
+                        _curTween1:Play()
+                        _curTween2:Play()
+                        task.delay(dur2 + 0.02, function()
+                            _animating = false
+                            if not isOpen2 then
+                                contentBg2.Visible = false
+                            else
+                                local finalH = calcContentH()
+                                if finalH > 0 then
+                                    innerH2 = finalH
+                                    local realCh = finalH + pad2 * 2
+                                    contentBg2.Size = UDim2.new(1, 0, 0, realCh)
+                                    outerWrap2.Size = UDim2.new(1, 0, 0, 26 + realCh + sectionMargin)
+                                end
+                            end
+                        end)
+                    else
+                        contentBg2.Size = UDim2.new(1, 0, 0, ch)
+                        outerWrap2.Size = UDim2.new(1, 0, 0, oh)
+                        contentBg2.Visible = open
+                    end
+                end
+
+                innerLayout2:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                    local newH = innerLayout2.AbsoluteContentSize.Y
+                    if newH > 0 then innerH2 = newH end
+                    if isOpen2 and not _animating then
+                        local ch = (newH > 0 and newH or calcContentH()) + pad2 * 2
+                        contentBg2.Size = UDim2.new(1, 0, 0, ch)
+                        outerWrap2.Size = UDim2.new(1, 0, 0, 26 + ch + sectionMargin)
+                    end
+                end)
+
+                header2.MouseButton1Click:Connect(function()
+                    setOpen2(not isOpen2, true)
+                end)
+                task.defer(function()
+                    local initH = calcContentH()
+                    if initH > 0 then innerH2 = initH end
+                    setOpen2(startOpen2, false)
+                end)
+                local colMod2 = {
+                    Type = "Section",
+                    Container = contentBg2,
+                    ScrollFrame = x.Container,
+                    _elementCount = 0,
+                }
+                function colMod2:Open(anim)   setOpen2(true,  anim ~= false) end
+                function colMod2:Close(anim)  setOpen2(false, anim ~= false) end
+                function colMod2:Toggle(anim) setOpen2(not isOpen2, anim ~= false) end
+                function colMod2:IsOpen()     return isOpen2 end
+                function colMod2:SetTitle(s)  titleLbl2.Text = tostring(s or "") end
+                setmetatable(colMod2, v)
+                z._currentSection = colMod2
+                return colMod2
+            end
+            setmetatable(x, v)
+            return x
+        end
+        function o.SelectTab(p, q)
+            local r = o.Window
+            if not r then return end
+            local tabObj, tabIdx = o:GetTab(q)
+            if not tabObj then return end
+            o.SelectedTab = tabIdx
+            for s, t in next, o.Tabs do
+                t.SetTransparency(1)
+                t.Selected = false
+                if t._SBOverlay then
+                    t._SBOverlay.Visible = false
+                end
+            end
+            tabObj.SetTransparency(0.89)
+            tabObj.Selected = true
+            r.TabDisplay.Text = tabObj.Name
+            local tabPos = o:GetCurrentTabPos()
+            if tabPos and r.SelectorPosMotor then
+                if r.SelectorFrame then r.SelectorFrame.Visible = true end
+                r.SelectorPosMotor:setGoal(l(tabPos, {frequency = 8}))
+            end
+            if r.UpdateSelector then
+                r.UpdateSelector(false)
+            end
+            local curCont = o.Containers[tabIdx]
+            local twSvc = game:GetService("TweenService")
+            task.spawn(function()
+                for u, v in next, o.Containers do
+                    v.Visible = false
+                end
+                if curCont then
+                    curCont.Visible = true
+                    curCont.CanvasPosition = Vector2.new(0, 0)
+                end
+                if tabObj._updateScrollbar then
+                    tabObj._updateScrollbar()
+                end
+                if r.ContainerHolder then
+                    local tabW = r.SidebarWidth or r.TabWidth or 150
+                    local topH = r.TopbarHeight or 40
+                    r.ContainerHolder.Position = UDim2.fromOffset(tabW + 16, topH + 30)
+                    local tw = twSvc:Create(r.ContainerHolder, TweenInfo.new(0.18, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                        Position = UDim2.fromOffset(tabW + 16, topH + 26)
+                    })
+                    tw:Play()
+                end
+            end)
+        end
+        function o.UpdateActiveScrollbar(p)
+            for idx, tab in ipairs(o.Tabs) do
+                if tab._SBOverlay then
+                    if idx == o.SelectedTab and tab.ContainerFrame and tab.ContainerFrame.Visible then
+                        if tab._updateScrollbar then tab._updateScrollbar() end
+                    else
+                        tab._SBOverlay.Visible = false
+                    end
+                end
+            end
+        end
+        return o
+    end,
+    [15] = function()
+        local c, d, e, f, g = b(15)
+        local h, i = game:GetService "TextService", d.Parent.Parent
+        local j, k = e(i.Packages.Flipper), e(i.Creator)
+        local l = k.New
+        return function(m, n)
+            n = n or false
+            local o = {}
+            o.Input =
+                l(
+                "TextBox",
+                {
+                    FontFace = Font.new "rbxasset://fonts/families/GothamSSm.json",
+                    TextColor3 = Color3.fromRGB(200, 200, 200),
+                    TextSize = 14,
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextYAlignment = Enum.TextYAlignment.Center,
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.fromScale(1, 1),
+                    Position = UDim2.fromOffset(10, 0),
+                    ThemeTag = {TextColor3 = "Text", PlaceholderColor3 = "SubText"}
+                }
+            )
+            o.Container =
+                l(
+                "Frame",
+                {
+                    BackgroundTransparency = 1,
+                    ClipsDescendants = true,
+                    Position = UDim2.new(0, 6, 0, 0),
+                    Size = UDim2.new(1, -12, 1, 0)
+                },
+                {o.Input}
+            )
+            o.Indicator =
+                l(
+                "Frame",
+                {
+                    Size = UDim2.new(1, -4, 0, 1),
+                    Position = UDim2.new(0, 2, 1, 0),
+                    AnchorPoint = Vector2.new(0, 1),
+                    BackgroundTransparency = n and 0.5 or 0,
+                    ThemeTag = {BackgroundColor3 = n and "InputIndicator" or "DialogInputLine"}
+                }
+            )
+            o.Frame =
+                l(
+                "Frame",
+                {
+                    Size = UDim2.new(0, 0, 0, 30),
+                    BackgroundTransparency = n and 0.9 or 0,
+                    Parent = m,
+                    ThemeTag = {BackgroundColor3 = n and "Input" or "DialogInput"}
+                },
+                {
+                    l("UICorner", {CornerRadius = UDim.new(0, 4)}),
+                    l(
+                        "UIStroke",
+                        {
+                            ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                            Transparency = n and 0.5 or 0.65,
+                            ThemeTag = {Color = n and "InElementBorder" or "DialogButtonBorder"}
+                        }
+                    ),
+                    o.Indicator,
+                    o.Container
+                }
+            )
+            local p = function()
+                local p, q = 2, o.Container.AbsoluteSize.X
+                if not o.Input:IsFocused() or o.Input.TextBounds.X <= q - 2 * p then
+                    o.Input.Position = UDim2.new(0, p, 0, 0)
+                else
+                    local r = o.Input.CursorPosition
+                    if r ~= -1 then
+                        local s = string.sub(o.Input.Text, 1, r - 1)
+                        local t = h:GetTextSize(s, o.Input.TextSize, o.Input.Font, Vector2.new(math.huge, math.huge)).X
+                        local u = o.Input.Position.X.Offset + t
+                        if u < p then
+                            o.Input.Position = UDim2.fromOffset(p - t, 0)
+                        elseif u > q - p - 1 then
+                            o.Input.Position = UDim2.fromOffset(q - t - p - 1, 0)
+                        end
+                    end
+                end
+            end
+            task.spawn(p)
+            k.AddSignal(o.Input:GetPropertyChangedSignal "Text", p)
+            k.AddSignal(o.Input:GetPropertyChangedSignal "CursorPosition", p)
+            k.AddSignal(
+                o.Input.Focused,
+                function()
+                    p()
+                    o.Indicator.Size = UDim2.new(1, -2, 0, 2)
+                    o.Indicator.Position = UDim2.new(0, 1, 1, 0)
+                    o.Indicator.BackgroundTransparency = 0
+                    k.OverrideTag(o.Frame, {BackgroundColor3 = n and "InputFocused" or "DialogHolder"})
+                    k.OverrideTag(o.Indicator, {BackgroundColor3 = "Accent"})
+                end
+            )
+            k.AddSignal(
+                o.Input.FocusLost,
+                function()
+                    p()
+                    o.Indicator.Size = UDim2.new(1, -4, 0, 1)
+                    o.Indicator.Position = UDim2.new(0, 2, 1, 0)
+                    o.Indicator.BackgroundTransparency = 0.5
+                    k.OverrideTag(o.Frame, {BackgroundColor3 = n and "Input" or "DialogInput"})
+                    k.OverrideTag(o.Indicator, {BackgroundColor3 = n and "InputIndicator" or "DialogInputLine"})
+                end
+            )
+            return o
+        end
+    end,
+    [16] = function()
+        local c, d, e, f, g = b(16)
+        local h, i = d.Parent.Parent, e(d.Parent.Assets)
+        local j, k = e(h.Creator), e(h.Packages.Flipper)
+        local l, m = j.New, j.AddSignal
+        return function(n)
+            local o, p, q =
+                {},
+                e(h),
+                function(o, p, q, r)
+                    local s = {
+                        Callback = r or function()
+                            end
+                    }
+                    s.Frame =
+                        l(
+                        "TextButton",
+                        {
+                            Size = UDim2.new(0, 34, 1, -8),
+                            AnchorPoint = Vector2.new(1, 0),
+                            BackgroundTransparency = 1,
+                            Parent = q,
+                            Position = p,
+                            Text = "",
+                            ThemeTag = {BackgroundColor3 = "Text"}
+                        },
+                        {
+                            l("UICorner", {CornerRadius = UDim.new(0, 7)}),
+                            l(
+                                "ImageLabel",
+                                {
+                                    Image = o,
+                                    Size = UDim2.fromOffset(16, 16),
+                                    Position = UDim2.fromScale(0.5, 0.5),
+                                    AnchorPoint = Vector2.new(0.5, 0.5),
+                                    BackgroundTransparency = 1,
+                                    Name = "Icon",
+                                    ThemeTag = {ImageColor3 = "Text"}
+                                }
+                            )
+                        }
+                    )
+                    local t, u = j.SpringMotor(1, s.Frame, "BackgroundTransparency")
+                    m(
+                        s.Frame.MouseEnter,
+                        function()
+                            u(0.94)
+                        end
+                    )
+                    m(
+                        s.Frame.MouseLeave,
+                        function()
+                            u(1, true)
+                        end
+                    )
+                    m(
+                        s.Frame.MouseButton1Down,
+                        function()
+                            u(0.96)
+                        end
+                    )
+                    m(
+                        s.Frame.MouseButton1Up,
+                        function()
+                            u(0.94)
+                        end
+                    )
+                    m(s.Frame.MouseButton1Click, s.Callback)
+                    s.SetCallback = function(v)
+                        s.Callback = v
+                    end
+                    return s
+                end
+            local topH = (p.Window and p.Window.TopbarHeight) or (n.TopbarHeight) or 40
+            o.Frame =
+                l(
+                "Frame",
+                {Size = UDim2.new(1, 0, 0, topH), BackgroundTransparency = 1, Active = true, Parent = n.Parent},
+                {
+                    l("UICorner", {CornerRadius = UDim.new(0, 10)}),
+                    l(
+                        "Frame",
+                        {Size = UDim2.new(1, -84, 1, 0), Position = UDim2.new(0, 16, 0, 0), BackgroundTransparency = 1},
+                        {
+                            l(
+                                "UIListLayout",
+                                {
+                                    Padding = UDim.new(0, 8),
+                                    FillDirection = Enum.FillDirection.Horizontal,
+                                    VerticalAlignment = Enum.VerticalAlignment.Center,
+                                    SortOrder = Enum.SortOrder.LayoutOrder
+                                }
+                            ),
+                            l(
+                                "ImageLabel",
+                                {
+                                    Name = "TitleIcon",
+                                    Image = "",
+                                    Size = UDim2.fromOffset(20, 20),
+                                    BackgroundTransparency = 1,
+                                    Visible = n.Icon ~= nil,
+                                    LayoutOrder = 0,
+                                    ThemeTag = {ImageColor3 = "Text"}
+                                }
+                            ),
+                            l(
+                                "Frame",
+                                {
+                                    Size = UDim2.new(1, -30, 1, 0),
+                                    BackgroundTransparency = 1,
+                                    LayoutOrder = 1,
+                                },
+                                {
+                                    l(
+                                        "UIListLayout",
+                                        {
+                                            Padding = UDim.new(0, 1),
+                                            FillDirection = Enum.FillDirection.Vertical,
+                                            VerticalAlignment = Enum.VerticalAlignment.Center,
+                                            SortOrder = Enum.SortOrder.LayoutOrder
+                                        }
+                                    ),
+                                    l(
+                                        "TextLabel",
+                                        {
+                                            RichText = true,
+                                            Text = n.Title,
+                                            FontFace = Font.new(
+                                                "rbxasset://fonts/families/GothamSSm.json",
+                                                Enum.FontWeight.Bold,
+                                                Enum.FontStyle.Normal
+                                            ),
+                                            TextSize = 16,
+                                            TextXAlignment = "Left",
+                                            TextYAlignment = "Center",
+                                            AutomaticSize = Enum.AutomaticSize.X,
+                                            Size = UDim2.new(0, 0, 0, 20),
+                                            BackgroundTransparency = 1,
+                                            LayoutOrder = 1,
+                                            TextColor3 = Color3.fromRGB(255, 255, 255),
+                                        },
+                                        {
+                                            l("UIGradient", {
+                                                Rotation = 0,
+                                                ThemeTag = { Color = "TitleGradient" }
+                                            })
+                                        }
+                                    ),
+                                    l(
+                                        "TextLabel",
+                                        {
+                                            RichText = true,
+                                            Text = n.SubTitle,
+                                            TextTransparency = 0,
+                                            FontFace = Font.new(
+                                                "rbxasset://fonts/families/GothamSSm.json",
+                                                Enum.FontWeight.Medium,
+                                                Enum.FontStyle.Normal
+                                            ),
+                                            TextSize = 11,
+                                            TextXAlignment = "Left",
+                                            TextYAlignment = "Center",
+                                            AutomaticSize = Enum.AutomaticSize.X,
+                                            Size = UDim2.new(0, 0, 0, 14),
+                                            BackgroundTransparency = 1,
+                                            LayoutOrder = 2,
+                                            TextColor3 = Color3.fromRGB(255, 255, 255),
+                                        },
+                                        {
+                                            l("UIGradient", {
+                                                Rotation = 0,
+                                                ThemeTag = { Color = "SubTitleGradient" }
+                                            })
+                                        }
+                                    )
+                                }
+                            )
+                        }
+                    ),
+                    l(
+                        "Frame",
+                        {
+                            BackgroundTransparency = 0.5,
+                            Size = UDim2.new(1, 0, 0, 1),
+                            Position = UDim2.new(0, 0, 1, 0),
+                            ThemeTag = {BackgroundColor3 = "TitleBarLine"}
+                        }
+                    )
+                }
+            )
+            if n.Icon then
+                local titleIco = o.Frame:FindFirstChild("TitleIcon", true)
+                if titleIco then
+                    task.defer(function()
+                        local lib = p
+                        local ic = lib and lib.GetIcon and lib:GetIcon(n.Icon)
+                        if ic and type(ic) == "table" then
+                            titleIco.Image = ic.Image or ""
+                            titleIco.ImageRectOffset = ic.ImageRectOffset or Vector2.new()
+                            titleIco.ImageRectSize = ic.ImageRectSize or Vector2.new()
+                        elseif ic then
+                            titleIco.Image = tostring(ic)
+                            titleIco.ImageColor3 = Color3.fromRGB(255, 255, 255)
+                        else
+                            titleIco.Image = tostring(n.Icon)
+                            titleIco.ImageColor3 = Color3.fromRGB(255, 255, 255)
+                        end
+                    end)
+                end
+            end
+            local btnY = math.max(math.floor((topH - 26) / 2), 2)
+            o.CloseButton =
+                q(
+                i.Close,
+                UDim2.new(1, -4, 0, btnY),
+                o.Frame,
+                function()
+                    p.Window:Dialog {
+                        Title = "Close",
+                        Content = "Are you sure you want to unload the interface?",
+                        Buttons = {
+                            {
+                                Title = "Yes",
+                                Callback = function()
+                                    p:Destroy()
+                                end
+                            },
+                            {Title = "No"}
+                        }
+                    }
+                end
+            )
+            o.MinButton =
+                q(
+                i.Min,
+                UDim2.new(1, -38, 0, btnY),
+                o.Frame,
+                function()
+                    p.Window:Minimize()
+                end
+            )
+            o.MaxButton = {
+                Frame = l("Frame", {Visible = false, Parent = o.Frame}),
+                SetCallback = function() end
+            }
+            do
+                local UIS = game:GetService("UserInputService")
+                local RS  = game:GetService("RunService")
+                local function _detectDevice()
+                    local platform = UIS:GetPlatform()
+                    if table.find({Enum.Platform.IOS, Enum.Platform.Android}, platform) then
+                        return "smartphone", "lucide/smartphone"
+                    end
+                    if table.find({Enum.Platform.XBoxOne, Enum.Platform.PS4,
+                                   Enum.Platform.XBox360, Enum.Platform.WiiU,
+                                   Enum.Platform.NX}, platform) then
+                        return "console", "lucide/gamepad-2"
+                    end
+                    if not RS:IsStudio() then
+                        local kbd = UIS.KeyboardEnabled
+                        local touch = UIS.TouchEnabled
+                        local gamepad = UIS.GamepadEnabled
+                        if touch and not kbd and not gamepad then
+                            return "tablet", "lucide/tablet"
+                        end
+                        if gamepad and not kbd then
+                            return "console", "lucide/gamepad-2"
+                        end
+                        if kbd then
+                            local vp = game:GetService("Workspace").CurrentCamera.ViewportSize
+                            if vp.X > 0 and vp.X <= 1366 then
+                                return "laptop", "lucide/laptop"
+                            end
+                            return "pc", "lucide/monitor"
+                        end
+                    end
+                    return "pc", "lucide/monitor"
+                end
+                local _devType, _devIcon = _detectDevice()
+                local _tooltipNames = {
+                    pc = "Desktop PC", laptop = "Laptop", smartphone = "Mobile",
+                    tablet = "Tablet", console = "Console",
+                }
+                local _devBadge = j.New("Frame", {
+                    Name             = "_DeviceBadge",
+                    Size             = UDim2.fromOffset(80, 22),
+                    Position         = UDim2.new(1, -168, 0, 9),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel  = 0,
+                    ZIndex           = 4,
+                    Parent           = o.Frame,
+                })
+                local _devIco = j.New("ImageLabel", {
+                    Name             = "_DevIco",
+                    Size             = UDim2.fromOffset(14, 14),
+                    Position         = UDim2.fromOffset(0, 4),
+                    AnchorPoint      = Vector2.new(0, 0),
+                    BackgroundTransparency = 1,
+                    ZIndex           = 5,
+                    ThemeTag         = {ImageColor3 = "SubText"},
+                    Parent           = _devBadge,
+                })
+                local _devText = j.New("TextLabel", {
+                    Name             = "_DevText",
+                    Size             = UDim2.new(1, -20, 1, 0),
+                    Position         = UDim2.fromOffset(18, 0),
+                    BackgroundTransparency = 1,
+                    Text             = _tooltipNames[_devType] or _devType,
+                    TextSize         = 10,
+                    FontFace         = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+                    TextXAlignment   = Enum.TextXAlignment.Left,
+                    TextYAlignment   = Enum.TextYAlignment.Center,
+                    TextTruncate     = Enum.TextTruncate.AtEnd,
+                    ZIndex           = 5,
+                    ThemeTag         = {TextColor3 = "SubText"},
+                    Parent           = _devBadge,
+                })
+                task.defer(function()
+                    local lib = e(h)
+                    if lib and lib.GetIcon then
+                        local ic = lib:GetIcon(_devIcon)
+                        if ic and type(ic) == "table" then
+                            _devIco.Image           = ic.Image or ""
+                            _devIco.ImageRectOffset = ic.ImageRectOffset or Vector2.new()
+                            _devIco.ImageRectSize   = ic.ImageRectSize   or Vector2.new()
+                        elseif ic then
+                            _devIco.Image = tostring(ic)
+                        end
+                    end
+                end)
+            end
+            return o
+        end
+    end,
+    [17] = function()
+        local c, d, e, f, g = b(17)
+        local h, i, j, k =
+            game:GetService "UserInputService",
+            game:GetService "Players".LocalPlayer:GetMouse(),
+            game:GetService "Workspace".CurrentCamera,
+            d.Parent.Parent
+        local l, m, n, o, p = e(k.Packages.Flipper), e(k.Creator), e(k.Acrylic), e(d.Parent.Assets), d.Parent
+        local q, r, s = l.Spring.new, l.Instant.new, m.New
+        return function(t)
+            local FIXED_SIZE = UDim2.fromOffset(525, 290)
+            local FIXED_VEC = Vector2.new(525, 290)
+            local sidebarWidth = 145
+            local topbarHeight = 38
+            local minSize = FIXED_VEC
+            t.SidebarWidth = sidebarWidth
+            t.TabWidth = sidebarWidth
+            t.TopbarHeight = topbarHeight
+            t.MinWindowSize = FIXED_VEC
+            t.MinSize = FIXED_VEC
+            t.Size = FIXED_SIZE
+            local u, v, w, x, y, z =
+                e(k),
+                {
+                    Minimized = false,
+                    Maximized = false,
+                    Size = FIXED_SIZE,
+                    SidebarWidth = sidebarWidth,
+                    TabWidth = sidebarWidth,
+                    TopbarHeight = topbarHeight,
+                    MinWindowSize = FIXED_VEC,
+                    MinSize = FIXED_VEC,
+                    CurrentPos = 0,
+                    Position = UDim2.fromOffset(
+                        math.max(0, math.floor(j.ViewportSize.X / 2 - 525 / 2)),
+                        math.max(0, math.floor(j.ViewportSize.Y / 2 - 290 / 2))
+                    )
+                },
+                false
+            local A, B = false
+            local C = false
+            v.AcrylicPaint = n.AcrylicPaint()
+            local gripLine1 = s("Frame", {
+                Size = UDim2.fromOffset(12, 2),
+                Position = UDim2.fromOffset(11, 11),
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Rotation = -45,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                BackgroundTransparency = 0.45,
+                BorderSizePixel = 0,
+                ThemeTag = {BackgroundColor3 = "SubText"}
+            }, {s("UICorner", {CornerRadius = UDim.new(1, 0)})})
+
+            local gripLine2 = s("Frame", {
+                Size = UDim2.fromOffset(8, 2),
+                Position = UDim2.fromOffset(14, 14),
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Rotation = -45,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                BackgroundTransparency = 0.45,
+                BorderSizePixel = 0,
+                ThemeTag = {BackgroundColor3 = "SubText"}
+            }, {s("UICorner", {CornerRadius = UDim.new(1, 0)})})
+
+            local gripLine3 = s("Frame", {
+                Size = UDim2.fromOffset(4, 2),
+                Position = UDim2.fromOffset(17, 17),
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Rotation = -45,
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                BackgroundTransparency = 0.45,
+                BorderSizePixel = 0,
+                ThemeTag = {BackgroundColor3 = "SubText"}
+            }, {s("UICorner", {CornerRadius = UDim.new(1, 0)})})
+
+            local D, E =
+                s(
+                    "Frame",
+                    {
+                        Size = UDim2.fromOffset(4, 16),
+                        BackgroundColor3 = Color3.fromRGB(76, 194, 255),
+                        Position = UDim2.fromOffset(0, 17),
+                        AnchorPoint = Vector2.new(0, 0.5),
+                        ZIndex = 5,
+                        ThemeTag = {BackgroundColor3 = "Accent"}
+                    },
+                    {s("UICorner", {CornerRadius = UDim.new(0, 6)})}
+                ),
+                s(
+                    "Frame",
+                    {
+                        Size = UDim2.fromOffset(22, 22),
+                        Position = UDim2.new(1, -22, 1, -22),
+                        BackgroundTransparency = 1,
+                        Active = true,
+                        ZIndex = 25,
+                    },
+                    {gripLine1, gripLine2, gripLine3}
+                )
+            local uiTopH = 54
+            local topOffset = 0
+            local botOffset = 0
+            local sidebarChildren = {}
+
+            local function mkCorner(r) return s("UICorner",{CornerRadius=UDim.new(0,r)}) end
+            local function mkStroke(t2,thk) return s("UIStroke",{Transparency=t2,Thickness=thk or 1,ThemeTag={Color="InElementBorder"}}) end
+
+            if t.TabLogo then
+                local logoH = 110
+                local logoFrame = s("Frame",{
+                    Name="TabLogoFrame",
+                    Size=UDim2.new(1,0,0,logoH),
+                    Position=UDim2.fromOffset(0,topOffset),
+                    BackgroundTransparency=0.85,
+                    ZIndex=2,
+                    ThemeTag={BackgroundColor3="Element"},
+                },{
+                    mkCorner(10), mkStroke(0.5),
+                })
+                local logoImg = s("ImageLabel",{
+                    Size=UDim2.fromOffset(86,86),
+                    Position=UDim2.new(0.5,0,0.5,0), AnchorPoint=Vector2.new(0.5,0.5),
+                    BackgroundTransparency=1,
+                    Image="",
+                    ImageColor3=Color3.fromRGB(255,255,255),
+                    ScaleType=Enum.ScaleType.Fit,
+                    Parent=logoFrame,
+                })
+                local ic = u:GetIcon(t.TabLogo)
+                if ic then
+                    if type(ic) == "table" then
+                        logoImg.Image = ic.Image or ""
+                        logoImg.ImageRectOffset = ic.ImageRectOffset or Vector2.new(0,0)
+                        logoImg.ImageRectSize   = ic.ImageRectSize   or Vector2.new(0,0)
+                    else
+                        logoImg.Image = tostring(ic)
+                    end
+                else
+                    logoImg.Image = tostring(t.TabLogo)
+                    logoImg.ImageColor3 = Color3.fromRGB(255,255,255)
+                end
+                topOffset = topOffset + logoH + 4
+                table.insert(sidebarChildren, logoFrame)
+            end
+
+            if t.UserInfoTop then
+                local lp = game:GetService("Players").LocalPlayer
+                local h = 58
+                local realDisplayName = t.UserInfoTitle or (lp and lp.DisplayName) or "Player"
+                local realUsername    = t.UserInfoSubtitle or (lp and ("@"..lp.Name)) or "@Player"
+                local anonActive = false
+
+                local avatarImgTop = s("ImageLabel",{
+                    Size=UDim2.fromOffset(36,36),
+                    Position=UDim2.new(0,7,0.5,0), AnchorPoint=Vector2.new(0,0.5),
+                    BackgroundTransparency=0.5, Image="",
+                    ThemeTag={BackgroundColor3="Tab"},
+                },{mkCorner(18)})
+
+                if lp then
+                    task.spawn(function()
+                        pcall(function()
+                            local av = game:GetService("Players"):GetUserThumbnailAsync(
+                                lp.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+                            if avatarImgTop and avatarImgTop.Parent then
+                                avatarImgTop.Image = av
+                            end
+                        end)
+                    end)
+                end
+
+                local panel = s("Frame",{
+                    Name="UserInfoTop",
+                    Size=UDim2.new(1,0,0,h),
+                    Position=UDim2.fromOffset(0,topOffset),
+                    BackgroundTransparency=0.78,
+                    ZIndex=2,
+                    ThemeTag={BackgroundColor3="Element"},
+                },{
+                    mkCorner(8), mkStroke(0.55),
+                    avatarImgTop,
+                    s("TextLabel",{
+                        Name="DisplayName",
+                        FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json",Enum.FontWeight.SemiBold),
+                        Text=realDisplayName,
+                        TextSize=12, TextXAlignment=Enum.TextXAlignment.Left,
+                        TextTruncate=Enum.TextTruncate.AtEnd,
+                        BackgroundTransparency=1,
+                        Size=UDim2.new(1,-66,0,14), Position=UDim2.new(0,49,0,12),
+                        ThemeTag={TextColor3="Text"},
+                    }),
+                    s("TextLabel",{
+                        Name="Username",
+                        FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json"),
+                        Text=realUsername,
+                        TextSize=10, TextXAlignment=Enum.TextXAlignment.Left,
+                        TextTruncate=Enum.TextTruncate.AtEnd,
+                        BackgroundTransparency=1,
+                        Size=UDim2.new(1,-66,0,13), Position=UDim2.new(0,49,0,30),
+                        ThemeTag={TextColor3="SubText"},
+                    }),
+                    s("Frame",{Size=UDim2.new(1,-10,0,1),Position=UDim2.new(0,5,1,-1),
+                        BackgroundTransparency=0.7,ThemeTag={BackgroundColor3="TitleBarLine"}}),
+                })
+
+                local eyeBtn = s("TextButton",{
+                    Name="AnonToggle",
+                    Size=UDim2.fromOffset(22,22),
+                    Position=UDim2.new(1,-4,0,4), AnchorPoint=Vector2.new(1,0),
+                    BackgroundTransparency=0.7, Text="",
+                    Parent=panel,
+                    ThemeTag={BackgroundColor3="Tab"},
+                },{
+                    s("UICorner",{CornerRadius=UDim.new(0,5)}),
+                    s("UIStroke",{Transparency=0.5,Thickness=1,ThemeTag={Color="InElementBorder"}}),
+                    s("ImageLabel",{
+                        Name="EyeIcon",
+                        Size=UDim2.fromOffset(13,13),
+                        Position=UDim2.fromScale(0.5,0.5), AnchorPoint=Vector2.new(0.5,0.5),
+                        BackgroundTransparency=1,
+                        ScaleType=Enum.ScaleType.Fit,
+                        ThemeTag={ImageColor3="SubText"},
+                    }),
+                })
+                do
+                    local eyeImg = eyeBtn:FindFirstChild("EyeIcon")
+                    if eyeImg then
+                        local icOpen = u.GetIcon(u, "solar/eye-bold")
+                        local icClosed = u.GetIcon(u, "solar/eye-closed-bold")
+                        local function setEyeIcon(active)
+                            local ic = active and icClosed or icOpen
+                            if ic and type(ic) == "table" then
+                                eyeImg.Image = ic.Image or ""
+                                eyeImg.ImageRectOffset = ic.ImageRectOffset or Vector2.new()
+                                eyeImg.ImageRectSize   = ic.ImageRectSize   or Vector2.new()
+                            elseif ic then
+                                eyeImg.Image = tostring(ic)
+                            end
+                        end
+                        setEyeIcon(false)
+                        local dnLbl = panel:FindFirstChild("DisplayName")
+                        local unLbl = panel:FindFirstChild("Username")
+                        m.AddSignal(eyeBtn.MouseButton1Click, function()
+                            anonActive = not anonActive
+                            if dnLbl then dnLbl.Text = anonActive and "Anonymous" or realDisplayName end
+                            if unLbl then unLbl.Text = anonActive and "@•••••••" or realUsername end
+                            setEyeIcon(anonActive)
+                        end)
+                    end
+                end
+
+                if t.UserInfoColor then
+                    local _uic = t.UserInfoColor
+                    local dnLbl2 = panel:FindFirstChild("DisplayName")
+                    local unLbl2 = panel:FindFirstChild("Username")
+                    if dnLbl2 then
+                        m.Registry[dnLbl2] = nil
+                        dnLbl2.TextColor3 = _uic
+                    end
+                    if unLbl2 then
+                        m.Registry[unLbl2] = nil
+                        unLbl2.TextColor3 = _uic
+                    end
+                end
+                topOffset = topOffset + h + 4
+                table.insert(sidebarChildren, panel)
+            end
+
+            local showSearch = not (t.Search == false)
+            local searchH = 30
+            local searchBox = nil
+            if showSearch then
+                local sb = s("Frame",{
+                    Name="SearchBar",
+                    Size=UDim2.new(1,0,0,searchH),
+                    Position=UDim2.fromOffset(0,topOffset),
+                    BackgroundTransparency=0.72,
+                    ZIndex=2,
+                    ThemeTag={BackgroundColor3="Element"},
+                },{
+                    mkCorner(6), mkStroke(0.6),
+                    s("ImageLabel",{
+                        Size=UDim2.fromOffset(13,13),
+                        Position=UDim2.new(0,8,0.5,0), AnchorPoint=Vector2.new(0,0.5),
+                        BackgroundTransparency=1, Image="rbxassetid://10734943674",
+                        ImageTransparency=0.4, ThemeTag={ImageColor3="SubText"},
+                    }),
+                })
+                searchBox = s("TextBox",{
+                    FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json"),
+                    TextSize=12, TextXAlignment=Enum.TextXAlignment.Left,
+                    BackgroundTransparency=1,
+                    Size=UDim2.new(1,-32,1,0), Position=UDim2.new(0,26,0,0),
+                    PlaceholderText="Search...",
+                    PlaceholderColor3=Color3.fromRGB(85,85,85),
+                    ClearTextOnFocus=false, Text="",
+                    ThemeTag={TextColor3="Text",PlaceholderColor3="SubText"},
+                    Parent=sb,
+                })
+                topOffset = topOffset + searchH + 4
+                table.insert(sidebarChildren, sb)
+            end
+
+            v._tabTopOffset = topOffset
+
+            if t.UserInfo then
+                local lp2 = game:GetService("Players").LocalPlayer
+                local h2 = 54
+                botOffset = h2 + 4
+                local realDN2 = t.UserInfoTitle or t.UserInfoTitleBottom or (lp2 and lp2.DisplayName) or "Player"
+                local realUN2 = t.UserInfoSubtitle or t.UserInfoSubtitleBottom or (lp2 and ("@"..lp2.Name)) or "@Player"
+                local anonActive2 = false
+
+                local avatarImgBot = s("ImageLabel",{
+                    Size=UDim2.fromOffset(34,34),
+                    Position=UDim2.new(0,7,0.5,0), AnchorPoint=Vector2.new(0,0.5),
+                    BackgroundTransparency=0.5, Image="",
+                    ThemeTag={BackgroundColor3="Tab"},
+                },{mkCorner(17)})
+
+                if lp2 then
+                    task.spawn(function()
+                        pcall(function()
+                            local av2 = game:GetService("Players"):GetUserThumbnailAsync(
+                                lp2.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+                            if avatarImgBot and avatarImgBot.Parent then
+                                avatarImgBot.Image = av2
+                            end
+                        end)
+                    end)
+                end
+
+                local bot = s("Frame",{
+                    Name="UserInfo",
+                    Size=UDim2.new(1,0,0,h2),
+                    Position=UDim2.new(0,0,1,-h2),
+                    BackgroundTransparency=0.78,
+                    ZIndex=2,
+                    ThemeTag={BackgroundColor3="Element"},
+                },{
+                    mkCorner(8), mkStroke(0.55),
+                    s("Frame",{Size=UDim2.new(1,-10,0,1),Position=UDim2.new(0,5,0,0),
+                        BackgroundTransparency=0.7,ThemeTag={BackgroundColor3="TitleBarLine"}}),
+                    avatarImgBot,
+                    s("TextLabel",{
+                        Name="DisplayName",
+                        FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json",Enum.FontWeight.SemiBold),
+                        Text=realDN2,
+                        TextSize=12, TextXAlignment=Enum.TextXAlignment.Left,
+                        TextTruncate=Enum.TextTruncate.AtEnd,
+                        BackgroundTransparency=1,
+                        Size=UDim2.new(1,-66,0,14), Position=UDim2.new(0,47,0,10),
+                        ThemeTag={TextColor3="Text"},
+                    }),
+                    s("TextLabel",{
+                        Name="Username",
+                        FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json"),
+                        Text=realUN2,
+                        TextSize=10, TextXAlignment=Enum.TextXAlignment.Left,
+                        TextTruncate=Enum.TextTruncate.AtEnd,
+                        BackgroundTransparency=1,
+                        Size=UDim2.new(1,-66,0,13), Position=UDim2.new(0,47,0,27),
+                        ThemeTag={TextColor3="SubText"},
+                    }),
+                })
+                local eyeBtn2 = s("TextButton",{
+                    Name="AnonToggle",
+                    Size=UDim2.fromOffset(22,22),
+                    Position=UDim2.new(1,-4,0,4), AnchorPoint=Vector2.new(1,0),
+                    BackgroundTransparency=0.7, Text="",
+                    Parent=bot,
+                    ThemeTag={BackgroundColor3="Tab"},
+                },{
+                    s("UICorner",{CornerRadius=UDim.new(0,5)}),
+                    s("UIStroke",{Transparency=0.5,Thickness=1,ThemeTag={Color="InElementBorder"}}),
+                    s("ImageLabel",{
+                        Name="EyeIcon",
+                        Size=UDim2.fromOffset(13,13),
+                        Position=UDim2.fromScale(0.5,0.5), AnchorPoint=Vector2.new(0.5,0.5),
+                        BackgroundTransparency=1,
+                        ScaleType=Enum.ScaleType.Fit,
+                        ThemeTag={ImageColor3="SubText"},
+                    }),
+                })
+                do
+                    local eyeImg2 = eyeBtn2:FindFirstChild("EyeIcon")
+                    if eyeImg2 then
+                        local icOpen2 = u.GetIcon(u, "solar/eye-bold")
+                        local icClosed2 = u.GetIcon(u, "solar/eye-closed-bold")
+                        local function setEyeIcon2(active)
+                            local ic = active and icClosed2 or icOpen2
+                            if ic and type(ic) == "table" then
+                                eyeImg2.Image = ic.Image or ""
+                                eyeImg2.ImageRectOffset = ic.ImageRectOffset or Vector2.new()
+                                eyeImg2.ImageRectSize   = ic.ImageRectSize   or Vector2.new()
+                            elseif ic then
+                                eyeImg2.Image = tostring(ic)
+                            end
+                        end
+                        setEyeIcon2(false)
+                        local dn2Lbl = bot:FindFirstChild("DisplayName")
+                        local un2Lbl = bot:FindFirstChild("Username")
+                        m.AddSignal(eyeBtn2.MouseButton1Click, function()
+                            anonActive2 = not anonActive2
+                            if dn2Lbl then dn2Lbl.Text = anonActive2 and "Anonymous" or realDN2 end
+                            if un2Lbl then un2Lbl.Text = anonActive2 and "@•••••••" or realUN2 end
+                            setEyeIcon2(anonActive2)
+                        end)
+                    end
+                end
+                if t.UserInfoColor then
+                    local _uic2 = t.UserInfoColor
+                    local dnLbl3 = bot:FindFirstChild("DisplayName")
+                    local unLbl3 = bot:FindFirstChild("Username")
+                    if dnLbl3 then
+                        m.Registry[dnLbl3] = nil
+                        dnLbl3.TextColor3 = _uic2
+                    end
+                    if unLbl3 then
+                        m.Registry[unLbl3] = nil
+                        unLbl3.TextColor3 = _uic2
+                    end
+                end
+                table.insert(sidebarChildren, bot)
+            end
+
+            local _tabListLayout = s("UIListLayout", {Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder})
+            v.TabListContainer = s(
+                "Frame",
+                {
+                    Size = UDim2.new(1, 0, 0, 0),
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                },
+                {_tabListLayout}
+            )
+            v.TabHolder =
+                s(
+                "ScrollingFrame",
+                {
+                    Size = UDim2.new(1, 0, 1, -(topOffset + botOffset)),
+                    Position = UDim2.fromOffset(0, topOffset),
+                    BackgroundTransparency = 1,
+                    ScrollBarImageTransparency = 0.7,
+                    ScrollBarThickness = 3,
+                    ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255),
+                    ElasticBehavior = Enum.ElasticBehavior.Never,
+                    BorderSizePixel = 0,
+                    CanvasSize = UDim2.fromScale(0, 0),
+                    ScrollingDirection = Enum.ScrollingDirection.Y,
+                    ClipsDescendants = true,
+                },
+                {D, v.TabListContainer, s("UICorner", {CornerRadius = UDim.new(0, 12)})}
+            )
+            table.insert(sidebarChildren, v.TabHolder)
+
+            local listLayout = _tabListLayout
+            if listLayout then
+                listLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                    v.TabHolder.CanvasSize = UDim2.new(0, 0, 0, listLayout.AbsoluteContentSize.Y + 10)
+                end)
+            end
+
+            if searchBox then
+                local allElements = {}
+                v.AllElements = allElements
+                v.SearchBox = searchBox
+
+                local function scrollToFirstVisible()
+                    task.wait(0.05)
+                    for _, cf in pairs(v.ContainerHolder and v.ContainerHolder:GetChildren() or {}) do
+                        if cf:IsA("ScrollingFrame") then
+                            for _, sec in pairs(cf:GetChildren()) do
+                                if sec:IsA("Frame") and sec.Visible then
+                                    local cont = sec:FindFirstChild("Container")
+                                    if cont then
+                                        for _, ch in pairs(cont:GetChildren()) do
+                                            if not ch:IsA("UIListLayout") and not ch:IsA("UIPadding") and ch.Visible then
+                                                local yPos = ch.AbsolutePosition.Y - cf.AbsolutePosition.Y
+                                                if yPos > 0 then
+                                                    cf.CanvasPosition = Vector2.new(0, math.max(0, yPos - 20))
+                                                end
+                                                return
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+                    local q = (searchBox.Text or ""):lower():gsub("^%s+",""):gsub("%s+$","")
+                    local blank = q == ""
+
+                    for _, tabBtn in pairs(v.TabListContainer:GetChildren()) do
+                        if tabBtn:IsA("TextButton") then
+                            local txt = ""
+                            local txtLbl = tabBtn:FindFirstChildWhichIsA("TextLabel")
+                            if txtLbl then txt = txtLbl.Text end
+                            tabBtn.Visible = blank or txt:lower():find(q, 1, true) ~= nil
+                        end
+                    end
+
+                    for el, label in pairs(allElements) do
+                        if el and el.Parent then
+                            el.Visible = blank or label:lower():find(q, 1, true) ~= nil
+                        end
+                    end
+
+                    task.delay(0.03, function()
+                        for _, cf in pairs(v.ContainerHolder and v.ContainerHolder:GetChildren() or {}) do
+                            if cf:IsA("ScrollingFrame") then
+                                for _, sec in pairs(cf:GetChildren()) do
+                                    if sec:IsA("Frame") then
+                                        local cont = sec:FindFirstChild("Container")
+                                        if cont then
+                                            local any = false
+                                            for _, ch in pairs(cont:GetChildren()) do
+                                                if not ch:IsA("UIListLayout") and not ch:IsA("UIPadding") and ch.Visible then
+                                                    any = true
+                                                    break
+                                                end
+                                            end
+                                            sec.Visible = blank or any
+                                        end
+                                    end
+                                end
+                                local layout = cf:FindFirstChildWhichIsA("UIListLayout")
+                                if layout then
+                                    cf.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+                                end
+                            end
+                        end
+                        if not blank then
+                            scrollToFirstVisible()
+                        end
+                    end)
+                end)
+
+                game:GetService("UserInputService").InputBegan:Connect(function(inp, gp)
+                    if gp then return end
+                    if inp.KeyCode == Enum.KeyCode.Escape and searchBox:IsFocused() then
+                        searchBox.Text = ""
+                        searchBox:ReleaseFocus()
+                    end
+                end)
+            end
+
+            local F =
+                s(
+                "Frame",
+                {
+                    Size = UDim2.new(0, sidebarWidth, 1, -(topbarHeight + 10)),
+                    Position = UDim2.new(0, 8, 0, topbarHeight + 4),
+                    BackgroundTransparency = 1,
+                    ClipsDescendants = true
+                },
+                sidebarChildren
+            )
+            v.TabDisplay =
+                s(
+                "TextLabel",
+                {
+                    RichText = true,
+                    Text = "Tab",
+                    TextTransparency = 0,
+                    FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal),
+                    TextSize = 15,
+                    TextXAlignment = "Left",
+                    TextYAlignment = "Center",
+                    Size = UDim2.new(1, -sidebarWidth - 24, 0, 20),
+                    Position = UDim2.fromOffset(sidebarWidth + 16, topbarHeight + 4),
+                    BackgroundTransparency = 1,
+                    ThemeTag = {TextColor3 = "Text"}
+                }
+            )
+            v.TabWidth = sidebarWidth
+            v.SidebarWidth = sidebarWidth
+            v.TopbarHeight = topbarHeight
+            v.MinWindowSize = minSize
+            v.ContainerHolder =
+                s(
+                "Frame",
+                {
+                    Size = UDim2.new(1, -sidebarWidth - 24, 1, -(topbarHeight + 30)),
+                    Position = UDim2.fromOffset(sidebarWidth + 16, topbarHeight + 26),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    ClipsDescendants = true,
+                }
+            )
+            v.ContainerClip =
+                s(
+                "Frame",
+                {
+                    Size = UDim2.fromScale(1, 1),
+                    BackgroundTransparency = 1,
+                    ClipsDescendants = true,
+                    Parent = v.ContainerHolder,
+                },
+                {s("UICorner", {CornerRadius = UDim.new(0, 8)})}
+            )
+            local sizeConstraint = s("UISizeConstraint", {
+                MinSize = Vector2.new(440, 250),
+                MaxSize = Vector2.new(3840, 2160),
+            })
+            v.Root =
+                s(
+                "Frame",
+                {BackgroundTransparency = 1, Size = FIXED_SIZE, Position = v.Position, Parent = t.Parent},
+                {v.AcrylicPaint.Frame, v.TabDisplay, v.ContainerHolder, F, E, sizeConstraint}
+            )
+            function v.SetSize(self, newSize)
+                if typeof(newSize) == "UDim2" then
+                    v.Size = newSize
+                    v.Root.Size = newSize
+                end
+            end
+            v.TitleBar = e(d.Parent.TitleBar) {Title = t.Title, SubTitle = t.SubTitle, Parent = v.Root, Window = v, Icon = t.TitleIcon or t.Icon or "lucide/cloud"}
+            v.MinimizeIcon = "rbxassetid://109388426525855"
+            local floatGui = (u and (u.GUI or u.PopupGUI)) or t.Parent
+            local floatBtn = s("TextButton", {
+                Size = UDim2.fromOffset(50, 50),
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Position = UDim2.new(0.9, -30, 0.15, 25),
+                BackgroundTransparency = 1,
+                AutoButtonColor = false,
+                Text = "",
+                ZIndex = 1000,
+                Visible = true,
+                Parent = floatGui,
+            })
+
+            local floatIconImg = s("ImageLabel", {
+                Size = UDim2.fromScale(1, 1),
+                Position = UDim2.fromScale(0.5, 0.5),
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                BackgroundTransparency = 1,
+                Image = v.MinimizeIcon,
+                ImageColor3 = Color3.fromRGB(255, 255, 255),
+                ZIndex = 1001,
+                Parent = floatBtn
+            })
+
+            local function getSafeViewportSize()
+                local vp = j and j.ViewportSize
+                local vx = (vp and vp.X and vp.X > 50) and vp.X or 1920
+                local vy = (vp and vp.Y and vp.Y > 50) and vp.Y or 1080
+                return vx, vy
+            end
+
+            local rs = game:GetService("RunService")
+
+            local fDragging = false
+            local fDragMoved = false
+            local fDragInput = nil
+            local fIsTouch = false
+            local fTouchPos = Vector2.new()
+            local fDragOffset = Vector2.new()
+            local fDragStartMouse = Vector2.new()
+            local fDragConn = nil
+
+            local function startFloatDragLoop()
+                if fDragConn then return end
+                fDragConn = rs.RenderStepped:Connect(function()
+                    if not fDragging then
+                        if fDragConn then
+                            fDragConn:Disconnect()
+                            fDragConn = nil
+                        end
+                        return
+                    end
+                    local curPointer = fIsTouch and fTouchPos or h:GetMouseLocation()
+                    local rawX = curPointer.X - fDragOffset.X
+                    local rawY = curPointer.Y - fDragOffset.Y
+
+                    local vpX, vpY = getSafeViewportSize()
+                    local newX = math.clamp(rawX, 0, vpX)
+                    local newY = math.clamp(rawY, 0, vpY)
+
+                    floatBtn.Position = UDim2.fromOffset(math.floor(newX), math.floor(newY))
+                end)
+            end
+
+            local function stopFloatDragLoop()
+                if fDragConn then
+                    fDragConn:Disconnect()
+                    fDragConn = nil
+                end
+            end
+
+            m.AddSignal(floatBtn.InputBegan, function(M)
+                if (M.UserInputType == Enum.UserInputType.MouseButton1 or M.UserInputType == Enum.UserInputType.Touch) and not fDragging then
+                    fDragging = true
+                    fDragMoved = false
+                    fDragInput = M
+                    fIsTouch = (M.UserInputType == Enum.UserInputType.Touch)
+                    local curPointer = fIsTouch and Vector2.new(M.Position.X, M.Position.Y) or h:GetMouseLocation()
+                    if fIsTouch then
+                        fTouchPos = curPointer
+                    end
+                    local vpX, vpY = getSafeViewportSize()
+                    local curCenterX = floatBtn.Position.X.Scale * vpX + floatBtn.Position.X.Offset
+                    local curCenterY = floatBtn.Position.Y.Scale * vpY + floatBtn.Position.Y.Offset
+                    fDragOffset = Vector2.new(curPointer.X - curCenterX, curPointer.Y - curCenterY)
+                    fDragStartMouse = curPointer
+                    startFloatDragLoop()
+                end
+            end)
+            m.AddSignal(h.InputChanged, function(M)
+                if not fDragging then return end
+                if fIsTouch and (M == fDragInput or M.UserInputType == Enum.UserInputType.Touch) then
+                    fTouchPos = Vector2.new(M.Position.X, M.Position.Y)
+                end
+                local curPointer = fIsTouch and fTouchPos or h:GetMouseLocation()
+                local deltaX = curPointer.X - fDragStartMouse.X
+                local deltaY = curPointer.Y - fDragStartMouse.Y
+                if math.abs(deltaX) > 5 or math.abs(deltaY) > 5 then
+                    fDragMoved = true
+                end
+            end)
+            m.AddSignal(h.InputEnded, function(M)
+                if not fDragging then return end
+                local isEnd = false
+                if fIsTouch then
+                    isEnd = (M == fDragInput or M.UserInputType == Enum.UserInputType.Touch)
+                else
+                    isEnd = (M.UserInputType == Enum.UserInputType.MouseButton1 or M == fDragInput)
+                end
+
+                if isEnd then
+                    fDragging = false
+                    fDragInput = nil
+                    fIsTouch = false
+                    stopFloatDragLoop()
+                end
+            end)
+
+            m.AddSignal(floatBtn.MouseButton1Click, function()
+                if not fDragMoved then
+                    v:Minimize()
+                end
+                fDragMoved = false
+            end)
+
+            function v.SetMinimizeIcon(self, iconId)
+                v.MinimizeIcon = iconId
+                floatIconImg.Image = iconId
+            end
+            v.SetFloatingIcon = v.SetMinimizeIcon
+            if e(k).UseAcrylic then
+                v.AcrylicPaint.AddParent(v.Root)
+            end
+            v.SelectorPosMotor = l.SingleMotor.new(17)
+            v.SelectorSizeMotor = l.SingleMotor.new(16)
+            v.ContainerBackMotor = l.SingleMotor.new(0)
+            v.ContainerPosMotor = l.SingleMotor.new(68)
+
+            local _isDragging = false
+            local _dragInput = nil
+            local _dragOffset = Vector2.new()
+
+            local _isResizing = false
+            local _resizeInput = nil
+            local _resizeStartMouse = Vector2.new()
+            local _resizeStartSize = Vector2.new()
+
+            local _isTouch = false
+            local _touchPos = Vector2.new()
+            local _dragConn = nil
+
+            local function startDragLoop()
+                if _dragConn then return end
+                _dragConn = rs.RenderStepped:Connect(function()
+                    if not _isDragging and not _isResizing then
+                        if _dragConn then
+                            _dragConn:Disconnect()
+                            _dragConn = nil
+                        end
+                        return
+                    end
+
+                    local vpX, vpY = getSafeViewportSize()
+
+                    if _isDragging then
+                        local currentPos = _isTouch and _touchPos or h:GetMouseLocation()
+                        local rawX = currentPos.X - _dragOffset.X
+                        local rawY = currentPos.Y - _dragOffset.Y
+
+                        local minX = -475
+                        local maxX = math.max(vpX - 50, minX)
+                        local minY = 0
+                        local maxY = math.max(vpY - 30, minY)
+
+                        local newX = math.clamp(rawX, minX, maxX)
+                        local newY = math.clamp(rawY, minY, maxY)
+
+                        local newPos = UDim2.fromOffset(math.floor(newX), math.floor(newY))
+                        v.Root.Position = newPos
+                        v.Position = newPos
+                    elseif _isResizing then
+                        local curPointer = _isTouch and _touchPos or h:GetMouseLocation()
+                        local deltaX = curPointer.X - _resizeStartMouse.X
+                        local deltaY = curPointer.Y - _resizeStartMouse.Y
+
+                        local minW, minH = 440, 250
+                        local maxW = math.max(vpX - 20, minW)
+                        local maxH = math.max(vpY - 20, minH)
+
+                        local newW = math.clamp(_resizeStartSize.X + deltaX, minW, maxW)
+                        local newH = math.clamp(_resizeStartSize.Y + deltaY, minH, maxH)
+
+                        local newSize = UDim2.fromOffset(math.floor(newW), math.floor(newH))
+                        v.Root.Size = newSize
+                        v.Size = newSize
+                    end
+                end)
+            end
+
+            local function stopDragLoop()
+                if not _isDragging and not _isResizing then
+                    if _dragConn then
+                        _dragConn:Disconnect()
+                        _dragConn = nil
+                    end
+                end
+            end
+
+            v._isInteracting = false
+            getgenv()._FluentWindowInteracting = false
+
+            local I, J = 17, tick()
+            local lastSz = 16
+            v.SelectorPosMotor:onStep(
+                function(K)
+                    D.Position = UDim2.new(0, 0, 0, K)
+                    local L = tick()
+                    local M = math.max(L - J, 0.001)
+                    if I ~= nil then
+                        local spd = math.abs(K - I) / (M * 60)
+                        local sz = math.clamp(spd + 16, 16, 28)
+                        if math.abs(sz - lastSz) > 0.8 then
+                            lastSz = sz
+                            v.SelectorSizeMotor:setGoal(q(sz, {frequency = 8}))
+                        end
+                        I = K
+                    end
+                    J = L
+                end
+            )
+            v.SelectorSizeMotor:onStep(
+                function(K)
+                    D.Size = UDim2.new(0, 4, 0, math.max(K, 4))
+                end
+            )
+            v.ContainerBackMotor:onStep(
+                function(K)
+                    if v.ContainerHolder and v.ContainerHolder:IsA("CanvasGroup") then
+                        v.ContainerHolder.GroupTransparency = K
+                    end
+                end
+            )
+            v.ContainerPosMotor:onStep(
+                function(K)
+                    v.ContainerHolder.Position = UDim2.fromOffset(t.TabWidth + 16, K)
+                end
+            )
+            v.Maximize = function() end
+            m.AddSignal(
+                v.TitleBar.Frame.InputBegan,
+                function(M)
+                    if (M.UserInputType == Enum.UserInputType.MouseButton1 or M.UserInputType == Enum.UserInputType.Touch) and not _isDragging then
+                        _isDragging = true
+                        _dragInput = M
+                        _isTouch = (M.UserInputType == Enum.UserInputType.Touch)
+                        local curPointer = _isTouch and Vector2.new(M.Position.X, M.Position.Y) or h:GetMouseLocation()
+                        if _isTouch then
+                            _touchPos = curPointer
+                        end
+                        local vpX, vpY = getSafeViewportSize()
+                        local curWindowX = v.Root.Position.X.Scale * vpX + v.Root.Position.X.Offset
+                        local curWindowY = v.Root.Position.Y.Scale * vpY + v.Root.Position.Y.Offset
+                        _dragOffset = Vector2.new(curPointer.X - curWindowX, curPointer.Y - curWindowY)
+                        v._isInteracting = true
+                        getgenv()._FluentWindowInteracting = true
+                        startDragLoop()
+                    end
+                end
+            )
+            m.AddSignal(
+                E.InputBegan,
+                function(M)
+                    if (M.UserInputType == Enum.UserInputType.MouseButton1 or M.UserInputType == Enum.UserInputType.Touch) and not _isResizing then
+                        _isResizing = true
+                        _resizeInput = M
+                        _isTouch = (M.UserInputType == Enum.UserInputType.Touch)
+                        local curPointer = _isTouch and Vector2.new(M.Position.X, M.Position.Y) or h:GetMouseLocation()
+                        if _isTouch then
+                            _touchPos = curPointer
+                        end
+                        _resizeStartMouse = curPointer
+                        _resizeStartSize = Vector2.new(
+                            (v.Root.AbsoluteSize.X > 0 and v.Root.AbsoluteSize.X) or v.Size.X.Offset,
+                            (v.Root.AbsoluteSize.Y > 0 and v.Root.AbsoluteSize.Y) or v.Size.Y.Offset
+                        )
+                        v._isInteracting = true
+                        getgenv()._FluentWindowInteracting = true
+                        startDragLoop()
+                    end
+                end
+            )
+            m.AddSignal(E.MouseEnter, function()
+                gripLine1.BackgroundTransparency = 0.1
+                gripLine2.BackgroundTransparency = 0.1
+                gripLine3.BackgroundTransparency = 0.1
+            end)
+            m.AddSignal(E.MouseLeave, function()
+                gripLine1.BackgroundTransparency = 0.45
+                gripLine2.BackgroundTransparency = 0.45
+                gripLine3.BackgroundTransparency = 0.45
+            end)
+            m.AddSignal(
+                h.InputChanged,
+                function(M)
+                    if not _isDragging and not _isResizing then return end
+                    if _isTouch and (M == _dragInput or M == _resizeInput or M.UserInputType == Enum.UserInputType.Touch) then
+                        _touchPos = Vector2.new(M.Position.X, M.Position.Y)
+                    end
+                end
+            )
+            m.AddSignal(
+                h.InputEnded,
+                function(M)
+                    if _isDragging then
+                        local isDragEnd = false
+                        if _isTouch then
+                            isDragEnd = (M == _dragInput or M.UserInputType == Enum.UserInputType.Touch)
+                        else
+                            isDragEnd = (M.UserInputType == Enum.UserInputType.MouseButton1 or M == _dragInput)
+                        end
+
+                        if isDragEnd then
+                            _isDragging = false
+                            _dragInput = nil
+                            _isTouch = false
+                            v._isInteracting = false
+                            getgenv()._FluentWindowInteracting = false
+                            stopDragLoop()
+                        end
+                    end
+
+                    if _isResizing then
+                        local isResizeEnd = false
+                        if _isTouch then
+                            isResizeEnd = (M == _resizeInput or M.UserInputType == Enum.UserInputType.Touch)
+                        else
+                            isResizeEnd = (M.UserInputType == Enum.UserInputType.MouseButton1 or M == _resizeInput)
+                        end
+
+                        if isResizeEnd then
+                            _isResizing = false
+                            _resizeInput = nil
+                            _isTouch = false
+                            v._isInteracting = false
+                            getgenv()._FluentWindowInteracting = false
+                            stopDragLoop()
+                        end
+                    end
+                end
+            )
+            m.AddSignal(
+                v.TabListContainer.UIListLayout:GetPropertyChangedSignal "AbsoluteContentSize",
+                function()
+                    v.TabHolder.CanvasSize = UDim2.new(0, 0, 0, v.TabListContainer.UIListLayout.AbsoluteContentSize.Y + 10)
+                end
+            )
+            local _lastMinTick = 0
+            m.AddSignal(
+                h.InputBegan,
+                function(M, gp)
+                    if gp then return end
+                    if h:GetFocusedTextBox() then return end
+                    if M.UserInputType ~= Enum.UserInputType.Keyboard then return end
+
+                    if type(u.MinimizeKeybind) == "table" and u.MinimizeKeybind.Type == "Keybind" then
+                        local bindVal = u.MinimizeKeybind.Value
+                        if bindVal and bindVal ~= "None" and bindVal ~= "Unknown" and bindVal ~= "" and M.KeyCode.Name == bindVal then
+                            v:Minimize()
+                        end
+                    elseif u.MinimizeKey and typeof(u.MinimizeKey) == "EnumItem" and u.MinimizeKey ~= Enum.KeyCode.Unknown then
+                        if M.KeyCode == u.MinimizeKey then
+                            v:Minimize()
+                        end
+                    end
+                end
+            )
+            function v.Show(M)
+                v.Minimized = false
+                v.Root.Visible = true
+                floatBtn.Visible = true
+                pcall(function()
+                    if v.TabsAPI and v.TabsAPI.UpdateActiveScrollbar then
+                        v.TabsAPI:UpdateActiveScrollbar()
+                    end
+                end)
+            end
+            function v.Hide(M)
+                v.Minimized = true
+                v.Root.Visible = false
+                floatBtn.Visible = true
+                pcall(function()
+                    if v.TabsAPI and v.TabsAPI.Tabs then
+                        for _, tab in ipairs(v.TabsAPI.Tabs) do
+                            if tab._SBOverlay then tab._SBOverlay.Visible = false end
+                        end
+                    end
+                end)
+            end
+            function v.Minimize(M)
+                if tick() - _lastMinTick < 0.25 then return end
+                _lastMinTick = tick()
+                v.Minimized = not v.Minimized
+                v.Root.Visible = not v.Minimized
+                floatBtn.Visible = true
+                pcall(function()
+                    if v.TabsAPI then
+                        if v.Minimized then
+                            if v.TabsAPI.Tabs then
+                                for _, tab in ipairs(v.TabsAPI.Tabs) do
+                                    if tab._SBOverlay then tab._SBOverlay.Visible = false end
+                                end
+                            end
+                        else
+                            if v.TabsAPI.UpdateActiveScrollbar then
+                                v.TabsAPI:UpdateActiveScrollbar()
+                            end
+                        end
+                    end
+                end)
+                if not C then
+                    C = true
+                    local N = (u.MinimizeKeybind and u.MinimizeKeybind.Value and u.MinimizeKeybind.Value ~= "None" and u.MinimizeKeybind.Value ~= "" and u.MinimizeKeybind.Value)
+                        or (u.MinimizeKey and typeof(u.MinimizeKey) == "EnumItem" and u.MinimizeKey.Name)
+                        or "LeftControl"
+                    u:Notify {Title = "Interface", Content = "Press " .. tostring(N) .. " or tap floating icon to toggle.", Duration = 6}
+                end
+            end
+            function v.Destroy(M)
+                if _winRenderConn then
+                    pcall(function() _winRenderConn:Disconnect() end)
+                end
+                if e(k).UseAcrylic and v.AcrylicPaint and v.AcrylicPaint.Model then
+                    pcall(function() v.AcrylicPaint.Model:Destroy() end)
+                end
+                pcall(function()
+                    local ovs = e(k)._SBOverlays
+                    if ovs then
+                        for _, ov in ipairs(ovs) do pcall(function() ov:Destroy() end) end
+                        table.clear(ovs)
+                    end
+                end)
+                v.Root:Destroy()
+            end
+            local M = e(p.Dialog):Init(v)
+            function v.Dialog(N, O)
+                local P = M:Create()
+                P.Title.Text = O.Title
+                local Q =
+                    s(
+                    "TextLabel",
+                    {
+                        FontFace = Font.new "rbxasset://fonts/families/GothamSSm.json",
+                        Text = O.Content,
+                        TextColor3 = Color3.fromRGB(240, 240, 240),
+                        TextSize = 14,
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        TextYAlignment = Enum.TextYAlignment.Top,
+                        Size = UDim2.new(1, -40, 1, 0),
+                        Position = UDim2.fromOffset(20, 60),
+                        BackgroundTransparency = 1,
+                        Parent = P.Root,
+                        ClipsDescendants = false,
+                        ThemeTag = {TextColor3 = "Text"}
+                    }
+                )
+                s(
+                    "UISizeConstraint",
+                    {MinSize = Vector2.new(300, 165), MaxSize = Vector2.new(620, math.huge), Parent = P.Root}
+                )
+                P.Root.Size = UDim2.fromOffset(Q.TextBounds.X + 40, 165)
+                if Q.TextBounds.X + 40 > v.Size.X.Offset - 120 then
+                    P.Root.Size = UDim2.fromOffset(v.Size.X.Offset - 120, 165)
+                    Q.TextWrapped = true
+                    P.Root.Size = UDim2.fromOffset(v.Size.X.Offset - 120, Q.TextBounds.Y + 150)
+                end
+                for R, S in next, O.Buttons do
+                    P:Button(S.Title, S.Callback)
+                end
+                P:Open()
+            end
+            local N = e(p.Tab):Init(v)
+            v.TabsAPI = N
+            v.SelectorFrame = D
+            D.Visible = false
+            local function updateSelector(instant)
+                if not v.Root or not v.Root.Parent then return end
+                local sel = N.Tabs[N.SelectedTab]
+                if not sel or not sel.Frame or not sel.Frame.Parent then
+                    D.Visible = false
+                    return
+                end
+                local tabY = sel.Frame.AbsolutePosition.Y
+                local holderY = v.TabHolder.AbsolutePosition.Y
+                local holderH = v.TabHolder.AbsoluteSize.Y
+                local shouldBeVisible = true
+                if holderH > 0 and holderY > 0 and tabY > 0 then
+                    if tabY + sel.Frame.AbsoluteSize.Y < holderY or tabY > holderY + holderH then
+                        shouldBeVisible = false
+                    end
+                end
+                D.Visible = shouldBeVisible
+                local pos = N:GetCurrentTabPos()
+                if pos and v.SelectorPosMotor then
+                    if instant then
+                        pcall(function() v.SelectorPosMotor:setGoal(r(pos)) end)
+                    else
+                        pcall(function() v.SelectorPosMotor:setGoal(q(pos, {frequency = 8})) end)
+                    end
+                end
+            end
+            v.UpdateSelector = updateSelector
+            if v.TabHolder then
+                v.TabHolder:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+                    updateSelector(false)
+                end)
+            end
+            function v.AddTab(O, P)
+                local _tab = N:New(P.Title, P.Icon, v.TabListContainer)
+                N:ReapplyFavoriteOrder()
+                if N.TabCount == 1 then
+                    task.defer(function()
+                        N:SelectTab(1)
+                        if v.UpdateSelector then v.UpdateSelector(true) end
+                    end)
+                end
+                return _tab
+            end
+            function v.SelectTab(O, P)
+                local tabObj, tabIdx = N:GetTab(P)
+                if tabObj then
+                    N:SelectTab(tabIdx)
+                else
+                    task.defer(function()
+                        local tObj, tIdx = N:GetTab(P)
+                        if tObj then N:SelectTab(tIdx) end
+                    end)
+                end
+            end
+            m.AddSignal(
+                v.TabHolder:GetPropertyChangedSignal "CanvasPosition",
+                function()
+                    local pos = N:GetCurrentTabPos()
+                    if pos then
+                        I = pos + 16
+                        J = 0
+                        v.SelectorPosMotor:setGoal(r(pos))
+                    end
+                end
+            )
+            return v
+        end
+    end,
+    [18] = function()
+        local c, d, e, f, g = b(18)
+        local h = d.Parent
+        local i, j, k =
+            e(h.Themes),
+            e(h.Packages.Flipper),
+            {
+                Registry = setmetatable({}, {__mode = "k"}),
+                Signals = {},
+                TransparencyMotors = setmetatable({}, {__mode = "k"}),
+                DefaultProperties = {
+                    ScreenGui = {ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true},
+                    Frame = {
+                        BackgroundColor3 = Color3.new(1, 1, 1),
+                        BorderColor3 = Color3.new(0, 0, 0),
+                        BorderSizePixel = 0
+                    },
+                    ScrollingFrame = {
+                        BackgroundColor3 = Color3.new(1, 1, 1),
+                        BorderColor3 = Color3.new(0, 0, 0),
+                        ScrollBarImageColor3 = Color3.new(0, 0, 0)
+                    },
+                    TextLabel = {
+                        BackgroundColor3 = Color3.new(1, 1, 1),
+                        BorderColor3 = Color3.new(0, 0, 0),
+                        Font = Enum.Font.SourceSans,
+                        Text = "",
+                        TextColor3 = Color3.new(0, 0, 0),
+                        BackgroundTransparency = 1,
+                        TextSize = 14
+                    },
+                    TextButton = {
+                        BackgroundColor3 = Color3.new(1, 1, 1),
+                        BorderColor3 = Color3.new(0, 0, 0),
+                        AutoButtonColor = false,
+                        Font = Enum.Font.SourceSans,
+                        Text = "",
+                        TextColor3 = Color3.new(0, 0, 0),
+                        TextSize = 14
+                    },
+                    TextBox = {
+                        BackgroundColor3 = Color3.new(1, 1, 1),
+                        BorderColor3 = Color3.new(0, 0, 0),
+                        ClearTextOnFocus = false,
+                        Font = Enum.Font.SourceSans,
+                        Text = "",
+                        TextColor3 = Color3.new(0, 0, 0),
+                        TextSize = 14
+                    },
+                    ImageLabel = {
+                        BackgroundTransparency = 1,
+                        BackgroundColor3 = Color3.new(1, 1, 1),
+                        BorderColor3 = Color3.new(0, 0, 0),
+                        BorderSizePixel = 0
+                    },
+                    ImageButton = {
+                        BackgroundColor3 = Color3.new(1, 1, 1),
+                        BorderColor3 = Color3.new(0, 0, 0),
+                        AutoButtonColor = false
+                    },
+                    CanvasGroup = {
+                        BackgroundColor3 = Color3.new(1, 1, 1),
+                        BorderColor3 = Color3.new(0, 0, 0),
+                        BorderSizePixel = 0
+                    }
+                }
+            }
+        local l = function(l, m)
+            if m.ThemeTag then
+                k.AddThemeObject(l, m.ThemeTag)
+            end
+        end
+        function k.AddSignal(m, n)
+            if not m then return nil end
+            if n == nil then
+                table.insert(k.Signals, m)
+                return m
+            end
+            local ok, conn = pcall(function()
+                return m:Connect(n)
+            end)
+            if ok and conn then
+                table.insert(k.Signals, conn)
+                return conn
+            else
+                table.insert(k.Signals, m)
+                return m
+            end
+        end
+        function k.Disconnect()
+            for m = #k.Signals, 1, -1 do
+                local n = table.remove(k.Signals, m)
+                if n and n.Disconnect then
+                    pcall(function() n:Disconnect() end)
+                end
+            end
+        end
+        local _noInheritFallbackKeys = {ShineEnabled = true, StrokeShine = true}
+        function k.GetThemeProperty(m)
+            local currentThemeName = e(h).Theme
+            local t = i[currentThemeName]
+            if not t then
+                local lower = tostring(currentThemeName):lower():gsub("[%s_%-]+", "")
+                if lower:find("cloudy") then
+                    t = i["Cloudy"]
+                elseif lower:find("hut") or lower:find("81") or lower:find("ri") then
+                    t = i["HUT RI 81"]
+                elseif lower:find("emerald") then
+                    t = i["Emerald"]
+                elseif lower:find("blood") or lower:find("red") then
+                    t = i["Blood Red"]
+                elseif lower:find("rimuru") or lower:find("tempest") then
+                    t = i["Rimuru Tempest"]
+                elseif lower:find("solar") then
+                    t = i["Solar"]
+                elseif lower:find("neko") or lower:find("pink") then
+                    t = i["Neko"]
+                end
+            end
+            if t and t[m] ~= nil then
+                return t[m]
+            end
+            if m == "TitleGradient" and t then
+                if t.TitleGradient then return t.TitleGradient end
+                if t.Accent then
+                    return ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, t.Accent),
+                        ColorSequenceKeypoint.new(0.5, t.Accent:Lerp(Color3.new(1, 1, 1), 0.4)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+                    })
+                end
+            elseif m == "SubTitleGradient" and t then
+                if t.SubTitleGradient then return t.SubTitleGradient end
+                if t.Accent then
+                    return ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                        ColorSequenceKeypoint.new(1, t.Accent)
+                    })
+                end
+            end
+            if _noInheritFallbackKeys[m] then
+                return false
+            end
+            local fallbacks = { "Cloudy", "Emerald", "HUT RI 81", "Blood Red", "Rimuru Tempest", "Solar", "Neko" }
+            for _, fbName in ipairs(fallbacks) do
+                local fb = i[fbName]
+                if fb and fb[m] ~= nil then
+                    return fb[m]
+                end
+            end
+            return nil
+        end
+        function k.UpdateTheme()
+            for m, n in next, k.Registry do
+                if m and m.Parent then
+                    for o, p in next, n.Properties do
+                        local val = k.GetThemeProperty(p)
+                        if val ~= nil then
+                            pcall(function()
+                                m[o] = val
+                            end)
+                        end
+                    end
+                else
+                    k.Registry[m] = nil
+                end
+            end
+            for o, p in next, k.TransparencyMotors do
+                local val = k.GetThemeProperty("ElementTransparency")
+                if val ~= nil then
+                    pcall(function()
+                        p:setGoal(j.Instant.new(val))
+                    end)
+                end
+            end
+            local thm = i[e(h).Theme]
+            local x = getgenv().Fluent
+            if x and x.Window and x.Window.AcrylicPaint then
+                if getgenv().ShineEnabled == true and Animation and Animation.Apply then
+                    Animation.Apply(thm, x.Window.AcrylicPaint.Frame)
+                end
+                task.defer(function()
+                    if getgenv()._FluentProRefreshOpenDropdownShine then
+                        getgenv()._FluentProRefreshOpenDropdownShine()
+                    end
+                end)
+                if thm and thm.ButtonGradient then getgenv().ButtonGradients = thm.ButtonGradient end
+                local bgParent = x.Window.AcrylicPaint.Frame
+                if bgParent then
+                    local bgImg = bgParent:FindFirstChild("__ThemeBG")
+                    local bgVal = thm and thm.Background
+                    if bgVal and tostring(bgVal) ~= "" then
+                        if not bgImg then
+                            bgImg = Instance.new("ImageLabel")
+                            bgImg.Name = "__ThemeBG"
+                            bgImg.Size = UDim2.fromScale(1, 1)
+                            bgImg.Position = UDim2.new(0.5, 0, 0.5, 0)
+                            bgImg.AnchorPoint = Vector2.new(0.5, 0.5)
+                            bgImg.BackgroundTransparency = 1
+                            bgImg.ScaleType = Enum.ScaleType.Crop
+                            bgImg.ClipsDescendants = true
+                            bgImg.ZIndex = 1
+                            local corner = Instance.new("UICorner")
+                            corner.CornerRadius = UDim.new(0, 12)
+                            corner.Parent = bgImg
+                            bgImg.Parent = bgParent
+                        else
+                            bgImg.Size = UDim2.fromScale(1, 1)
+                            bgImg.Position = UDim2.new(0.5, 0, 0.5, 0)
+                            bgImg.AnchorPoint = Vector2.new(0.5, 0.5)
+                            bgImg.ZIndex = 1
+                        end
+                        bgImg.Image = tostring(bgVal)
+                        bgImg.ImageColor3 = Color3.fromRGB(255, 255, 255)
+                        local isTrans = (getgenv().WindowTransparent ~= false)
+                        local themeTrans = thm and thm.BackgroundTransparency
+                        bgImg.ImageTransparency = themeTrans or (isTrans and 0.74 or 0.68)
+                        local im=x.InterfaceManager
+                        bgImg.Visible = not (im and im.Settings and im.Settings.DisableBG)
+                    elseif bgImg then
+                        bgImg.Visible = false
+                    end
+                end
+            end
+        end
+        function k.AddThemeObject(m, n)
+            k.Registry[m] = {Object = m, Properties = n}
+            for propName, themeKey in next, n do
+                local val = k.GetThemeProperty(themeKey)
+                if val ~= nil then
+                    pcall(function() m[propName] = val end)
+                end
+            end
+            return m
+        end
+        function k.OverrideTag(m, n)
+            if k.Registry[m] then
+                k.Registry[m].Properties = n
+            else
+                k.Registry[m] = {Object = m, Properties = n}
+            end
+            for propName, themeKey in next, n do
+                local val = k.GetThemeProperty(themeKey)
+                if val ~= nil then
+                    pcall(function() m[propName] = val end)
+                end
+            end
+        end
+        function k.New(m, n, o)
+            local p = Instance.new(m)
+            for q, r in next, k.DefaultProperties[m] or {} do
+                p[q] = r
+            end
+            for s, t in next, n or {} do
+                if s ~= "ThemeTag" then
+                    p[s] = t
+                end
+            end
+            for u, v in next, o or {} do
+                v.Parent = p
+            end
+            l(p, n)
+            return p
+        end
+        function k.SpringMotor(m, n, o, p, s)
+            p = p or false
+            s = s or false
+            local t = j.SingleMotor.new(m)
+            t:onStep(
+                function(u)
+                    n[o] = u
+                end
+            )
+            if s then
+                table.insert(k.TransparencyMotors, t)
+            end
+            local u = function(u, v)
+                v = v or false
+                if not p then
+                    if not v then
+                        if o == "BackgroundTransparency" and e(h).DialogOpen then
+                            return
+                        end
+                    end
+                end
+                t:setGoal(j.Spring.new(u, {frequency = 8}))
+            end
+            return t, u
+        end
+        return k
+    end,
+    [19] = function()
+        local c, d, e, f, g = b(19)
+        local h = {}
+        for i, j in next, d:GetChildren() do
+            table.insert(h, e(j))
+        end
+        return h
+    end,
+    [20] = function()
+        local c, d, e, f, g = b(20)
+        local h = d.Parent.Parent
+        local i = e(h.Creator)
+        local j, k, l = i.New, h.Components, {}
+        l.__index = l
+        l.__type = "Button"
+        function l.New(m, n)
+            local g = m.Library or e(h)
+            n.Title = n.Title or "Button"
+            n.Callback = n.Callback or function()
+                end
+            local o = e(k.Element)(n.Title, n.Description, m.Container, true)
+            local btnIcon = "rbxassetid://10709791437"
+            if n.Icon and g and g.GetIcon then
+                local ri = g:GetIcon(n.Icon)
+                if ri then btnIcon = (type(ri) == "table" and ri.Image or ri) end
+            end
+            local p =
+                j(
+                "ImageLabel",
+                {
+                    Image = btnIcon,
+                    ImageRectOffset = (n.Icon and g and g.GetIcon and type(g:GetIcon(n.Icon)) == "table") and g:GetIcon(n.Icon).ImageRectOffset or Vector2.new(0,0),
+                    ImageRectSize  = (n.Icon and g and g.GetIcon and type(g:GetIcon(n.Icon)) == "table") and g:GetIcon(n.Icon).ImageRectSize  or Vector2.new(0,0),
+                    Size = UDim2.fromOffset(16, 16),
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    Position = UDim2.new(1, -10, 0.5, 0),
+                    BackgroundTransparency = 1,
+                    Parent = o.Frame,
+                    ThemeTag = {ImageColor3 = "Text"}
+                }
+            )
+            i.AddSignal(
+                o.Frame.MouseButton1Click,
+                function()
+                    if g and g.SafeCallback then
+                        g:SafeCallback(n.Callback)
+                    elseif n.Callback then
+                        pcall(n.Callback)
+                    end
+                end
+            )
+            return o
+        end
+        return l
+    end,
+    [21] = function()
+        local c, d, e, f, g = b(21)
+        local h, i, j, k =
+            game:GetService "UserInputService",
+            game:GetService "TouchInputService",
+            game:GetService "RunService",
+            game:GetService "Players"
+        local l, m = j.RenderStepped, k.LocalPlayer
+        local n, o = m:GetMouse(), d.Parent.Parent
+        local p = e(o.Creator)
+        local s, t, u = p.New, o.Components, {}
+        u.__index = u
+        u.__type = "Colorpicker"
+        function u.New(v, w, x)
+            local y = v.Library or e(o)
+            assert(x.Title, "Colorpicker - Missing Title")
+            assert(x.Default ~= nil, "AddColorPicker: Missing default value.")
+            local z = {
+                Value = x.Default,
+                Transparency = x.Transparency or 0,
+                Type = "Colorpicker",
+                Title = type(x.Title) == "string" and x.Title or "Colorpicker",
+                Callback = x.Callback or function(z)
+                    end
+            }
+            function z.SetHSVFromRGB(A, B)
+                local C, D, E = Color3.toHSV(B)
+                z.Hue = C
+                z.Sat = D
+                z.Vib = E
+            end
+            z:SetHSVFromRGB(z.Value)
+            local A = e(t.Element)(x.Title, x.Description, v.Container, true)
+            z.SetTitle = A.SetTitle
+            z.SetDesc = A.SetDesc
+            local B =
+                s(
+                "Frame",
+                {Size = UDim2.fromScale(1, 1), BackgroundColor3 = z.Value, Parent = A.Frame},
+                {s("UICorner", {CornerRadius = UDim.new(0, 4)})}
+            )
+            local aa, ab =
+                s(
+                    "ImageLabel",
+                    {
+                        Size = UDim2.fromOffset(26, 26),
+                        Position = UDim2.new(1, -10, 0.5, 0),
+                        AnchorPoint = Vector2.new(1, 0.5),
+                        Parent = A.Frame,
+                        Image = "http://www.roblox.com/asset/?id=14204231522",
+                        ImageTransparency = 0.45,
+                        ScaleType = Enum.ScaleType.Tile,
+                        TileSize = UDim2.fromOffset(40, 40)
+                    },
+                    {s("UICorner", {CornerRadius = UDim.new(0, 4)}), B}
+                ),
+                function()
+                    local C = e(t.Dialog):Create()
+                    C.Title.Text = z.Title
+                    C.Root.Size = UDim2.fromOffset(430, 360)
+                    local D, E, F, G, H, I =
+                        z.Hue,
+                        z.Sat,
+                        z.Vib,
+                        z.Transparency,
+                        function()
+                            local D = e(t.Textbox)()
+                            D.Frame.Parent = C.Root
+                            D.Frame.Size = UDim2.new(0, 90, 0, 32)
+                            return D
+                        end,
+                        function(D, E)
+                            return s(
+                                "TextLabel",
+                                {
+                                    FontFace = Font.new(
+                                        "rbxasset://fonts/families/GothamSSm.json",
+                                        Enum.FontWeight.Medium,
+                                        Enum.FontStyle.Normal
+                                    ),
+                                    Text = D,
+                                    TextColor3 = Color3.fromRGB(240, 240, 240),
+                                    TextSize = 13,
+                                    TextXAlignment = Enum.TextXAlignment.Left,
+                                    Size = UDim2.new(1, 0, 0, 32),
+                                    Position = E,
+                                    BackgroundTransparency = 1,
+                                    Parent = C.Root,
+                                    ThemeTag = {TextColor3 = "Text"}
+                                }
+                            )
+                        end
+                    local J, K =
+                        function()
+                            local J = Color3.fromHSV(D, E, F)
+                            return {R = math.floor(J.r * 255), G = math.floor(J.g * 255), B = math.floor(J.b * 255)}
+                        end,
+                        s(
+                            "ImageLabel",
+                            {
+                                Size = UDim2.new(0, 18, 0, 18),
+                                ScaleType = Enum.ScaleType.Fit,
+                                AnchorPoint = Vector2.new(0.5, 0.5),
+                                BackgroundTransparency = 1,
+                                Image = "http://www.roblox.com/asset/?id=4805639000"
+                            }
+                        )
+                    local L, M =
+                        s(
+                            "ImageLabel",
+                            {
+                                Size = UDim2.fromOffset(180, 160),
+                                Position = UDim2.fromOffset(20, 55),
+                                Image = "rbxassetid://4155801252",
+                                BackgroundColor3 = z.Value,
+                                BackgroundTransparency = 0,
+                                Parent = C.Root
+                            },
+                            {s("UICorner", {CornerRadius = UDim.new(0, 4)}), K}
+                        ),
+                        s(
+                            "Frame",
+                            {
+                                BackgroundColor3 = z.Value,
+                                Size = UDim2.fromScale(1, 1),
+                                BackgroundTransparency = z.Transparency
+                            },
+                            {s("UICorner", {CornerRadius = UDim.new(0, 4)})}
+                        )
+                    local N, O =
+                        s(
+                            "ImageLabel",
+                            {
+                                Image = "http://www.roblox.com/asset/?id=14204231522",
+                                ImageTransparency = 0.45,
+                                ScaleType = Enum.ScaleType.Tile,
+                                TileSize = UDim2.fromOffset(40, 40),
+                                BackgroundTransparency = 1,
+                                Position = UDim2.fromOffset(112, 220),
+                                Size = UDim2.fromOffset(88, 24),
+                                Parent = C.Root
+                            },
+                            {
+                                s("UICorner", {CornerRadius = UDim.new(0, 4)}),
+                                s("UIStroke", {Thickness = 2, Transparency = 0.75}),
+                                M
+                            }
+                        ),
+                        s(
+                            "Frame",
+                            {BackgroundColor3 = z.Value, Size = UDim2.fromScale(1, 1), BackgroundTransparency = 0},
+                            {s("UICorner", {CornerRadius = UDim.new(0, 4)})}
+                        )
+                    local P, Q =
+                        s(
+                            "ImageLabel",
+                            {
+                                Image = "http://www.roblox.com/asset/?id=14204231522",
+                                ImageTransparency = 0.45,
+                                ScaleType = Enum.ScaleType.Tile,
+                                TileSize = UDim2.fromOffset(40, 40),
+                                BackgroundTransparency = 1,
+                                Position = UDim2.fromOffset(20, 220),
+                                Size = UDim2.fromOffset(88, 24),
+                                Parent = C.Root
+                            },
+                            {
+                                s("UICorner", {CornerRadius = UDim.new(0, 4)}),
+                                s("UIStroke", {Thickness = 2, Transparency = 0.75}),
+                                O
+                            }
+                        ),
+                        {}
+                    for R = 0, 1, 0.1 do
+                        table.insert(Q, ColorSequenceKeypoint.new(R, Color3.fromHSV(R, 1, 1)))
+                    end
+                    local R, S =
+                        s("UIGradient", {Color = ColorSequence.new(Q), Rotation = 90}),
+                        s(
+                            "Frame",
+                            {
+                                Size = UDim2.new(1, 0, 1, -10),
+                                Position = UDim2.fromOffset(0, 5),
+                                BackgroundTransparency = 1
+                            }
+                        )
+                    local T, U, V =
+                        s(
+                            "ImageLabel",
+                            {
+                                Size = UDim2.fromOffset(14, 14),
+                                Image = "http://www.roblox.com/asset/?id=12266946128",
+                                Parent = S,
+                                ThemeTag = {ImageColor3 = "DialogInput"}
+                            }
+                        ),
+                        s(
+                            "Frame",
+                            {Size = UDim2.fromOffset(12, 190), Position = UDim2.fromOffset(210, 55), Parent = C.Root},
+                            {s("UICorner", {CornerRadius = UDim.new(1, 0)}), R, S}
+                        ),
+                        H()
+                    V.Frame.Position = UDim2.fromOffset(x.Transparency and 260 or 240, 55)
+                    I("Hex", UDim2.fromOffset(x.Transparency and 360 or 340, 55))
+                    local W = H()
+                    W.Frame.Position = UDim2.fromOffset(x.Transparency and 260 or 240, 95)
+                    I("Red", UDim2.fromOffset(x.Transparency and 360 or 340, 95))
+                    local X = H()
+                    X.Frame.Position = UDim2.fromOffset(x.Transparency and 260 or 240, 135)
+                    I("Green", UDim2.fromOffset(x.Transparency and 360 or 340, 135))
+                    local Y = H()
+                    Y.Frame.Position = UDim2.fromOffset(x.Transparency and 260 or 240, 175)
+                    I("Blue", UDim2.fromOffset(x.Transparency and 360 or 340, 175))
+                    local Z
+                    if x.Transparency then
+                        Z = H()
+                        Z.Frame.Position = UDim2.fromOffset(260, 215)
+                        I("Alpha", UDim2.fromOffset(360, 215))
+                    end
+                    local _, aa, ab2
+                    if x.Transparency then
+                        local ac =
+                            s(
+                            "Frame",
+                            {
+                                Size = UDim2.new(1, 0, 1, -10),
+                                Position = UDim2.fromOffset(0, 5),
+                                BackgroundTransparency = 1
+                            }
+                        )
+                        aa =
+                            s(
+                            "ImageLabel",
+                            {
+                                Size = UDim2.fromOffset(14, 14),
+                                Image = "http://www.roblox.com/asset/?id=12266946128",
+                                Parent = ac,
+                                ThemeTag = {ImageColor3 = "DialogInput"}
+                            }
+                        )
+                        ab2 =
+                            s(
+                            "Frame",
+                            {Size = UDim2.fromScale(1, 1)},
+                            {
+                                s(
+                                    "UIGradient",
+                                    {
+                                        Transparency = NumberSequence.new {
+                                            NumberSequenceKeypoint.new(0, 0),
+                                            NumberSequenceKeypoint.new(1, 1)
+                                        },
+                                        Rotation = 270
+                                    }
+                                ),
+                                s("UICorner", {CornerRadius = UDim.new(1, 0)})
+                            }
+                        )
+                        _ =
+                            s(
+                            "Frame",
+                            {
+                                Size = UDim2.fromOffset(12, 190),
+                                Position = UDim2.fromOffset(230, 55),
+                                Parent = C.Root,
+                                BackgroundTransparency = 1
+                            },
+                            {
+                                s("UICorner", {CornerRadius = UDim.new(1, 0)}),
+                                s(
+                                    "ImageLabel",
+                                    {
+                                        Image = "http://www.roblox.com/asset/?id=14204231522",
+                                        ImageTransparency = 0.45,
+                                        ScaleType = Enum.ScaleType.Tile,
+                                        TileSize = UDim2.fromOffset(40, 40),
+                                        BackgroundTransparency = 1,
+                                        Size = UDim2.fromScale(1, 1),
+                                        Parent = C.Root
+                                    },
+                                    {s("UICorner", {CornerRadius = UDim.new(1, 0)})}
+                                ),
+                                ab2,
+                                ac
+                            }
+                        )
+                    end
+                    local prevColor = Color3.fromHSV(D, E, F)
+                    local blendEnabled = false
+                    M.BackgroundColor3 = prevColor
+                    O.BackgroundColor3 = prevColor
+                    local ac = function()
+                        local c1 = Color3.fromHSV(D, E, F)
+                        L.BackgroundColor3 = Color3.fromHSV(D, 1, 1)
+                        T.Position = UDim2.new(0, -1, D, -6)
+                        K.Position = UDim2.new(E, 0, 1 - F, 0)
+                        O.BackgroundColor3 = c1
+                        V.Input.Text = "#" .. c1:ToHex()
+                        W.Input.Text = math.floor(c1.r * 255)
+                        X.Input.Text = math.floor(c1.g * 255)
+                        Y.Input.Text = math.floor(c1.b * 255)
+                        if x.Transparency then
+                            ab2.BackgroundColor3 = c1
+                            O.BackgroundTransparency = G
+                            aa.Position = UDim2.new(0, -1, 1 - G, -6)
+                            Z.Input.Text = e(o):Round((1 - G) * 100, 0) .. "%"
+                        end
+                    end
+                    p.AddSignal(
+                        V.Input.FocusLost,
+                        function(ad)
+                            if ad then
+                                local ae, af = pcall(Color3.fromHex, V.Input.Text)
+                                if ae and typeof(af) == "Color3" then D, E, F = Color3.toHSV(af) end
+                            end
+                            ac()
+                        end
+                    )
+                    p.AddSignal(
+                        W.Input.FocusLost,
+                        function(ad)
+                            if ad then
+                                local c1=Color3.fromHSV(D,E,F)
+                                local af,ag=pcall(Color3.fromRGB,W.Input.Text,math.floor(c1.g*255),math.floor(c1.b*255))
+                                if af and typeof(ag)=="Color3" and tonumber(W.Input.Text)<=255 then D,E,F=Color3.toHSV(ag) end
+                            end
+                            ac()
+                        end
+                    )
+                                        p.AddSignal(
+                        X.Input.FocusLost,
+                        function(ad)
+                            if ad then
+                                local c1=Color3.fromHSV(D,E,F)
+                                local af,ag=pcall(Color3.fromRGB,math.floor(c1.r*255),X.Input.Text,math.floor(c1.b*255))
+                                if af and typeof(ag)=="Color3" and tonumber(X.Input.Text)<=255 then D,E,F=Color3.toHSV(ag) end
+                            end
+                            ac()
+                        end
+                    )
+                    p.AddSignal(
+                        Y.Input.FocusLost,
+                        function(ad)
+                            if ad then
+                                local c1=Color3.fromHSV(D,E,F)
+                                local af,ag=pcall(Color3.fromRGB,math.floor(c1.r*255),math.floor(c1.g*255),Y.Input.Text)
+                                if af and typeof(ag)=="Color3" and tonumber(Y.Input.Text)<=255 then D,E,F=Color3.toHSV(ag) end
+                            end
+                            ac()
+                        end
+                    )
+                    if x.Transparency then
+                        p.AddSignal(
+                            Z.Input.FocusLost,
+                            function(ad)
+                                if ad then
+                                    pcall(
+                                        function()
+                                            local ae = tonumber(Z.Input.Text)
+                                            if ae >= 0 and ae <= 100 then
+                                                G = 1 - ae * 0.01
+                                            end
+                                        end
+                                    )
+                                end
+                                ac()
+                            end
+                        )
+                    end
+                    local cpDragSat, cpDragHue, cpDragTrans = false, false, false
+                    local function updateSat(pos)
+                        local ae = L.AbsolutePosition.X
+                        local af = ae + L.AbsoluteSize.X
+                        local ag = math.clamp(pos.X, ae, af)
+                        local ah = L.AbsolutePosition.Y
+                        local ai = ah + L.AbsoluteSize.Y
+                        local aj = math.clamp(pos.Y, ah, ai)
+                        E = (ag - ae) / math.max(af - ae, 1)
+                        F = 1 - ((aj - ah) / math.max(ai - ah, 1))
+                        ac()
+                    end
+                    local function updateHue(pos)
+                        local ae = U.AbsolutePosition.Y
+                        local af = ae + U.AbsoluteSize.Y
+                        local ag = math.clamp(pos.Y, ae, af)
+                        D = (ag - ae) / math.max(af - ae, 1)
+                        ac()
+                    end
+                    local function updateTrans(pos)
+                        if not _ then return end
+                        local ae = _.AbsolutePosition.Y
+                        local af = ae + _.AbsoluteSize.Y
+                        local ag = math.clamp(pos.Y, ae, af)
+                        G = 1 - ((ag - ae) / math.max(af - ae, 1))
+                        ac()
+                    end
+
+                    p.AddSignal(L.InputBegan, function(ad)
+                        if ad.UserInputType == Enum.UserInputType.MouseButton1 or ad.UserInputType == Enum.UserInputType.Touch then
+                            cpDragSat = true
+                            updateSat(ad.Position)
+                        end
+                    end)
+                    p.AddSignal(U.InputBegan, function(ad)
+                        if ad.UserInputType == Enum.UserInputType.MouseButton1 or ad.UserInputType == Enum.UserInputType.Touch then
+                            cpDragHue = true
+                            updateHue(ad.Position)
+                        end
+                    end)
+                    if x.Transparency and _ then
+                        p.AddSignal(_.InputBegan, function(ad)
+                            if ad.UserInputType == Enum.UserInputType.MouseButton1 or ad.UserInputType == Enum.UserInputType.Touch then
+                                cpDragTrans = true
+                                updateTrans(ad.Position)
+                            end
+                        end)
+                    end
+                    p.AddSignal(h.InputChanged, function(ad)
+                        if ad.UserInputType == Enum.UserInputType.MouseMovement or ad.UserInputType == Enum.UserInputType.Touch then
+                            if cpDragSat then updateSat(ad.Position) end
+                            if cpDragHue then updateHue(ad.Position) end
+                            if cpDragTrans then updateTrans(ad.Position) end
+                        end
+                    end)
+                    p.AddSignal(h.InputEnded, function(ad)
+                        if ad.UserInputType == Enum.UserInputType.MouseButton1 or ad.UserInputType == Enum.UserInputType.Touch then
+                            cpDragSat = false
+                            cpDragHue = false
+                            cpDragTrans = false
+                        end
+                    end)
+                    ac()
+                    local prevLbl = s("TextLabel", {
+                        Text = "New", TextSize = 9,
+                        FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.SemiBold),
+                        Position = UDim2.fromOffset(20, 256),
+                        Size = UDim2.fromOffset(80, 14),
+                        BackgroundTransparency = 1,
+                        Parent = C.Root,
+                        ThemeTag = {TextColor3 = "Accent"},
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                    })
+                    s("TextLabel", {
+                        Text = "Old", TextSize = 9,
+                        FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+                        Position = UDim2.fromOffset(112, 256),
+                        Size = UDim2.fromOffset(80, 14),
+                        BackgroundTransparency = 1,
+                        Parent = C.Root,
+                        ThemeTag = {TextColor3 = "SubText"},
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                    })
+                    C:Button(
+                        "Done",
+                        function()
+                            local c1 = Color3.fromHSV(D, E, F)
+                            local fH, fS, fV = Color3.toHSV(c1)
+                            z:SetValue({fH, fS, fV}, G)
+                        end
+                    )
+                    C:Button "Cancel"
+                    C:Open()
+                end
+            function z.Display(ac)
+                z.Value = Color3.fromHSV(z.Hue, z.Sat, z.Vib)
+                B.BackgroundColor3 = z.Value
+                B.BackgroundTransparency = z.Transparency
+                if y and y.SafeCallback then
+                    y:SafeCallback(z.Callback, z.Value)
+                    y:SafeCallback(z.Changed, z.Value)
+                else
+                    pcall(z.Callback, z.Value)
+                    if z.Changed then pcall(z.Changed, z.Value) end
+                end
+                if z.Callback2 then
+                    pcall(z.Callback2, z.Value2 or z.Value)
+                end
+            end
+            function z.SetValue(ac, ad, ae)
+                local af = Color3.fromHSV(ad[1], ad[2], ad[3])
+                z.Transparency = ae or 0
+                z:SetHSVFromRGB(af)
+                z:Display()
+            end
+            function z.SetValueRGB(ac, ad, ae)
+                z.Transparency = ae or 0
+                z:SetHSVFromRGB(ad)
+                z:Display()
+            end
+            function z.OnChanged(ac, ad)
+                z.Changed = ad
+                ad(z.Value)
+            end
+            function z.Destroy(ac)
+                A:Destroy()
+                y.Options[w] = nil
+            end
+            p.AddSignal(
+                A.Frame.MouseButton1Click,
+                function()
+                    ab()
+                end
+            )
+            z:Display()
+            y.Options[w] = z
+            return z
+        end
+        return u
+    end,
+    [22] = function()
+        local aa, ab, ac, ad, ae = b(22)
+        local af, ag, ah, ai, aj =
+            game:GetService "TweenService",
+            game:GetService "UserInputService",
+            game:GetService "Players".LocalPlayer:GetMouse(),
+            game:GetService "Workspace".CurrentCamera,
+            ab.Parent.Parent
+        local c, d = ac(aj.Creator), ac(aj.Packages.Flipper)
+        local e, f, g = c.New, aj.Components, {}
+        local _RS_dd = game:GetService("RunService")
+        local function _clearDropShine(state)
+            if state._shineConns then
+                for _, conn in ipairs(state._shineConns) do
+                    pcall(function() conn:Disconnect() end)
+                end
+                table.clear(state._shineConns)
+            end
+        end
+        local function _applyDropShine(state, root, elementAnimated)
+            _clearDropShine(state)
+            state._shineConns = {}
+            if getgenv().ShineEnabled ~= true or not root then return end
+            local shineCfg = c.GetThemeProperty("Shine")
+            if not shineCfg then return end
+            local Speed = shineCfg.Speed or 0.5
+            local RotationSpeed = shineCfg.RotationSpeed or 25
+            local ColorSeq = shineCfg.ColorSequence
+            local strokeDark = c.GetThemeProperty("StrokeDark") or c.GetThemeProperty("AcrylicBorder")
+            local accent = c.GetThemeProperty("Accent")
+            local strokeShine = c.GetThemeProperty("StrokeShine")
+
+            local grads = {}
+            local strokes = {}
+            pcall(function()
+                for _, obj in ipairs(root:GetDescendants()) do
+                    if obj:IsA("UIGradient") then
+                        table.insert(grads, obj)
+                    elseif obj:IsA("UIStroke") and strokeShine then
+                        table.insert(strokes, obj)
+                    end
+                end
+            end)
+
+            local accum = 0
+            local conn
+            conn = _RS_dd.Heartbeat:Connect(function(dt)
+                if getgenv().ShineEnabled ~= true or (#grads == 0 and #strokes == 0) then
+                    if conn then conn:Disconnect() end
+                    return
+                end
+                accum = accum + dt
+                if accum < 0.05 then return end
+                local step = accum
+                accum = 0
+
+                for i = #grads, 1, -1 do
+                    local obj = grads[i]
+                    if obj and obj.Parent then
+                        local t = (obj:GetAttribute("_t") or 0) + step * Speed
+                        obj:SetAttribute("_t", t)
+                        obj.Rotation = (t * RotationSpeed) % 360
+                        if ColorSeq then obj.Color = ColorSeq end
+                    else
+                        table.remove(grads, i)
+                    end
+                end
+
+                for i = #strokes, 1, -1 do
+                    local obj = strokes[i]
+                    if obj and obj.Parent then
+                        local t = (obj:GetAttribute("_t") or 0) + step * Speed
+                        obj:SetAttribute("_t", t)
+                        obj.Thickness = 2
+                        if strokeDark and accent then
+                            obj.Color = strokeDark:Lerp(accent, (math.sin(t) + 1) / 2)
+                        end
+                    else
+                        table.remove(strokes, i)
+                    end
+                end
+            end)
+            table.insert(state._shineConns, conn)
+        end
+        g.__index = g
+        g.__type = "Dropdown"
+
+        local _outsideSideOwner = {left = nil, right = nil, top = nil, bottom = nil}
+
+        local _openDropdowns = setmetatable({}, {__mode = "k"})
+        getgenv()._FluentProRefreshOpenDropdownShine = function()
+            for state in next, _openDropdowns do
+                if state._refreshShine then state._refreshShine() end
+            end
+        end
+        function g.New(h, i, j)
+            local k, l, m =
+                h.Library,
+                {
+                    Values = j.Values,
+                    Value = j.Default,
+                    Multi = j.Multi,
+                    Buttons = {},
+                    Opened = false,
+                    Type = "Dropdown",
+                    Callback = j.Callback or function()
+                        end
+                },
+                ac(f.Element)(j.Title, j.Description, h.Container, false)
+            m.DescLabel.Size = UDim2.new(1, -110, 0, 14)
+            l.SetTitle = m.SetTitle
+            l.SetDesc = m.SetDesc
+            local n, o =
+                e(
+                    "TextLabel",
+                    {
+                        FontFace = Font.new(
+                            "rbxasset://fonts/families/GothamSSm.json",
+                            Enum.FontWeight.Regular,
+                            Enum.FontStyle.Normal
+                        ),
+                        Text = "Value",
+                        TextColor3 = Color3.fromRGB(240, 240, 240),
+                        TextSize = 13,
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        Size = UDim2.new(1, -30, 0, 14),
+                        Position = UDim2.new(0, 8, 0.5, 0),
+                        AnchorPoint = Vector2.new(0, 0.5),
+                        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                        BackgroundTransparency = 1,
+                        TextTruncate = Enum.TextTruncate.AtEnd,
+                        ThemeTag = {TextColor3 = "Text"}
+                    }
+                ),
+                e(
+                    "ImageLabel",
+                    {
+                        Image = "rbxassetid://10709790948",
+                        Size = UDim2.fromOffset(16, 16),
+                        AnchorPoint = Vector2.new(1, 0.5),
+                        Position = UDim2.new(1, -8, 0.5, 0),
+                        BackgroundTransparency = 1,
+                        ThemeTag = {ImageColor3 = "SubText"}
+                    }
+                )
+            local p, s =
+                e(
+                    "TextButton",
+                    {
+                        Size = UDim2.fromOffset(95, 26),
+                        Position = UDim2.new(1, -10, 0.5, 0),
+                        AnchorPoint = Vector2.new(1, 0.5),
+                        BackgroundTransparency = 0.9,
+                        Parent = m.Frame,
+                        ThemeTag = {BackgroundColor3 = "DropdownFrame"}
+                    },
+                    {
+                        e("UICorner", {CornerRadius = UDim.new(0, 5)}),
+                        e(
+                            "UIStroke",
+                            {
+                                Transparency = 0.5,
+                                ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                                ThemeTag = {Color = "InElementBorder"}
+                            }
+                        ),
+                        o,
+                        n
+                    }
+                ),
+                e("UIListLayout", {Padding = UDim.new(0, 3)})
+
+            local ddShowSearch = not (j.NoSearch == true or j.Search == false)
+            local ddSearchBox, ddSearchFrame = nil, nil
+            if ddShowSearch then
+                ddSearchBox = e("TextBox", {
+                    FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium),
+                    TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left,
+                    BackgroundTransparency = 1, BorderSizePixel = 0,
+                    Size = UDim2.new(1, -34, 1, 0), Position = UDim2.fromOffset(30, 0),
+                    PlaceholderText = "Search options...", ClearTextOnFocus = false, Text = "",
+                    TextColor3 = Color3.fromRGB(255, 255, 255),
+                    PlaceholderColor3 = Color3.fromRGB(170, 210, 185),
+                })
+                local ddSearchIcon = e("ImageLabel", {
+                    Image = "rbxassetid://11422155687",
+                    Size = UDim2.fromOffset(16, 16),
+                    Position = UDim2.new(0, 8, 0.5, 0),
+                    AnchorPoint = Vector2.new(0, 0.5),
+                    BackgroundTransparency = 1,
+                    ThemeTag = {ImageColor3 = "SubText"},
+                })
+                ddSearchFrame = e("Frame", {
+                    Size = UDim2.new(1, -10, 0, 32),
+                    Position = UDim2.fromOffset(5, 5),
+                    BackgroundTransparency = 0,
+                    BorderSizePixel = 0,
+                    ThemeTag = {BackgroundColor3 = "Element"},
+                }, {
+                    e("UICorner", {CornerRadius = UDim.new(0, 7)}),
+                    e("UIStroke", {Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, ThemeTag = {Color = "InElementBorder"}}),
+                    ddSearchIcon,
+                    ddSearchBox,
+                })
+            end
+            local scrollOffY = ddShowSearch and 42 or 5
+            local scrollH    = ddShowSearch and -47 or -10
+            local t =
+                e(
+                "ScrollingFrame",
+                {
+                    Size = UDim2.new(1, -5, 1, scrollH),
+                    Position = UDim2.fromOffset(5, scrollOffY),
+                    BackgroundTransparency = 1,
+                    ScrollBarImageTransparency = 1,
+                    ScrollBarThickness = 0,
+                    VerticalScrollBarInset = Enum.ScrollBarInset.None,
+                    TopImage = "", MidImage = "", BottomImage = "",
+                    ElasticBehavior = Enum.ElasticBehavior.Never,
+                    BorderSizePixel = 0,
+                    ClipsDescendants = true,
+                    CanvasSize = UDim2.fromScale(0, 0)
+                },
+                {s}
+            )
+            local _ddBgImgRaw = j.DropdownBackgroundImages or j.DropdownBackgroundImage
+            local _ddBgImg = ""
+            if type(_ddBgImgRaw) == "string" then
+                if _ddBgImgRaw:match("^rbxassetid://") or _ddBgImgRaw:match("^rbxasset://") or _ddBgImgRaw:match("^http") then
+                    _ddBgImg = _ddBgImgRaw
+                elseif _ddBgImgRaw:match("^%d+$") then
+                    _ddBgImg = "rbxassetid://" .. _ddBgImgRaw
+                end
+            end
+            local _ddBgTransp= j.DropdownBackgroundTransparency
+            if _ddBgTransp == nil then _ddBgTransp = 0.4 end
+            local _ddBgChild
+            if _ddBgImg ~= "" then
+                _ddBgChild = e("ImageLabel",{BackgroundTransparency=1,Image=_ddBgImg,ScaleType=Enum.ScaleType.Stretch,Size=UDim2.fromScale(1,1),ImageTransparency=_ddBgTransp,ZIndex=0})
+            else
+                _ddBgChild = e("ImageLabel",{BackgroundTransparency=1,Image="http://www.roblox.com/asset/?id=5554236805",ScaleType=Enum.ScaleType.Slice,SliceCenter=Rect.new(23,23,277,277),Size=UDim2.fromScale(1,1)+UDim2.fromOffset(30,30),Position=UDim2.fromOffset(-15,-15),ImageColor3=Color3.fromRGB(0,0,0),ImageTransparency=0.1,Visible=false})
+            end
+            local ddStroke = e("UIStroke", {ApplyStrokeMode = Enum.ApplyStrokeMode.Border, ThemeTag = {Color = "DropdownBorder"}})
+            local ddGradient = e("Frame", {
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                BackgroundTransparency = 0.4,
+                Size = UDim2.fromScale(1, 1),
+                ZIndex = 0,
+                Visible = false,
+            }, {
+                e("UICorner", {CornerRadius = UDim.new(0, 7)}),
+                e("UIGradient", {Rotation = 90, ThemeTag = {Color = "AcrylicGradient"}}),
+            })
+
+            local uChildren = {t, e("UICorner", {CornerRadius = UDim.new(0, 7)}),
+                ddStroke,
+                ddGradient,
+                _ddBgChild
+            }
+            if ddSearchFrame then table.insert(uChildren, 1, ddSearchFrame) end
+            local u = e("Frame", {Size = UDim2.fromScale(1, 1), ThemeTag = {BackgroundColor3 = "DropdownHolder"}}, uChildren)
+            local _isManagerDD = j.IsManagerDropdown == true
+            if _isManagerDD then
+
+                local function _syncManagerTransparency()
+                    local baseTransp = c.GetThemeProperty("DropdownTransparency") or 0
+                    u.BackgroundTransparency = getgenv().WindowTransparent and math.max(baseTransp, 0.35) or baseTransp
+                end
+                _syncManagerTransparency()
+                getgenv()._FluentProManagerDropdowns = getgenv()._FluentProManagerDropdowns or {}
+                table.insert(getgenv()._FluentProManagerDropdowns, _syncManagerTransparency)
+            end
+            local _isOutsideDD = false
+            local _isManagerDDAnim = j.IsManagerDropdown == true
+            local _themeSupportsShineInit = c.GetThemeProperty("ShineEnabled") == true
+            local _initialAnimated = _themeSupportsShineInit and (
+                (_isManagerDDAnim and (getgenv().ShineEnabled == true)) or (j.Animated == true)
+            )
+            if _initialAnimated then
+                ddGradient.Visible = true
+                local acrylicBorder = c.GetThemeProperty("AcrylicBorder")
+                if acrylicBorder then ddStroke.Color = acrylicBorder end
+            end
+            local winRoot = h.Root or (h.Library.GUI and h.Library.GUI:FindFirstChildWhichIsA("Frame", true))
+            local popupParent = winRoot or h.Library.PopupGUI or h.Library.GUI
+
+            local dimOverlay = e("TextButton", {
+                Size = UDim2.fromScale(1, 1),
+                Position = UDim2.fromScale(0, 0),
+                BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+                BackgroundTransparency = 1,
+                AutoButtonColor = false,
+                Text = "",
+                ZIndex = 90,
+                Visible = false,
+                Parent = popupParent,
+            }, {
+                e("UICorner", { CornerRadius = UDim.new(0, 10) })
+            })
+
+            local v = e("Frame", {
+                Size = UDim2.new(0, 200, 1, 0),
+                Position = UDim2.new(0, 0, 0, 0),
+                BackgroundTransparency = 1,
+                ZIndex = 95,
+                ClipsDescendants = true,
+                Visible = false,
+                Parent = popupParent,
+            }, {
+                u,
+                e("UICorner", { CornerRadius = UDim.new(0, 10) }),
+                e("UISizeConstraint", { MinSize = Vector2.new(140, 0) })
+            })
+
+            c.AddSignal(dimOverlay.MouseButton1Click, function()
+                if l.Opened then
+                    l:Close()
+                end
+            end)
+            table.insert(k.OpenFrames, v)
+            local function _winFrame()
+                local winGui = h.Library.GUI or h.Library.PopupGUI
+                return h.Root or (winGui and winGui:FindFirstChildWhichIsA("Frame", true))
+            end
+            local w, x = function()
+                    local winFrame = _winFrame()
+                    if not winFrame then return end
+
+                    if v.Parent ~= winFrame then
+                        v.Parent = winFrame
+                    end
+                    if dimOverlay.Parent ~= winFrame then
+                        dimOverlay.Parent = winFrame
+                    end
+
+                    local winW = winFrame.AbsoluteSize.X
+                    local popW = math.clamp(p.AbsoluteSize.X + 20, 220, math.max(220, winW - 10))
+
+                    v.Size = UDim2.new(0, popW, 1, 0)
+
+                    local btnRelX = p.AbsolutePosition.X - winFrame.AbsolutePosition.X
+                    local maxPopX = math.max(0, winW - popW)
+                    local popX = math.clamp(btnRelX, 0, maxPopX)
+
+                    v.Position = UDim2.new(0, popX, 0, 0)
+                end, 0
+            local y, z = function()
+                    local winFrame = _winFrame()
+                    if winFrame then
+                        v.Size = UDim2.new(v.Size.X.Scale, v.Size.X.Offset, 1, 0)
+                    end
+                end, function()
+                    t.CanvasSize = UDim2.fromOffset(0, s.AbsoluteContentSize.Y + 10)
+                end
+            y()
+            w()
+            c.AddSignal(p:GetPropertyChangedSignal "AbsolutePosition", w)
+            c.AddSignal(p:GetPropertyChangedSignal "AbsoluteSize", function() y() w() end)
+            c.AddSignal(
+                p.MouseButton1Click,
+                function()
+                    l:Open()
+                end
+            )
+            c.AddSignal(
+                ag.InputBegan,
+                function(A)
+                    if not l.Opened then return end
+                    if A.UserInputType == Enum.UserInputType.MouseButton1 or A.UserInputType == Enum.UserInputType.Touch then
+                        local B, C = u.AbsolutePosition, u.AbsoluteSize
+                        local insideDropdown = ah.X >= B.X and ah.X <= B.X + C.X and ah.Y >= (B.Y - 20 - 1) and ah.Y <= B.Y + C.Y
+                        if insideDropdown then return end
+                        if j.OutsideWindow or j.DropdownOutsideWindow then
+                            local winGui = h.Library.GUI or h.Library.PopupGUI
+                            local winFrame = winGui and winGui:FindFirstChildWhichIsA("Frame", true)
+                            if winFrame then
+                                local wp, ws = winFrame.AbsolutePosition, winFrame.AbsoluteSize
+                                local insideWindow = ah.X >= wp.X and ah.X <= wp.X + ws.X and ah.Y >= wp.Y and ah.Y <= wp.Y + ws.Y
+                                if insideWindow then return end
+                            end
+                        end
+                        l:Close()
+                    end
+                end
+            )
+            local A = h.ScrollFrame
+            l._refreshShine = function()
+                local themeSupportsShine = c.GetThemeProperty("ShineEnabled") == true
+                local shouldAnimate
+                if j.IsManagerDropdown then
+                    shouldAnimate = themeSupportsShine and getgenv().ShineEnabled == true
+                else
+                    shouldAnimate = themeSupportsShine and j.Animated == true
+                end
+                ddGradient.Visible = shouldAnimate
+
+                if shouldAnimate then
+                    local acrylicBorder = c.GetThemeProperty("AcrylicBorder")
+                    if acrylicBorder then ddStroke.Color = acrylicBorder end
+                else
+                    local dropBorder = c.GetThemeProperty("DropdownBorder")
+                    if dropBorder then ddStroke.Color = dropBorder end
+                end
+                _applyDropShine(l, u, shouldAnimate)
+            end
+            function l.Open(B)
+                for openDD, _ in pairs(_openDropdowns) do
+                    if openDD ~= l and openDD.Close then
+                        pcall(function() openDD:Close() end)
+                    end
+                end
+
+                l.Opened = true
+                A.ScrollingEnabled = false
+                y()
+                w()
+
+                dimOverlay.Visible = true
+                dimOverlay.BackgroundTransparency = 1
+                v.Visible = true
+                _openDropdowns[l] = true
+                l._refreshShine()
+
+                af:Create(
+                    dimOverlay,
+                    TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+                    { BackgroundTransparency = 0.5 }
+                ):Play()
+            end
+
+            function l.Close(B)
+                l.Opened = false
+                A.ScrollingEnabled = true
+                _openDropdowns[l] = nil
+                _clearDropShine(l)
+
+                local tDim = af:Create(dimOverlay, TweenInfo.new(0.15, Enum.EasingStyle.Quart, Enum.EasingDirection.In), { BackgroundTransparency = 1 })
+                tDim:Play()
+
+                tDim.Completed:Connect(function()
+                    if not l.Opened then
+                        v.Visible = false
+                        dimOverlay.Visible = false
+                    end
+                end)
+            end
+            function l.Display(B)
+                local C, D = l.Values, ""
+                if j.Multi then
+                    for E, F in next, C do
+                        if l.Value[F] then
+                            D = D .. F .. ", "
+                        end
+                    end
+                    D = D:sub(1, #D - 2)
+                else
+                    D = l.Value or ""
+                end
+                n.Text = (D == "" and "--" or D)
+            end
+            function l.GetActiveValues(B)
+                if j.Multi then
+                    local C = {}
+                    for D, E in next, l.Value do
+                        table.insert(C, D)
+                    end
+                    return C
+                else
+                    return l.Value and 1 or 0
+                end
+            end
+
+            local filterTimer = nil
+            local function updateDropdownFilter()
+                if not ddSearchBox then return end
+                local query = (ddSearchBox.Text or ""):lower():gsub("^%s+",""):gsub("%s+$","")
+                local blank = query == ""
+                for btn, btnObj in pairs(l.Buttons) do
+                    local lbl = btn:FindFirstChild("ButtonLabel")
+                    if lbl then
+                        btn.Visible = blank or lbl.Text:lower():find(query, 1, true) ~= nil
+                    end
+                end
+                z()
+                y()
+            end
+
+            if ddSearchBox then
+                ddSearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+                    updateDropdownFilter()
+                end)
+            end
+
+            function l.BuildDropdownList(B)
+                local C, D = l.Values, {}
+                l.Buttons = {}
+                for E, F in next, t:GetChildren() do
+                    if not F:IsA "UIListLayout" then
+                        F:Destroy()
+                    end
+                end
+                local G = 0
+                for H, I in next, C do
+                    local J = {}
+                    G = G + 1
+                    local K, L =
+                        e(
+                            "Frame",
+                            {
+                                Size = UDim2.fromOffset(4, 14),
+                                BackgroundColor3 = Color3.fromRGB(76, 194, 255),
+                                Position = UDim2.fromOffset(-1, 16),
+                                AnchorPoint = Vector2.new(0, 0.5),
+                                ThemeTag = {BackgroundColor3 = "Accent"}
+                            },
+                            {e("UICorner", {CornerRadius = UDim.new(0, 2)})}
+                        ),
+                        e(
+                            "TextLabel",
+                            {
+                                FontFace = Font.new "rbxasset://fonts/families/GothamSSm.json",
+                                Text = I,
+                                TextColor3 = Color3.fromRGB(200, 200, 200),
+                                TextSize = 13,
+                                TextXAlignment = Enum.TextXAlignment.Left,
+                                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                                AutomaticSize = Enum.AutomaticSize.Y,
+                                BackgroundTransparency = 1,
+                                Size = UDim2.fromScale(1, 1),
+                                Position = UDim2.fromOffset(10, 0),
+                                Name = "ButtonLabel",
+                                ThemeTag = {TextColor3 = "Text"}
+                            }
+                        )
+                    local isTSel = j.IsThemeSelector == true
+                    local rowH = isTSel and 38 or 32
+                    local swatches = {}
+                    if isTSel then
+                        local td = nil
+                        pcall(function()
+                            local tm = e(aa.Themes)
+                            if tm and tm[I] then td = tm[I] end
+                        end)
+                        if td then
+                            local bgC = td.AcrylicMain or Color3.fromRGB(30,30,30)
+                            local elC = td.Element    or Color3.fromRGB(60,60,60)
+                            local acC = td.ThemeAccentColors or {td.Accent or Color3.fromRGB(100,100,100)}
+                            local sw = e("Frame",{
+                                Size=UDim2.fromOffset(66,22),
+                                Position=UDim2.new(1,-70,0.5,0), AnchorPoint=Vector2.new(0,0.5),
+                                BackgroundTransparency=1, ZIndex=25,
+                            })
+                            e("Frame",{Size=UDim2.fromOffset(19,19),Position=UDim2.fromOffset(0,1),
+                                BackgroundColor3=bgC,ZIndex=25,Parent=sw},
+                                {e("UICorner",{CornerRadius=UDim.new(0,4)})})
+                            e("Frame",{Size=UDim2.fromOffset(19,19),Position=UDim2.fromOffset(22,1),
+                                BackgroundColor3=elC,ZIndex=25,Parent=sw},
+                                {e("UICorner",{CornerRadius=UDim.new(0,4)})})
+                            if #acC > 1 then
+                                local sw2 = math.floor(19/#acC)
+                                for _ci,col in ipairs(acC) do
+                                    e("Frame",{Size=UDim2.fromOffset(sw2,19),
+                                        Position=UDim2.fromOffset(44+(_ci-1)*sw2,1),
+                                        BackgroundColor3=col,ZIndex=25,Parent=sw},
+                                        {e("UICorner",{CornerRadius=UDim.new(0,(_ci==1 or _ci==#acC) and 4 or 0)})})
+                                end
+                            else
+                                e("Frame",{Size=UDim2.fromOffset(19,19),Position=UDim2.fromOffset(44,1),
+                                    BackgroundColor3=acC[1],ZIndex=25,Parent=sw},
+                                    {e("UICorner",{CornerRadius=UDim.new(0,4)})})
+                            end
+                            table.insert(swatches, sw)
+                            L.Size = UDim2.new(1,-82,1,0)
+                        end
+                    end
+                    local btnChildren = {K, L, e("UICorner",{CornerRadius=UDim.new(0,6)})}
+                    for _,sw in ipairs(swatches) do table.insert(btnChildren,sw) end
+                    local M, N =
+                        (e(
+                        "TextButton",
+                        {
+                            Size = UDim2.new(1, -5, 0, rowH),
+                            BackgroundTransparency = 1,
+                            ZIndex = 23,
+                            Text = "",
+                            Parent = t,
+                            ThemeTag = {BackgroundColor3 = "DropdownOption"}
+                        },
+                        btnChildren
+                    ))
+                    if j.Multi then
+                        N = l.Value[I]
+                    else
+                        N = l.Value == I
+                    end
+                    local O, P = c.SpringMotor(1, M, "BackgroundTransparency")
+                    local Q, R = c.SpringMotor(1, K, "BackgroundTransparency")
+                    local S = d.SingleMotor.new(6)
+                    S:onStep(
+                        function(T)
+                            K.Size = UDim2.new(0, 4, 0, T)
+                        end
+                    )
+                    c.AddSignal(
+                        M.MouseEnter,
+                        function()
+                            P(N and 0.85 or 0.89)
+                        end
+                    )
+                    c.AddSignal(
+                        M.MouseLeave,
+                        function()
+                            P(N and 0.89 or 1)
+                        end
+                    )
+                    c.AddSignal(
+                        M.MouseButton1Down,
+                        function()
+                            P(0.92)
+                        end
+                    )
+                    c.AddSignal(
+                        M.MouseButton1Up,
+                        function()
+                            P(N and 0.85 or 0.89)
+                        end
+                    )
+                    function J.UpdateButton(T)
+                        if j.Multi then
+                            N = l.Value[I]
+                            if N then
+                                P(0.89)
+                            end
+                        else
+                            N = l.Value == I
+                            P(N and 0.89 or 1)
+                        end
+                        S:setGoal(d.Spring.new(N and 14 or 6, {frequency = 6}))
+                        R(N and 0 or 1)
+                    end
+                    L.InputBegan:Connect(
+                        function(T)
+                            if
+                                T.UserInputType == Enum.UserInputType.MouseButton1 or
+                                    T.UserInputType == Enum.UserInputType.Touch
+                             then
+                                local U = not N
+                                if l:GetActiveValues() == 1 and not U and not j.AllowNull then
+                                else
+                                    if j.Multi then
+                                        N = U
+                                        l.Value[I] = N and true or nil
+                                    else
+                                        N = U
+                                        l.Value = N and I or nil
+                                        for V, W in next, D do
+                                            W:UpdateButton()
+                                        end
+                                    end
+                                    J:UpdateButton()
+                                    l:Display()
+                                    k:SafeCallback(l.Callback, l.Value)
+                                    k:SafeCallback(l.Changed, l.Value)
+                                end
+                            end
+                        end
+                    )
+                    J:UpdateButton()
+                    l:Display()
+                    D[M] = J
+                    l.Buttons[M] = J
+                end
+                x = 0
+                for J, K in next, D do
+                    local lbl = J:FindFirstChild("ButtonLabel")
+                    if lbl and lbl.TextBounds.X > x then
+                        x = lbl.TextBounds.X
+                    end
+                end
+                if j.IsThemeSelector then
+                    x = math.max(x + 30, 210)
+                else
+                    x = x + 30
+                end
+
+                if x < 60 then
+                    x = p.AbsoluteSize.X > 0 and p.AbsoluteSize.X or 170
+                end
+                z()
+                task.defer(function()
+
+                    local mx = 0
+                    for J2, K2 in next, D do
+                        local lbl2 = J2:FindFirstChild("ButtonLabel")
+                        if lbl2 and lbl2.TextBounds.X > mx then
+                            mx = lbl2.TextBounds.X
+                        end
+                    end
+                    if mx > 0 then
+                        if j.IsThemeSelector then
+                            x = math.max(mx + 30, 210)
+                        else
+                            x = mx + 30
+                        end
+                    end
+                    y()
+                end)
+            end
+            function l.SetValues(B, C)
+                if C then
+                    l.Values = C
+                end
+                l:BuildDropdownList()
+            end
+            function l.OnChanged(B, C)
+                l.Changed = C
+                C(l.Value)
+            end
+            function l.SetValue(B, C)
+                if l.Multi then
+                    local D = {}
+                    for E, F in next, C do
+                        if table.find(l.Values, E) then
+                            D[E] = true
+                        end
+                    end
+                    l.Value = D
+                else
+                    if not C then
+                        l.Value = nil
+                    elseif table.find(l.Values, C) then
+                        l.Value = C
+                    end
+                end
+                l:BuildDropdownList()
+                k:SafeCallback(l.Callback, l.Value)
+                k:SafeCallback(l.Changed, l.Value)
+            end
+            function l.Destroy(B)
+                m:Destroy()
+                k.Options[i] = nil
+            end
+            l:BuildDropdownList()
+            l:Display()
+            local B = {}
+            if type(j.Default) == "string" then
+                local C = table.find(l.Values, j.Default)
+                if C then
+                    table.insert(B, C)
+                end
+            elseif type(j.Default) == "table" then
+                for C, D in next, j.Default do
+                    local E = table.find(l.Values, D)
+                    if E then
+                        table.insert(B, E)
+                    end
+                end
+            elseif type(j.Default) == "number" and l.Values[j.Default] ~= nil then
+                table.insert(B, j.Default)
+            end
+            if next(B) then
+                for C = 1, #B do
+                    local D = B[C]
+                    if j.Multi then
+                        l.Value[l.Values[D]] = true
+                    else
+                        l.Value = l.Values[D]
+                    end
+                    if not j.Multi then
+                        break
+                    end
+                end
+                l:BuildDropdownList()
+                l:Display()
+            end
+            k.Options[i] = l
+            return l
+        end
+        return g
+    end,
+    [23] = function()
+        local aa, ab, ac, ad, ae = b(23)
+        local af = ab.Parent.Parent
+        local ag = ac(af.Creator)
+        local ah, ai, aj, c = ag.New, ag.AddSignal, af.Components, {}
+        c.__index = c
+        c.__type = "Input"
+        function c.New(d, e, f)
+            local g = d.Library
+            f.Title = f.Title or "Input"
+            f.Callback = f.Callback or function()
+                end
+            local h, i =
+                {
+                    Value = f.Default or "",
+                    Numeric = f.Numeric or false,
+                    Finished = f.Finished or false,
+                    Callback = f.Callback or function(h)
+                        end,
+                    Type = "Input"
+                },
+                ac(aj.Element)(f.Title, f.Description, d.Container, false)
+            i.DescLabel.Size = UDim2.new(1, -110, 0, 14)
+            h.SetTitle = i.SetTitle
+            h.SetDesc = i.SetDesc
+            local j = ac(aj.Textbox)(i.Frame, true)
+            j.Frame.Position = UDim2.new(1, -10, 0.5, 0)
+            j.Frame.AnchorPoint = Vector2.new(1, 0.5)
+            j.Frame.Size = UDim2.fromOffset(95, 26)
+            j.Input.Text = f.Default or ""
+            j.Input.PlaceholderText = f.Placeholder or ""
+            local k = j.Input
+            function h.SetValue(l, m)
+                if f.MaxLength and #m > f.MaxLength then
+                    m = m:sub(1, f.MaxLength)
+                end
+                if h.Numeric then
+                    if (not tonumber(m)) and m:len() > 0 then
+                        m = h.Value
+                    end
+                end
+                h.Value = m
+                if k.Text ~= m then
+                    k.Text = m
+                end
+                g:SafeCallback(h.Callback, h.Value)
+                g:SafeCallback(h.Changed, h.Value)
+            end
+            if h.Finished then
+                ai(
+                    k.FocusLost,
+                    function(l)
+                        if not l then
+                            return
+                        end
+                        h:SetValue(k.Text)
+                    end
+                )
+            else
+                ai(
+                    k:GetPropertyChangedSignal "Text",
+                    function()
+                        h:SetValue(k.Text)
+                    end
+                )
+            end
+            function h.OnChanged(l, m)
+                h.Changed = m
+                m(h.Value)
+            end
+            function h.Destroy(l)
+                i:Destroy()
+                g.Options[e] = nil
+            end
+            g.Options[e] = h
+            return h
+        end
+        return c
+    end,
+    [24] = function()
+        local aa, ab, ac, ad, ae = b(24)
+        local af, ag = game:GetService "UserInputService", ab.Parent.Parent
+        local ah = ac(ag.Creator)
+        local ai, aj, c = ah.New, ag.Components, {}
+        c.__index = c
+        c.__type = "Keybind"
+        function c.New(d, e, f)
+            local g = d.Library
+            assert(f.Title, "KeyBind - Missing Title")
+            assert(f.Default, "KeyBind - Missing default value.")
+            local h, i, j =
+                {
+                    Value = f.Default,
+                    Toggled = false,
+                    Mode = f.Mode or "Toggle",
+                    Type = "Keybind",
+                    Callback = f.Callback or function(h)
+                        end,
+                    ChangedCallback = f.ChangedCallback or function(h)
+                        end
+                },
+                false,
+                ac(aj.Element)(f.Title, f.Description, d.Container, true)
+            h.SetTitle = j.SetTitle
+            h.SetDesc = j.SetDesc
+            local k =
+                ai(
+                "TextLabel",
+                {
+                    FontFace = Font.new(
+                        "rbxasset://fonts/families/GothamSSm.json",
+                        Enum.FontWeight.Regular,
+                        Enum.FontStyle.Normal
+                    ),
+                    Text = f.Default,
+                    TextColor3 = Color3.fromRGB(240, 240, 240),
+                    TextSize = 13,
+                    TextXAlignment = Enum.TextXAlignment.Center,
+                    Size = UDim2.new(0, 0, 0, 14),
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    BackgroundTransparency = 1,
+                    ThemeTag = {TextColor3 = "Text"}
+                }
+            )
+            local mouseIco =
+                ai(
+                "ImageLabel",
+                {
+                    Size = UDim2.fromOffset(13, 13),
+                    BackgroundTransparency = 1,
+                    Image = "rbxassetid://10734898592",
+                    ImageTransparency = 0.35,
+                    LayoutOrder = 1,
+                    ThemeTag = {ImageColor3 = "SubText"}
+                }
+            )
+            k.LayoutOrder = 2
+            local l =
+                ai(
+                "TextButton",
+                {
+                    Size = UDim2.fromOffset(0, 30),
+                    Position = UDim2.new(1, -10, 0.5, 0),
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    BackgroundTransparency = 0.9,
+                    Parent = j.Frame,
+                    AutomaticSize = Enum.AutomaticSize.X,
+                    ThemeTag = {BackgroundColor3 = "Keybind"}
+                },
+                {
+                    ai("UICorner", {CornerRadius = UDim.new(0, 5)}),
+                    ai("UIPadding", {PaddingLeft = UDim.new(0, 7), PaddingRight = UDim.new(0, 8)}),
+                    ai("UIListLayout", {
+                        FillDirection = Enum.FillDirection.Horizontal,
+                        VerticalAlignment = Enum.VerticalAlignment.Center,
+                        Padding = UDim.new(0, 4),
+                        SortOrder = Enum.SortOrder.LayoutOrder,
+                    }),
+                    ai(
+                        "UIStroke",
+                        {
+                            Transparency = 0.5,
+                            ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                            ThemeTag = {Color = "InElementBorder"}
+                        }
+                    ),
+                    mouseIco,
+                    k
+                }
+            )
+            function h.GetState(m)
+                if af:GetFocusedTextBox() and h.Mode ~= "Always" then
+                    return false
+                end
+                if h.Mode == "Always" then
+                    return true
+                elseif h.Mode == "Hold" then
+                    if h.Value == "None" then
+                        return false
+                    end
+                    local n = h.Value
+                    if n == "MouseLeft" or n == "MouseRight" then
+                        return n == "MouseLeft" and af:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) or
+                            n == "MouseRight" and af:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
+                    else
+                        return af:IsKeyDown(Enum.KeyCode[h.Value])
+                    end
+                else
+                    return h.Toggled
+                end
+            end
+            function h.SetValue(m, n, o)
+                n = n or h.Key
+                o = o or h.Mode
+                k.Text = n
+                h.Value = n
+                h.Mode = o
+            end
+            function h.OnClick(m, n)
+                h.Clicked = n
+            end
+            function h.OnChanged(m, n)
+                h.Changed = n
+                n(h.Value)
+            end
+            function h.DoClick(m)
+                g:SafeCallback(h.Callback, h.Toggled)
+                g:SafeCallback(h.Clicked, h.Toggled)
+            end
+            function h.Destroy(m)
+                j:Destroy()
+                g.Options[e] = nil
+            end
+            ah.AddSignal(
+                l.InputBegan,
+                function(m)
+                    if m.UserInputType == Enum.UserInputType.MouseButton1 or m.UserInputType == Enum.UserInputType.Touch then
+                        i = true
+                        k.Text = "..."
+                        task.wait(0.1)
+                        local n, s
+                        n =
+                            af.InputBegan:Connect(
+                            function(o)
+                                local p
+                                if o.UserInputType == Enum.UserInputType.Keyboard then
+                                    p = o.KeyCode.Name
+                                elseif o.UserInputType == Enum.UserInputType.MouseButton1 then
+                                    p = "MouseLeft"
+                                elseif o.UserInputType == Enum.UserInputType.MouseButton2 then
+                                    p = "MouseRight"
+                                end
+                                s =
+                                    af.InputEnded:Connect(
+                                    function(t)
+                                        if
+                                            t.KeyCode.Name == p or
+                                                p == "MouseLeft" and t.UserInputType == Enum.UserInputType.MouseButton1 or
+                                                p == "MouseRight" and t.UserInputType == Enum.UserInputType.MouseButton2
+                                         then
+                                            i = false
+                                            k.Text = p
+                                            h.Value = p
+                                            g:SafeCallback(h.ChangedCallback, t.KeyCode or t.UserInputType)
+                                            g:SafeCallback(h.Changed, t.KeyCode or t.UserInputType)
+                                            if n then n:Disconnect() end
+                                            if s then s:Disconnect() end
+                                        end
+                                    end
+                                )
+                            end
+                        )
+                    end
+                end
+            )
+            ah.AddSignal(
+                af.InputBegan,
+                function(m, gp)
+                    if i or af:GetFocusedTextBox() then return end
+                    local n = h.Value
+                    if not n or n == "None" or n == "Unknown" or n == "" then return end
+
+                    if h.Mode == "Toggle" then
+                        if n == "MouseLeft" or n == "MouseRight" then
+                            if not gp then
+                                if
+                                    n == "MouseLeft" and m.UserInputType == Enum.UserInputType.MouseButton1 or
+                                        n == "MouseRight" and m.UserInputType == Enum.UserInputType.MouseButton2
+                                 then
+                                    h.Toggled = not h.Toggled
+                                    h:DoClick()
+                                end
+                            end
+                        elseif m.UserInputType == Enum.UserInputType.Keyboard and not gp then
+                            if m.KeyCode.Name == n then
+                                h.Toggled = not h.Toggled
+                                h:DoClick()
+                            end
+                        end
+                    elseif h.Mode == "Hold" then
+                        if n == "MouseLeft" or n == "MouseRight" then
+                            if not gp then
+                                if n == "MouseLeft" and m.UserInputType == Enum.UserInputType.MouseButton1 then
+                                    g:SafeCallback(h.Callback, true)
+                                elseif n == "MouseRight" and m.UserInputType == Enum.UserInputType.MouseButton2 then
+                                    g:SafeCallback(h.Callback, true)
+                                end
+                            end
+                        elseif m.UserInputType == Enum.UserInputType.Keyboard and not gp and m.KeyCode.Name == n then
+                            g:SafeCallback(h.Callback, true)
+                        end
+                    end
+                end
+            )
+            ah.AddSignal(
+                af.InputEnded,
+                function(m)
+                    if af:GetFocusedTextBox() then return end
+                    local n = h.Value
+                    if not n or n == "None" or n == "Unknown" or n == "" then return end
+                    if h.Mode == "Hold" then
+                        if n == "MouseLeft" and m.UserInputType == Enum.UserInputType.MouseButton1 then
+                            g:SafeCallback(h.Callback, false)
+                        elseif n == "MouseRight" and m.UserInputType == Enum.UserInputType.MouseButton2 then
+                            g:SafeCallback(h.Callback, false)
+                        elseif m.UserInputType == Enum.UserInputType.Keyboard and m.KeyCode.Name == n then
+                            g:SafeCallback(h.Callback, false)
+                        end
+                    end
+                end
+            )
+            g.Options[e] = h
+            return h
+        end
+        return c
+    end,
+    [25] = function()
+        local aa, ab, ac, ad, ae = b(25)
+        local af = ab.Parent.Parent
+        local ag, ah, ai, aj = af.Components, ac(af.Packages.Flipper), ac(af.Creator), {}
+        aj.__index = aj
+        aj.__type = "Paragraph"
+        function aj.New(c, d)
+            d.Title = d.Title or "Paragraph"
+            d.Content = d.Content or ""
+            local e = ac(ag.Element)(d.Title, d.Content, c.Container or aj.Container, false)
+            if e.TitleLabel then e.TitleLabel.RichText = true end
+            if e.DescLabel then e.DescLabel.RichText = true end
+            e.SetContent = function(self, text)
+                e:SetDesc(text)
+            end
+            e.Frame.BackgroundTransparency = 0.92
+            e.Border.Transparency = 0.6
+            return e
+        end
+        return aj
+    end,
+    [26] = function()
+        local aa, ab, ac, ad, ae = b(26)
+        local af, ag = game:GetService "UserInputService", ab.Parent.Parent
+        local ah = ac(ag.Creator)
+        local ai, aj, c = ah.New, ag.Components, {}
+        c.__index = c
+        c.__type = "Slider"
+        function c.New(d, e, f)
+            local g = d.Library
+            f.Title = f.Title or "Slider"
+            f.Min = f.Min or 0
+            f.Max = f.Max or 100
+            f.Default = f.Default or f.Min
+            f.Rounding = f.Rounding or 0
+            local h, i, j =
+                {
+                    Value = nil,
+                    Min = f.Min,
+                    Max = f.Max,
+                    Rounding = f.Rounding,
+                    Callback = f.Callback or function(h)
+                        end,
+                    Type = "Slider"
+                },
+                false,
+                ac(aj.Element)(f.Title, f.Description, d.Container, false)
+            j.DescLabel.Size = UDim2.new(1, -110, 0, 14)
+            h.SetTitle = j.SetTitle
+            h.SetDesc = j.SetDesc
+            local k =
+                ai(
+                "Frame",
+                {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0, 0, 0.5, 0),
+                    Size = UDim2.fromOffset(16, 16),
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    ZIndex = 3,
+                },
+                {
+                    ai("UICorner", {CornerRadius = UDim.new(1, 0)}),
+                    ai("UIStroke", {Thickness = 1, ThemeTag = {Color = "InElementBorder"}})
+                }
+            )
+            local l, m, n =
+                ai(
+                    "Frame",
+                    {BackgroundTransparency = 1, Position = UDim2.fromOffset(10, 0), Size = UDim2.new(1, -20, 1, 0)},
+                    {k}
+                ),
+                ai(
+                    "Frame",
+                    {Size = UDim2.new(0, 0, 1, 0), ThemeTag = {BackgroundColor3 = "Accent"}},
+                    {ai("UICorner", {CornerRadius = UDim.new(1, 0)})}
+                ),
+                ai(
+                    "TextLabel",
+                    {
+                        FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Medium),
+                        Text = "Value",
+                        TextSize = 13,
+                        TextWrapped = true,
+                        TextXAlignment = Enum.TextXAlignment.Right,
+                        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                        BackgroundTransparency = 1,
+                        Size = UDim2.new(0, 60, 0, 14),
+                        Position = UDim2.new(0, -4, 0.5, 0),
+                        AnchorPoint = Vector2.new(1, 0.5),
+                        ThemeTag = {TextColor3 = "SubText"}
+                    }
+                )
+            local o =
+                ai(
+                "Frame",
+                {
+                    Size = UDim2.new(1, 0, 0, 6),
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    Position = UDim2.new(1, -10, 0.5, 0),
+                    BackgroundTransparency = 0,
+                    Parent = j.Frame,
+                    ThemeTag = {BackgroundColor3 = "SliderRail"}
+                },
+                {
+                    ai("UICorner", {CornerRadius = UDim.new(1, 0)}),
+                    ai("UIStroke", {Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border, ThemeTag = {Color = "InElementBorder"}}),
+                    ai("UISizeConstraint", {MaxSize = Vector2.new(90, math.huge)}),
+                    n,
+                    m,
+                    l
+                }
+            )
+            local function updateSliderFromInput(p)
+                local s = math.clamp((p.Position.X - l.AbsolutePosition.X) / l.AbsoluteSize.X, 0, 1)
+                h:SetValue(h.Min + ((h.Max - h.Min) * s))
+            end
+            ah.AddSignal(
+                k.InputBegan,
+                function(p)
+                    if p.UserInputType == Enum.UserInputType.MouseButton1 or p.UserInputType == Enum.UserInputType.Touch then
+                        i = true
+                        updateSliderFromInput(p)
+                    end
+                end
+            )
+            ah.AddSignal(
+                o.InputBegan,
+                function(p)
+                    if p.UserInputType == Enum.UserInputType.MouseButton1 or p.UserInputType == Enum.UserInputType.Touch then
+                        i = true
+                        updateSliderFromInput(p)
+                    end
+                end
+            )
+            ah.AddSignal(
+                af.InputEnded,
+                function(p)
+                    if p.UserInputType == Enum.UserInputType.MouseButton1 or p.UserInputType == Enum.UserInputType.Touch then
+                        i = false
+                    end
+                end
+            )
+            ah.AddSignal(
+                af.InputChanged,
+                function(p)
+                    if
+                        i and
+                            (p.UserInputType == Enum.UserInputType.MouseMovement or
+                                p.UserInputType == Enum.UserInputType.Touch)
+                     then
+                        updateSliderFromInput(p)
+                    end
+                end
+            )
+            function h.OnChanged(p, s)
+                h.Changed = s
+                s(h.Value)
+            end
+            function h.SetValue(p, s)
+                p.Value = g:Round(math.clamp(s, h.Min, h.Max), h.Rounding)
+                k.Position = UDim2.new((p.Value - h.Min) / (h.Max - h.Min), 0, 0.5, 0)
+                m.Size = UDim2.fromScale((p.Value - h.Min) / (h.Max - h.Min), 1)
+                n.Text = tostring(p.Value)
+                g:SafeCallback(h.Callback, p.Value)
+                g:SafeCallback(h.Changed, p.Value)
+            end
+            function h.Destroy(p)
+                j:Destroy()
+                g.Options[e] = nil
+            end
+            h:SetValue(f.Default)
+            g.Options[e] = h
+            return h
+        end
+        return c
+    end,
+    [27] = function()
+        local aa, ab, ac, ad, ae = b(27)
+        local af, ag = game:GetService "TweenService", ab.Parent.Parent
+        local ah = ac(ag.Creator)
+        local ai, aj, c = ah.New, ag.Components, {}
+        c.__index = c
+        c.__type = "Toggle"
+        function c.New(d, e, f)
+            local g = d.Library
+            f.Title = f.Title or "Toggle"
+            local h, i =
+                {
+                    Value = f.Default or false,
+                    Callback = f.Callback or function(h)
+                        end,
+                    Type = "Toggle"
+                },
+                ac(aj.Element)(f.Title, f.Description, d.Container, true)
+            i.DescLabel.Size = UDim2.new(1, -54, 0, 14)
+            h.SetTitle = i.SetTitle
+            h.SetDesc = i.SetDesc
+            local j, k =
+                ai(
+                    "Frame",
+                    {
+                        AnchorPoint = Vector2.new(0, 0.5),
+                        Size = UDim2.fromOffset(14, 14),
+                        Position = UDim2.new(0, 2, 0.5, 0),
+                        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                        ZIndex = 2,
+                    },
+                    {ai("UICorner", {CornerRadius = UDim.new(1, 0)})}
+                ),
+                ai("UIStroke", {Thickness = 1, ThemeTag = {Color = "InElementBorder"}})
+            local l =
+                ai(
+                "Frame",
+                {
+                    Size = UDim2.fromOffset(36, 18),
+                    AnchorPoint = Vector2.new(1, 0.5),
+                    Position = UDim2.new(1, -10, 0.5, 0),
+                    Parent = i.Frame,
+                    BackgroundTransparency = 0,
+                    ThemeTag = {BackgroundColor3 = "ToggleSlider"}
+                },
+                {ai("UICorner", {CornerRadius = UDim.new(0, 9)}), k, j}
+            )
+            local _lastToggleTick = 0
+            function h.OnChanged(m, n)
+                h.Changed = n
+                n(h.Value)
+            end
+            function h.SetValue(m, n)
+                n = not (not n)
+                h.Value = n
+                local borderCol = ah.GetThemeProperty("InElementBorder") or Color3.fromRGB(80, 80, 80)
+                k.Color = borderCol
+                j.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                af:Create(
+                    j,
+                    TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+                    {Position = UDim2.new(0, h.Value and 20 or 2, 0.5, 0)}
+                ):Play()
+                local activeBg = ah.GetThemeProperty("ToggleToggled") or ah.GetThemeProperty("Accent") or Color3.fromRGB(16, 160, 95)
+                local inactiveBg = ah.GetThemeProperty("ToggleSlider") or Color3.fromRGB(30, 30, 35)
+                af:Create(
+                    l,
+                    TweenInfo.new(0.2, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+                    {BackgroundColor3 = h.Value and activeBg or inactiveBg}
+                ):Play()
+                g:SafeCallback(h.Callback, h.Value)
+                g:SafeCallback(h.Changed, h.Value)
+            end
+            function h.Destroy(m)
+                i:Destroy()
+                g.Options[e] = nil
+            end
+            ah.AddSignal(
+                i.Frame.MouseButton1Click,
+                function()
+                    if tick() - _lastToggleTick < 0.15 then return end
+                    _lastToggleTick = tick()
+                    h:SetValue(not h.Value)
+                end
+            )
+            h:SetValue(h.Value)
+            g.Options[e] = h
+            return h
+        end
+        return c
+    end,
+    [59] = function()
+        local aa, ab, ac, ad, ae = b(59)
+        local af = ab.Parent.Parent
+        local c = {}
+        c.__index = c
+        c.__type = "Image"
+        function c.New(d, e, f)
+            local opts = (type(e) == "table" and e) or (type(f) == "table" and f) or {}
+            local parent = d.Container
+            if not parent then return end
+            local ratio = opts.AspectRatio or "16:9"
+            local radius = opts.Radius or 8
+            local src = opts.Image or ""
+            local function resolve(src)
+                local mm = d.Library and d.Library.MediaManager
+                if mm then return mm:Image(src) end
+                if type(src)~="string" or src=="" then return "" end
+                if src:match("^rbxassetid://") or src:match("^rbxasset://") then return src end
+                if src:match("^%d+$") then return "rbxassetid://"..src end
+                return ""
+            end
+            local function parseRatio(r)
+                if type(r) == "number" then return r end
+                local w, h = tostring(r):match("(%d+):(%d+)")
+                if w and h and tonumber(h) ~= 0 then return tonumber(w) / tonumber(h) end
+                return 16 / 9
+            end
+            local ratioNum = parseRatio(ratio)
+            local u = ac(af.Creator).New
+            local wrap = u("Frame", {
+                Size = UDim2.new(1, -16, 0, 150),
+                BackgroundTransparency = 1,
+                ClipsDescendants = true,
+                Parent = parent,
+            })
+            local function _recalcAspect()
+                local w = wrap.AbsoluteSize.X
+                if w > 0 and ratioNum and ratioNum > 0 then
+                    wrap.Size = UDim2.new(1, -16, 0, math.floor(w / ratioNum))
+                end
+            end
+            wrap:GetPropertyChangedSignal("AbsoluteSize"):Connect(_recalcAspect)
+            task.defer(_recalcAspect)
+            local img = u("ImageLabel", {
+                Size = UDim2.fromScale(1, 1),
+                BackgroundTransparency = 1,
+                Image = resolve(src),
+                ScaleType = Enum.ScaleType.Fit,
+                Parent = wrap,
+            })
+            u("UICorner", {CornerRadius = UDim.new(0, radius), Parent = img})
+            local mod = {Frame = wrap, Type = "Image"}
+            function mod:SetImage(src) img.Image = resolve(src) end
+            function mod:SetAspectRatio(r)
+                ratioNum = parseRatio(r)
+                _recalcAspect()
+            end
+            function mod:Destroy() wrap:Destroy() end
+            return mod
+        end
+        return c
+    end,
+    [60] = function()
+        local aa, ab, ac, ad, ae = b(60)
+        local af = ab.Parent.Parent
+        local c = {}
+        c.__index = c
+        c.__type = "Video"
+        function c.New(d, e, f)
+            local opts   = (type(e)=="table" and e) or (type(f)=="table" and f) or {}
+            local parent = d.Container
+            if not parent then return end
+            local radius = opts.Radius or 8
+            local src    = opts.Video or ""
+            local looped = opts.Looped ~= false
+            local vol    = opts.Volume or 0
+            local auto   = opts.AutoPlay ~= false
+            local rs2    = game:GetService("RunService")
+            local uis2   = game:GetService("UserInputService")
+            local ts2    = game:GetService("TweenService")
+            local function resolveSync(s)
+                if type(s)~="string" or s=="" then return "" end
+                if s:match("^rbxassetid://") or s:match("^rbxasset://") then return s end
+                if s:match("^%d+$") then return "rbxassetid://"..s end
+                return ""
+            end
+            local syncResolved = resolveSync(src)
+            local hasVideo = syncResolved ~= ""
+            local u = ac(af.Creator).New
+            local function applyIcon(imgLabel, iconName)
+                local ic = d.Library and d.Library:GetIcon(iconName)
+                if ic and type(ic)=="table" then
+                    imgLabel.Image=ic.Image or ""; imgLabel.ImageRectOffset=ic.ImageRectOffset or Vector2.new(); imgLabel.ImageRectSize=ic.ImageRectSize or Vector2.new()
+                elseif ic then imgLabel.Image=tostring(ic) end
+            end
+            local function parseRatio2(r)
+                if type(r) == "number" then return r end
+                if type(r) == "string" then
+                    local rw, rh = r:match("(%d+):(%d+)")
+                    if rw and rh and tonumber(rh) ~= 0 then return tonumber(rw) / tonumber(rh) end
+                end
+                return 16 / 9
+            end
+            local wrap = u("Frame",{
+                Size=UDim2.new(1,-16,0,180),
+                BackgroundColor3=Color3.fromRGB(8,8,12),
+                BorderSizePixel=0, ClipsDescendants=true,
+                Parent=parent, ThemeTag={BackgroundColor3="Element"},
+            })
+            local ratioNum2 = parseRatio2(opts.AspectRatio or "16:9")
+            local function _recalcAspect2()
+                local w = wrap.AbsoluteSize.X
+                if w > 0 and ratioNum2 and ratioNum2 > 0 then
+                    wrap.Size = UDim2.new(1, -16, 0, math.floor(w / ratioNum2))
+                end
+            end
+            wrap:GetPropertyChangedSignal("AbsoluteSize"):Connect(_recalcAspect2)
+            task.defer(_recalcAspect2)
+            u("UICorner",{CornerRadius=UDim.new(0,radius),Parent=wrap})
+            u("UIStroke",{Transparency=0.6,Thickness=1,ThemeTag={Color="InElementBorder"},Parent=wrap})
+            local vid = nil
+            if hasVideo then
+                vid = Instance.new("VideoFrame")
+                vid.Size=UDim2.fromScale(1,1); vid.BackgroundTransparency=1
+                vid.Looped=looped; vid.Volume=vol; vid.ZIndex=1
+                vid:SetAttribute("BFVolume",vol); vid:SetAttribute("BFAutoPlay",auto)
+                u("UICorner",{CornerRadius=UDim.new(0,radius),Parent=vid})
+                vid.Video = syncResolved; vid.Parent=wrap
+            end
+            local placeholder = u("Frame",{Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Visible=not hasVideo,ZIndex=2,Parent=wrap})
+            local phImg = u("ImageLabel",{Size=UDim2.fromOffset(32,32),Position=UDim2.new(0.5,0,0.5,-14),AnchorPoint=Vector2.new(0.5,0.5),BackgroundTransparency=1,ImageTransparency=0.4,ZIndex=3,Parent=placeholder,ThemeTag={ImageColor3="SubText"}})
+            applyIcon(phImg, "solar/videocamera-record-bold")
+            u("TextLabel",{Size=UDim2.new(1,0,0,16),Position=UDim2.new(0,0,0.5,20),AnchorPoint=Vector2.new(0,0),BackgroundTransparency=1,Text="rbxassetid:// required",TextSize=11,Font=Enum.Font.GothamMedium,TextTransparency=0.5,ZIndex=3,Parent=placeholder,ThemeTag={TextColor3="SubText"}})
+            if not hasVideo then
+                local mod={Frame=wrap,Type="Video",VideoFrame=nil}
+                function mod:Destroy() wrap:Destroy() end
+                return mod
+            end
+
+            local overlay = Instance.new("CanvasGroup")
+            overlay.Size=UDim2.new(1,0,0,54); overlay.Position=UDim2.new(0,0,1,0); overlay.AnchorPoint=Vector2.new(0,1)
+            overlay.BackgroundTransparency=1; overlay.GroupTransparency=1; overlay.ZIndex=5; overlay.Parent=wrap
+
+            local gradFr = u("Frame",{Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(0,0,0),BackgroundTransparency=0,BorderSizePixel=0,ZIndex=5,Parent=overlay})
+            u("UIGradient",{Transparency=NumberSequence.new({NumberSequenceKeypoint.new(0,0.3),NumberSequenceKeypoint.new(1,1)}),Rotation=90,Parent=gradFr})
+
+            local seekRow = u("Frame",{Size=UDim2.new(1,-12,0,16),Position=UDim2.new(0,6,0,4),BackgroundTransparency=1,ZIndex=6,Parent=overlay})
+            local timeCur = u("TextLabel",{Size=UDim2.fromOffset(36,16),BackgroundTransparency=1,Text="0:00",TextSize=10,Font=Enum.Font.GothamMedium,TextColor3=Color3.fromRGB(220,220,220),ZIndex=7,Parent=seekRow})
+            local seekContainer = u("Frame",{Size=UDim2.new(1,-84,0,16),Position=UDim2.fromOffset(40,0),BackgroundTransparency=1,ZIndex=6,Parent=seekRow})
+            local seekRail = u("TextButton",{Size=UDim2.new(1,0,0,5),Position=UDim2.new(0,0,0.5,-2),BackgroundColor3=Color3.fromRGB(80,80,90),BorderSizePixel=0,ZIndex=7,Text="",AutoButtonColor=false,Parent=seekContainer})
+            u("UICorner",{CornerRadius=UDim.new(1,0),Parent=seekRail})
+            local seekFill = u("Frame",{Size=UDim2.new(0,0,1,0),BackgroundColor3=Color3.fromRGB(200,30,30),BorderSizePixel=0,ZIndex=8,Parent=seekRail})
+            u("UICorner",{CornerRadius=UDim.new(1,0),Parent=seekFill})
+            local seekKnob = u("Frame",{Size=UDim2.fromOffset(12,12),Position=UDim2.new(0,0,0.5,0),AnchorPoint=Vector2.new(0.5,0.5),BackgroundColor3=Color3.fromRGB(255,255,255),BorderSizePixel=0,ZIndex=9,Parent=seekRail})
+            u("UICorner",{CornerRadius=UDim.new(1,0),Parent=seekKnob})
+            local timeDur = u("TextLabel",{Size=UDim2.fromOffset(36,16),Position=UDim2.new(1,-36,0,0),BackgroundTransparency=1,Text="0:00",TextSize=10,Font=Enum.Font.GothamMedium,TextColor3=Color3.fromRGB(160,160,170),ZIndex=7,Parent=seekRow})
+
+            local ctrlRow = u("Frame",{Size=UDim2.new(1,-12,0,26),Position=UDim2.new(0,6,0,24),BackgroundTransparency=1,ZIndex=6,Parent=overlay})
+            local function ctrlBtn2(iconName, size, cb)
+                local btn=u("TextButton",{Size=UDim2.fromOffset(size or 22,22),BackgroundTransparency=1,Text="",ZIndex=7,AutoButtonColor=false,Parent=ctrlRow})
+                local ic=u("ImageLabel",{Size=UDim2.fromOffset(16,16),Position=UDim2.new(0.5,0,0.5,0),AnchorPoint=Vector2.new(0.5,0.5),BackgroundTransparency=1,ZIndex=8,Parent=btn,ThemeTag={ImageColor3="Text"}})
+                applyIcon(ic,iconName); btn.MouseButton1Click:Connect(function() pcall(cb) end)
+                return btn,ic
+            end
+            local playing=auto
+            local playBtn,playIco=ctrlBtn2("solar/play-bold",22,function() end)
+            local pauseBtn,pauseIco=ctrlBtn2("solar/pause-bold",22,function() end)
+            local stopBtn=ctrlBtn2("solar/stop-bold",22,function() end)
+            local volIco=u("ImageLabel",{Size=UDim2.fromOffset(14,14),Position=UDim2.fromOffset(68,4),BackgroundTransparency=1,ZIndex=7,Parent=ctrlRow,ThemeTag={ImageColor3="SubText"}})
+            applyIcon(volIco,"solar/volume-loud-bold")
+            local volLbl=u("TextLabel",{Size=UDim2.fromOffset(32,22),Position=UDim2.fromOffset(84,0),BackgroundTransparency=1,Text=tostring(math.floor(vol*100)).."%",TextSize=10,Font=Enum.Font.Gotham,ZIndex=7,Parent=ctrlRow,ThemeTag={TextColor3="SubText"}})
+            u("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,VerticalAlignment=Enum.VerticalAlignment.Center,Padding=UDim.new(0,2),Parent=ctrlRow})
+
+            local ctrlVisible=false; local fadeTimer=0; local fadingOut=false
+            local function showOverlay()
+                ctrlVisible=true; fadingOut=false; fadeTimer=3
+                ts2:Create(overlay,TweenInfo.new(0.18,Enum.EasingStyle.Sine),{GroupTransparency=0}):Play()
+            end
+            local function hideOverlay()
+                ctrlVisible=false; fadingOut=true
+                ts2:Create(overlay,TweenInfo.new(0.3,Enum.EasingStyle.Sine),{GroupTransparency=1}):Play()
+            end
+
+            local vidClickBtn=u("TextButton",{Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Text="",ZIndex=4,AutoButtonColor=false,Parent=wrap})
+            vidClickBtn.MouseButton1Click:Connect(function()
+                if ctrlVisible then fadeTimer=3 else showOverlay() end
+            end)
+
+            local function resetFade() fadeTimer=3; fadingOut=false end
+            playBtn.MouseButton1Click:Connect(function()
+                pcall(function() vid:Play() end); playing=true
+                playBtn.Visible=false; pauseBtn.Visible=true; resetFade()
+            end)
+            pauseBtn.MouseButton1Click:Connect(function()
+                pcall(function() vid:Pause() end); playing=false
+                playBtn.Visible=true; pauseBtn.Visible=false; resetFade()
+            end)
+            stopBtn.MouseButton1Click:Connect(function()
+                pcall(function() vid:Stop() end); playing=false
+                playBtn.Visible=true; pauseBtn.Visible=false; resetFade()
+            end)
+            pauseBtn.Visible=auto
+            playBtn.Visible=not auto
+
+            local seeking=false
+            local function vidSeek(posX)
+                resetFade()
+                local rx=seekRail.AbsolutePosition.X; local rw=seekRail.AbsoluteSize.X
+                local pct=math.clamp((posX-rx)/rw,0,1)
+                seekFill.Size=UDim2.new(pct,0,1,0); seekKnob.Position=UDim2.new(pct,0,0.5,0)
+                if vid and vid.TimeLength and vid.TimeLength>0 then
+                    pcall(function() vid.TimePosition=vid.TimeLength*pct end)
+                end
+            end
+            seekRail.InputBegan:Connect(function(i)
+                if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
+                    seeking=true; vidSeek(i.Position.X); resetFade()
+                    i.Changed:Connect(function() if i.UserInputState==Enum.UserInputState.End then seeking=false end end)
+                end
+            end)
+            uis2.InputChanged:Connect(function(i)
+                if seeking and (i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch) then
+                    vidSeek(i.Position.X)
+                end
+            end)
+            local hbConn
+            hbConn = rs2.Heartbeat:Connect(function(dt)
+                if not wrap.Parent then if hbConn then hbConn:Disconnect() end return end
+
+                if ctrlVisible then
+                    fadeTimer=fadeTimer-dt
+                    if fadeTimer<=0 and not seeking then hideOverlay() end
+                end
+
+                if not vid then return end
+                if not playing and not seeking and not ctrlVisible then return end
+                local dur=vid.TimeLength or 0
+                local pos=0
+                pcall(function() pos=vid.TimePosition end)
+                if dur>0 and not seeking then
+                    local pct=math.clamp(pos/dur,0,1)
+                    seekFill.Size=UDim2.new(pct,0,1,0)
+                    seekKnob.Position=UDim2.new(pct,0,0.5,0)
+                end
+                timeCur.Text=fmtT(pos); timeDur.Text=fmtT(dur)
+            end)
+            if auto and syncResolved~="" then
+                task.spawn(function()
+                    task.wait(0.08)
+                    if vid and vid.Parent then pcall(function() vid:Play() end); playing=true end
+                end)
+            end
+            local mod={Frame=wrap,Type="Video",VideoFrame=vid}
+            function mod:Play()  if vid then pcall(function() vid:Play()  end); playing=true;  playBtn.Visible=false; pauseBtn.Visible=true  end end
+            function mod:Pause() if vid then pcall(function() vid:Pause() end); playing=false; playBtn.Visible=true;  pauseBtn.Visible=false end end
+            function mod:Stop()  if vid then pcall(function() vid:Stop()  end); playing=false; playBtn.Visible=true;  pauseBtn.Visible=false end end
+            function mod:SetVideo(s)
+                if not vid then return end
+                local r=resolveSync(s)
+                if r~="" then vid.Video=r; placeholder.Visible=false
+                else placeholder.Visible=true end
+            end
+            function mod:SetVolume(v)
+                if vid then vid.Volume=math.clamp(v,0,1) end
+                volLbl.Text=tostring(math.floor(math.clamp(v,0,1)*100)).."%"
+            end
+            function mod:SetAspectRatio(r)
+                ratioNum2 = parseRatio2(r)
+                _recalcAspect2()
+            end
+            function mod:Destroy()
+                pcall(function() hbConn:Disconnect() end); wrap:Destroy()
+            end
+            return mod
+        end
+        return c
+    end,
+    [61] = function()
+        local aa, ab, ac, ad, ae = b(61)
+        local af = ab.Parent.Parent
+        local c = {}
+        c.__index = c
+        c.__type = "Code"
+        function c.New(d, e, f)
+            local D = (type(e)=="table" and e) or (type(f)=="table" and f) or {}
+            local parent = d.Container
+            if not parent then return end
+            local u = ac(af.Creator).New
+            local code  = D.Code  or ""
+            local title = D.Title or ""
+            local cb    = D.OnCopy
+            local wrap  = u("Frame",{Size=UDim2.new(1,0,0,0),BackgroundTransparency=0.88,AutomaticSize=Enum.AutomaticSize.Y,Parent=parent,ThemeTag={BackgroundColor3="Element"}})
+            u("UICorner",{CornerRadius=UDim.new(0,8),Parent=wrap})
+            u("UIStroke",{Transparency=0.7,Thickness=1,ThemeTag={Color="InElementBorder"},Parent=wrap})
+            u("UIPadding",{PaddingTop=UDim.new(0,8),PaddingBottom=UDim.new(0,8),PaddingLeft=UDim.new(0,10),PaddingRight=UDim.new(0,36),Parent=wrap})
+            local lbl
+            if title ~= "" then
+                lbl = u("TextLabel",{FontFace=Font.new("rbxasset://fonts/families/GothamSSm.json",Enum.FontWeight.SemiBold),Text=title,TextSize=11,TextXAlignment=Enum.TextXAlignment.Left,BackgroundTransparency=1,Size=UDim2.new(1,0,0,14),AutomaticSize=Enum.AutomaticSize.None,LayoutOrder=1,Parent=wrap,ThemeTag={TextColor3="SubText"}})
+            end
+            local codeLabel = u("TextLabel",{FontFace=Font.new("rbxasset://fonts/families/RobotoMono.json"),Text=code,TextSize=12,TextXAlignment=Enum.TextXAlignment.Left,TextWrapped=true,RichText=false,BackgroundTransparency=1,Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,LayoutOrder=2,Parent=wrap,ThemeTag={TextColor3="Text"}})
+            if title ~= "" then
+                u("UIListLayout",{FillDirection=Enum.FillDirection.Vertical,Padding=UDim.new(0,4),SortOrder=Enum.SortOrder.LayoutOrder,Parent=wrap})
+            end
+            local copyBtn = u("TextButton",{Size=UDim2.fromOffset(24,24),Position=UDim2.new(1,4,0,6),AnchorPoint=Vector2.new(0,0),BackgroundTransparency=0.7,Text="",ZIndex=3,Parent=wrap,ThemeTag={BackgroundColor3="Tab"}})
+            u("UICorner",{CornerRadius=UDim.new(0,6),Parent=copyBtn})
+            local copyIconImg = u("ImageLabel",{Size=UDim2.fromOffset(14,14),Position=UDim2.new(0.5,0,0.5,0),AnchorPoint=Vector2.new(0.5,0.5),BackgroundTransparency=1,Parent=copyBtn,ThemeTag={ImageColor3="SubText"}})
+            local copyIc = d.Library and d.Library:GetIcon("solar/copy-bold")
+            if copyIc and type(copyIc)=="table" then
+                copyIconImg.Image           = copyIc.Image           or ""
+                copyIconImg.ImageRectOffset = copyIc.ImageRectOffset or Vector2.new(0,0)
+                copyIconImg.ImageRectSize   = copyIc.ImageRectSize   or Vector2.new(0,0)
+            elseif copyIc then
+                copyIconImg.Image = tostring(copyIc)
+            end
+            copyBtn.MouseButton1Click:Connect(function()
+                pcall(function() toclipboard(code) end)
+                if cb then pcall(cb) end
+            end)
+            local mod = {Frame=wrap, Type="Code"}
+            function mod:SetCode(v) code=v; codeLabel.Text=v end
+            function mod:Set(v) code=v; codeLabel.Text=v end
+            function mod:Destroy() wrap:Destroy() end
+            return mod
+        end
+        return c
+    end,
+    [62] = function()
+        local aa, ab, ac, ad, ae = b(62)
+        local af = ab.Parent.Parent
+        local c = {}
+        c.__index = c
+        c.__type = "Group"
+        function c.New(d, e, f)
+            local D = (type(e)=="table" and e) or (type(f)=="table" and f) or {}
+            local parent = d.Container
+            if not parent then return end
+            local u    = ac(af.Creator).New
+            local gap  = D.Gap     or 6
+            local cols = D.Columns or 2
+            local outerWrap = u("Frame",{Size=UDim2.new(1,0,0,0),BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.Y,Parent=parent,BorderSizePixel=0})
+            u("UIPadding",{PaddingTop=UDim.new(0,2),PaddingBottom=UDim.new(0,2),Parent=outerWrap})
+            local wrap = u("Frame",{Size=UDim2.new(1,0,0,0),BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.Y,Parent=outerWrap,BorderSizePixel=0})
+            local totalGap = gap * (cols - 1)
+            local colScale = 1 / cols
+            local colOffset = -math.floor(totalGap / cols + 0.5)
+            u("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,HorizontalAlignment=Enum.HorizontalAlignment.Left,VerticalAlignment=Enum.VerticalAlignment.Top,Padding=UDim.new(0,gap),Parent=wrap})
+            local colW = colScale
+            local mod  = {Frame=outerWrap, Type="Group", Elements={}, _section=nil}
+            function mod:SetSection(sec) self._section = sec end
+            function mod:AddElement()
+                local el = u("Frame",{Size=UDim2.new(colW,colOffset,0,0),BackgroundTransparency=1,AutomaticSize=Enum.AutomaticSize.Y,Parent=wrap})
+                u("UIListLayout",{Padding=UDim.new(0,5),SortOrder=Enum.SortOrder.LayoutOrder,Parent=el})
+                local sec = self._section
+                local colObj = setmetatable({
+                    Container    = el,
+                    Type         = sec and sec.Type or nil,
+                    ScrollFrame  = sec and sec.ScrollFrame or nil,
+                    _elementCount = 0,
+                }, getmetatable(sec))
+                table.insert(mod.Elements, {Frame=el, ColObj=colObj})
+                return colObj
+            end
+            function mod:Destroy() outerWrap:Destroy() end
+            return mod
+        end
+        return c
+    end,
+    [63] = function()
+        local aa, ab, ac, ad, ae = b(63)
+        local af = ab.Parent.Parent
+        local c = {}
+        c.__index = c
+        c.__type = "Space"
+        function c.New(d, e, f)
+            local D = (type(e)=="table" and e) or (type(f)=="table" and f) or {}
+            local parent = d.Container
+            if not parent then return end
+            local u  = ac(af.Creator).New
+            local h = D.Height or 8
+            local sp = u("Frame",{Size=UDim2.new(1,0,0,h),BackgroundTransparency=1,BorderSizePixel=0,Parent=parent})
+            local mod = {Frame=sp, Type="Space"}
+            function mod:Destroy() sp:Destroy() end
+            return mod
+        end
+        return c
+    end,
+    [64] = function()
+        local aa, ab, ac, ad, ae = b(64)
+        local af = ab.Parent.Parent
+        local c = {}
+        c.__index = c
+        c.__type = "Divider"
+        function c.New(d, e, f)
+            local parent = d.Container
+            if not parent then return end
+            local u   = ac(af.Creator).New
+            local dv = u("Frame",{Size=UDim2.new(1,-10,0,1),BackgroundTransparency=0.5,BorderSizePixel=0,Parent=parent,ThemeTag={BackgroundColor3="TitleBarLine"}})
+            local mod = {Frame=dv, Type="Divider"}
+            function mod:Destroy() dv:Destroy() end
+            return mod
+        end
+        return c
+    end,
+    [65] = function()
+        local aa, ab, ac, ad, ae = b(65)
+        local af = ab.Parent.Parent
+        local c = {}
+        c.__index = c
+        c.__type = "Audio"
+        function c.New(d, e, f)
+            local opts   = (type(e)=="table" and e) or (type(f)=="table" and f) or {}
+            local parent = d.Container
+            if not parent then return end
+            local src    = opts.Audio or opts.Sound or ""
+            local vol    = (opts.Volume ~= nil) and math.clamp(opts.Volume, 0, 10) or 0.5
+            local looped = opts.Looped ~= false
+            local auto   = opts.AutoPlay ~= false
+            local u = ac(af.Creator).New
+            local lib = d.Library
+            local function resolve(s, noDownload)
+                local mm = lib and lib.MediaManager
+                if mm then return mm:Audio(s, noDownload) end
+                if type(s)~="string" or s=="" then return "" end
+                if s:match("^rbxassetid://") or s:match("^rbxasset://") then return s end
+                if s:match("^%d+$") then return "rbxassetid://"..s end
+                return ""
+            end
+            local isHttp = type(src)=="string" and src:match("^https?://")
+            local resolved = isHttp and resolve(src, true) or resolve(src, false)
+            local pendingDownload = isHttp and (not resolved or resolved == "")
+            local hasAudio = (resolved ~= nil and resolved ~= "") or pendingDownload
+            local snd = nil
+            local playOutside = (opts.PlayOutsideWindow == true)
+            local function _initSound(resolvedId)
+                local sndSvc = game:GetService("SoundService")
+                for _, _ex in ipairs(sndSvc:GetChildren()) do
+                    if _ex:IsA("Sound") and _ex.Name == "BFAudio" and _ex.SoundId == resolvedId then
+                        pcall(function() _ex:Stop(); _ex:Destroy() end)
+                    end
+                end
+                for _, _ex in ipairs(workspace:GetChildren()) do
+                    if _ex:IsA("Sound") and _ex.Name == "BFAudio" and _ex.SoundId == resolvedId then
+                        pcall(function() _ex:Stop(); _ex:Destroy() end)
+                    end
+                end
+                local s2 = Instance.new("Sound")
+                s2.Name   = "BFAudio"
+                pcall(function() s2.SoundId = resolvedId end)
+                s2.Volume = vol
+                s2.Looped = looped
+                if playOutside then
+                    s2.RollOffMaxDistance = 10000
+                    s2.Parent = game:GetService("SoundService")
+                else
+                    s2.Parent = workspace
+                end
+                return s2
+            end
+            if hasAudio and not pendingDownload then
+                snd = _initSound(resolved)
+            end
+            local rs  = game:GetService("RunService")
+            local uis = game:GetService("UserInputService")
+            local function fmtTime(s)
+                s = math.max(0, math.floor(s or 0))
+                return string.format("%d:%02d", math.floor(s / 60), s % 60)
+            end
+            local function applyAudioIcon(imgLabel, iconName)
+                local ic = d.Library and d.Library:GetIcon(iconName)
+                if ic and type(ic) == "table" then
+                    imgLabel.Image           = ic.Image           or ""
+                    imgLabel.ImageRectOffset = ic.ImageRectOffset or Vector2.new(0,0)
+                    imgLabel.ImageRectSize   = ic.ImageRectSize   or Vector2.new(0,0)
+                elseif ic then
+                    imgLabel.Image = tostring(ic)
+                end
+            end
+            local audioTitle    = opts.AudioTitle    or opts.Title    or (hasAudio and "Audio" or nil)
+            local audioSubtitle = opts.AudioSubtitle or opts.SubTitle or nil
+            local hasLabels = (audioTitle ~= nil and audioTitle ~= "") or (audioSubtitle ~= nil and audioSubtitle ~= "")
+            local wrapHeight = hasLabels and 118 or 96
+            local wrap = u("Frame",{
+                Size=UDim2.new(1,-16,0,wrapHeight),
+                BackgroundTransparency=0.9,
+                BorderSizePixel=0,
+                Parent=parent,
+                ThemeTag={BackgroundColor3="Element"},
+            })
+            u("UICorner",{CornerRadius=UDim.new(0,8),Parent=wrap})
+            u("UIStroke",{Transparency=0.6,Thickness=1,ThemeTag={Color="InElementBorder"},Parent=wrap})
+            u("UIPadding",{PaddingLeft=UDim.new(0,10),PaddingRight=UDim.new(0,10),PaddingTop=UDim.new(0,10),PaddingBottom=UDim.new(0,10),Parent=wrap})
+            local topRow = u("Frame",{
+                Size=UDim2.new(1,0,0,hasLabels and 38 or 28),
+                BackgroundTransparency=1,
+                Parent=wrap,
+            })
+            local audioIconImg = u("ImageLabel",{
+                Size=UDim2.fromOffset(20,20),
+                Position=UDim2.new(0,0,0.5,0),
+                AnchorPoint=Vector2.new(0,0.5),
+                BackgroundTransparency=1,
+                ZIndex=2,
+                Parent=topRow,
+                ThemeTag={ImageColor3=hasAudio and "Accent" or "SubText"},
+            })
+            applyAudioIcon(audioIconImg, "solar/volume-loud-bold")
+            local titleHolder = u("Frame",{
+                Size=UDim2.new(1,-110,1,0),
+                Position=UDim2.new(0,28,0,0),
+                BackgroundTransparency=1,
+                ZIndex=2,
+                Parent=topRow,
+            })
+            local statusLbl = u("TextLabel",{
+                Size=UDim2.new(1,0,0,16),
+                Position=UDim2.new(0,0,0,hasLabels and 2 or 0),
+                AnchorPoint=Vector2.new(0,0),
+                BackgroundTransparency=1,
+                Text=(audioTitle ~= nil and audioTitle ~= "") and audioTitle or (hasAudio and "Audio" or "No audio source"),
+                TextSize=hasLabels and 12 or 11,
+                Font=hasLabels and Enum.Font.GothamBold or Enum.Font.Gotham,
+                TextXAlignment=Enum.TextXAlignment.Left,
+                TextTruncate=Enum.TextTruncate.AtEnd,
+                ZIndex=2,
+                Parent=titleHolder,
+                ThemeTag={TextColor3=hasAudio and "Text" or "SubText"},
+            })
+            local subtitleLbl = u("TextLabel",{
+                Size=UDim2.new(1,0,0,13),
+                Position=UDim2.new(0,0,0,20),
+                AnchorPoint=Vector2.new(0,0),
+                BackgroundTransparency=1,
+                Text=(audioSubtitle ~= nil) and audioSubtitle or "",
+                TextSize=10,
+                Font=Enum.Font.Gotham,
+                TextXAlignment=Enum.TextXAlignment.Left,
+                TextTruncate=Enum.TextTruncate.AtEnd,
+                Visible=(audioSubtitle ~= nil and audioSubtitle ~= ""),
+                ZIndex=2,
+                Parent=titleHolder,
+                ThemeTag={TextColor3="SubText"},
+            })
+            local controls = u("Frame",{
+                Size=UDim2.new(0,116,1,0),
+                Position=UDim2.new(1,0,0,0),
+                AnchorPoint=Vector2.new(1,0),
+                BackgroundTransparency=1,
+                Visible=hasAudio,
+                Parent=topRow,
+            })
+            u("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,VerticalAlignment=Enum.VerticalAlignment.Center,HorizontalAlignment=Enum.HorizontalAlignment.Right,Padding=UDim.new(0,4),Parent=controls})
+            local function ctrlBtn(iconName, cb)
+                local btn = u("TextButton",{Size=UDim2.fromOffset(24,24),BackgroundTransparency=1,Text="",ZIndex=3,Parent=controls})
+                local icImg = u("ImageLabel",{Size=UDim2.fromOffset(16,16),Position=UDim2.new(0.5,0,0.5,0),AnchorPoint=Vector2.new(0.5,0.5),BackgroundTransparency=1,ZIndex=4,Parent=btn,ThemeTag={ImageColor3="Text"}})
+                applyAudioIcon(icImg, iconName)
+                btn.MouseButton1Click:Connect(function() pcall(cb) end)
+                return btn, icImg
+            end
+            local playing = false
+            local playBtn, _pauseBtn
+            local outsideIcImg
+            if hasAudio then
+                local _downloading = false
+                local function _doPlay()
+                    if not snd then return end
+                    pcall(function() snd:Play() end); playing=true
+                    if playBtn  then playBtn.Visible=false end
+                    if _pauseBtn then _pauseBtn.Visible=true  end
+                end
+                local function _triggerPlay()
+                    if _downloading then return end
+                    if snd then
+                        _doPlay()
+                        return
+                    end
+                    if pendingDownload then
+                        _downloading = true
+                        if lib then lib:Notify({Title="Audio", Content="Downloading audio, please wait...", Type="Info", Duration=4}) end
+                        task.spawn(function()
+                            local got = resolve(src, false)
+                            _downloading = false
+                            if got and got ~= "" then
+                                pendingDownload = false
+                                snd = _initSound(got)
+                                _doPlay()
+                                if lib then lib:Notify({Title="Audio", Content="Audio ready — playing now", Type="Success", Duration=2}) end
+                            else
+                                if lib then lib:Notify({Title="Audio", Content="Failed to download audio", Type="Error", Duration=3}) end
+                            end
+                        end)
+                    end
+                end
+                playBtn  = ctrlBtn("solar/play-bold", _triggerPlay)
+                _pauseBtn = ctrlBtn("solar/pause-bold", function()
+                    if snd then snd:Pause() end; playing=false
+                    if playBtn  then playBtn.Visible=true   end
+                    if _pauseBtn then _pauseBtn.Visible=false  end
+                end)
+                _pauseBtn.Visible = false
+                ctrlBtn("solar/stop-bold", function()
+                    local win = lib and lib.Window
+                    if win then
+                        win:Dialog({
+                            Title="Restart Audio",
+                            Content="Are you sure you want to restart this audio?",
+                            Buttons={
+                                {Title="Restart", Callback=function()
+                                    pcall(function()
+                                        if snd then snd:Stop(); snd.TimePosition=0 end
+                                        playing=false
+                                    end)
+                                    if playBtn  then playBtn.Visible=true  end
+                                    if _pauseBtn then _pauseBtn.Visible=false end
+                                end},
+                                {Title="Cancel"},
+                            },
+                        })
+                    else
+                        if snd then snd:Stop() end; playing=false
+                        if playBtn  then playBtn.Visible=true  end
+                        if _pauseBtn then _pauseBtn.Visible=false end
+                    end
+                end)
+                local outsideBtn2, _outsideIc2 = ctrlBtn("solar/export-bold", function()
+                    playOutside = not playOutside
+                    applyAudioIcon(_outsideIc2, playOutside and "solar/export-bold" or "solar/import-bold")
+                    if snd then
+                        local wasPlaying = playing
+                        pcall(function() if wasPlaying then snd:Stop() end end)
+                        if playOutside then
+                            snd.RollOffMaxDistance = 10000
+                            snd.Parent = game:GetService("SoundService")
+                        else
+                            snd.Parent = workspace
+                        end
+                        if wasPlaying then pcall(function() snd:Play() end) end
+                    end
+                    if lib then lib:Notify({Title="Audio", Content=playOutside and "Play Outside Window: ON" or "Play Outside Window: OFF", Type="Info", Duration=2}) end
+                end)
+                outsideIcImg = _outsideIc2
+                applyAudioIcon(outsideIcImg, playOutside and "solar/export-bold" or "solar/import-bold")
+                if auto and snd then
+                    _doPlay()
+                end
+            end
+            local seekRowOffset = hasLabels and 56 or 36
+            local seekRow = u("Frame",{
+                Size=UDim2.new(1,0,0,24),
+                Position=UDim2.new(0,0,0,seekRowOffset),
+                BackgroundTransparency=1,
+                Visible=hasAudio,
+                Parent=wrap,
+            })
+            local curLbl = u("TextLabel",{
+                Size=UDim2.fromOffset(34,20),
+                Position=UDim2.new(0,0,0.5,0),
+                AnchorPoint=Vector2.new(0,0.5),
+                BackgroundTransparency=1,
+                Text="0:00",
+                TextSize=10,
+                Font=Enum.Font.Gotham,
+                TextXAlignment=Enum.TextXAlignment.Left,
+                ZIndex=3,
+                Parent=seekRow,
+                ThemeTag={TextColor3="SubText"},
+            })
+            local durLbl = u("TextLabel",{
+                Size=UDim2.fromOffset(34,20),
+                Position=UDim2.new(1,0,0.5,0),
+                AnchorPoint=Vector2.new(1,0.5),
+                BackgroundTransparency=1,
+                Text="0:00",
+                TextSize=10,
+                Font=Enum.Font.Gotham,
+                TextXAlignment=Enum.TextXAlignment.Right,
+                ZIndex=3,
+                Parent=seekRow,
+                ThemeTag={TextColor3="SubText"},
+            })
+            local rail = u("Frame",{
+                Size=UDim2.new(1,-76,0,4),
+                Position=UDim2.new(0,38,0.5,0),
+                AnchorPoint=Vector2.new(0,0.5),
+                BackgroundTransparency=0.65,
+                ZIndex=2,
+                Parent=seekRow,
+                ThemeTag={BackgroundColor3="SubText"},
+            })
+            u("UICorner",{CornerRadius=UDim.new(1,0),Parent=rail})
+            local fill = u("Frame",{
+                Size=UDim2.new(0,0,1,0),
+                BackgroundTransparency=0,
+                ZIndex=3,
+                Parent=rail,
+                ThemeTag={BackgroundColor3="Accent"},
+            })
+            u("UICorner",{CornerRadius=UDim.new(1,0),Parent=fill})
+            local knob = u("Frame",{
+                Size=UDim2.fromOffset(12,12),
+                Position=UDim2.new(0,0,0.5,0),
+                AnchorPoint=Vector2.new(0.5,0.5),
+                ZIndex=4,
+                Parent=rail,
+                ThemeTag={BackgroundColor3="Accent"},
+            })
+            u("UICorner",{CornerRadius=UDim.new(1,0),Parent=knob})
+            local dragging = false
+            local function seekTo(inputX)
+                if not snd then return end
+                local railX = rail.AbsolutePosition.X
+                local railW = rail.AbsoluteSize.X
+                if railW <= 0 then return end
+                local pct = math.clamp((inputX - railX) / railW, 0, 1)
+                local dur = snd.TimeLength or 0
+                if dur > 0 then
+                    pcall(function() snd.TimePosition = pct * dur end)
+                end
+            end
+            rail.InputBegan:Connect(function(inp)
+                if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    seekTo(inp.Position.X)
+                end
+            end)
+            rail.InputEnded:Connect(function(inp)
+                if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+                    dragging = false
+                end
+            end)
+            uis.InputChanged:Connect(function(inp)
+                if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
+                    seekTo(inp.Position.X)
+                end
+            end)
+            local hbConn
+            local win = d.Library and d.Library.Window
+            hbConn = rs.Heartbeat:Connect(function()
+                if not wrap.Parent then if hbConn then hbConn:Disconnect() end return end
+                if not snd then return end
+                if win and win.Minimized and not playOutside and playing then
+                    pcall(function() snd:Stop() end)
+                    playing = false
+                    if playBtn then playBtn.Visible = true end
+                    if _pauseBtn then _pauseBtn.Visible = false end
+                end
+                if not playing and not dragging then return end
+                local dur = snd.TimeLength or 0
+                local pos = snd.TimePosition or 0
+                curLbl.Text = fmtTime(pos)
+                durLbl.Text = fmtTime(dur)
+                local pct = dur > 0 and (pos / dur) or 0
+                fill.Size     = UDim2.new(pct, 0, 1, 0)
+                knob.Position = UDim2.new(pct, 0, 0.5, 0)
+            end)
+            local mod = {Frame=wrap, Type="Audio", Sound=snd}
+            function mod:Play()   if snd then pcall(function() pcall(function() snd:Play() end)  end) end end
+            function mod:Pause()  if snd then pcall(function() snd:Pause() end) end end
+            function mod:Stop()   if snd then pcall(function() snd:Stop()  end) end end
+            function mod:SetVolume(v)
+                if snd then snd.Volume = math.clamp(v, 0, 10) end
+            end
+            function mod:SetAudio(src)
+                local r = resolve(src)
+                if snd then
+                    pcall(function() snd:Stop() end)
+                    pcall(function() snd.SoundId = r end)
+                else
+                    snd = Instance.new("Sound")
+                    snd.Name    = "BFAudio"
+                    snd.SoundId = r
+                    snd.Volume  = vol
+                    snd.Looped  = looped
+                    if playOutside then
+                        snd.Parent = game:GetService("SoundService")
+                    else
+                        snd.Parent = workspace
+                    end
+                end
+                hasAudio = r ~= ""
+                controls.Visible = hasAudio
+                seekRow.Visible  = hasAudio
+                statusLbl.Text   = hasAudio and (audioTitle or "Audio") or "No audio source"
+                if playBtn  then playBtn.Visible  = hasAudio end
+                if _pauseBtn then _pauseBtn.Visible = false end
+            end
+            function mod:SetAudioTitle(title, subtitle)
+                statusLbl.Text = title or (hasAudio and "Audio" or "No audio source")
+                if subtitle ~= nil then
+                    subtitleLbl.Text    = subtitle
+                    subtitleLbl.Visible = subtitle ~= ""
+                end
+            end
+            function mod:SetPlayOutside(enabled)
+                playOutside = enabled
+                if snd then
+                    local wasPlaying = playing
+                    pcall(function() snd:Stop() end)
+                    if enabled then
+                        snd.Parent = game:GetService("SoundService")
+                    else
+                        snd.Parent = workspace
+                    end
+                    if wasPlaying then
+                        pcall(function() pcall(function() snd:Play() end) end)
+                    end
+                end
+            end
+            function mod:Destroy()
+                if hbConn then hbConn:Disconnect() end
+                if hideConn then hideConn:Disconnect() end
+                if snd then pcall(function() snd:Stop(); snd:Destroy() end) end
+                wrap:Destroy()
+            end
+            return mod
+        end
+        return c
+    end,
+
+    [28] = function()
+        local aa, ab, ac, ad, ae = b(28)
+        return {
+            assets = {
+                ["lucide-accessibility"] = "rbxassetid://10709751939",
+                ["lucide-activity"] = "rbxassetid://10709752035",
+                ["lucide-air-vent"] = "rbxassetid://10709752131",
+                ["lucide-airplay"] = "rbxassetid://10709752254",
+                ["lucide-alarm-check"] = "rbxassetid://10709752405",
+                ["lucide-alarm-clock"] = "rbxassetid://10709752630",
+                ["lucide-alarm-clock-off"] = "rbxassetid://10709752508",
+                ["lucide-alarm-minus"] = "rbxassetid://10709752732",
+                ["lucide-alarm-plus"] = "rbxassetid://10709752825",
+                ["lucide-album"] = "rbxassetid://10709752906",
+                ["lucide-alert-circle"] = "rbxassetid://10709752996",
+                ["lucide-alert-octagon"] = "rbxassetid://10709753064",
+                ["lucide-alert-triangle"] = "rbxassetid://10709753149",
+                ["lucide-align-center"] = "rbxassetid://10709753570",
+                ["lucide-align-center-horizontal"] = "rbxassetid://10709753272",
+                ["lucide-align-center-vertical"] = "rbxassetid://10709753421",
+                ["lucide-align-end-horizontal"] = "rbxassetid://10709753692",
+                ["lucide-align-end-vertical"] = "rbxassetid://10709753808",
+                ["lucide-align-horizontal-distribute-center"] = "rbxassetid://10747779791",
+                ["lucide-align-horizontal-distribute-end"] = "rbxassetid://10747784534",
+                ["lucide-align-horizontal-distribute-start"] = "rbxassetid://10709754118",
+                ["lucide-align-horizontal-justify-center"] = "rbxassetid://10709754204",
+                ["lucide-align-horizontal-justify-end"] = "rbxassetid://10709754317",
+                ["lucide-align-horizontal-justify-start"] = "rbxassetid://10709754436",
+                ["lucide-align-horizontal-space-around"] = "rbxassetid://10709754590",
+                ["lucide-align-horizontal-space-between"] = "rbxassetid://10709754749",
+                ["lucide-align-justify"] = "rbxassetid://10709759610",
+                ["lucide-align-left"] = "rbxassetid://10709759764",
+                ["lucide-align-right"] = "rbxassetid://10709759895",
+                ["lucide-align-start-horizontal"] = "rbxassetid://10709760051",
+                ["lucide-align-start-vertical"] = "rbxassetid://10709760244",
+                ["lucide-align-vertical-distribute-center"] = "rbxassetid://10709760351",
+                ["lucide-align-vertical-distribute-end"] = "rbxassetid://10709760434",
+                ["lucide-align-vertical-distribute-start"] = "rbxassetid://10709760612",
+                ["lucide-align-vertical-justify-center"] = "rbxassetid://10709760814",
+                ["lucide-align-vertical-justify-end"] = "rbxassetid://10709761003",
+                ["lucide-align-vertical-justify-start"] = "rbxassetid://10709761176",
+                ["lucide-align-vertical-space-around"] = "rbxassetid://10709761324",
+                ["lucide-align-vertical-space-between"] = "rbxassetid://10709761434",
+                ["lucide-anchor"] = "rbxassetid://10709761530",
+                ["lucide-angry"] = "rbxassetid://10709761629",
+                ["lucide-annoyed"] = "rbxassetid://10709761722",
+                ["lucide-aperture"] = "rbxassetid://10709761813",
+                ["lucide-apple"] = "rbxassetid://10709761889",
+                ["lucide-archive"] = "rbxassetid://10709762233",
+                ["lucide-archive-restore"] = "rbxassetid://10709762058",
+                ["lucide-armchair"] = "rbxassetid://10709762327",
+                ["lucide-arrow-big-down"] = "rbxassetid://10747796644",
+                ["lucide-arrow-big-left"] = "rbxassetid://10709762574",
+                ["lucide-arrow-big-right"] = "rbxassetid://10709762727",
+                ["lucide-arrow-big-up"] = "rbxassetid://10709762879",
+                ["lucide-arrow-down"] = "rbxassetid://10709767827",
+                ["lucide-arrow-down-circle"] = "rbxassetid://10709763034",
+                ["lucide-arrow-down-left"] = "rbxassetid://10709767656",
+                ["lucide-arrow-down-right"] = "rbxassetid://10709767750",
+                ["lucide-arrow-left"] = "rbxassetid://10709768114",
+                ["lucide-arrow-left-circle"] = "rbxassetid://10709767936",
+                ["lucide-arrow-left-right"] = "rbxassetid://10709768019",
+                ["lucide-arrow-right"] = "rbxassetid://10709768347",
+                ["lucide-arrow-right-circle"] = "rbxassetid://10709768226",
+                ["lucide-arrow-up"] = "rbxassetid://10709768939",
+                ["lucide-arrow-up-circle"] = "rbxassetid://10709768432",
+                ["lucide-arrow-up-down"] = "rbxassetid://10709768538",
+                ["lucide-arrow-up-left"] = "rbxassetid://10709768661",
+                ["lucide-arrow-up-right"] = "rbxassetid://10709768787",
+                ["lucide-asterisk"] = "rbxassetid://10709769095",
+                ["lucide-at-sign"] = "rbxassetid://10709769286",
+                ["lucide-award"] = "rbxassetid://10709769406",
+                ["lucide-axe"] = "rbxassetid://10709769508",
+                ["lucide-axis-3d"] = "rbxassetid://10709769598",
+                ["lucide-baby"] = "rbxassetid://10709769732",
+                ["lucide-backpack"] = "rbxassetid://10709769841",
+                ["lucide-baggage-claim"] = "rbxassetid://10709769935",
+                ["lucide-banana"] = "rbxassetid://10709770005",
+                ["lucide-banknote"] = "rbxassetid://10709770178",
+                ["lucide-bar-chart"] = "rbxassetid://10709773755",
+                ["lucide-bar-chart-2"] = "rbxassetid://10709770317",
+                ["lucide-bar-chart-3"] = "rbxassetid://10709770431",
+                ["lucide-bar-chart-4"] = "rbxassetid://10709770560",
+                ["lucide-bar-chart-horizontal"] = "rbxassetid://10709773669",
+                ["lucide-barcode"] = "rbxassetid://10747360675",
+                ["lucide-baseline"] = "rbxassetid://10709773863",
+                ["lucide-bath"] = "rbxassetid://10709773963",
+                ["lucide-battery"] = "rbxassetid://10709774640",
+                ["lucide-battery-charging"] = "rbxassetid://10709774068",
+                ["lucide-battery-full"] = "rbxassetid://10709774206",
+                ["lucide-battery-low"] = "rbxassetid://10709774370",
+                ["lucide-battery-medium"] = "rbxassetid://10709774513",
+                ["lucide-beaker"] = "rbxassetid://10709774756",
+                ["lucide-bed"] = "rbxassetid://10709775036",
+                ["lucide-bed-double"] = "rbxassetid://10709774864",
+                ["lucide-bed-single"] = "rbxassetid://10709774968",
+                ["lucide-beer"] = "rbxassetid://10709775167",
+                ["lucide-bell"] = "rbxassetid://10709775704",
+                ["lucide-bell-minus"] = "rbxassetid://10709775241",
+                ["lucide-bell-off"] = "rbxassetid://10709775320",
+                ["lucide-bell-plus"] = "rbxassetid://10709775448",
+                ["lucide-bell-ring"] = "rbxassetid://10709775560",
+                ["lucide-bike"] = "rbxassetid://10709775894",
+                ["lucide-binary"] = "rbxassetid://10709776050",
+                ["lucide-bitcoin"] = "rbxassetid://10709776126",
+                ["lucide-bluetooth"] = "rbxassetid://10709776655",
+                ["lucide-bluetooth-connected"] = "rbxassetid://10709776240",
+                ["lucide-bluetooth-off"] = "rbxassetid://10709776344",
+                ["lucide-bluetooth-searching"] = "rbxassetid://10709776501",
+                ["lucide-bold"] = "rbxassetid://10747813908",
+                ["lucide-bomb"] = "rbxassetid://10709781460",
+                ["lucide-bone"] = "rbxassetid://10709781605",
+                ["lucide-book"] = "rbxassetid://10709781824",
+                ["lucide-book-open"] = "rbxassetid://10709781717",
+                ["lucide-bookmark"] = "rbxassetid://10709782154",
+                ["lucide-bookmark-minus"] = "rbxassetid://10709781919",
+                ["lucide-bookmark-plus"] = "rbxassetid://10709782044",
+                ["lucide-bot"] = "rbxassetid://10709782230",
+                ["lucide-box"] = "rbxassetid://10709782497",
+                ["lucide-box-select"] = "rbxassetid://10709782342",
+                ["lucide-boxes"] = "rbxassetid://10709782582",
+                ["lucide-briefcase"] = "rbxassetid://10709782662",
+                ["lucide-brush"] = "rbxassetid://10709782758",
+                ["lucide-bug"] = "rbxassetid://10709782845",
+                ["lucide-building"] = "rbxassetid://10709783051",
+                ["lucide-building-2"] = "rbxassetid://10709782939",
+                ["lucide-bus"] = "rbxassetid://10709783137",
+                ["lucide-cake"] = "rbxassetid://10709783217",
+                ["lucide-calculator"] = "rbxassetid://10709783311",
+                ["lucide-calendar"] = "rbxassetid://10709789505",
+                ["lucide-calendar-check"] = "rbxassetid://10709783474",
+                ["lucide-calendar-check-2"] = "rbxassetid://10709783392",
+                ["lucide-calendar-clock"] = "rbxassetid://10709783577",
+                ["lucide-calendar-days"] = "rbxassetid://10709783673",
+                ["lucide-calendar-heart"] = "rbxassetid://10709783835",
+                ["lucide-calendar-minus"] = "rbxassetid://10709783959",
+                ["lucide-calendar-off"] = "rbxassetid://10709788784",
+                ["lucide-calendar-plus"] = "rbxassetid://10709788937",
+                ["lucide-calendar-range"] = "rbxassetid://10709789053",
+                ["lucide-calendar-search"] = "rbxassetid://10709789200",
+                ["lucide-calendar-x"] = "rbxassetid://10709789407",
+                ["lucide-calendar-x-2"] = "rbxassetid://10709789329",
+                ["lucide-camera"] = "rbxassetid://10709789686",
+                ["lucide-camera-off"] = "rbxassetid://10747822677",
+                ["lucide-car"] = "rbxassetid://10709789810",
+                ["lucide-carrot"] = "rbxassetid://10709789960",
+                ["lucide-cast"] = "rbxassetid://10709790097",
+                ["lucide-charge"] = "rbxassetid://10709790202",
+                ["lucide-check"] = "rbxassetid://10709790644",
+                ["lucide-check-circle"] = "rbxassetid://10709790387",
+                ["lucide-check-circle-2"] = "rbxassetid://10709790298",
+                ["lucide-check-square"] = "rbxassetid://10709790537",
+                ["lucide-chef-hat"] = "rbxassetid://10709790757",
+                ["lucide-cherry"] = "rbxassetid://10709790875",
+                ["lucide-chevron-down"] = "rbxassetid://10709790948",
+                ["lucide-chevron-first"] = "rbxassetid://10709791015",
+                ["lucide-chevron-last"] = "rbxassetid://10709791130",
+                ["lucide-chevron-left"] = "rbxassetid://10709791281",
+                ["lucide-chevron-right"] = "rbxassetid://10709791437",
+                ["lucide-chevron-up"] = "rbxassetid://10709791523",
+                ["lucide-chevrons-down"] = "rbxassetid://10709796864",
+                ["lucide-chevrons-down-up"] = "rbxassetid://10709791632",
+                ["lucide-chevrons-left"] = "rbxassetid://10709797151",
+                ["lucide-chevrons-left-right"] = "rbxassetid://10709797006",
+                ["lucide-chevrons-right"] = "rbxassetid://10709797382",
+                ["lucide-chevrons-right-left"] = "rbxassetid://10709797274",
+                ["lucide-chevrons-up"] = "rbxassetid://10709797622",
+                ["lucide-chevrons-up-down"] = "rbxassetid://10709797508",
+                ["lucide-chrome"] = "rbxassetid://10709797725",
+                ["lucide-circle"] = "rbxassetid://10709798174",
+                ["lucide-circle-dot"] = "rbxassetid://10709797837",
+                ["lucide-circle-ellipsis"] = "rbxassetid://10709797985",
+                ["lucide-circle-slashed"] = "rbxassetid://10709798100",
+                ["lucide-citrus"] = "rbxassetid://10709798276",
+                ["lucide-clapperboard"] = "rbxassetid://10709798350",
+                ["lucide-clipboard"] = "rbxassetid://10709799288",
+                ["lucide-clipboard-check"] = "rbxassetid://10709798443",
+                ["lucide-clipboard-copy"] = "rbxassetid://10709798574",
+                ["lucide-clipboard-edit"] = "rbxassetid://10709798682",
+                ["lucide-clipboard-list"] = "rbxassetid://10709798792",
+                ["lucide-clipboard-signature"] = "rbxassetid://10709798890",
+                ["lucide-clipboard-type"] = "rbxassetid://10709798999",
+                ["lucide-clipboard-x"] = "rbxassetid://10709799124",
+                ["lucide-clock"] = "rbxassetid://10709805144",
+                ["lucide-clock-1"] = "rbxassetid://10709799535",
+                ["lucide-clock-10"] = "rbxassetid://10709799718",
+                ["lucide-clock-11"] = "rbxassetid://10709799818",
+                ["lucide-clock-12"] = "rbxassetid://10709799962",
+                ["lucide-clock-2"] = "rbxassetid://10709803876",
+                ["lucide-clock-3"] = "rbxassetid://10709803989",
+                ["lucide-clock-4"] = "rbxassetid://10709804164",
+                ["lucide-clock-5"] = "rbxassetid://10709804291",
+                ["lucide-clock-6"] = "rbxassetid://10709804435",
+                ["lucide-clock-7"] = "rbxassetid://10709804599",
+                ["lucide-clock-8"] = "rbxassetid://10709804784",
+                ["lucide-clock-9"] = "rbxassetid://10709804996",
+                ["lucide-cloud"] = "rbxassetid://10709806740",
+                ["lucide-cloud-cog"] = "rbxassetid://10709805262",
+                ["lucide-cloud-drizzle"] = "rbxassetid://10709805371",
+                ["lucide-cloud-fog"] = "rbxassetid://10709805477",
+                ["lucide-cloud-hail"] = "rbxassetid://10709805596",
+                ["lucide-cloud-lightning"] = "rbxassetid://10709805727",
+                ["lucide-cloud-moon"] = "rbxassetid://10709805942",
+                ["lucide-cloud-moon-rain"] = "rbxassetid://10709805838",
+                ["lucide-cloud-off"] = "rbxassetid://10709806060",
+                ["lucide-cloud-rain"] = "rbxassetid://10709806277",
+                ["lucide-cloud-rain-wind"] = "rbxassetid://10709806166",
+                ["lucide-cloud-snow"] = "rbxassetid://10709806374",
+                ["lucide-cloud-sun"] = "rbxassetid://10709806631",
+                ["lucide-cloud-sun-rain"] = "rbxassetid://10709806475",
+                ["lucide-cloudy"] = "rbxassetid://10709806859",
+                ["lucide-clover"] = "rbxassetid://10709806995",
+                ["lucide-code"] = "rbxassetid://10709810463",
+                ["lucide-code-2"] = "rbxassetid://10709807111",
+                ["lucide-codepen"] = "rbxassetid://10709810534",
+                ["lucide-codesandbox"] = "rbxassetid://10709810676",
+                ["lucide-coffee"] = "rbxassetid://10709810814",
+                ["lucide-cog"] = "rbxassetid://10709810948",
+                ["lucide-coins"] = "rbxassetid://10709811110",
+                ["lucide-columns"] = "rbxassetid://10709811261",
+                ["lucide-command"] = "rbxassetid://10709811365",
+                ["lucide-compass"] = "rbxassetid://10709811445",
+                ["lucide-component"] = "rbxassetid://10709811595",
+                ["lucide-concierge-bell"] = "rbxassetid://10709811706",
+                ["lucide-connection"] = "rbxassetid://10747361219",
+                ["lucide-contact"] = "rbxassetid://10709811834",
+                ["lucide-contrast"] = "rbxassetid://10709811939",
+                ["lucide-cookie"] = "rbxassetid://10709812067",
+                ["lucide-copy"] = "rbxassetid://10709812159",
+                ["lucide-copyleft"] = "rbxassetid://10709812251",
+                ["lucide-copyright"] = "rbxassetid://10709812311",
+                ["lucide-corner-down-left"] = "rbxassetid://10709812396",
+                ["lucide-corner-down-right"] = "rbxassetid://10709812485",
+                ["lucide-corner-left-down"] = "rbxassetid://10709812632",
+                ["lucide-corner-left-up"] = "rbxassetid://10709812784",
+                ["lucide-corner-right-down"] = "rbxassetid://10709812939",
+                ["lucide-corner-right-up"] = "rbxassetid://10709813094",
+                ["lucide-corner-up-left"] = "rbxassetid://10709813185",
+                ["lucide-corner-up-right"] = "rbxassetid://10709813281",
+                ["lucide-cpu"] = "rbxassetid://10709813383",
+                ["lucide-croissant"] = "rbxassetid://10709818125",
+                ["lucide-crop"] = "rbxassetid://10709818245",
+                ["lucide-cross"] = "rbxassetid://10709818399",
+                ["lucide-crosshair"] = "rbxassetid://10709818534",
+                ["lucide-crown"] = "rbxassetid://10709818626",
+                ["lucide-cup-soda"] = "rbxassetid://10709818763",
+                ["lucide-curly-braces"] = "rbxassetid://10709818847",
+                ["lucide-currency"] = "rbxassetid://10709818931",
+                ["lucide-database"] = "rbxassetid://10709818996",
+                ["lucide-delete"] = "rbxassetid://10709819059",
+                ["lucide-diamond"] = "rbxassetid://10709819149",
+                ["lucide-dice-1"] = "rbxassetid://10709819266",
+                ["lucide-dice-2"] = "rbxassetid://10709819361",
+                ["lucide-dice-3"] = "rbxassetid://10709819508",
+                ["lucide-dice-4"] = "rbxassetid://10709819670",
+                ["lucide-dice-5"] = "rbxassetid://10709819801",
+                ["lucide-dice-6"] = "rbxassetid://10709819896",
+                ["lucide-dices"] = "rbxassetid://10723343321",
+                ["lucide-diff"] = "rbxassetid://10723343416",
+                ["lucide-disc"] = "rbxassetid://10723343537",
+                ["lucide-divide"] = "rbxassetid://10723343805",
+                ["lucide-divide-circle"] = "rbxassetid://10723343636",
+                ["lucide-divide-square"] = "rbxassetid://10723343737",
+                ["lucide-dollar-sign"] = "rbxassetid://10723343958",
+                ["lucide-download"] = "rbxassetid://10723344270",
+                ["lucide-download-cloud"] = "rbxassetid://10723344088",
+                ["lucide-droplet"] = "rbxassetid://10723344432",
+                ["lucide-droplets"] = "rbxassetid://10734883356",
+                ["lucide-drumstick"] = "rbxassetid://10723344737",
+                ["lucide-edit"] = "rbxassetid://10734883598",
+                ["lucide-edit-2"] = "rbxassetid://10723344885",
+                ["lucide-edit-3"] = "rbxassetid://10723345088",
+                ["lucide-egg"] = "rbxassetid://10723345518",
+                ["lucide-egg-fried"] = "rbxassetid://10723345347",
+                ["lucide-electricity"] = "rbxassetid://10723345749",
+                ["lucide-electricity-off"] = "rbxassetid://10723345643",
+                ["lucide-equal"] = "rbxassetid://10723345990",
+                ["lucide-equal-not"] = "rbxassetid://10723345866",
+                ["lucide-eraser"] = "rbxassetid://10723346158",
+                ["lucide-euro"] = "rbxassetid://10723346372",
+                ["lucide-expand"] = "rbxassetid://10723346553",
+                ["lucide-external-link"] = "rbxassetid://10723346684",
+                ["lucide-eye"] = "rbxassetid://10723346959",
+                ["lucide-eye-off"] = "rbxassetid://10723346871",
+                ["lucide-factory"] = "rbxassetid://10723347051",
+                ["lucide-fan"] = "rbxassetid://10723354359",
+                ["lucide-fast-forward"] = "rbxassetid://10723354521",
+                ["lucide-feather"] = "rbxassetid://10723354671",
+                ["lucide-figma"] = "rbxassetid://10723354801",
+                ["lucide-file"] = "rbxassetid://10723374641",
+                ["lucide-file-archive"] = "rbxassetid://10723354921",
+                ["lucide-file-audio"] = "rbxassetid://10723355148",
+                ["lucide-file-audio-2"] = "rbxassetid://10723355026",
+                ["lucide-file-axis-3d"] = "rbxassetid://10723355272",
+                ["lucide-file-badge"] = "rbxassetid://10723355622",
+                ["lucide-file-badge-2"] = "rbxassetid://10723355451",
+                ["lucide-file-bar-chart"] = "rbxassetid://10723355887",
+                ["lucide-file-bar-chart-2"] = "rbxassetid://10723355746",
+                ["lucide-file-box"] = "rbxassetid://10723355989",
+                ["lucide-file-check"] = "rbxassetid://10723356210",
+                ["lucide-file-check-2"] = "rbxassetid://10723356100",
+                ["lucide-file-clock"] = "rbxassetid://10723356329",
+                ["lucide-file-code"] = "rbxassetid://10723356507",
+                ["lucide-file-cog"] = "rbxassetid://10723356830",
+                ["lucide-file-cog-2"] = "rbxassetid://10723356676",
+                ["lucide-file-diff"] = "rbxassetid://10723357039",
+                ["lucide-file-digit"] = "rbxassetid://10723357151",
+                ["lucide-file-down"] = "rbxassetid://10723357322",
+                ["lucide-file-edit"] = "rbxassetid://10723357495",
+                ["lucide-file-heart"] = "rbxassetid://10723357637",
+                ["lucide-file-image"] = "rbxassetid://10723357790",
+                ["lucide-file-input"] = "rbxassetid://10723357933",
+                ["lucide-file-json"] = "rbxassetid://10723364435",
+                ["lucide-file-json-2"] = "rbxassetid://10723364361",
+                ["lucide-file-key"] = "rbxassetid://10723364605",
+                ["lucide-file-key-2"] = "rbxassetid://10723364515",
+                ["lucide-file-line-chart"] = "rbxassetid://10723364725",
+                ["lucide-file-lock"] = "rbxassetid://10723364957",
+                ["lucide-file-lock-2"] = "rbxassetid://10723364861",
+                ["lucide-file-minus"] = "rbxassetid://10723365254",
+                ["lucide-file-minus-2"] = "rbxassetid://10723365086",
+                ["lucide-file-output"] = "rbxassetid://10723365457",
+                ["lucide-file-pie-chart"] = "rbxassetid://10723365598",
+                ["lucide-file-plus"] = "rbxassetid://10723365877",
+                ["lucide-file-plus-2"] = "rbxassetid://10723365766",
+                ["lucide-file-question"] = "rbxassetid://10723365987",
+                ["lucide-file-scan"] = "rbxassetid://10723366167",
+                ["lucide-file-search"] = "rbxassetid://10723366550",
+                ["lucide-file-search-2"] = "rbxassetid://10723366340",
+                ["lucide-file-signature"] = "rbxassetid://10723366741",
+                ["lucide-file-spreadsheet"] = "rbxassetid://10723366962",
+                ["lucide-file-symlink"] = "rbxassetid://10723367098",
+                ["lucide-file-terminal"] = "rbxassetid://10723367244",
+                ["lucide-file-text"] = "rbxassetid://10723367380",
+                ["lucide-file-type"] = "rbxassetid://10723367606",
+                ["lucide-file-type-2"] = "rbxassetid://10723367509",
+                ["lucide-file-up"] = "rbxassetid://10723367734",
+                ["lucide-file-video"] = "rbxassetid://10723373884",
+                ["lucide-file-video-2"] = "rbxassetid://10723367834",
+                ["lucide-file-volume"] = "rbxassetid://10723374172",
+                ["lucide-file-volume-2"] = "rbxassetid://10723374030",
+                ["lucide-file-warning"] = "rbxassetid://10723374276",
+                ["lucide-file-x"] = "rbxassetid://10723374544",
+                ["lucide-file-x-2"] = "rbxassetid://10723374378",
+                ["lucide-files"] = "rbxassetid://10723374759",
+                ["lucide-film"] = "rbxassetid://10723374981",
+                ["lucide-filter"] = "rbxassetid://10723375128",
+                ["lucide-fingerprint"] = "rbxassetid://10723375250",
+                ["lucide-flag"] = "rbxassetid://10723375890",
+                ["lucide-flag-off"] = "rbxassetid://10723375443",
+                ["lucide-flag-triangle-left"] = "rbxassetid://10723375608",
+                ["lucide-flag-triangle-right"] = "rbxassetid://10723375727",
+                ["lucide-flame"] = "rbxassetid://10723376114",
+                ["lucide-flashlight"] = "rbxassetid://10723376471",
+                ["lucide-flashlight-off"] = "rbxassetid://10723376365",
+                ["lucide-flask-conical"] = "rbxassetid://10734883986",
+                ["lucide-flask-round"] = "rbxassetid://10723376614",
+                ["lucide-flip-horizontal"] = "rbxassetid://10723376884",
+                ["lucide-flip-horizontal-2"] = "rbxassetid://10723376745",
+                ["lucide-flip-vertical"] = "rbxassetid://10723377138",
+                ["lucide-flip-vertical-2"] = "rbxassetid://10723377026",
+                ["lucide-flower"] = "rbxassetid://10747830374",
+                ["lucide-flower-2"] = "rbxassetid://10723377305",
+                ["lucide-focus"] = "rbxassetid://10723377537",
+                ["lucide-folder"] = "rbxassetid://10723387563",
+                ["lucide-folder-archive"] = "rbxassetid://10723384478",
+                ["lucide-folder-check"] = "rbxassetid://10723384605",
+                ["lucide-folder-clock"] = "rbxassetid://10723384731",
+                ["lucide-folder-closed"] = "rbxassetid://10723384893",
+                ["lucide-folder-cog"] = "rbxassetid://10723385213",
+                ["lucide-folder-cog-2"] = "rbxassetid://10723385036",
+                ["lucide-folder-down"] = "rbxassetid://10723385338",
+                ["lucide-folder-edit"] = "rbxassetid://10723385445",
+                ["lucide-folder-heart"] = "rbxassetid://10723385545",
+                ["lucide-folder-input"] = "rbxassetid://10723385721",
+                ["lucide-folder-key"] = "rbxassetid://10723385848",
+                ["lucide-folder-lock"] = "rbxassetid://10723386005",
+                ["lucide-folder-minus"] = "rbxassetid://10723386127",
+                ["lucide-folder-open"] = "rbxassetid://10723386277",
+                ["lucide-folder-output"] = "rbxassetid://10723386386",
+                ["lucide-folder-plus"] = "rbxassetid://10723386531",
+                ["lucide-folder-search"] = "rbxassetid://10723386787",
+                ["lucide-folder-search-2"] = "rbxassetid://10723386674",
+                ["lucide-folder-symlink"] = "rbxassetid://10723386930",
+                ["lucide-folder-tree"] = "rbxassetid://10723387085",
+                ["lucide-folder-up"] = "rbxassetid://10723387265",
+                ["lucide-folder-x"] = "rbxassetid://10723387448",
+                ["lucide-folders"] = "rbxassetid://10723387721",
+                ["lucide-form-input"] = "rbxassetid://10723387841",
+                ["lucide-forward"] = "rbxassetid://10723388016",
+                ["lucide-frame"] = "rbxassetid://10723394389",
+                ["lucide-framer"] = "rbxassetid://10723394565",
+                ["lucide-frown"] = "rbxassetid://10723394681",
+                ["lucide-fuel"] = "rbxassetid://10723394846",
+                ["lucide-function-square"] = "rbxassetid://10723395041",
+                ["lucide-gamepad"] = "rbxassetid://10723395457",
+                ["lucide-gamepad-2"] = "rbxassetid://10723395215",
+                ["lucide-gauge"] = "rbxassetid://10723395708",
+                ["lucide-gavel"] = "rbxassetid://10723395896",
+                ["lucide-gem"] = "rbxassetid://10723396000",
+                ["lucide-ghost"] = "rbxassetid://10723396107",
+                ["lucide-gift"] = "rbxassetid://10723396402",
+                ["lucide-gift-card"] = "rbxassetid://10723396225",
+                ["lucide-git-branch"] = "rbxassetid://10723396676",
+                ["lucide-git-branch-plus"] = "rbxassetid://10723396542",
+                ["lucide-git-commit"] = "rbxassetid://10723396812",
+                ["lucide-git-compare"] = "rbxassetid://10723396954",
+                ["lucide-git-fork"] = "rbxassetid://10723397049",
+                ["lucide-git-merge"] = "rbxassetid://10723397165",
+                ["lucide-git-pull-request"] = "rbxassetid://10723397431",
+                ["lucide-git-pull-request-closed"] = "rbxassetid://10723397268",
+                ["lucide-git-pull-request-draft"] = "rbxassetid://10734884302",
+                ["lucide-glass"] = "rbxassetid://10723397788",
+                ["lucide-glass-2"] = "rbxassetid://10723397529",
+                ["lucide-glass-water"] = "rbxassetid://10723397678",
+                ["lucide-glasses"] = "rbxassetid://10723397895",
+                ["lucide-globe"] = "rbxassetid://10723404337",
+                ["lucide-globe-2"] = "rbxassetid://10723398002",
+                ["lucide-grab"] = "rbxassetid://10723404472",
+                ["lucide-graduation-cap"] = "rbxassetid://10723404691",
+                ["lucide-grape"] = "rbxassetid://10723404822",
+                ["lucide-grid"] = "rbxassetid://10723404936",
+                ["lucide-grip-horizontal"] = "rbxassetid://10723405089",
+                ["lucide-grip-vertical"] = "rbxassetid://10723405236",
+                ["lucide-hammer"] = "rbxassetid://10723405360",
+                ["lucide-hand"] = "rbxassetid://10723405649",
+                ["lucide-hand-metal"] = "rbxassetid://10723405508",
+                ["lucide-hard-drive"] = "rbxassetid://10723405749",
+                ["lucide-hard-hat"] = "rbxassetid://10723405859",
+                ["lucide-hash"] = "rbxassetid://10723405975",
+                ["lucide-haze"] = "rbxassetid://10723406078",
+                ["lucide-headphones"] = "rbxassetid://10723406165",
+                ["lucide-heart"] = "rbxassetid://10723406885",
+                ["lucide-heart-crack"] = "rbxassetid://10723406299",
+                ["lucide-heart-handshake"] = "rbxassetid://10723406480",
+                ["lucide-heart-off"] = "rbxassetid://10723406662",
+                ["lucide-heart-pulse"] = "rbxassetid://10723406795",
+                ["lucide-help-circle"] = "rbxassetid://10723406988",
+                ["lucide-hexagon"] = "rbxassetid://10723407092",
+                ["lucide-highlighter"] = "rbxassetid://10723407192",
+                ["lucide-history"] = "rbxassetid://10723407335",
+                ["lucide-home"] = "rbxassetid://10723407389",
+                ["lucide-hourglass"] = "rbxassetid://10723407498",
+                ["lucide-ice-cream"] = "rbxassetid://10723414308",
+                ["lucide-image"] = "rbxassetid://10723415040",
+                ["lucide-image-minus"] = "rbxassetid://10723414487",
+                ["lucide-image-off"] = "rbxassetid://10723414677",
+                ["lucide-image-plus"] = "rbxassetid://10723414827",
+                ["lucide-import"] = "rbxassetid://10723415205",
+                ["lucide-inbox"] = "rbxassetid://10723415335",
+                ["lucide-indent"] = "rbxassetid://10723415494",
+                ["lucide-indian-rupee"] = "rbxassetid://10723415642",
+                ["lucide-infinity"] = "rbxassetid://10723415766",
+                ["lucide-info"] = "rbxassetid://10723415903",
+                ["lucide-inspect"] = "rbxassetid://10723416057",
+                ["lucide-italic"] = "rbxassetid://10723416195",
+                ["lucide-japanese-yen"] = "rbxassetid://10723416363",
+                ["lucide-joystick"] = "rbxassetid://10723416527",
+                ["lucide-key"] = "rbxassetid://10723416652",
+                ["lucide-keyboard"] = "rbxassetid://10723416765",
+                ["lucide-lamp"] = "rbxassetid://10723417513",
+                ["lucide-lamp-ceiling"] = "rbxassetid://10723416922",
+                ["lucide-lamp-desk"] = "rbxassetid://10723417016",
+                ["lucide-lamp-floor"] = "rbxassetid://10723417131",
+                ["lucide-lamp-wall-down"] = "rbxassetid://10723417240",
+                ["lucide-lamp-wall-up"] = "rbxassetid://10723417356",
+                ["lucide-landmark"] = "rbxassetid://10723417608",
+                ["lucide-languages"] = "rbxassetid://10723417703",
+                ["lucide-laptop"] = "rbxassetid://10723423881",
+                ["lucide-laptop-2"] = "rbxassetid://10723417797",
+                ["lucide-lasso"] = "rbxassetid://10723424235",
+                ["lucide-lasso-select"] = "rbxassetid://10723424058",
+                ["lucide-laugh"] = "rbxassetid://10723424372",
+                ["lucide-layers"] = "rbxassetid://10723424505",
+                ["lucide-layout"] = "rbxassetid://10723425376",
+                ["lucide-layout-dashboard"] = "rbxassetid://10723424646",
+                ["lucide-layout-grid"] = "rbxassetid://10723424838",
+                ["lucide-layout-list"] = "rbxassetid://10723424963",
+                ["lucide-layout-template"] = "rbxassetid://10723425187",
+                ["lucide-leaf"] = "rbxassetid://10723425539",
+                ["lucide-library"] = "rbxassetid://10723425615",
+                ["lucide-life-buoy"] = "rbxassetid://10723425685",
+                ["lucide-lightbulb"] = "rbxassetid://10723425852",
+                ["lucide-lightbulb-off"] = "rbxassetid://10723425762",
+                ["lucide-line-chart"] = "rbxassetid://10723426393",
+                ["lucide-link"] = "rbxassetid://10723426722",
+                ["lucide-link-2"] = "rbxassetid://10723426595",
+                ["lucide-link-2-off"] = "rbxassetid://10723426513",
+                ["lucide-list"] = "rbxassetid://10723433811",
+                ["lucide-list-checks"] = "rbxassetid://10734884548",
+                ["lucide-list-end"] = "rbxassetid://10723426886",
+                ["lucide-list-minus"] = "rbxassetid://10723426986",
+                ["lucide-list-music"] = "rbxassetid://10723427081",
+                ["lucide-list-ordered"] = "rbxassetid://10723427199",
+                ["lucide-list-plus"] = "rbxassetid://10723427334",
+                ["lucide-list-start"] = "rbxassetid://10723427494",
+                ["lucide-list-video"] = "rbxassetid://10723427619",
+                ["lucide-list-x"] = "rbxassetid://10723433655",
+                ["lucide-loader"] = "rbxassetid://10723434070",
+                ["lucide-loader-2"] = "rbxassetid://10723433935",
+                ["lucide-locate"] = "rbxassetid://10723434557",
+                ["lucide-locate-fixed"] = "rbxassetid://10723434236",
+                ["lucide-locate-off"] = "rbxassetid://10723434379",
+                ["lucide-lock"] = "rbxassetid://10723434711",
+                ["lucide-log-in"] = "rbxassetid://10723434830",
+                ["lucide-log-out"] = "rbxassetid://10723434906",
+                ["lucide-luggage"] = "rbxassetid://10723434993",
+                ["lucide-magnet"] = "rbxassetid://10723435069",
+                ["lucide-mail"] = "rbxassetid://10734885430",
+                ["lucide-mail-check"] = "rbxassetid://10723435182",
+                ["lucide-mail-minus"] = "rbxassetid://10723435261",
+                ["lucide-mail-open"] = "rbxassetid://10723435342",
+                ["lucide-mail-plus"] = "rbxassetid://10723435443",
+                ["lucide-mail-question"] = "rbxassetid://10723435515",
+                ["lucide-mail-search"] = "rbxassetid://10734884739",
+                ["lucide-mail-warning"] = "rbxassetid://10734885015",
+                ["lucide-mail-x"] = "rbxassetid://10734885247",
+                ["lucide-mails"] = "rbxassetid://10734885614",
+                ["lucide-map"] = "rbxassetid://10734886202",
+                ["lucide-map-pin"] = "rbxassetid://10734886004",
+                ["lucide-map-pin-off"] = "rbxassetid://10734885803",
+                ["lucide-maximize"] = "rbxassetid://10734886735",
+                ["lucide-maximize-2"] = "rbxassetid://10734886496",
+                ["lucide-medal"] = "rbxassetid://10734887072",
+                ["lucide-megaphone"] = "rbxassetid://10734887454",
+                ["lucide-megaphone-off"] = "rbxassetid://10734887311",
+                ["lucide-meh"] = "rbxassetid://10734887603",
+                ["lucide-menu"] = "rbxassetid://10734887784",
+                ["lucide-message-circle"] = "rbxassetid://10734888000",
+                ["lucide-message-square"] = "rbxassetid://10734888228",
+                ["lucide-mic"] = "rbxassetid://10734888864",
+                ["lucide-mic-2"] = "rbxassetid://10734888430",
+                ["lucide-mic-off"] = "rbxassetid://10734888646",
+                ["lucide-microscope"] = "rbxassetid://10734889106",
+                ["lucide-microwave"] = "rbxassetid://10734895076",
+                ["lucide-milestone"] = "rbxassetid://10734895310",
+                ["lucide-minimize"] = "rbxassetid://10734895698",
+                ["lucide-minimize-2"] = "rbxassetid://10734895530",
+                ["lucide-minus"] = "rbxassetid://10734896206",
+                ["lucide-minus-circle"] = "rbxassetid://10734895856",
+                ["lucide-minus-square"] = "rbxassetid://10734896029",
+                ["lucide-monitor"] = "rbxassetid://10734896881",
+                ["lucide-monitor-off"] = "rbxassetid://10734896360",
+                ["lucide-monitor-speaker"] = "rbxassetid://10734896512",
+                ["lucide-moon"] = "rbxassetid://10734897102",
+                ["lucide-more-horizontal"] = "rbxassetid://10734897250",
+                ["lucide-more-vertical"] = "rbxassetid://10734897387",
+                ["lucide-mountain"] = "rbxassetid://10734897956",
+                ["lucide-mountain-snow"] = "rbxassetid://10734897665",
+                ["lucide-mouse"] = "rbxassetid://10734898592",
+                ["lucide-mouse-pointer"] = "rbxassetid://10734898476",
+                ["lucide-mouse-pointer-2"] = "rbxassetid://10734898194",
+                ["lucide-mouse-pointer-click"] = "rbxassetid://10734898355",
+                ["lucide-move"] = "rbxassetid://10734900011",
+                ["lucide-move-3d"] = "rbxassetid://10734898756",
+                ["lucide-move-diagonal"] = "rbxassetid://10734899164",
+                ["lucide-move-diagonal-2"] = "rbxassetid://10734898934",
+                ["lucide-move-horizontal"] = "rbxassetid://10734899414",
+                ["lucide-move-vertical"] = "rbxassetid://10734899821",
+                ["lucide-music"] = "rbxassetid://10734905958",
+                ["lucide-music-2"] = "rbxassetid://10734900215",
+                ["lucide-music-3"] = "rbxassetid://10734905665",
+                ["lucide-music-4"] = "rbxassetid://10734905823",
+                ["lucide-navigation"] = "rbxassetid://10734906744",
+                ["lucide-navigation-2"] = "rbxassetid://10734906332",
+                ["lucide-navigation-2-off"] = "rbxassetid://10734906144",
+                ["lucide-navigation-off"] = "rbxassetid://10734906580",
+                ["lucide-network"] = "rbxassetid://10734906975",
+                ["lucide-newspaper"] = "rbxassetid://10734907168",
+                ["lucide-octagon"] = "rbxassetid://10734907361",
+                ["lucide-option"] = "rbxassetid://10734907649",
+                ["lucide-outdent"] = "rbxassetid://10734907933",
+                ["lucide-package"] = "rbxassetid://10734909540",
+                ["lucide-package-2"] = "rbxassetid://10734908151",
+                ["lucide-package-check"] = "rbxassetid://10734908384",
+                ["lucide-package-minus"] = "rbxassetid://10734908626",
+                ["lucide-package-open"] = "rbxassetid://10734908793",
+                ["lucide-package-plus"] = "rbxassetid://10734909016",
+                ["lucide-package-search"] = "rbxassetid://10734909196",
+                ["lucide-package-x"] = "rbxassetid://10734909375",
+                ["lucide-paint-bucket"] = "rbxassetid://10734909847",
+                ["lucide-paintbrush"] = "rbxassetid://10734910187",
+                ["lucide-paintbrush-2"] = "rbxassetid://10734910030",
+                ["lucide-palette"] = "rbxassetid://10734910430",
+                ["lucide-palmtree"] = "rbxassetid://10734910680",
+                ["lucide-paperclip"] = "rbxassetid://10734910927",
+                ["lucide-party-popper"] = "rbxassetid://10734918735",
+                ["lucide-pause"] = "rbxassetid://10734919336",
+                ["lucide-pause-circle"] = "rbxassetid://10735024209",
+                ["lucide-pause-octagon"] = "rbxassetid://10734919143",
+                ["lucide-pen-tool"] = "rbxassetid://10734919503",
+                ["lucide-pencil"] = "rbxassetid://10734919691",
+                ["lucide-percent"] = "rbxassetid://10734919919",
+                ["lucide-person-standing"] = "rbxassetid://10734920149",
+                ["lucide-phone"] = "rbxassetid://10734921524",
+                ["lucide-phone-call"] = "rbxassetid://10734920305",
+                ["lucide-phone-forwarded"] = "rbxassetid://10734920508",
+                ["lucide-phone-incoming"] = "rbxassetid://10734920694",
+                ["lucide-phone-missed"] = "rbxassetid://10734920845",
+                ["lucide-phone-off"] = "rbxassetid://10734921077",
+                ["lucide-phone-outgoing"] = "rbxassetid://10734921288",
+                ["lucide-pie-chart"] = "rbxassetid://10734921727",
+                ["lucide-piggy-bank"] = "rbxassetid://10734921935",
+                ["lucide-pin"] = "rbxassetid://10734922324",
+                ["lucide-pin-off"] = "rbxassetid://10734922180",
+                ["lucide-pipette"] = "rbxassetid://10734922497",
+                ["lucide-pizza"] = "rbxassetid://10734922774",
+                ["lucide-plane"] = "rbxassetid://10734922971",
+                ["lucide-play"] = "rbxassetid://10734923549",
+                ["lucide-play-circle"] = "rbxassetid://10734923214",
+                ["lucide-plus"] = "rbxassetid://10734924532",
+                ["lucide-plus-circle"] = "rbxassetid://10734923868",
+                ["lucide-plus-square"] = "rbxassetid://10734924219",
+                ["lucide-podcast"] = "rbxassetid://10734929553",
+                ["lucide-pointer"] = "rbxassetid://10734929723",
+                ["lucide-pound-sterling"] = "rbxassetid://10734929981",
+                ["lucide-power"] = "rbxassetid://10734930466",
+                ["lucide-power-off"] = "rbxassetid://10734930257",
+                ["lucide-printer"] = "rbxassetid://10734930632",
+                ["lucide-puzzle"] = "rbxassetid://10734930886",
+                ["lucide-quote"] = "rbxassetid://10734931234",
+                ["lucide-radio"] = "rbxassetid://10734931596",
+                ["lucide-radio-receiver"] = "rbxassetid://10734931402",
+                ["lucide-rectangle-horizontal"] = "rbxassetid://10734931777",
+                ["lucide-rectangle-vertical"] = "rbxassetid://10734932081",
+                ["lucide-recycle"] = "rbxassetid://10734932295",
+                ["lucide-redo"] = "rbxassetid://10734932822",
+                ["lucide-redo-2"] = "rbxassetid://10734932586",
+                ["lucide-refresh-ccw"] = "rbxassetid://10734933056",
+                ["lucide-refresh-cw"] = "rbxassetid://10734933222",
+                ["lucide-refrigerator"] = "rbxassetid://10734933465",
+                ["lucide-regex"] = "rbxassetid://10734933655",
+                ["lucide-repeat"] = "rbxassetid://10734933966",
+                ["lucide-repeat-1"] = "rbxassetid://10734933826",
+                ["lucide-reply"] = "rbxassetid://10734934252",
+                ["lucide-reply-all"] = "rbxassetid://10734934132",
+                ["lucide-rewind"] = "rbxassetid://10734934347",
+                ["lucide-rocket"] = "rbxassetid://10734934585",
+                ["lucide-rocking-chair"] = "rbxassetid://10734939942",
+                ["lucide-rotate-3d"] = "rbxassetid://10734940107",
+                ["lucide-rotate-ccw"] = "rbxassetid://10734940376",
+                ["lucide-rotate-cw"] = "rbxassetid://10734940654",
+                ["lucide-rss"] = "rbxassetid://10734940825",
+                ["lucide-ruler"] = "rbxassetid://10734941018",
+                ["lucide-russian-ruble"] = "rbxassetid://10734941199",
+                ["lucide-sailboat"] = "rbxassetid://10734941354",
+                ["lucide-save"] = "rbxassetid://10734941499",
+                ["lucide-scale"] = "rbxassetid://10734941912",
+                ["lucide-scale-3d"] = "rbxassetid://10734941739",
+                ["lucide-scaling"] = "rbxassetid://10734942072",
+                ["lucide-scan"] = "rbxassetid://10734942565",
+                ["lucide-scan-face"] = "rbxassetid://10734942198",
+                ["lucide-scan-line"] = "rbxassetid://10734942351",
+                ["lucide-scissors"] = "rbxassetid://10734942778",
+                ["lucide-screen-share"] = "rbxassetid://10734943193",
+                ["lucide-screen-share-off"] = "rbxassetid://10734942967",
+                ["lucide-scroll"] = "rbxassetid://10734943448",
+                ["lucide-search"] = "rbxassetid://10734943674",
+                ["lucide-send"] = "rbxassetid://10734943902",
+                ["lucide-separator-horizontal"] = "rbxassetid://10734944115",
+                ["lucide-separator-vertical"] = "rbxassetid://10734944326",
+                ["lucide-server"] = "rbxassetid://10734949856",
+                ["lucide-server-cog"] = "rbxassetid://10734944444",
+                ["lucide-server-crash"] = "rbxassetid://10734944554",
+                ["lucide-server-off"] = "rbxassetid://10734944668",
+                ["lucide-settings"] = "rbxassetid://10734950309",
+                ["lucide-settings-2"] = "rbxassetid://10734950020",
+                ["lucide-share"] = "rbxassetid://10734950813",
+                ["lucide-share-2"] = "rbxassetid://10734950553",
+                ["lucide-sheet"] = "rbxassetid://10734951038",
+                ["lucide-shield"] = "rbxassetid://10734951847",
+                ["lucide-shield-alert"] = "rbxassetid://10734951173",
+                ["lucide-shield-check"] = "rbxassetid://10734951367",
+                ["lucide-shield-close"] = "rbxassetid://10734951535",
+                ["lucide-shield-off"] = "rbxassetid://10734951684",
+                ["lucide-shirt"] = "rbxassetid://10734952036",
+                ["lucide-shopping-bag"] = "rbxassetid://10734952273",
+                ["lucide-shopping-cart"] = "rbxassetid://10734952479",
+                ["lucide-shovel"] = "rbxassetid://10734952773",
+                ["lucide-shower-head"] = "rbxassetid://10734952942",
+                ["lucide-shrink"] = "rbxassetid://10734953073",
+                ["lucide-shrub"] = "rbxassetid://10734953241",
+                ["lucide-shuffle"] = "rbxassetid://10734953451",
+                ["lucide-sidebar"] = "rbxassetid://10734954301",
+                ["lucide-sidebar-close"] = "rbxassetid://10734953715",
+                ["lucide-sidebar-open"] = "rbxassetid://10734954000",
+                ["lucide-sigma"] = "rbxassetid://10734954538",
+                ["lucide-signal"] = "rbxassetid://10734961133",
+                ["lucide-signal-high"] = "rbxassetid://10734954807",
+                ["lucide-signal-low"] = "rbxassetid://10734955080",
+                ["lucide-signal-medium"] = "rbxassetid://10734955336",
+                ["lucide-signal-zero"] = "rbxassetid://10734960878",
+                ["lucide-siren"] = "rbxassetid://10734961284",
+                ["lucide-skip-back"] = "rbxassetid://10734961526",
+                ["lucide-skip-forward"] = "rbxassetid://10734961809",
+                ["lucide-skull"] = "rbxassetid://10734962068",
+                ["lucide-slack"] = "rbxassetid://10734962339",
+                ["lucide-slash"] = "rbxassetid://10734962600",
+                ["lucide-slice"] = "rbxassetid://10734963024",
+                ["lucide-sliders"] = "rbxassetid://10734963400",
+                ["lucide-sliders-horizontal"] = "rbxassetid://10734963191",
+                ["lucide-smartphone"] = "rbxassetid://10734963940",
+                ["lucide-smartphone-charging"] = "rbxassetid://10734963671",
+                ["lucide-smile"] = "rbxassetid://10734964441",
+                ["lucide-smile-plus"] = "rbxassetid://10734964188",
+                ["lucide-snowflake"] = "rbxassetid://10734964600",
+                ["lucide-sofa"] = "rbxassetid://10734964852",
+                ["lucide-sort-asc"] = "rbxassetid://10734965115",
+                ["lucide-sort-desc"] = "rbxassetid://10734965287",
+                ["lucide-speaker"] = "rbxassetid://10734965419",
+                ["lucide-sprout"] = "rbxassetid://10734965572",
+                ["lucide-square"] = "rbxassetid://10734965702",
+                ["lucide-star"] = "rbxassetid://10734966248",
+                ["lucide-star-half"] = "rbxassetid://10734965897",
+                ["lucide-star-off"] = "rbxassetid://10734966097",
+                ["lucide-stethoscope"] = "rbxassetid://10734966384",
+                ["lucide-sticker"] = "rbxassetid://10734972234",
+                ["lucide-sticky-note"] = "rbxassetid://10734972463",
+                ["lucide-stop-circle"] = "rbxassetid://10734972621",
+                ["lucide-stretch-horizontal"] = "rbxassetid://10734972862",
+                ["lucide-stretch-vertical"] = "rbxassetid://10734973130",
+                ["lucide-strikethrough"] = "rbxassetid://10734973290",
+                ["lucide-subscript"] = "rbxassetid://10734973457",
+                ["lucide-sun"] = "rbxassetid://10734974297",
+                ["lucide-sun-dim"] = "rbxassetid://10734973645",
+                ["lucide-sun-medium"] = "rbxassetid://10734973778",
+                ["lucide-sun-moon"] = "rbxassetid://10734973999",
+                ["lucide-sun-snow"] = "rbxassetid://10734974130",
+                ["lucide-sunrise"] = "rbxassetid://10734974522",
+                ["lucide-sunset"] = "rbxassetid://10734974689",
+                ["lucide-superscript"] = "rbxassetid://10734974850",
+                ["lucide-swiss-franc"] = "rbxassetid://10734975024",
+                ["lucide-switch-camera"] = "rbxassetid://10734975214",
+                ["lucide-sword"] = "rbxassetid://10734975486",
+                ["lucide-swords"] = "rbxassetid://10734975692",
+                ["lucide-syringe"] = "rbxassetid://10734975932",
+                ["lucide-table"] = "rbxassetid://10734976230",
+                ["lucide-table-2"] = "rbxassetid://10734976097",
+                ["lucide-tablet"] = "rbxassetid://10734976394",
+                ["lucide-tag"] = "rbxassetid://10734976528",
+                ["lucide-tags"] = "rbxassetid://10734976739",
+                ["lucide-target"] = "rbxassetid://10734977012",
+                ["lucide-tent"] = "rbxassetid://10734981750",
+                ["lucide-terminal"] = "rbxassetid://10734982144",
+                ["lucide-terminal-square"] = "rbxassetid://10734981995",
+                ["lucide-text-cursor"] = "rbxassetid://10734982395",
+                ["lucide-text-cursor-input"] = "rbxassetid://10734982297",
+                ["lucide-thermometer"] = "rbxassetid://10734983134",
+                ["lucide-thermometer-snowflake"] = "rbxassetid://10734982571",
+                ["lucide-thermometer-sun"] = "rbxassetid://10734982771",
+                ["lucide-thumbs-down"] = "rbxassetid://10734983359",
+                ["lucide-thumbs-up"] = "rbxassetid://10734983629",
+                ["lucide-ticket"] = "rbxassetid://10734983868",
+                ["lucide-timer"] = "rbxassetid://10734984606",
+                ["lucide-timer-off"] = "rbxassetid://10734984138",
+                ["lucide-timer-reset"] = "rbxassetid://10734984355",
+                ["lucide-toggle-left"] = "rbxassetid://10734984834",
+                ["lucide-toggle-right"] = "rbxassetid://10734985040",
+                ["lucide-tornado"] = "rbxassetid://10734985247",
+                ["lucide-toy-brick"] = "rbxassetid://10747361919",
+                ["lucide-train"] = "rbxassetid://10747362105",
+                ["lucide-trash"] = "rbxassetid://10747362393",
+                ["lucide-trash-2"] = "rbxassetid://10747362241",
+                ["lucide-tree-deciduous"] = "rbxassetid://10747362534",
+                ["lucide-tree-pine"] = "rbxassetid://10747362748",
+                ["lucide-trees"] = "rbxassetid://10747363016",
+                ["lucide-trending-down"] = "rbxassetid://10747363205",
+                ["lucide-trending-up"] = "rbxassetid://10747363465",
+                ["lucide-triangle"] = "rbxassetid://10747363621",
+                ["lucide-trophy"] = "rbxassetid://10747363809",
+                ["lucide-truck"] = "rbxassetid://10747364031",
+                ["lucide-tv"] = "rbxassetid://10747364593",
+                ["lucide-tv-2"] = "rbxassetid://10747364302",
+                ["lucide-type"] = "rbxassetid://10747364761",
+                ["lucide-umbrella"] = "rbxassetid://10747364971",
+                ["lucide-underline"] = "rbxassetid://10747365191",
+                ["lucide-undo"] = "rbxassetid://10747365484",
+                ["lucide-undo-2"] = "rbxassetid://10747365359",
+                ["lucide-unlink"] = "rbxassetid://10747365771",
+                ["lucide-unlink-2"] = "rbxassetid://10747397871",
+                ["lucide-unlock"] = "rbxassetid://10747366027",
+                ["lucide-upload"] = "rbxassetid://10747366434",
+                ["lucide-upload-cloud"] = "rbxassetid://10747366266",
+                ["lucide-usb"] = "rbxassetid://10747366606",
+                ["lucide-user"] = "rbxassetid://10747373176",
+                ["lucide-user-check"] = "rbxassetid://10747371901",
+                ["lucide-user-cog"] = "rbxassetid://10747372167",
+                ["lucide-user-minus"] = "rbxassetid://10747372346",
+                ["lucide-user-plus"] = "rbxassetid://10747372702",
+                ["lucide-user-x"] = "rbxassetid://10747372992",
+                ["lucide-users"] = "rbxassetid://10747373426",
+                ["lucide-utensils"] = "rbxassetid://10747373821",
+                ["lucide-utensils-crossed"] = "rbxassetid://10747373629",
+                ["lucide-venetian-mask"] = "rbxassetid://10747374003",
+                ["lucide-verified"] = "rbxassetid://10747374131",
+                ["lucide-vibrate"] = "rbxassetid://10747374489",
+                ["lucide-vibrate-off"] = "rbxassetid://10747374269",
+                ["lucide-video"] = "rbxassetid://10747374938",
+                ["lucide-video-off"] = "rbxassetid://10747374721",
+                ["lucide-view"] = "rbxassetid://10747375132",
+                ["lucide-voicemail"] = "rbxassetid://10747375281",
+                ["lucide-volume"] = "rbxassetid://10747376008",
+                ["lucide-volume-1"] = "rbxassetid://10747375450",
+                ["lucide-volume-2"] = "rbxassetid://10747375679",
+                ["lucide-volume-x"] = "rbxassetid://10747375880",
+                ["lucide-wallet"] = "rbxassetid://10747376205",
+                ["lucide-wand"] = "rbxassetid://10747376565",
+                ["lucide-wand-2"] = "rbxassetid://10747376349",
+                ["lucide-watch"] = "rbxassetid://10747376722",
+                ["lucide-waves"] = "rbxassetid://10747376931",
+                ["lucide-webcam"] = "rbxassetid://10747381992",
+                ["lucide-wifi"] = "rbxassetid://10747382504",
+                ["lucide-wifi-off"] = "rbxassetid://10747382268",
+                ["lucide-wind"] = "rbxassetid://10747382750",
+                ["lucide-wrap-text"] = "rbxassetid://10747383065",
+                ["lucide-wrench"] = "rbxassetid://10747383470",
+                ["lucide-x"] = "rbxassetid://10747384394",
+                ["lucide-x-circle"] = "rbxassetid://10747383819",
+                ["lucide-x-octagon"] = "rbxassetid://10747384037",
+                ["lucide-x-square"] = "rbxassetid://10747384217",
+                ["lucide-zoom-in"] = "rbxassetid://10747384552",
+                ["lucide-zoom-out"] = "rbxassetid://10747384679"
+            }
+        }
+    end,
+    [30] = function()
+        local aa, ab, ac, ad, ae = b(30)
+        local af = {
+            SingleMotor = ac(ab.SingleMotor),
+            GroupMotor = ac(ab.GroupMotor),
+            Instant = ac(ab.Instant),
+            Linear = ac(ab.Linear),
+            Spring = ac(ab.Spring),
+            isMotor = ac(ab.isMotor)
+        }
+        return af
+    end,
+    [31] = function()
+        local aa, ab, ac, ad, ae = b(31)
+        local af, ag, ah, ai = game:GetService "RunService", ac(ab.Parent.Signal), function()
+            end, {}
+        ai.__index = ai
+        function ai.new()
+            return setmetatable({_onStep = ag.new(), _onStart = ag.new(), _onComplete = ag.new()}, ai)
+        end
+        function ai.onStep(aj, c)
+            return aj._onStep:connect(c)
+        end
+        function ai.onStart(aj, c)
+            return aj._onStart:connect(c)
+        end
+        function ai.onComplete(aj, c)
+            return aj._onComplete:connect(c)
+        end
+        function ai.start(aj)
+            if not aj._connection then
+                aj._connection =
+                    af.RenderStepped:Connect(
+                    function(c)
+                        aj:step(c)
+                    end
+                )
+            end
+        end
+        function ai.stop(aj)
+            if aj._connection then
+                aj._connection:Disconnect()
+                aj._connection = nil
+            end
+        end
+        ai.destroy = ai.stop
+        ai.step = ah
+        ai.getValue = ah
+        ai.setGoal = ah
+        function ai.__tostring(aj)
+            return "Motor"
+        end
+        return ai
+    end,
+    [33] = function()
+        local aa, ab, ac, ad, ae = b(33)
+        local af, ag, ah = ac(ab.Parent.BaseMotor), ac(ab.Parent.SingleMotor), ac(ab.Parent.isMotor)
+        local ai = setmetatable({}, af)
+        ai.__index = ai
+        local aj = function(aj)
+            if ah(aj) then
+                return aj
+            end
+            local c = typeof(aj)
+            if c == "number" then
+                return ag.new(aj, false)
+            elseif c == "table" then
+                return ai.new(aj, false)
+            end
+            error(("Unable to convert %q to motor; type %s is unsupported"):format(aj, c), 2)
+        end
+        function ai.new(c, d)
+            assert(c, "Missing argument #1: initialValues")
+            assert(typeof(c) == "table", "initialValues must be a table!")
+            assert(
+                not c.step,
+                [[initialValues contains disallowed property "step". Did you mean to put a table of values here?]]
+            )
+            local e = setmetatable(af.new(), ai)
+            if d ~= nil then
+                e._useImplicitConnections = d
+            else
+                e._useImplicitConnections = true
+            end
+            e._complete = true
+            e._motors = {}
+            for f, g in pairs(c) do
+                e._motors[f] = aj(g)
+            end
+            return e
+        end
+        function ai.step(c, d)
+            if c._complete then
+                return true
+            end
+            local e = true
+            for f, g in pairs(c._motors) do
+                local h = g:step(d)
+                if not h then
+                    e = false
+                end
+            end
+            c._onStep:fire(c:getValue())
+            if e then
+                if c._useImplicitConnections then
+                    c:stop()
+                end
+                c._complete = true
+                c._onComplete:fire()
+            end
+            return e
+        end
+        function ai.setGoal(c, d)
+            assert(
+                not d.step,
+                [[goals contains disallowed property "step". Did you mean to put a table of goals here?]]
+            )
+            c._complete = false
+            c._onStart:fire()
+            for e, f in pairs(d) do
+                local g = assert(c._motors[e], ("Unknown motor for key %s"):format(e))
+                g:setGoal(f)
+            end
+            if c._useImplicitConnections then
+                c:start()
+            end
+        end
+        function ai.getValue(c)
+            local d = {}
+            for e, f in pairs(c._motors) do
+                d[e] = f:getValue()
+            end
+            return d
+        end
+        function ai.__tostring(c)
+            return "Motor(Group)"
+        end
+        return ai
+    end,
+    [35] = function()
+        local aa, ab, ac, ad, ae = b(35)
+        local af = {}
+        af.__index = af
+        function af.new(ag)
+            return setmetatable({_targetValue = ag}, af)
+        end
+        function af.step(ag)
+            return {complete = true, value = ag._targetValue}
+        end
+        return af
+    end,
+    [37] = function()
+        local aa, ab, ac, ad, ae = b(37)
+        local af = {}
+        af.__index = af
+        function af.new(ag, ah)
+            assert(ag, "Missing argument #1: targetValue")
+            ah = ah or {}
+            return setmetatable({_targetValue = ag, _velocity = ah.velocity or 1}, af)
+        end
+        function af.step(ag, ah, ai)
+            local aj, c, d = ah.value, ag._velocity, ag._targetValue
+            local e = ai * c
+            local f = e >= math.abs(d - aj)
+            aj = aj + e * (d > aj and 1 or -1)
+            if f then
+                aj = ag._targetValue
+                c = 0
+            end
+            return {complete = f, value = aj, velocity = c}
+        end
+        return af
+    end,
+    [39] = function()
+        local aa, ab, ac, ad, ae = b(39)
+        local af = {}
+        af.__index = af
+        function af.new(ag, ah)
+            return setmetatable({signal = ag, connected = true, _handler = ah}, af)
+        end
+        function af.disconnect(ag)
+            if ag.connected then
+                ag.connected = false
+                for ah, ai in pairs(ag.signal._connections) do
+                    if ai == ag then
+                        table.remove(ag.signal._connections, ah)
+                        return
+                    end
+                end
+            end
+        end
+        local ag = {}
+        ag.__index = ag
+        function ag.new()
+            return setmetatable({_connections = {}, _threads = {}}, ag)
+        end
+        function ag.fire(ah, ...)
+            for ai, aj in pairs(ah._connections) do
+                aj._handler(...)
+            end
+            for c, d in pairs(ah._threads) do
+                coroutine.resume(d, ...)
+            end
+            ah._threads = {}
+        end
+        function ag.connect(ah, aj)
+            local c = af.new(ah, aj)
+            table.insert(ah._connections, c)
+            return c
+        end
+        function ag.wait(ah)
+            table.insert(ah._threads, coroutine.running())
+            return coroutine.yield()
+        end
+        return ag
+    end,
+    [41] = function()
+        local aa, ab, ac, ad, ae = b(41)
+        local af = ac(ab.Parent.BaseMotor)
+        local ag = setmetatable({}, af)
+        ag.__index = ag
+        function ag.new(ah, aj)
+            assert(ah, "Missing argument #1: initialValue")
+            assert(typeof(ah) == "number", "initialValue must be a number!")
+            local c = setmetatable(af.new(), ag)
+            if aj ~= nil then
+                c._useImplicitConnections = aj
+            else
+                c._useImplicitConnections = true
+            end
+            c._goal = nil
+            c._state = {complete = true, value = ah}
+            return c
+        end
+        function ag.step(ah, aj)
+            if ah._state.complete then
+                return true
+            end
+            local c = ah._goal:step(ah._state, aj)
+            ah._state = c
+            ah._onStep:fire(c.value)
+            if c.complete then
+                if ah._useImplicitConnections then
+                    ah:stop()
+                end
+                ah._onComplete:fire()
+            end
+            return c.complete
+        end
+        function ag.getValue(ah)
+            return ah._state.value
+        end
+        function ag.setGoal(ah, aj)
+            ah._state.complete = false
+            ah._goal = aj
+            ah._onStart:fire()
+            if ah._useImplicitConnections then
+                ah:start()
+            end
+        end
+        function ag.__tostring(ah)
+            return "Motor(Single)"
+        end
+        return ag
+    end,
+    [43] = function()
+        local aa, ab, ac, ad, ae = b(43)
+        local af, ag, ah, aj = 0.005, 0.005, 0.0001, {}
+        aj.__index = aj
+        function aj.new(c, d)
+            assert(c, "Missing argument #1: targetValue")
+            d = d or {}
+            return setmetatable(
+                {_targetValue = c, _frequency = d.frequency or 4, _dampingRatio = d.dampingRatio or 1},
+                aj
+            )
+        end
+        function aj.step(c, d, e)
+            local f, g, h, i, j = c._dampingRatio, c._frequency * 2 * math.pi, c._targetValue, d.value, d.velocity or 0
+            local k, l, m, n = i - h, (math.exp(-f * g * e))
+            if f == 1 then
+                m = (k * (1 + g * e) + j * e) * l + h
+                n = (j * (1 - g * e) - k * (g * g * e)) * l
+            elseif f < 1 then
+                local o = math.sqrt(1 - f * f)
+                local p, s, t = math.cos(g * o * e), (math.sin(g * o * e))
+                if o > ah then
+                    t = s / o
+                else
+                    local u = e * g
+                    t = u + ((u * u) * (o * o) * (o * o) / 20 - o * o) * (u * u * u) / 6
+                end
+                local u
+                if g * o > ah then
+                    u = s / (g * o)
+                else
+                    local v = g * o
+                    u = e + ((e * e) * (v * v) * (v * v) / 20 - v * v) * (e * e * e) / 6
+                end
+                m = (k * (p + f * t) + j * u) * l + h
+                n = (j * (p - t * f) - k * (t * g)) * l
+            else
+                local o = math.sqrt(f * f - 1)
+                local p, s = -g * (f - o), -g * (f + o)
+                local t = (j - k * p) / (2 * g * o)
+                local u = k - t
+                local v, w = u * math.exp(p * e), t * math.exp(s * e)
+                m = v + w + h
+                n = v * p + w * s
+            end
+            local o = math.abs(n) < af and math.abs(m - h) < ag
+            return {complete = o, value = o and h or m, velocity = n}
+        end
+        return aj
+    end,
+    [45] = function()
+        local aa, ab, ac, ad, ae = b(45)
+        local af = function(af)
+            local ag = tostring(af):match "^Motor%((.+)%)$"
+            if ag then
+                return true, ag
+            else
+                return false
+            end
+        end
+        return af
+    end,
+    [47] = function()
+        local af = {
+            Names = {
+                "Cloudy", "Emerald", "HUT RI 81", "Blood Red", "Rimuru Tempest", "Solar", "Neko"
+            }
+        }
+
+        af["Cloudy"] = {
+            Name = "Cloudy",
+            Accent = Color3.fromRGB(220, 225, 232),
+            Background = "rbxassetid://125037768754460",
+            BackgroundTransparency = 0.68,
+            AcrylicMain = Color3.fromRGB(18, 20, 24),
+            AcrylicBorder = Color3.fromRGB(140, 145, 155),
+            AcrylicGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 225, 232)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(48, 52, 60))
+            }),
+            AcrylicNoise = 1,
+            TitleBarLine = Color3.fromRGB(110, 115, 125),
+            Tab = Color3.fromRGB(22, 24, 28),
+            Element = Color3.fromRGB(20, 22, 26),
+            ElementBorder = Color3.fromRGB(80, 85, 95),
+            InElementBorder = Color3.fromRGB(130, 135, 145),
+            ElementTransparency = 0.4,
+            ToggleSlider = Color3.fromRGB(35, 38, 45),
+            ToggleToggled = Color3.fromRGB(215, 220, 228),
+            SliderRail = Color3.fromRGB(35, 38, 45),
+            DropdownFrame = Color3.fromRGB(22, 24, 28),
+            DropdownHolder = Color3.fromRGB(16, 18, 22),
+            DropdownBorder = Color3.fromRGB(100, 105, 115),
+            DropdownOption = Color3.fromRGB(26, 28, 34),
+            Keybind = Color3.fromRGB(26, 28, 34),
+            Input = Color3.fromRGB(22, 24, 28),
+            InputFocused = Color3.fromRGB(12, 14, 18),
+            InputIndicator = Color3.fromRGB(215, 220, 228),
+            InputIndicatorFocus = Color3.fromRGB(240, 242, 248),
+            Dialog = Color3.fromRGB(22, 24, 28),
+            DialogHolder = Color3.fromRGB(16, 18, 22),
+            DialogHolderLine = Color3.fromRGB(100, 105, 115),
+            DialogButton = Color3.fromRGB(20, 22, 26),
+            DialogButtonBorder = Color3.fromRGB(130, 135, 145),
+            DialogBorder = Color3.fromRGB(100, 105, 115),
+            DialogInput = Color3.fromRGB(26, 28, 34),
+            DialogInputLine = Color3.fromRGB(215, 220, 228),
+            Text = Color3.fromRGB(245, 245, 250),
+            SubText = Color3.fromRGB(175, 180, 190),
+            Hover = Color3.fromRGB(90, 95, 105),
+            HoverChange = 0.05,
+            ShineEnabled = true,
+            Shine = {
+                Speed = 0.5,
+                RotationSpeed = 25,
+                ColorSequence = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(55, 60, 70)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(215, 220, 228)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(55, 60, 70))
+                })
+            },
+            StrokeShine = true,
+            StrokeDark = Color3.fromRGB(75, 80, 90),
+            ButtonGradient = {
+                Background = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(185, 190, 200)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(32, 35, 42))
+                }),
+                Stroke = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(235, 238, 245)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(170, 175, 185)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 105, 115))
+                })
+            },
+            ThemeAccentColors = { Color3.fromRGB(220, 225, 232), Color3.fromRGB(150, 155, 165) },
+            TitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(240, 242, 248)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(180, 185, 195)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(110, 115, 125))
+            }),
+            SubTitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(225, 228, 235)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(165, 170, 180)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(95, 100, 110))
+            }),
+        }
+
+        af["Emerald"] = {
+            Name = "Emerald",
+            Accent = Color3.fromRGB(16, 160, 95),
+            Background = "rbxassetid://100391623230690",
+            BackgroundTransparency = 0.68,
+            AcrylicMain = Color3.fromRGB(8, 16, 11),
+            AcrylicBorder = Color3.fromRGB(14, 120, 70),
+            AcrylicGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(6, 16, 11)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 115, 65))
+            }),
+            AcrylicNoise = 1,
+            TitleBarLine = Color3.fromRGB(12, 100, 55),
+            Tab = Color3.fromRGB(10, 22, 14),
+            Element = Color3.fromRGB(12, 24, 16),
+            ElementBorder = Color3.fromRGB(10, 90, 50),
+            InElementBorder = Color3.fromRGB(14, 120, 70),
+            ElementTransparency = 0.4,
+            ToggleSlider = Color3.fromRGB(18, 36, 24),
+            ToggleToggled = Color3.fromRGB(16, 160, 95),
+            SliderRail = Color3.fromRGB(18, 36, 24),
+            DropdownFrame = Color3.fromRGB(10, 22, 14),
+            DropdownHolder = Color3.fromRGB(8, 16, 11),
+            DropdownBorder = Color3.fromRGB(12, 100, 55),
+            DropdownOption = Color3.fromRGB(14, 28, 18),
+            Keybind = Color3.fromRGB(14, 28, 18),
+            Input = Color3.fromRGB(10, 22, 14),
+            InputFocused = Color3.fromRGB(4, 12, 8),
+            InputIndicator = Color3.fromRGB(16, 160, 95),
+            InputIndicatorFocus = Color3.fromRGB(20, 180, 105),
+            Dialog = Color3.fromRGB(10, 22, 14),
+            DialogHolder = Color3.fromRGB(8, 16, 11),
+            DialogHolderLine = Color3.fromRGB(12, 100, 55),
+            DialogButton = Color3.fromRGB(12, 24, 16),
+            DialogButtonBorder = Color3.fromRGB(14, 120, 70),
+            DialogBorder = Color3.fromRGB(12, 100, 55),
+            DialogInput = Color3.fromRGB(14, 28, 18),
+            DialogInputLine = Color3.fromRGB(16, 160, 95),
+            Text = Color3.fromRGB(255, 255, 255),
+            SubText = Color3.fromRGB(200, 225, 210),
+            Hover = Color3.fromRGB(12, 100, 55),
+            HoverChange = 0.05,
+            ShineEnabled = true,
+            Shine = { Speed = 0.5, RotationSpeed = 25, ColorSequence = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 30, 18)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(16, 160, 95)), ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 30, 18)) }) },
+            StrokeShine = true,
+            StrokeDark = Color3.fromRGB(10, 90, 50),
+            ButtonGradient = { Background = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 200, 100)), ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 30, 16)) }), Stroke = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 230, 118)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 150)), ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 200, 100)) }) },
+            ThemeAccentColors = { Color3.fromRGB(0, 230, 118) },
+            TitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 136)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(77, 238, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+            }),
+            SubTitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(64, 224, 155)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 180, 100))
+            }),
+        }
+
+        af["HUT RI 81"] = {
+            Name = "HUT RI 81",
+            Accent = Color3.fromRGB(220, 20, 30),
+            Background = "rbxassetid://72205077312597",
+            BackgroundTransparency = 0.68,
+            AcrylicMain = Color3.fromRGB(160, 16, 24),
+            AcrylicBorder = Color3.fromRGB(220, 30, 40),
+            AcrylicGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 20, 30)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(245, 245, 250))
+            }),
+            AcrylicNoise = 1,
+            TitleBarLine = Color3.fromRGB(220, 30, 40),
+            Tab = Color3.fromRGB(40, 8, 12),
+            Element = Color3.fromRGB(30, 10, 14),
+            ElementBorder = Color3.fromRGB(180, 20, 30),
+            InElementBorder = Color3.fromRGB(220, 30, 40),
+            ElementTransparency = 0.35,
+            ToggleSlider = Color3.fromRGB(50, 15, 20),
+            ToggleToggled = Color3.fromRGB(220, 20, 30),
+            SliderRail = Color3.fromRGB(50, 15, 20),
+            DropdownFrame = Color3.fromRGB(40, 10, 15),
+            DropdownHolder = Color3.fromRGB(25, 8, 12),
+            DropdownBorder = Color3.fromRGB(200, 25, 35),
+            DropdownOption = Color3.fromRGB(45, 12, 18),
+            Keybind = Color3.fromRGB(45, 12, 18),
+            Input = Color3.fromRGB(35, 10, 15),
+            InputFocused = Color3.fromRGB(20, 5, 8),
+            InputIndicator = Color3.fromRGB(220, 20, 30),
+            InputIndicatorFocus = Color3.fromRGB(255, 40, 50),
+            Dialog = Color3.fromRGB(40, 10, 15),
+            DialogHolder = Color3.fromRGB(25, 8, 12),
+            DialogHolderLine = Color3.fromRGB(200, 25, 35),
+            DialogButton = Color3.fromRGB(35, 10, 15),
+            DialogButtonBorder = Color3.fromRGB(220, 30, 40),
+            DialogBorder = Color3.fromRGB(200, 25, 35),
+            DialogInput = Color3.fromRGB(45, 12, 18),
+            DialogInputLine = Color3.fromRGB(220, 20, 30),
+            Text = Color3.fromRGB(255, 255, 255),
+            SubText = Color3.fromRGB(235, 210, 215),
+            Hover = Color3.fromRGB(200, 25, 35),
+            HoverChange = 0.05,
+            ShineEnabled = true,
+            Shine = {
+                Speed = 0.5,
+                RotationSpeed = 25,
+                ColorSequence = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 20, 30)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 20, 30))
+                })
+            },
+            StrokeShine = true,
+            StrokeDark = Color3.fromRGB(180, 20, 30),
+            ButtonGradient = {
+                Background = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 20, 30)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(245, 245, 250))
+                }),
+                Stroke = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 40, 50)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 40, 50))
+                })
+            },
+            ThemeAccentColors = { Color3.fromRGB(220, 20, 30), Color3.fromRGB(255, 255, 255) },
+            TitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 30, 45)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 140, 150)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+            }),
+            SubTitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 170, 175)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(230, 30, 45))
+            }),
+        }
+
+        af["Blood Red"] = {
+            Name = "Blood Red",
+            Accent = Color3.fromRGB(200, 20, 30),
+            Background = "rbxassetid://121343473918667",
+            BackgroundTransparency = 0.68,
+            AcrylicMain = Color3.fromRGB(25, 5, 8),
+            AcrylicBorder = Color3.fromRGB(140, 15, 20),
+            AcrylicGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(130, 12, 20)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(28, 5, 8))
+            }),
+            AcrylicNoise = 1,
+            TitleBarLine = Color3.fromRGB(120, 10, 15),
+            Tab = Color3.fromRGB(35, 6, 10),
+            Element = Color3.fromRGB(28, 5, 8),
+            ElementBorder = Color3.fromRGB(100, 10, 15),
+            InElementBorder = Color3.fromRGB(140, 15, 20),
+            ElementTransparency = 0.4,
+            ToggleSlider = Color3.fromRGB(45, 8, 12),
+            ToggleToggled = Color3.fromRGB(200, 20, 30),
+            SliderRail = Color3.fromRGB(45, 8, 12),
+            DropdownFrame = Color3.fromRGB(35, 6, 10),
+            DropdownHolder = Color3.fromRGB(25, 5, 8),
+            DropdownBorder = Color3.fromRGB(120, 10, 15),
+            DropdownOption = Color3.fromRGB(40, 8, 12),
+            Keybind = Color3.fromRGB(40, 8, 12),
+            Input = Color3.fromRGB(35, 6, 10),
+            InputFocused = Color3.fromRGB(18, 3, 5),
+            InputIndicator = Color3.fromRGB(200, 20, 30),
+            InputIndicatorFocus = Color3.fromRGB(230, 40, 50),
+            Dialog = Color3.fromRGB(35, 6, 10),
+            DialogHolder = Color3.fromRGB(25, 5, 8),
+            DialogHolderLine = Color3.fromRGB(120, 10, 15),
+            DialogButton = Color3.fromRGB(28, 5, 8),
+            DialogButtonBorder = Color3.fromRGB(140, 15, 20),
+            DialogBorder = Color3.fromRGB(120, 10, 15),
+            DialogInput = Color3.fromRGB(40, 8, 12),
+            DialogInputLine = Color3.fromRGB(200, 20, 30),
+            Text = Color3.fromRGB(255, 255, 255),
+            SubText = Color3.fromRGB(225, 200, 205),
+            Hover = Color3.fromRGB(120, 10, 15),
+            HoverChange = 0.05,
+            ShineEnabled = true,
+            Shine = { Speed = 0.5, RotationSpeed = 25, ColorSequence = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 8, 12)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 20, 30)), ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 8, 12)) }) },
+            StrokeShine = true,
+            StrokeDark = Color3.fromRGB(100, 10, 15),
+            ButtonGradient = { Background = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 15, 25)), ColorSequenceKeypoint.new(1, Color3.fromRGB(28, 5, 8)) }), Stroke = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 20, 30)), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 50, 60)), ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 20, 30)) }) },
+            ThemeAccentColors = { Color3.fromRGB(200, 20, 30) },
+            TitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 35, 50)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 110, 80)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 215, 215))
+            }),
+            SubTitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 210, 210)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(240, 50, 65)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 10, 20))
+            }),
+        }
+
+        af["Rimuru Tempest"] = {
+            Name = "Rimuru Tempest",
+            Accent = Color3.fromRGB(0, 195, 255),
+            Background = "rbxassetid://133652514200333",
+            BackgroundTransparency = 0.68,
+            AcrylicMain = Color3.fromRGB(8, 18, 32),
+            AcrylicBorder = Color3.fromRGB(0, 140, 230),
+            AcrylicGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 210, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 50, 130))
+            }),
+            AcrylicNoise = 1,
+            TitleBarLine = Color3.fromRGB(0, 140, 230),
+            Tab = Color3.fromRGB(10, 24, 42),
+            Element = Color3.fromRGB(12, 28, 48),
+            ElementBorder = Color3.fromRGB(0, 120, 210),
+            InElementBorder = Color3.fromRGB(0, 160, 255),
+            ElementTransparency = 0.4,
+            ToggleSlider = Color3.fromRGB(16, 36, 60),
+            ToggleToggled = Color3.fromRGB(0, 195, 255),
+            SliderRail = Color3.fromRGB(16, 36, 60),
+            DropdownFrame = Color3.fromRGB(10, 24, 42),
+            DropdownHolder = Color3.fromRGB(8, 18, 32),
+            DropdownBorder = Color3.fromRGB(0, 140, 230),
+            DropdownOption = Color3.fromRGB(14, 32, 54),
+            Keybind = Color3.fromRGB(14, 32, 54),
+            Input = Color3.fromRGB(10, 24, 42),
+            InputFocused = Color3.fromRGB(4, 12, 22),
+            InputIndicator = Color3.fromRGB(0, 195, 255),
+            InputIndicatorFocus = Color3.fromRGB(60, 225, 255),
+            Dialog = Color3.fromRGB(10, 24, 42),
+            DialogHolder = Color3.fromRGB(8, 18, 32),
+            DialogHolderLine = Color3.fromRGB(0, 140, 230),
+            DialogButton = Color3.fromRGB(12, 28, 48),
+            DialogButtonBorder = Color3.fromRGB(0, 160, 255),
+            DialogBorder = Color3.fromRGB(0, 140, 230),
+            DialogInput = Color3.fromRGB(14, 32, 54),
+            DialogInputLine = Color3.fromRGB(0, 195, 255),
+            Text = Color3.fromRGB(255, 255, 255),
+            SubText = Color3.fromRGB(200, 230, 255),
+            Hover = Color3.fromRGB(0, 140, 230),
+            HoverChange = 0.05,
+            ShineEnabled = true,
+            Shine = {
+                Speed = 0.5,
+                RotationSpeed = 25,
+                ColorSequence = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 210, 255)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 60, 150)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 210, 255))
+                })
+            },
+            StrokeShine = true,
+            StrokeDark = Color3.fromRGB(0, 110, 200),
+            ButtonGradient = {
+                Background = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 210, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 60, 150))
+                }),
+                Stroke = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 230, 255)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 140, 230))
+                })
+            },
+            ThemeAccentColors = { Color3.fromRGB(0, 195, 255) },
+            TitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 235, 255)),
+                ColorSequenceKeypoint.new(0.45, Color3.fromRGB(35, 160, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 80, 200))
+            }),
+            SubTitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(175, 240, 255)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 170, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 60, 160))
+            }),
+        }
+
+        af["Solar"] = {
+            Name = "Solar",
+            Accent = Color3.fromRGB(255, 200, 20),
+            Background = "rbxassetid://83078153431765",
+            BackgroundTransparency = 0.68,
+            AcrylicMain = Color3.fromRGB(24, 18, 6),
+            AcrylicBorder = Color3.fromRGB(180, 130, 20),
+            AcrylicGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 215, 30)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 50, 5))
+            }),
+            AcrylicNoise = 1,
+            TitleBarLine = Color3.fromRGB(180, 130, 20),
+            Tab = Color3.fromRGB(32, 24, 8),
+            Element = Color3.fromRGB(26, 20, 7),
+            ElementBorder = Color3.fromRGB(150, 110, 15),
+            InElementBorder = Color3.fromRGB(200, 150, 25),
+            ElementTransparency = 0.4,
+            ToggleSlider = Color3.fromRGB(45, 34, 10),
+            ToggleToggled = Color3.fromRGB(255, 200, 20),
+            SliderRail = Color3.fromRGB(45, 34, 10),
+            DropdownFrame = Color3.fromRGB(32, 24, 8),
+            DropdownHolder = Color3.fromRGB(20, 15, 5),
+            DropdownBorder = Color3.fromRGB(180, 130, 20),
+            DropdownOption = Color3.fromRGB(38, 28, 9),
+            Keybind = Color3.fromRGB(38, 28, 9),
+            Input = Color3.fromRGB(30, 22, 7),
+            InputFocused = Color3.fromRGB(16, 12, 4),
+            InputIndicator = Color3.fromRGB(255, 200, 20),
+            InputIndicatorFocus = Color3.fromRGB(255, 235, 80),
+            Dialog = Color3.fromRGB(32, 24, 8),
+            DialogHolder = Color3.fromRGB(20, 15, 5),
+            DialogHolderLine = Color3.fromRGB(180, 130, 20),
+            DialogButton = Color3.fromRGB(26, 20, 7),
+            DialogButtonBorder = Color3.fromRGB(200, 150, 25),
+            DialogBorder = Color3.fromRGB(180, 130, 20),
+            DialogInput = Color3.fromRGB(38, 28, 9),
+            DialogInputLine = Color3.fromRGB(255, 200, 20),
+            Text = Color3.fromRGB(255, 255, 255),
+            SubText = Color3.fromRGB(245, 230, 195),
+            Hover = Color3.fromRGB(180, 130, 20),
+            HoverChange = 0.05,
+            ShineEnabled = true,
+            Shine = {
+                Speed = 0.5,
+                RotationSpeed = 25,
+                ColorSequence = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 230, 50)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(120, 80, 10)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 230, 50))
+                })
+            },
+            StrokeShine = true,
+            StrokeDark = Color3.fromRGB(150, 110, 15),
+            ButtonGradient = {
+                Background = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 215, 40)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 40, 5))
+                }),
+                Stroke = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 240, 80)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 150, 25))
+                })
+            },
+            ThemeAccentColors = { Color3.fromRGB(255, 200, 20) },
+            TitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 245, 60)),
+                ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 185, 25)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(190, 125, 10))
+            }),
+            SubTitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 180)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 210, 40)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 95, 5))
+            }),
+        }
+
+        af["Neko"] = {
+            Name = "Neko",
+            Accent = Color3.fromRGB(255, 105, 180),
+            Background = "rbxassetid://111901135222937",
+            BackgroundTransparency = 0.68,
+            AcrylicMain = Color3.fromRGB(28, 12, 22),
+            AcrylicBorder = Color3.fromRGB(230, 90, 165),
+            AcrylicGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 110, 185)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 20, 50))
+            }),
+            AcrylicNoise = 1,
+            TitleBarLine = Color3.fromRGB(230, 90, 165),
+            Tab = Color3.fromRGB(36, 15, 28),
+            Element = Color3.fromRGB(30, 14, 24),
+            ElementBorder = Color3.fromRGB(190, 70, 135),
+            InElementBorder = Color3.fromRGB(240, 110, 180),
+            ElementTransparency = 0.4,
+            ToggleSlider = Color3.fromRGB(50, 22, 40),
+            ToggleToggled = Color3.fromRGB(255, 105, 180),
+            SliderRail = Color3.fromRGB(50, 22, 40),
+            DropdownFrame = Color3.fromRGB(36, 15, 28),
+            DropdownHolder = Color3.fromRGB(24, 10, 18),
+            DropdownBorder = Color3.fromRGB(230, 90, 165),
+            DropdownOption = Color3.fromRGB(44, 18, 34),
+            Keybind = Color3.fromRGB(44, 18, 34),
+            Input = Color3.fromRGB(34, 14, 26),
+            InputFocused = Color3.fromRGB(18, 6, 14),
+            InputIndicator = Color3.fromRGB(255, 105, 180),
+            InputIndicatorFocus = Color3.fromRGB(255, 160, 215),
+            Dialog = Color3.fromRGB(36, 15, 28),
+            DialogHolder = Color3.fromRGB(24, 10, 18),
+            DialogHolderLine = Color3.fromRGB(230, 90, 165),
+            DialogButton = Color3.fromRGB(30, 14, 24),
+            DialogButtonBorder = Color3.fromRGB(240, 110, 180),
+            DialogBorder = Color3.fromRGB(230, 90, 165),
+            DialogInput = Color3.fromRGB(44, 18, 34),
+            DialogInputLine = Color3.fromRGB(255, 105, 180),
+            Text = Color3.fromRGB(255, 255, 255),
+            SubText = Color3.fromRGB(250, 215, 235),
+            Hover = Color3.fromRGB(230, 90, 165),
+            HoverChange = 0.05,
+            ShineEnabled = true,
+            Shine = {
+                Speed = 0.5,
+                RotationSpeed = 25,
+                ColorSequence = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 110, 185)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 235, 245)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 110, 185))
+                })
+            },
+            StrokeShine = true,
+            StrokeDark = Color3.fromRGB(190, 70, 135),
+            ButtonGradient = {
+                Background = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 110, 185)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(70, 20, 50))
+                }),
+                Stroke = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 140, 200)),
+                    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(240, 110, 180))
+                })
+            },
+            ThemeAccentColors = { Color3.fromRGB(255, 105, 180) },
+            TitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 90, 175)),
+                ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 160, 215)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 235, 245))
+            }),
+            SubTitleGradient = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 240, 250)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 140, 200)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(225, 60, 145))
+            }),
+        }
+
+        af["cloudy"] = af["Cloudy"]
+        af["BloodRed"] = af["Blood Red"]
+        af["blood red"] = af["Blood Red"]
+        af["bloodred"] = af["Blood Red"]
+        af["HUT RI"] = af["HUT RI 81"]
+        af["Hut RI 81"] = af["HUT RI 81"]
+        af["hut ri 81"] = af["HUT RI 81"]
+        af["emerald"] = af["Emerald"]
+        af["Rimuru"] = af["Rimuru Tempest"]
+        af["rimuru"] = af["Rimuru Tempest"]
+        af["rimuru tempest"] = af["Rimuru Tempest"]
+        af["rimurutempest"] = af["Rimuru Tempest"]
+        af["solar"] = af["Solar"]
+        af["neko"] = af["Neko"]
+        af["Pink"] = af["Neko"]
+        af["pink"] = af["Neko"]
+
+        return af
+    end,
+}
+
+do local ab,ac,ad,ae,af,ag,ah,aj,c,e,f,g,h,i,j,k=task,setmetatable,error,newproxy,getmetatable,next,table,unpack,coroutine,script,type,require,pcall,getfenv,setfenv,rawget local l,m,n,o,p,s,t,u,v,w,x=ah.insert,ah.remove,ah.freeze or function(l)return l end,ab and ab.defer or function(l,...)local m=c.create(l)c.resume(m,...)return m end,'0.0.0-venv',{},{},{},{},{},{}local y,z={GetChildren=function(y)local z,A=x[y],{}for B in ag,z do l(A,B)end return A end,FindFirstChild=function(y,z)if not z then ad('Argument 1 missing or nil',2)end for A in ag,x[y]do if A.Name==z then return A end end return end,GetFullName=function(y)local z,A=y.Name,y.Parent while A do z=A.Name..'.'..z A=A.Parent end return'VirtualEnv.'..z end},{}for A,B in ag,y do z[A]=function(C,...)if not x[C]then ad("Expected ':' not '.' calling member function "..A,1)end return B(C,...)end end local C=function(C,D,E)local F,G,H,I,J=ac({},{__mode='k'}),function(F)ad(F..' is not a valid (virtual) member of '..C..' "'..D..'"',1)end,function(F)ad('Unable to assign (virtual) property '..F..'. Property is read only',1)end,(ae(true))local K=af(I)K.__index=function(L,M)if M=='ClassName'then return C elseif M=='Name'then return D elseif M=='Parent'then return E elseif C=='StringValue'and M=='Value'then return J else local N=z[M]if N then return N end end for N in ag,F do if N.Name==M then return N end end G(M)end K.__newindex=function(L,M,N)if M=='ClassName'then H(M)elseif M=='Name'then D=N elseif M=='Parent'then if N==I then return end if E~=nil then x[E][I]=nil end E=N if N~=nil then x[N][I]=true end elseif C=='StringValue'and M=='Value'then J=N else G(M)end end K.__tostring=function()return D end x[I]=F if E~=nil then x[E][I]=true end return I end local function D(E,F)local G,H,I,J=E[1],E[2],E[3],E[4]local K=m(I,1)local L=C(H,K,F)s[G]=L if I then for M,N in ag,I do L[M]=N end end if J then for M,N in ag,J do D(N,L)end end return L end local E={}for F,G in ag,a do l(E,D(G))end for H,I in ag,aa do local J=s[H] if J then t[J]=I local K=J.ClassName if K=='LocalScript'or K=='Script'then l(v,J)end end end local J=function(J)local K,L=J.ClassName,u[J]if L and K=='ModuleScript'then return aj(L)end local M=t[J]if not M then return end if K=='LocalScript'or K=='Script'then M()return else local N={M()}u[J]=N return aj(N)end end function b(K)local L=s[K]local M=t[L]if not M then return end local N,O,P,Q,R,S,T=false,n{Version=p,Script=e,Shared=w,GetScript=function()return e end,GetShared=function()return w end},L,function(N,...)if x[N]and N.ClassName=='ModuleScript'and t[N]then return J(N)end return g(N,...)end local U,V=function(U,...)if not N then T()end if f(U)=='number'and U>=0 then if U==0 then return S else U=U+1 local V,W=h(i,U)if V and W==R then return S end end end return i(U,...)end,function(U,V,...)if not N then T()end if f(U)=='number'and U>=0 then if U==0 then return j(S,V)else U=U+1 local W,X=h(i,U)if W and X==R then return j(S,V)end end end return j(U,V,...)end function T()R=i(0)local W={maui=O,script=P,require=Q,getfenv=U,setfenv=V}S=ac({},{__index=function(X,Y)local Z=k(S,Y)if Z~=nil then return Z end local _=W[Y]if _~=nil then return _ end return R[Y]end})j(M,S)N=true end return O,P,Q,U,V end for K,L in ag,v do o(J,L)end do local M for N,O in ag,E do if O.ClassName=='ModuleScript'and O.Name=='MainModule'then M=O break end end if M then return J(M)end end end
