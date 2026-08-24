@@ -4312,6 +4312,7 @@ local aa = {
             end
             v.TitleBar = e(d.Parent.TitleBar) {Title = t.Title, SubTitle = t.SubTitle, Parent = v.Root, Window = v, Icon = t.TitleIcon or t.Icon or "lucide/cloud"}
             v.MinimizeIcon = "rbxassetid://109388426525855"
+
             local floatGui = (u and (u.GUI or u.PopupGUI)) or t.Parent
             local floatBtn = s("TextButton", {
                 Size = UDim2.fromOffset(50, 50),
@@ -4332,6 +4333,7 @@ local aa = {
                 BackgroundTransparency = 1,
                 Image = v.MinimizeIcon,
                 ImageColor3 = Color3.fromRGB(255, 255, 255),
+                ScaleType = Enum.ScaleType.Fit,
                 ZIndex = 1001,
                 Parent = floatBtn
             })
@@ -4438,8 +4440,12 @@ local aa = {
             end)
 
             function v.SetMinimizeIcon(self, iconId)
-                v.MinimizeIcon = iconId
-                floatIconImg.Image = iconId
+                local idStr = tostring(iconId or "109388426525855")
+                if not idStr:find("rbxassetid://") and tonumber(idStr) then
+                    idStr = "rbxassetid://" .. idStr
+                end
+                v.MinimizeIcon = idStr
+                floatIconImg.Image = idStr
             end
             v.SetFloatingIcon = v.SetMinimizeIcon
             if e(k).UseAcrylic then
