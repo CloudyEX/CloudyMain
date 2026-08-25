@@ -995,6 +995,7 @@ local aa = {
                     Search = D.Search,
                     TabLogo = D.Icons or D.TabLogo,
                     TitleIcon = D.TitleIcon,
+                    MinimizeIcon = D.MinimizeIcon or D.FloatingIcon,
                 }
             x.Window = E
             x:SetTheme(D.Theme or "Cloudy")
@@ -4310,8 +4311,11 @@ local aa = {
                     v.Root.Size = newSize
                 end
             end
-            v.TitleBar = e(d.Parent.TitleBar) {Title = t.Title, SubTitle = t.SubTitle, Parent = v.Root, Window = v, Icon = t.TitleIcon or t.Icon or "lucide/cloud"}
-            v.MinimizeIcon = "rbxassetid://109388426525855"
+            local initMinIcon = tostring(t.MinimizeIcon or t.FloatingIcon or "109388426525855")
+            if not initMinIcon:find("rbxassetid://") and tonumber(initMinIcon) then
+                initMinIcon = "rbxassetid://" .. initMinIcon
+            end
+            v.MinimizeIcon = initMinIcon
 
             local floatGui = (u and (u.GUI or u.PopupGUI)) or t.Parent
             local floatBtn = s("TextButton", {
