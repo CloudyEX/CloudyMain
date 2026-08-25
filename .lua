@@ -5938,18 +5938,33 @@ if MainTab then
 
         local Section_MainTab_Elemental = MainTab:AddSection("Auto Event (Elemental Island)")
 
-        local ELEMENTAL_EVENT_MAP = {
+        local ElementalEventState = {
             ["Storm Elemental Event"] = {
-                Name = "Storm Elemental Event",
-                CFrame = LOCATIONS["Elemental Island (Storm Area)"] or CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904)
+                Active = false,
+                StartTime = 0,
+                Duration = 360,
+                Keywords = {"massive storm", "storm is accurring", "storm is occurring", "storm has started", "a massive storm"},
+                EndKeywords = {"storm has ended", "storm has passed", "storm has cleared", "storm is over", "storm cleared"},
+                CFrame = LOCATIONS["Elemental Island (Storm Area)"] or CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904),
+                RSName = "Storm Elemental Event"
             },
             ["Blizzard Elemental Event"] = {
-                Name = "Blizzard Elemental Event",
-                CFrame = LOCATIONS["Elemental Island (Blizzard Area)"] or CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819)
+                Active = false,
+                StartTime = 0,
+                Duration = 360,
+                Keywords = {"blizzard has started", "blizzard is occurring", "blizzard is accurring", "a blizzard has", "blizzard started"},
+                EndKeywords = {"blizzard has ended", "blizzard has passed", "blizzard has cleared", "blizzard is over", "blizzard cleared"},
+                CFrame = LOCATIONS["Elemental Island (Blizzard Area)"] or CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819),
+                RSName = "Blizzard Elemental Event"
             },
             ["Volcano Elemental Event"] = {
-                Name = "Volcano Elemental Event",
-                CFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795)
+                Active = false,
+                StartTime = 0,
+                Duration = 360,
+                Keywords = {"volcano has erupted", "volcano is erupting", "volcano eruption", "the volcano has", "volcano erupted"},
+                EndKeywords = {"volcano has stopped", "volcano has calmed", "volcano is over", "volcano cleared", "volcano eruption ended"},
+                CFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795),
+                RSName = "Volcano Elemental Event"
             }
         }
 
@@ -5957,18 +5972,189 @@ if MainTab then
             ["Storm Elemental Event"] = true
         }
 
-        local function isElementalEventActive(eventName)
+        local function processEventText(text)
+            if type(text) ~= "string" or text == "" then return end
+            local lower = text:lower()
+
+            for eventKey, info in pairs(ElementalEventState) do
+                for _, kw in ipairs(info.Keywords) do
+                    if lower:find(kw, 1, true) then
+                        if not info.Active then
+                            info.Active = true
+                            info.StartTime = tick()
+                            NotifySuccess("Elemental Event", "Peringatan Terdeteksi: " .. eventKey .. "!")
+                        end
+                        return
+                    end
+                end
+
+                for _, ekw in ipairs(info.EndKeywords) do
+                    if lower:find(ekw, 1, true) then
+                        if info.Active then
+                            info.Active = false
+                            info.StartTime = 0
+                            NotifyInfo("Elemental Event", "Event Selesai: " .. eventKey)
+                        end
+                        return
+                    end
+                end
+            end
+        end
+
+        local function checkRSEventActive(rsName)
             local rs = game:GetService("ReplicatedStorage")
             local eventsFolder = rs:FindFirstChild("Events")
             if not eventsFolder then return false end
-            local ev = eventsFolder:FindFirstChild(eventName)
+            local ev = eventsFolder:FindFirstChild(rsName)
             if not ev then return false end
-            if ev.Parent ~= eventsFolder then return false end
-            if ev:IsA("BoolValue") then
-                return ev.Value == true
+
+            local ok, attrs = pcall(function() return ev:GetAttributes() end)
+            if ok and attrs then
+                if attrs.Active == true or attrs.Enabled == true or attrs.Started == true then return true end
+                if attrs.TimeLeft and type(attrs.TimeLeft) == "number" and attrs.TimeLeft > 0 then return true end
+                if attrs.Duration and type(attrs.Duration) == "number" and attrs.Duration > 0 then return true end
+                if attrs.Remaining and type(attrs.Remaining) == "number" and attrs.Remaining > 0 then return true end
             end
-            return true
+
+            local activeVal = ev:FindFirstChild("Active") or ev:FindFirstChild("Enabled") or ev:FindFirstChild("Started")
+            if activeVal and activeVal:IsA("BoolValue") and activeVal.Value == true then
+                return true
+            end
+            local timerVal = ev:FindFirstChild("TimeLeft") or ev:FindFirstChild("Timer") or ev:FindFirstChild("Duration")
+            if timerVal and (timerVal:IsA("NumberValue") or timerVal:IsA("IntValue")) and timerVal.Value > 0 then
+                return true
+            end
+
+            return false
         end
+
+        local function checkWorldWeatherActive(eventKey)
+            local ws = game:GetService("Workspace")
+            local zones = ws:FindFirstChild("Zones") or ws:FindFirstChild("Islands") or ws:FindFirstChild("Weather")
+            if zones then
+                for _, item in ipairs(zones:GetDescendants()) do
+                    local nameLower = item.Name:lower()
+                    local matchesEvent = false
+                    if eventKey == "Storm Elemental Event" and (nameLower:find("storm") or nameLower:find("thunder")) then
+                        matchesEvent = true
+                    elseif eventKey == "Blizzard Elemental Event" and nameLower:find("blizzard") then
+                        matchesEvent = true
+                    elseif eventKey == "Volcano Elemental Event" and (nameLower:find("volcano") or nameLower:find("eruption")) then
+                        matchesEvent = true
+                    end
+
+                    if matchesEvent then
+                        if item:IsA("ParticleEmitter") and item.Enabled then return true end
+                        if item:IsA("Sound") and item.Playing then return true end
+                        if item:IsA("BoolValue") and item.Value == true then return true end
+                        local ok, a = pcall(function() return item:GetAttribute("Active") end)
+                        if ok and a == true then return true end
+                    end
+                end
+            end
+
+            local lighting = game:GetService("Lighting")
+            for _, obj in ipairs(lighting:GetChildren()) do
+                local n = obj.Name:lower()
+                local isWeatherObj = false
+                if eventKey == "Storm Elemental Event" and n:find("storm") then isWeatherObj = true
+                elseif eventKey == "Blizzard Elemental Event" and n:find("blizzard") then isWeatherObj = true
+                elseif eventKey == "Volcano Elemental Event" and (n:find("volcano") or n:find("ash")) then isWeatherObj = true end
+
+                if isWeatherObj and (obj:IsA("Atmosphere") or obj:IsA("Clouds") or obj:IsA("ColorCorrectionEffect") or obj:IsA("ParticleEmitter")) then
+                    return true
+                end
+            end
+
+            return false
+        end
+
+        local function isElementalEventActive(eventKey)
+            local info = ElementalEventState[eventKey]
+            if not info then return false end
+
+            if info.Active then
+                if (tick() - info.StartTime) <= (info.Duration or 360) then
+                    return true
+                else
+                    info.Active = false
+                    info.StartTime = 0
+                end
+            end
+
+            if checkRSEventActive(info.RSName) then
+                if not info.Active then
+                    info.Active = true
+                    info.StartTime = tick()
+                end
+                return true
+            end
+
+            if checkWorldWeatherActive(eventKey) then
+                if not info.Active then
+                    info.Active = true
+                    info.StartTime = tick()
+                end
+                return true
+            end
+
+            return false
+        end
+
+        pcall(function()
+            local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
+            if ctrlFolder then
+                local TextNotifCtrl = require(ctrlFolder:WaitForChild("TextNotificationController", 5))
+                if TextNotifCtrl and TextNotifCtrl.DeliverNotification then
+                    local originalDeliver = TextNotifCtrl.DeliverNotification
+                    TextNotifCtrl.DeliverNotification = function(self, data, ...)
+                        if data then
+                            if type(data) == "string" then
+                                processEventText(data)
+                            elseif type(data) == "table" then
+                                if data.Text then processEventText(tostring(data.Text)) end
+                                if data.Message then processEventText(tostring(data.Message)) end
+                                if data.Content then processEventText(tostring(data.Content)) end
+                                if data.Title then processEventText(tostring(data.Title)) end
+                                if data.Description then processEventText(tostring(data.Description)) end
+                            end
+                        end
+                        return originalDeliver(self, data, ...)
+                    end
+                end
+            end
+        end)
+
+        pcall(function()
+            local playerGui = LocalPlayer:WaitForChild("PlayerGui", 5)
+            if playerGui then
+                local function scanTextInstance(inst)
+                    if inst:IsA("TextLabel") or inst:IsA("TextBox") then
+                        processEventText(inst.Text)
+                        inst:GetPropertyChangedSignal("Text"):Connect(function()
+                            processEventText(inst.Text)
+                        end)
+                    end
+                end
+                for _, d in ipairs(playerGui:GetDescendants()) do
+                    scanTextInstance(d)
+                end
+                playerGui.DescendantAdded:Connect(function(desc)
+                    scanTextInstance(desc)
+                end)
+            end
+        end)
+
+        pcall(function()
+            local TextChatService = game:GetService("TextChatService")
+            if TextChatService then
+                TextChatService.MessageReceived:Connect(function(msg)
+                    if msg and msg.Text then
+                        processEventText(msg.Text)
+                    end
+                end)
+            end
+        end)
 
         local elementalAutoTPState = false
         local elementalAutoTPThread = nil
@@ -5992,13 +6178,13 @@ if MainTab then
                     else
                         for evName, isSelected in pairs(selectedElementalEvents) do
                             if isSelected and isElementalEventActive(evName) then
-                                local targetData = ELEMENTAL_EVENT_MAP[evName]
+                                local targetData = ElementalEventState[evName]
                                 if targetData and targetData.CFrame then
                                     local hrp = getHRP()
                                     if hrp then
                                         elementalSavedCFrame = hrp.CFrame
                                         elementalCurrentEvent = evName
-                                        NotifySuccess("Elemental Event", "Event " .. tostring(evName) .. " aktif! Teleporting...")
+                                        NotifySuccess("Elemental Event", "Event " .. tostring(evName) .. " aktif! Teleporting ke lokasi...")
                                         TeleportTo(targetData.CFrame)
                                         break
                                     end
@@ -6049,11 +6235,15 @@ if MainTab then
                         return
                     end
 
+                    for evName in pairs(selectedElementalEvents) do
+                        isElementalEventActive(evName)
+                    end
+
                     if elementalAutoTPThread then
                         pcall(function() task.cancel(elementalAutoTPThread) end)
                     end
                     elementalAutoTPThread = task.spawn(runElementalEventLoop)
-                    NotifySuccess("Elemental Event", "Auto Event Aktif! Menunggu event muncul...")
+                    NotifySuccess("Elemental Event", "Auto Event Aktif! Menunggu/memindai event...")
                 else
                     if elementalAutoTPThread then
                         pcall(function() task.cancel(elementalAutoTPThread) end)
