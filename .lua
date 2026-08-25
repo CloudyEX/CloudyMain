@@ -6285,8 +6285,32 @@ if MainTab then
 
         Section_MainTab_Regulator:AddParagraph({
             Title = "📖 Panduan Auto Repair Regulator",
-            Content = "1. Pilih 'Atmospheric Regulator' di dropdown.\n2. Aktifkan toggle 'Auto Repair Regulator'.\n3. Saat Volcanic Event aktif, script otomatis teleport ke Volcanic Area & equip rod.\n4. Aktifkan Auto Fishing manual yang ingin kamu gunakan.\n5. Setelah Pyrocoil (ID 1197) didapatkan, script otomatis unequip rod, teleport ke mesin regulator, dan berinteraksi dengan ProximityPrompt untuk memperbaiki mesin."
+            Content = "1. Pilih Regulator yang ingin diperbaiki di dropdown.\n2. Aktifkan toggle 'Auto Repair Regulator'.\n3. Saat Event terkait aktif, script otomatis teleport ke Area Event & equip rod.\n4. Silakan aktifkan fitur Auto Fishing manual yang ingin kamu gunakan.\n5. Setelah item khusus didapatkan, script otomatis unequip rod, teleport ke mesin regulator, dan berinteraksi dengan ProximityPrompt untuk memperbaiki mesin."
         })
+
+        local REGULATOR_CONFIG = {
+            ["Atmospheric Regulator"] = {
+                EventName = "Storm Elemental Event",
+                AreaCFrame = LOCATIONS["Elemental Island (Storm Area)"] or CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904),
+                MachineCFrame = CFrame.new(-929.786743, 85.3661575, 5554.45117, -0.996223509, -2.47479495e-08, -0.0868259594, -2.45438905e-08, 1, -3.41774364e-09, 0.0868259594, -1.27378985e-09, -0.996223509),
+                ItemName = "Stormshell Brute",
+                ItemId = 1198
+            },
+            ["Glacial Regulator"] = {
+                EventName = "Blizzard Elemental Event",
+                AreaCFrame = LOCATIONS["Elemental Island (Blizzard Area)"] or CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819),
+                MachineCFrame = CFrame.new(-1081.87744, 124.093239, 5547.81152, -0.666997313, -8.72993127e-08, 0.745060146, -5.40679324e-08, 1, 6.87677968e-08, -0.745060146, 5.58407409e-09, -0.666997313),
+                ItemName = "Wintertusk Mammofin",
+                ItemId = nil
+            },
+            ["Magma Regulator"] = {
+                EventName = "Volcano Elemental Event",
+                AreaCFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795),
+                MachineCFrame = nil,
+                ItemName = "Pyrocoil",
+                ItemId = 1197
+            }
+        }
 
         local selectedRegulators = {
             ["Atmospheric Regulator"] = true
@@ -6294,11 +6318,13 @@ if MainTab then
 
         local regulatorState = false
         local regulatorThread = nil
-        local regulatorPhase = "IDLE"
         local regulatorSavedPos = nil
 
-        local function hasPyrocoilInInventory()
+        local function hasRequiredItemInInventory(targetItemName, targetItemId)
             local count = 0
+            local targetNameLower = targetItemName and targetItemName:lower() or nil
+            local targetIdNum = tonumber(targetItemId) or nil
+
             pcall(function()
                 local replion = GetPlayerDataReplion and GetPlayerDataReplion()
                 if replion then
@@ -6307,11 +6333,19 @@ if MainTab then
                         for categoryName, catItems in pairs(inv) do
                             if type(catItems) == "table" then
                                 for _, item in pairs(catItems) do
-                                    if type(item) == "table" and (tonumber(item.Id) == 1197 or tostring(item.Name):lower():find("pyrocoil")) then
-                                        local q = tonumber(item.Quantity or item.Count or 1) or 1
-                                        count = count + q
-                                    elseif tonumber(item) == 1197 or tostring(item):lower():find("pyrocoil") then
-                                        count = count + 1
+                                    if type(item) == "table" then
+                                        local iId = tonumber(item.Id)
+                                        local iName = tostring(item.Name or item.Id or ""):lower()
+                                        if (targetIdNum and iId == targetIdNum) or (targetNameLower and iName:find(targetNameLower, 1, true)) then
+                                            local q = tonumber(item.Quantity or item.Count or 1) or 1
+                                            count = count + q
+                                        end
+                                    elseif type(item) == "string" or type(item) == "number" then
+                                        local iId = tonumber(item)
+                                        local iName = tostring(item):lower()
+                                        if (targetIdNum and iId == targetIdNum) or (targetNameLower and iName:find(targetNameLower, 1, true)) then
+                                            count = count + 1
+                                        end
                                     end
                                 end
                             end
@@ -6319,12 +6353,15 @@ if MainTab then
                     end
                 end
             end)
+
             pcall(function()
                 local lp = Players.LocalPlayer
                 local bp = lp and lp:FindFirstChild("Backpack")
                 if bp then
                     for _, tool in ipairs(bp:GetChildren()) do
-                        if tool.Name:lower():find("pyrocoil") or tool:GetAttribute("ItemId") == 1197 then
+                        local tName = tool.Name:lower()
+                        local tId = tonumber(tool:GetAttribute("ItemId"))
+                        if (targetIdNum and tId == targetIdNum) or (targetNameLower and tName:find(targetNameLower, 1, true)) then
                             count = count + 1
                         end
                     end
@@ -6332,12 +6369,17 @@ if MainTab then
                 local char = lp and lp.Character
                 if char then
                     for _, tool in ipairs(char:GetChildren()) do
-                        if tool:IsA("Tool") and (tool.Name:lower():find("pyrocoil") or tool:GetAttribute("ItemId") == 1197) then
-                            count = count + 1
+                        if tool:IsA("Tool") then
+                            local tName = tool.Name:lower()
+                            local tId = tonumber(tool:GetAttribute("ItemId"))
+                            if (targetIdNum and tId == targetIdNum) or (targetNameLower and tName:find(targetNameLower, 1, true)) then
+                                count = count + 1
+                            end
                         end
                     end
                 end
             end)
+
             return count > 0, count
         end
 
@@ -6417,69 +6459,82 @@ if MainTab then
         end
 
         local function runAutoRegulatorLoop()
-            regulatorPhase = "WAITING_FOR_EVENT"
-            local ATMOSPHERIC_MACHINE_CF = CFrame.new(-929.786743, 85.3661575, 5554.45117, -0.996223509, -2.47479495e-08, -0.0868259594, -2.45438905e-08, 1, -3.41774364e-09, 0.0868259594, -1.27378985e-09, -0.996223509)
-            local VOLCANO_AREA_CF = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795)
+            local activeRegName = nil
+            local activePhase = "SCANNING"
 
             while regulatorState do
                 pcall(function()
-                    if selectedRegulators["Atmospheric Regulator"] then
-                        local hasPyro, count = hasPyrocoilInInventory()
-                        if hasPyro and regulatorPhase ~= "REPAIRING" and regulatorPhase ~= "DONE" then
-                            regulatorPhase = "REPAIRING"
-                            NotifySuccess("Auto Regulator", "Pyrocoil (ID 1197) terdeteksi di Inventory! Mempersiapkan perbaikan mesin...")
-                            unequipAllTools()
-                            task.wait(0.5)
-                            TeleportTo(ATMOSPHERIC_MACHINE_CF)
-                            task.wait(1)
-                            local interacted = triggerNearestProximityPrompt(35)
-                            if interacted then
-                                NotifySuccess("Auto Regulator", "Berhasil berinteraksi dengan Mesin Atmospheric Regulator!")
-                            else
-                                task.wait(1)
-                                triggerNearestProximityPrompt(35)
-                            end
-                            regulatorPhase = "DONE"
-                            NotifySuccess("Auto Regulator", "Proses perbaikan Atmospheric Regulator selesai!")
-                        elseif regulatorPhase == "WAITING_FOR_EVENT" then
-                            local isVolcanoActive = isElementalEventActive("Volcano Elemental Event")
-                            if isVolcanoActive then
-                                local hrp = getHRP()
-                                if hrp and not regulatorSavedPos then
-                                    regulatorSavedPos = hrp.CFrame
-                                end
-                                NotifySuccess("Auto Regulator", "Volcano Event aktif! Teleport ke Volcanic Area...")
-                                TeleportTo(VOLCANO_AREA_CF)
-                                task.wait(0.5)
-                                ensureRodEquipped(true)
-                                NotifyInfo("Auto Regulator", "Rod ter-equip! Silakan nyalakan fitur Auto Fishing pilihan Anda untuk mendapatkan Pyrocoil.")
-                                regulatorPhase = "FISHING_FOR_PYROCOIL"
-                            end
-                        elseif regulatorPhase == "FISHING_FOR_PYROCOIL" then
-                            local hasItem = hasPyrocoilInInventory()
-                            if hasItem then
-                                regulatorPhase = "REPAIRING"
-                                NotifySuccess("Auto Regulator", "Pyrocoil (ID 1197) berhasil didapatkan! Memperbaiki mesin...")
+                    for regName, isSelected in pairs(selectedRegulators) do
+                        if isSelected and REGULATOR_CONFIG[regName] then
+                            local config = REGULATOR_CONFIG[regName]
+                            local hasItem, count = hasRequiredItemInInventory(config.ItemName, config.ItemId)
+
+                            if hasItem and config.MachineCFrame and activePhase ~= "REPAIRING" and activePhase ~= "DONE" then
+                                activePhase = "REPAIRING"
+                                NotifySuccess("Auto Regulator", config.ItemName .. " terdeteksi di Inventory! Mempersiapkan perbaikan " .. regName .. "...")
                                 unequipAllTools()
                                 task.wait(0.5)
-                                TeleportTo(ATMOSPHERIC_MACHINE_CF)
+                                TeleportTo(config.MachineCFrame)
                                 task.wait(1)
                                 local interacted = triggerNearestProximityPrompt(35)
                                 if interacted then
-                                    NotifySuccess("Auto Regulator", "Berhasil berinteraksi dengan Mesin Atmospheric Regulator!")
+                                    NotifySuccess("Auto Regulator", "Berhasil berinteraksi dengan Mesin " .. regName .. "!")
                                 else
                                     task.wait(1)
                                     triggerNearestProximityPrompt(35)
                                 end
-                                regulatorPhase = "DONE"
-                                NotifySuccess("Auto Regulator", "Perbaikan Atmospheric Regulator selesai!")
-                            else
-                                local stillActive = isElementalEventActive("Volcano Elemental Event")
-                                if not stillActive then
-                                    NotifyWarning("Auto Regulator", "Volcano Event telah selesai sebelum mendapatkan Pyrocoil. Menunggu event berikutnya...")
-                                    regulatorPhase = "WAITING_FOR_EVENT"
-                                    if regulatorSavedPos then
-                                        TeleportTo(regulatorSavedPos)
+                                activePhase = "DONE"
+                                NotifySuccess("Auto Regulator", "Proses perbaikan " .. regName .. " selesai!")
+                                break
+                            elseif not hasItem then
+                                local isEventActive = isElementalEventActive(config.EventName)
+                                if isEventActive then
+                                    if activePhase ~= "FISHING" or activeRegName ~= regName then
+                                        local hrp = getHRP()
+                                        if hrp and not regulatorSavedPos then
+                                            regulatorSavedPos = hrp.CFrame
+                                        end
+                                        activeRegName = regName
+                                        activePhase = "FISHING"
+                                        NotifySuccess("Auto Regulator", config.EventName .. " aktif! Teleport ke Area " .. regName .. "...")
+                                        TeleportTo(config.AreaCFrame)
+                                        task.wait(0.5)
+                                        ensureRodEquipped(true)
+                                        NotifyInfo("Auto Regulator", "Rod ter-equip! Silakan nyalakan fitur Auto Fishing pilihan Anda untuk mendapatkan " .. config.ItemName .. ".")
+                                    else
+                                        local gotItem = hasRequiredItemInInventory(config.ItemName, config.ItemId)
+                                        if gotItem then
+                                            activePhase = "REPAIRING"
+                                            NotifySuccess("Auto Regulator", config.ItemName .. " berhasil didapatkan! Memperbaiki mesin " .. regName .. "...")
+                                            unequipAllTools()
+                                            task.wait(0.5)
+                                            if config.MachineCFrame then
+                                                TeleportTo(config.MachineCFrame)
+                                                task.wait(1)
+                                                local interacted = triggerNearestProximityPrompt(35)
+                                                if interacted then
+                                                    NotifySuccess("Auto Regulator", "Berhasil berinteraksi dengan Mesin " .. regName .. "!")
+                                                else
+                                                    task.wait(1)
+                                                    triggerNearestProximityPrompt(35)
+                                                end
+                                                activePhase = "DONE"
+                                                NotifySuccess("Auto Regulator", "Perbaikan " .. regName .. " selesai!")
+                                            else
+                                                NotifyInfo("Auto Regulator", "Item " .. config.ItemName .. " berhasil didapatkan! Mesin " .. regName .. " belum memiliki CFrame lokasi mesin.")
+                                                activePhase = "DONE"
+                                            end
+                                        end
+                                    end
+                                    break
+                                else
+                                    if activePhase == "FISHING" and activeRegName == regName then
+                                        NotifyWarning("Auto Regulator", config.EventName .. " telah selesai sebelum mendapatkan " .. config.ItemName .. ". Menunggu event berikutnya...")
+                                        activePhase = "SCANNING"
+                                        activeRegName = nil
+                                        if regulatorSavedPos then
+                                            TeleportTo(regulatorSavedPos)
+                                        end
                                     end
                                 end
                             end
@@ -6513,7 +6568,7 @@ if MainTab then
 
         Section_MainTab_Regulator:AddToggle("Toggle_AutoRepairRegulator", {
             Title = "Auto Repair Regulator",
-            Description = "Auto teleport saat event -> Equip rod -> Deteksi Pyrocoil -> Teleport mesin & klik prompt",
+            Description = "Auto teleport saat event -> Equip rod -> Deteksi item -> Teleport mesin & klik prompt",
             Default = false,
             Callback = function(state)
                 regulatorState = state
@@ -6528,7 +6583,6 @@ if MainTab then
                         return
                     end
 
-                    regulatorPhase = "WAITING_FOR_EVENT"
                     if regulatorThread then
                         pcall(function() task.cancel(regulatorThread) end)
                     end
@@ -6539,7 +6593,6 @@ if MainTab then
                         pcall(function() task.cancel(regulatorThread) end)
                         regulatorThread = nil
                     end
-                    regulatorPhase = "IDLE"
                     regulatorSavedPos = nil
                     NotifyInfo("Auto Regulator", "Auto Repair Regulator Dimatikan.")
                 end
