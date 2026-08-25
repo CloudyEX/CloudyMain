@@ -8764,7 +8764,7 @@ end
 if ShopTab then
     pcall(function()
         local Section_ShopTab_1 = ShopTab:AddSection("Buy Weather Event")
-        local weatherMap = {["Windy (10k)"]="Wind",["Foggy (20k)"]="Fog",["Snow (15k)"]="Snow",["Stormy (35k)"]="Storm",["Radiant (50k)"]="Radiant",["Shark Hunt (300k)"]="Shark Hunt"}
+        local weatherMap = {["Windy (10k)"]="Wind",["Foggy (20k)"]="Fog",["Snow (15k)"]="Snow",["Stormy (35k)"]="Storm",["Radiant (50k)"]="Radiant",["Shark Hunt (300k)"]="Shark Hunt",["Treasure Hunt (750k)"]="Treasure Hunt"}
         local weatherNames = {}; for name in pairs(weatherMap) do table.insert(weatherNames, name) end; table.sort(weatherNames)
         local selectedWeathers = {}
         local weatherValues = weatherNames
