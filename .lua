@@ -6280,6 +6280,271 @@ if MainTab then
                 end
             end
         })
+
+        local Section_MainTab_Regulator = MainTab:AddSection("Auto Repair Regulator (Elemental Island)")
+
+        Section_MainTab_Regulator:AddParagraph({
+            Title = "📖 Panduan Auto Repair Regulator",
+            Content = "1. Pilih 'Atmospheric Regulator' di dropdown.\n2. Aktifkan toggle 'Auto Repair Regulator'.\n3. Saat Volcanic Event aktif, script otomatis teleport ke Volcanic Area & equip rod.\n4. Aktifkan Auto Fishing manual yang ingin kamu gunakan.\n5. Setelah Pyrocoil (ID 1197) didapatkan, script otomatis unequip rod, teleport ke mesin regulator, dan berinteraksi dengan ProximityPrompt untuk memperbaiki mesin."
+        })
+
+        local selectedRegulators = {
+            ["Atmospheric Regulator"] = true
+        }
+
+        local regulatorState = false
+        local regulatorThread = nil
+        local regulatorPhase = "IDLE"
+        local regulatorSavedPos = nil
+
+        local function hasPyrocoilInInventory()
+            local count = 0
+            pcall(function()
+                local replion = GetPlayerDataReplion and GetPlayerDataReplion()
+                if replion then
+                    local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
+                    if ok and inv then
+                        for categoryName, catItems in pairs(inv) do
+                            if type(catItems) == "table" then
+                                for _, item in pairs(catItems) do
+                                    if type(item) == "table" and (tonumber(item.Id) == 1197 or tostring(item.Name):lower():find("pyrocoil")) then
+                                        local q = tonumber(item.Quantity or item.Count or 1) or 1
+                                        count = count + q
+                                    elseif tonumber(item) == 1197 or tostring(item):lower():find("pyrocoil") then
+                                        count = count + 1
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+            pcall(function()
+                local lp = Players.LocalPlayer
+                local bp = lp and lp:FindFirstChild("Backpack")
+                if bp then
+                    for _, tool in ipairs(bp:GetChildren()) do
+                        if tool.Name:lower():find("pyrocoil") or tool:GetAttribute("ItemId") == 1197 then
+                            count = count + 1
+                        end
+                    end
+                end
+                local char = lp and lp.Character
+                if char then
+                    for _, tool in ipairs(char:GetChildren()) do
+                        if tool:IsA("Tool") and (tool.Name:lower():find("pyrocoil") or tool:GetAttribute("ItemId") == 1197) then
+                            count = count + 1
+                        end
+                    end
+                end
+            end)
+            return count > 0, count
+        end
+
+        local function unequipAllTools()
+            pcall(function()
+                local char = LocalPlayer.Character
+                if char and char:FindFirstChildOfClass("Humanoid") then
+                    char.Humanoid:UnequipTools()
+                end
+                local RE_Unequip = GetServerRemote("RE/UnequipToolFromHotbar") or GetServerRemote("RF/UnequipToolFromHotbar")
+                if RE_Unequip then
+                    pcall(function()
+                        if RE_Unequip:IsA("RemoteEvent") then
+                            RE_Unequip:FireServer()
+                        elseif RE_Unequip:IsA("RemoteFunction") then
+                            RE_Unequip:InvokeServer()
+                        end
+                    end)
+                end
+                if Events.unequip then
+                    pcall(function() Events.unequip:FireServer() end)
+                end
+            end)
+        end
+
+        local function triggerNearestProximityPrompt(maxDist)
+            maxDist = maxDist or 35
+            local char = LocalPlayer.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            if not hrp then return false end
+
+            local targetPrompt = nil
+            local closestDist = maxDist
+
+            for _, desc in ipairs(Workspace:GetDescendants()) do
+                if desc:IsA("ProximityPrompt") and desc.Enabled then
+                    local pPos = nil
+                    if desc.Parent:IsA("BasePart") then
+                        pPos = desc.Parent.Position
+                    elseif desc.Parent:IsA("Model") and desc.Parent.PrimaryPart then
+                        pPos = desc.Parent.PrimaryPart.Position
+                    elseif desc.Parent:IsA("Attachment") then
+                        pPos = desc.Parent.WorldPosition
+                    end
+
+                    if pPos then
+                        local d = (hrp.Position - pPos).Magnitude
+                        if d < closestDist then
+                            closestDist = d
+                            targetPrompt = desc
+                        end
+                    end
+                end
+            end
+
+            if targetPrompt then
+                targetPrompt.RequiresLineOfSight = false
+                targetPrompt.MaxActivationDistance = math.max(targetPrompt.MaxActivationDistance or 10, 35)
+                local holdTime = (targetPrompt.HoldDuration and targetPrompt.HoldDuration > 0) and targetPrompt.HoldDuration or 0.5
+
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(function() fireproximityprompt(targetPrompt, 0) end)
+                    pcall(function() fireproximityprompt(targetPrompt, holdTime) end)
+                    pcall(function() fireproximityprompt(targetPrompt) end)
+                end
+
+                pcall(function() targetPrompt:InputHoldBegin() end)
+                task.wait(holdTime + 0.1)
+                pcall(function() targetPrompt:InputHoldEnd() end)
+
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(function() fireproximityprompt(targetPrompt) end)
+                end
+                return true
+            end
+            return false
+        end
+
+        local function runAutoRegulatorLoop()
+            regulatorPhase = "WAITING_FOR_EVENT"
+            local ATMOSPHERIC_MACHINE_CF = CFrame.new(-929.786743, 85.3661575, 5554.45117, -0.996223509, -2.47479495e-08, -0.0868259594, -2.45438905e-08, 1, -3.41774364e-09, 0.0868259594, -1.27378985e-09, -0.996223509)
+            local VOLCANO_AREA_CF = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795)
+
+            while regulatorState do
+                pcall(function()
+                    if selectedRegulators["Atmospheric Regulator"] then
+                        local hasPyro, count = hasPyrocoilInInventory()
+                        if hasPyro and regulatorPhase ~= "REPAIRING" and regulatorPhase ~= "DONE" then
+                            regulatorPhase = "REPAIRING"
+                            NotifySuccess("Auto Regulator", "Pyrocoil (ID 1197) terdeteksi di Inventory! Mempersiapkan perbaikan mesin...")
+                            unequipAllTools()
+                            task.wait(0.5)
+                            TeleportTo(ATMOSPHERIC_MACHINE_CF)
+                            task.wait(1)
+                            local interacted = triggerNearestProximityPrompt(35)
+                            if interacted then
+                                NotifySuccess("Auto Regulator", "Berhasil berinteraksi dengan Mesin Atmospheric Regulator!")
+                            else
+                                task.wait(1)
+                                triggerNearestProximityPrompt(35)
+                            end
+                            regulatorPhase = "DONE"
+                            NotifySuccess("Auto Regulator", "Proses perbaikan Atmospheric Regulator selesai!")
+                        elseif regulatorPhase == "WAITING_FOR_EVENT" then
+                            local isVolcanoActive = isElementalEventActive("Volcano Elemental Event")
+                            if isVolcanoActive then
+                                local hrp = getHRP()
+                                if hrp and not regulatorSavedPos then
+                                    regulatorSavedPos = hrp.CFrame
+                                end
+                                NotifySuccess("Auto Regulator", "Volcano Event aktif! Teleport ke Volcanic Area...")
+                                TeleportTo(VOLCANO_AREA_CF)
+                                task.wait(0.5)
+                                ensureRodEquipped(true)
+                                NotifyInfo("Auto Regulator", "Rod ter-equip! Silakan nyalakan fitur Auto Fishing pilihan Anda untuk mendapatkan Pyrocoil.")
+                                regulatorPhase = "FISHING_FOR_PYROCOIL"
+                            end
+                        elseif regulatorPhase == "FISHING_FOR_PYROCOIL" then
+                            local hasItem = hasPyrocoilInInventory()
+                            if hasItem then
+                                regulatorPhase = "REPAIRING"
+                                NotifySuccess("Auto Regulator", "Pyrocoil (ID 1197) berhasil didapatkan! Memperbaiki mesin...")
+                                unequipAllTools()
+                                task.wait(0.5)
+                                TeleportTo(ATMOSPHERIC_MACHINE_CF)
+                                task.wait(1)
+                                local interacted = triggerNearestProximityPrompt(35)
+                                if interacted then
+                                    NotifySuccess("Auto Regulator", "Berhasil berinteraksi dengan Mesin Atmospheric Regulator!")
+                                else
+                                    task.wait(1)
+                                    triggerNearestProximityPrompt(35)
+                                end
+                                regulatorPhase = "DONE"
+                                NotifySuccess("Auto Regulator", "Perbaikan Atmospheric Regulator selesai!")
+                            else
+                                local stillActive = isElementalEventActive("Volcano Elemental Event")
+                                if not stillActive then
+                                    NotifyWarning("Auto Regulator", "Volcano Event telah selesai sebelum mendapatkan Pyrocoil. Menunggu event berikutnya...")
+                                    regulatorPhase = "WAITING_FOR_EVENT"
+                                    if regulatorSavedPos then
+                                        TeleportTo(regulatorSavedPos)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+                task.wait(1)
+            end
+        end
+
+        Section_MainTab_Regulator:AddDropdown("MultiDropdown_SelectRegulator", {
+            Title = "Select Regulator",
+            Values = {"Atmospheric Regulator", "Glacial Regulator", "Magma Regulator"},
+            Default = {"Atmospheric Regulator"},
+            Multi = true,
+            Callback = function(val)
+                selectedRegulators = {}
+                if typeof(val) == "table" then
+                    for k, v in pairs(val) do
+                        if v == true then
+                            selectedRegulators[k] = true
+                        elseif typeof(v) == "string" then
+                            selectedRegulators[v] = true
+                        end
+                    end
+                elseif typeof(val) == "string" then
+                    selectedRegulators[val] = true
+                end
+            end
+        })
+
+        Section_MainTab_Regulator:AddToggle("Toggle_AutoRepairRegulator", {
+            Title = "Auto Repair Regulator",
+            Description = "Auto teleport saat event -> Equip rod -> Deteksi Pyrocoil -> Teleport mesin & klik prompt",
+            Default = false,
+            Callback = function(state)
+                regulatorState = state
+                if state then
+                    local hasSelected = false
+                    for _, v in pairs(selectedRegulators) do
+                        if v then hasSelected = true; break end
+                    end
+                    if not hasSelected then
+                        NotifyWarning("Auto Regulator", "Pilih minimal 1 regulator di dropdown!")
+                        regulatorState = false
+                        return
+                    end
+
+                    regulatorPhase = "WAITING_FOR_EVENT"
+                    if regulatorThread then
+                        pcall(function() task.cancel(regulatorThread) end)
+                    end
+                    regulatorThread = task.spawn(runAutoRegulatorLoop)
+                    NotifySuccess("Auto Regulator", "Auto Repair Regulator Aktif! Memindai event...")
+                else
+                    if regulatorThread then
+                        pcall(function() task.cancel(regulatorThread) end)
+                        regulatorThread = nil
+                    end
+                    regulatorPhase = "IDLE"
+                    regulatorSavedPos = nil
+                    NotifyInfo("Auto Regulator", "Auto Repair Regulator Dimatikan.")
+                end
+            end
+        })
     end)
 end
 
