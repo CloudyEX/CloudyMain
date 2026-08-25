@@ -1190,7 +1190,8 @@ local SkinAnimation = (function()
             local animName = string.lower(track.Name or "")
             if animName:find("fishcaught") or animName:find("caught") or animName:find("reel") then
                 if _G.QHBetaAnimSpeed then
-                    pcall(function() track:AdjustSpeed(15.0) end)
+                    local speedMultiplier = (typeof(_G.QHBetaAnimSpeed) == "number" and _G.QHBetaAnimSpeed) or 10.0
+                    pcall(function() track:AdjustSpeed(speedMultiplier) end)
                 end
             end
             if IsEnabled and IsFishCaughtAnimation(track) then InstantReplace(track) end
@@ -1762,7 +1763,7 @@ end
 local function UB_start()
     if Config.UB.Active then return end
     Config.UB.Settings.HookDelay = Config.UB.Settings.HookDelay or 0.3
-    _G.QHBetaAnimSpeed = true
+    _G.QHBetaAnimSpeed = 10.0
     UB_init(); Config.UB.Active = true; needCast = true
     _G.NotifQueue = {}; _G.NotifActive = 0; isCaught = false
     Config.UB.Stats.startTime = tick()
@@ -6787,7 +6788,7 @@ if ExclusiveTab then
                     if Config.CloudyV1.Active then onToggleCloudyV1(false) end
                     if Config.Cloudy1N.Active then onToggleCloudy1N(false) end
                     if Config.InstantV2 and Config.InstantV2.Active then stopInstantV2() end
-                    _G.QHBetaAnimSpeed = false
+                    _G.QHBetaAnimSpeed = 8.0
                     patchInstantBaitOverrideToCastPosition(false)
                     disableNotifDelay()
                     disableBlockNotif()
@@ -6820,6 +6821,7 @@ if ExclusiveTab then
                         end
                     end)
                 else
+                    _G.QHBetaAnimSpeed = false
                     Config.InstantFishing.Active = false
                     _G.NotifQueue = {}
                     _G.NotifActive = 0
@@ -6916,6 +6918,7 @@ function startInstantV2()
 
     enableNotifDelay()
     enableBlockNotif()
+    _G.QHBetaAnimSpeed = 8.0
     UB_init()
     Config.InstantV2.Active = true
     Tasks.instantV2Task = task.spawn(instantV2_loop)
@@ -6924,6 +6927,7 @@ end
 
 function stopInstantV2()
     if not Config.InstantV2.Active then return end
+    _G.QHBetaAnimSpeed = false
     Config.InstantV2.Active = false
     if Tasks.instantV2Task then
         pcall(task.cancel, Tasks.instantV2Task)
