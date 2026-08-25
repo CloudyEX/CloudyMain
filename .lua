@@ -4,7 +4,7 @@ local Scripts = {
     [93978595733734]  = { name = "Violence District", url = "" },
     [126884695634066] = { name = "QH Community",     url = "" },
     [83369512629707]  = { name = "Quantum Sawah",    url = "" },
-    [139802517550914] = { name = "99 Night At Sea",  url = "" },
+    [139802517550914] = { name = "99 Night At Sea",  url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/99inthesea.lua" },
 }
 
 local PlaceId = game.PlaceId
