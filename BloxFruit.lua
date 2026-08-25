@@ -361,7 +361,7 @@ G.DistH = function(I, e)
 		return (Root.Position - (I:FindFirstChild("HumanoidRootPart")).Position).Magnitude > e;
 	end;
 
-_G.MobHeight = _G.MobHeight or 15
+_G.MobHeight = _G.MobHeight or 20
 
 G.Kill = function(I, e)
 	if not (I and e) then return end
@@ -376,14 +376,14 @@ G.Kill = function(I, e)
 	PosMon = (I:GetAttribute("Locked")).Position
 
 	_B = true
-	BringEnemy(I)
+	BringEnemy()
 
 	EquipWeapon(_G.SelectWeapon)
 
 	local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
 	if not tool then return end
 
-	_tp(hrp.CFrame * CFrame.new(0, _G.MobHeight or 15, 0))
+	_tp(hrp.CFrame * CFrame.new(0, _G.MobHeight, 0))
 end
 G.Kill2 = function(I, e)
 		if I and e then
@@ -609,7 +609,7 @@ local function IsRaidMob(mob)
     return false
 end
 
-BringEnemy = function(targetMob)
+BringEnemy = function()
     if not FarmAtivo() or not _B then return end
 
     local plr = game.Players.LocalPlayer
@@ -619,38 +619,39 @@ BringEnemy = function(targetMob)
 
     pcall(function()
         sethiddenproperty(plr, "SimulationRadius", math.huge)
-        sethiddenproperty(plr, "MaxSimulationRadius", math.huge)
-        if setsimulationradius then
-            setsimulationradius(math.huge, math.huge)
-        end
     end)
 
-    local targetName = targetMob and targetMob.Name
-    local targetPos = PosMon or (targetMob and targetMob:FindFirstChild("HumanoidRootPart") and targetMob.HumanoidRootPart.Position) or hrp.Position
+    local targetPos = PosMon or hrp.Position
     local enemies = workspace.Enemies:GetChildren()
     local count = 0
 
     for _, mob in ipairs(enemies) do
-        if count >= (_G.MaxBringMobs or 4) then break end
+        if count >= _G.MaxBringMobs then break end
 
         local hum = mob:FindFirstChild("Humanoid")
         local root = mob:FindFirstChild("HumanoidRootPart")
 
         if hum and root and hum.Health > 0 and not IsRaidMob(mob) then
-            if not targetName or mob.Name == targetName then
-                local dist = (root.Position - targetPos).Magnitude
+            local dist = (root.Position - targetPos).Magnitude
 
-                if dist <= (_G.BringRange or 235) and dist > 4 and mob ~= targetMob then
-                    count = count + 1
-                    root.CanCollide = false
-                    if root:FindFirstChild("BodyVelocity") then
-                        pcall(function() root.BodyVelocity:Destroy() end)
+            if dist <= _G.BringRange and not root:GetAttribute("Tweening") then
+                count = count + 1
+                root:SetAttribute("Tweening", true)
+                root.CanCollide = false
+
+                local tween = TweenService:Create(
+                    root,
+                    TweenInfoBring,
+                    { CFrame = CFrame.new(targetPos) }
+                )
+
+                tween:Play()
+                tween.Completed:Once(function()
+                    if root then
+                        root:SetAttribute("Tweening", false)
+                        root.CanCollide = false
                     end
-                    root.CFrame = CFrame.new(targetPos)
-                    root.Velocity = Vector3.zero
-                    root.RotVelocity = Vector3.zero
-                    hum.WalkSpeed = 0
-                end
+                end)
             end
         end
     end
@@ -1030,168 +1031,35 @@ local function GetHRP()
 	return char and char:FindFirstChild("HumanoidRootPart")
 end
 
-function IsAnyFarmActive()
+local function IsAnyFarmActive()
 	if _G.FarmPriorityElf or _G.FarmElfLevelCustom or _G.FarmMastery_S then
 		return true
 	end
-	if _G.StartFarm and (_G.Level or _G.AutoFarm_Bone or _G.AutoFarm_Cake or _G.AutoTyrant) then
-		return true
-	end
-	return (
-		_G.AutoFarmNear or
-		_G.AutoFactory or
-		_G.AutoRaidCastle or
-		_G.AutoFarmChest or
-		_G.AutoBerry or
-		(getgenv()).AutoMaterial or
-		_G.Rdbone or
-		_G.AutoHytHallow or
-		_G.Pray or
-		_G.Trylux or
-		_G.AutoBoss or
-		_G.FarmAllBoss or
+	return _G.StartFarm and (
+		_G.Level or
+		_G.AutoFarm_Bone or
+		_G.AutoFarm_Cake or
 		_G.FarmMastery_Dev or
 		_G.FarmMastery_G or
-		_G.AutoFishing or
-		_G.AutoFishingQuest or
-		_G.TravelDres or
-		_G.AutoZou or
-		_G.obsFarm or
-		_G.AutoKenVTWO or
-		_G.CitizenQuest or
-		_G.FarmEliteHunt or
-		_G.Auto_Tushita or
-		_G.Auto_Yama or
-		_G.AutoTridentW2 or
-		_G.AutoSaw or
-		_G.SwanCoat or
-		_G.MarinesCoat or
-		_G.WardenBoss or
-		_G.AutoColShad or
-		_G.AutoEcBoss or
-		_G.IceBossRen or
-		_G.KeysRen or
-		_G.Greybeard or
-		_G.CDK or
-		_G.CDK_YM or
-		_G.CDK_TS or
-		_G.Tp_LgS or
-		_G.Auto_SwanGG or
-		_G.Auto_Cavender or
-		_G.AutoBigmom or
-		_G.DummyMan or
-		_G.SailBoats or
-		_G.SeaBeast1 or
-		_G.PGB or
-		_G.Shark or
-		_G.Piranha or
-		_G.TerrorShark or
-		_G.MobCrew or
-		_G.HCM or
-		_G.FishBoat or
-		_G.FrozenTP or
-		_G.Leviathan1 or
-		_G.AutofindKitIs or
-		_G.Collect_Ember or
-		_G.tweenShrine or
-		_G.Prehis_Find or
-		_G.Prehis_KillGolem or
-		_G.DragoV1 or
-		_G.AutoFireFlowers or
-		_G.DragoV3 or
-		_G.Relic123 or
-		_G.TrainDrago or
-		_G.FarmBlazeEM or
-		_G.FindMirage or
-		_G.AcientOne or
-		_G.Complete_Trials or
-		_G.Defeating or
-		_G.Auto_Mink or
-		_G.Auto_Human or
-		_G.Auto_Skypiea or
-		_G.Auto_Fish or
-		_G.TwFruits or
-		_G.AutoFarmRaid or
-		_G.AutoKillOrder or
-		_G.AutoAwaken or
-		_G.TpLab or
-		_G.Teleport or
-		_G.TPNpc
-	) == true
-end
-
-function StopFarmMovement()
-	shouldTween = false
-	getgenv().OnFarm = false
-	if CurrentTween then
-		pcall(function()
-			CurrentTween:Cancel()
-		end)
-		CurrentTween = nil
-	end
-	CurrentTarget = nil
-
-	local char = plr.Character
-	if char then
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if hrp then
-			hrp.Anchored = false
-			for _, v in pairs(hrp:GetChildren()) do
-				if v:IsA("BodyVelocity") or v:IsA("BodyPosition") or v:IsA("BodyGyro") or v.Name == "BodyClip" then
-					pcall(function() v:Destroy() end)
-				end
-			end
-			hrp.Velocity = Vector3.zero
-			hrp.RotVelocity = Vector3.zero
-			hrp.AssemblyLinearVelocity = Vector3.zero
-			hrp.AssemblyAngularVelocity = Vector3.zero
-			if C then
-				C.CFrame = hrp.CFrame
-			end
-		end
-		local hum = char:FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum.AutoRotate = true
-			hum.PlatformStand = false
-			hum.Sit = false
-			pcall(function()
-				hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-			end)
-		end
-		if not _G.NoClip then
-			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-					part.CanCollide = true
-				end
-			end
-		end
-	end
+		(getgenv()).AutoMaterial or
+		_G.AutoTyrant or
+		_G.SailBoat_Hydra or _G.WardenBoss or _G.AutoFactory or _G.HighestMirage or _G.HCM or _G.PGB or _G.Leviathan1 or _G.UPGDrago or _G.Complete_Trials or _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or _G.DT_Uzoth or _G.AutoBerry or _G.Prehis_Find or _G.Prehis_Skills or _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or _G.AutoLawKak or _G.TpLab or _G.AutoPhoenixF or _G.AutoFarmChest or _G.AutoHytHallow or _G.LongsWord or _G.BlackSpikey or _G.AutoHolyTorch or _G.TrainDrago or _G.AutoSaber or _G.FarmMastery_Dev or _G.CitizenQuest or _G.AutoEctoplasm or _G.KeysRen or _G.Auto_Rainbow_Haki or _G.obsFarm or _G.AutoBigmom or _G.Doughv2 or _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.TpPly or _G.Bartilo_Quest or _G.FarmEliteHunt or _G.AutoZou or _G.CraftVM or _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.AutoFarmNear or _G.AutoRaidCastle or _G.DarkBladev3 or _G.AutoFarmRaid or _G.Auto_Cake_Prince or _G.Addealer or _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or _G.Shark or _G.TerrorShark or _G.Piranha or _G.MobCrew or _G.SeaBeast1 or _G.FishBoat or _G.Auto or _G.AutoPoleV2 or _G.Auto_SuperHuman or _G.AutoDeathStep or _G.Auto_SharkMan_Karate or _G.Auto_Electric_Claw or _G.AutoDragonTalon or _G.Auto_Def_DarkCoat or _G.Auto_God_Human or _G.Auto_Tushita or _G.AutoMatSoul or _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or _G.Auto_Soul_Guitar or _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or _G.AutoEvoRace or _G.AutoGetQuestBounty or _G.MarinesCoat or _G.TravelDres or _G.Defeating or _G.DummyMan or _G.Auto_Yama or _G.Auto_SwanGG or _G.SwanCoat or _G.AutoEcBoss or _G.Auto_Mink or _G.Auto_Human or _G.Auto_Skypiea or _G.Auto_Fish or _G.CDK_TS or _G.CDK_YM or _G.CDK or _G.AutoFarmGodChalice or _G.AutoFistDarkness or _G.AutoMiror or _G.Teleport or _G.AutoKilo or _G.AutoGetUsoap or _G.Praying or _G.TryLucky or _G.AutoColShad or _G.AutoUnHaki or _G.Auto_DonAcces or _G.AutoRipIngay or _G.DragoV3 or _G.DragoV1 or _G.SailBoats or NextIs or _G.FarmGodChalice or _G.IceBossRen or senth or senth2 or _G.Lvthan or _G.beasthunter or _G.DangerLV or _G.Relic123 or _G.tweenKitsune or _G.Collect_Ember or _G.AutofindKitIs or _G.snaguine or _G.TwFruits or _G.tweenKitShrine or _G.Tp_LgS or _G.Tp_MasterA or _G.tweenShrine
+	)
 end
 
 RunSer.Stepped:Connect(function()
 	pcall(function()
-		local isMoving = (IsAnyFarmActive() and (shouldTween or (CurrentTween and CurrentTween.PlaybackState == Enum.PlaybackState.Playing))) or _G.NoClip
-		local char = plr.Character
-		if char then
-			local hum = char:FindFirstChildOfClass("Humanoid")
-			if isMoving then
+		local isMoving = shouldTween or IsAnyFarmActive() or (CurrentTween and CurrentTween.PlaybackState == Enum.PlaybackState.Playing)
+		if isMoving then
+			local char = plr.Character
+			if char then
+				local hum = char:FindFirstChildOfClass("Humanoid")
 				if hum and hum.Sit then
 					hum.Sit = false
 				end
 				for _, part in ipairs(char:GetDescendants()) do
 					if part:IsA("BasePart") then
 						part.CanCollide = false
-					end
-				end
-			else
-				if hum and hum:GetState() == Enum.HumanoidStateType.StrafingNoPhysics then
-					hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-				end
-				if not _G.NoClip then
-					for _, part in ipairs(char:GetDescendants()) do
-						if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-							part.CanCollide = true
-						end
 					end
 				end
 			end
@@ -1201,7 +1069,7 @@ end)
 
 RunSer.Heartbeat:Connect(function()
 	pcall(function()
-		local isMoving = IsAnyFarmActive() and (shouldTween or (CurrentTween and CurrentTween.PlaybackState == Enum.PlaybackState.Playing))
+		local isMoving = shouldTween or IsAnyFarmActive() or (CurrentTween and CurrentTween.PlaybackState == Enum.PlaybackState.Playing)
 		local hrp = GetHRP()
 		if not hrp then return end
 		if not C or C.Parent ~= workspace then
@@ -1231,30 +1099,16 @@ RunSer.Heartbeat:Connect(function()
 			hrp.RotVelocity = Vector3.new(0, 0, 0)
 		else
 			getgenv().OnFarm = false
-			shouldTween = false
-			if CurrentTween and not IsAnyFarmActive() then
-				pcall(function() CurrentTween:Cancel() end)
-				CurrentTween = nil
-			end
 			C.CFrame = hrp.CFrame
 			local bodyClip = hrp:FindFirstChild("BodyClip")
 			if bodyClip then
 				bodyClip:Destroy()
-			end
-			for _, v in pairs(hrp:GetChildren()) do
-				if v:IsA("BodyVelocity") and v.Name == "BodyClip" then
-					v:Destroy()
-				end
 			end
 		end
 	end)
 end)
 
 _tp = function(targetCFrame)
-	if not IsAnyFarmActive() and not shouldTween then
-		return
-	end
-
 	if typeof(targetCFrame) == "Vector3" then
 		targetCFrame = CFrame.new(targetCFrame)
 	end
@@ -1283,10 +1137,9 @@ _tp = function(targetCFrame)
 
 	if dist <= 1.5 then
 		if CurrentTween then
-			pcall(function() CurrentTween:Cancel() end)
+			CurrentTween:Cancel()
 			CurrentTween = nil
 		end
-		shouldTween = false
 		CurrentTarget = targetCFrame
 		C.CFrame = targetCFrame
 		hrp.CFrame = targetCFrame
@@ -1301,7 +1154,7 @@ _tp = function(targetCFrame)
 	end
 
 	if CurrentTween then
-		pcall(function() CurrentTween:Cancel() end)
+		CurrentTween:Cancel()
 		CurrentTween = nil
 	end
 
@@ -1322,13 +1175,12 @@ _tp = function(targetCFrame)
 		CurrentTween = tw
 		tw:Play()
 		tw.Completed:Connect(function(status)
-			if CurrentTween == tw then
-				CurrentTween = nil
+			if status == Enum.PlaybackState.Completed then
+				if CurrentTarget == targetCFrame then
+					CurrentTween = nil
+				end
 			end
-			shouldTween = false
 		end)
-	else
-		shouldTween = false
 	end
 end
 
@@ -3430,8 +3282,6 @@ sec_v2_1:AddToggle("Toggle_6", {
             elseif _G.SelectedFarmMode == "Tyrant Of The Skies" then
                 _G.AutoTyrant = true
             end
-        else
-            StopFarmMovement()
         end
 
         _G.SaveData["StartFarm_Save"] = v
@@ -3938,7 +3788,6 @@ sec_v2_2:AddToggle("Toggle_8", {
         _G.SaveData["AutoFarmNear_Save"] = I
 
         SaveSettings()
-        if not I then StopFarmMovement() end
     end,
 })
 
@@ -4009,7 +3858,6 @@ sec_v2_2:AddToggle("Toggle_9", {
         _G.SaveData["AutoFactory_Save"] = Value
 
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end,
 })
 
@@ -4058,7 +3906,6 @@ sec_v2_2:AddToggle("Toggle_10", {
         _G.SaveData["AutoRaidCastle_Save"] = I
 
         SaveSettings()
-        if not I then StopFarmMovement() end
     end,
 })
 
@@ -4131,7 +3978,6 @@ sec_v2_3:AddToggle("Toggle_11", {
         _G.SaveData["AutoFarmChest_Save"] = I
 
         SaveSettings()
-        if not I then StopFarmMovement() end
     end,
 })
 
@@ -4145,7 +3991,6 @@ sec_v2_3:AddToggle("Toggle_12", {
         _G.SaveData["AutoBerry_Save"] = I
 
         SaveSettings()
-        if not I then StopFarmMovement() end
 	end,
 });
 
@@ -4178,145 +4023,27 @@ spawn(function()
 	end;
 end);
 
-local CachedChests = {}
-local ChestLastScan = 0
-local CollectedChestCache = {}
-
-local function RefreshChestCache()
-    local results = {}
-    local seen = {}
-    local CollectionService = game:GetService("CollectionService")
-
-    -- 1. Check CollectionService tagged chests
-    pcall(function()
-        for _, chest in ipairs(CollectionService:GetTagged("_ChestTagged")) do
-            local part = chest:IsA("BasePart") and chest or chest:FindFirstChildWhichIsA("BasePart")
-            if part and part.Transparency < 1 and not seen[part] then
-                seen[part] = true
-                table.insert(results, part)
-            end
-        end
-    end)
-
-    -- 2. Scan workspace top-level and Map folders (efficient, targeted scan)
-    pcall(function()
-        for _, obj in ipairs(workspace:GetChildren()) do
-            if obj.Name:find("Chest") or obj:GetAttribute("IsChest") then
-                local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
-                if part and part.Transparency < 1 and not seen[part] then
-                    seen[part] = true
-                    table.insert(results, part)
-                end
-            end
-        end
-
-        local mapFolder = workspace:FindFirstChild("Map")
-        if mapFolder then
-            for _, obj in ipairs(mapFolder:GetDescendants()) do
-                if (obj.Name:find("Chest") or obj:GetAttribute("IsChest")) and (obj:IsA("BasePart") or obj:IsA("Model")) then
-                    local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
-                    if part and part.Transparency < 1 and not seen[part] then
-                        seen[part] = true
-                        table.insert(results, part)
-                    end
-                end
-            end
-        end
-
-        local worldOrigin = workspace:FindFirstChild("_WorldOrigin")
-        if worldOrigin then
-            local locations = worldOrigin:FindFirstChild("Locations")
-            if locations then
-                for _, obj in ipairs(locations:GetDescendants()) do
-                    if (obj.Name:find("Chest") or obj:GetAttribute("IsChest")) and (obj:IsA("BasePart") or obj:IsA("Model")) then
-                        local part = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
-                        if part and part.Transparency < 1 and not seen[part] then
-                            seen[part] = true
-                            table.insert(results, part)
-                        end
-                    end
-                end
-            end
-        end
-    end)
-
-    CachedChests = results
-    ChestLastScan = tick()
-    return results
-end
-
--- Auto Collect Chest Task (Zero-Lag, 60 FPS, Complete Map Coverage)
 spawn(function()
-    while task.wait(0.2) do
+    while wait(Sec) do
         if _G.AutoFarmChest then
             pcall(function()
-                local plr = game.Players.LocalPlayer
-                local char = plr.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-
-                -- Clean expired collected chests from cache (> 25s)
-                local now = tick()
-                for c, t in pairs(CollectedChestCache) do
-                    if now - t > 25 then
-                        CollectedChestCache[c] = nil
-                    end
-                end
-
-                -- Refresh chest list if empty or cache is older than 6 seconds
-                if #CachedChests == 0 or (now - ChestLastScan > 6) then
-                    RefreshChestCache()
-                end
-
-                -- Find nearest valid chest
-                local targetChest = nil
-                local shortestDist = math.huge
-
-                for _, chest in ipairs(CachedChests) do
-                    if chest and chest.Parent and chest.Transparency < 1 and not CollectedChestCache[chest] then
-                        local dist = (chest.Position - hrp.Position).Magnitude
-                        if dist < shortestDist then
-                            shortestDist = dist
-                            targetChest = chest
+                local CollectionService = game:GetService("CollectionService")
+                local Players = game:GetService("Players")
+                local plrChar = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+                local d = plrChar:GetPivot().Position
+                local Chests = CollectionService:GetTagged("_ChestTagged")
+                local minDist, nearestChest = math.huge, nil
+                for _, chest in pairs(Chests) do
+                    local dist = (chest:GetPivot().Position - d).Magnitude
+                    if not SelectedIsland or chest:IsDescendantOf(SelectedIsland) then
+                        if not chest:GetAttribute("IsDisabled") and dist < minDist then
+                            minDist = dist
+                            nearestChest = chest
                         end
                     end
                 end
-
-                if targetChest and targetChest.Parent and _G.AutoFarmChest then
-                    local chestPos = targetChest.Position
-                    local startTime = tick()
-                    local maxWait = math.clamp(shortestDist / 300, 1.5, 30)
-
-                    -- Start tween to chest
-                    _tp(CFrame.new(chestPos))
-
-                    -- Wait until close or timeout (NO spammed _tp calls!)
-                    while _G.AutoFarmChest and targetChest.Parent and targetChest.Transparency < 1 and (tick() - startTime < maxWait) do
-                        local curDist = (hrp.Position - chestPos).Magnitude
-                        if curDist <= 8 then
-                            break
-                        end
-                        task.wait(0.1)
-                    end
-
-                    -- Touch and collect chest
-                    if _G.AutoFarmChest and targetChest.Parent then
-                        hrp.CFrame = CFrame.new(chestPos)
-                        if firetouchinterest then
-                            pcall(function()
-                                firetouchinterest(hrp, targetChest, 0)
-                                task.wait(0.03)
-                                firetouchinterest(hrp, targetChest, 1)
-                            end)
-                        end
-                        task.wait(0.08)
-                    end
-
-                    CollectedChestCache[targetChest] = tick()
-                else
-                    -- No more chests in current area/island, wait and rescan
-                    task.wait(1.5)
-                    RefreshChestCache()
+                if nearestChest then
+                    _tp(nearestChest:GetPivot())
                 end
             end)
         end
@@ -4347,7 +4074,6 @@ sec_v2_4:AddToggle("Toggle_13", {
 
         _G.SaveData["AutoMaterial_Save"] = I
         SaveSettings()
-        if not I then StopFarmMovement() end
 	end,
 })
 
@@ -4399,7 +4125,6 @@ sec_v2_5:AddToggle("Toggle_14", {
     Default = false,
     Callback = function(Value)
         _G.Rdbone = Value
-        if not Value then StopFarmMovement() end
     end,
 })
 
@@ -4416,7 +4141,6 @@ sec_v2_5:AddToggle("Toggle_15", {
     Default = false,
     Callback = function(v)
         _G.AutoHytHallow = v
-        if not v then StopFarmMovement() end
     end,
 })
 
@@ -4455,7 +4179,6 @@ sec_v2_5:AddToggle("Toggle_16", {
     Default = false,
     Callback = function(v)
         _G.Pray = v
-        if not v then StopFarmMovement() end
     end
 })
 
@@ -4488,7 +4211,6 @@ sec_v2_5:AddToggle("Toggle_17", {
     Default = false,
     Callback = function(v)
         _G.Trylux = v
-        if not v then StopFarmMovement() end
     end
 })
 
@@ -4591,7 +4313,6 @@ sec_v2_6:AddToggle("Toggle_18", {
         if v then _G.FarmAllBoss = false end
         _G.SaveData["AutoBoss_Save"] = v
         SaveSettings()
-        if not v then StopFarmMovement() end
     end
 })
 
@@ -4614,7 +4335,6 @@ sec_v2_6:AddToggle("Toggle_20", {
         _G.CurrentTargetBoss = nil
         _G.SaveData["FarmAllBosses_Save"] = v
         SaveSettings()
-        if not v then StopFarmMovement() end
     end
 })
 
@@ -4801,7 +4521,6 @@ sec_v2_7:AddToggle("Toggle_21", {
         _G.FarmMastery_Dev = I
         _G.SaveData["FarmMastery_Dev_Save"] = I
         SaveSettings()
-        if not I then StopFarmMovement() end
     end
 })
 
@@ -4897,7 +4616,6 @@ sec_v2_7:AddToggle("Toggle_27", {
         _G.FarmMastery_G = I
         _G.SaveData["FarmMastery_G_Save"] = I
         SaveSettings()
-        if not I then StopFarmMovement() end
     end
 })
 
@@ -4979,7 +4697,6 @@ sec_v2_7:AddToggle("Toggle_28", {
         _G.FarmMastery_S = I
         _G.SaveData["FarmMastery_S_Save"] = I
         SaveSettings()
-        if not I then StopFarmMovement() end
     end
 })
 
@@ -5442,7 +5159,6 @@ sec_v5_1:AddToggle("Toggle_39", {
         _G.AutoFishing = Value
         _G.SaveData["Fish_AutoFishing"] = Value
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -5523,7 +5239,6 @@ if World1 then
             _G.TravelDres = Value
             _G.SaveData["TravelDres_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -5582,7 +5297,6 @@ if World2 then
             _G.AutoZou = Value
             _G.SaveData["AutoZou_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -5788,7 +5502,6 @@ sec_v3_3:AddToggle("Toggle_46", {
         _G.obsFarm = I
         _G.SaveData["AutoObsFarm_Save"] = I
         SaveSettings()
-        if not I then StopFarmMovement() end
     end,
 })
 
@@ -5859,7 +5572,6 @@ if World3 then
             _G.AutoKenVTWO = I
             _G.SaveData["AutoKenV2_Save"] = I
             SaveSettings()
-        if not I then StopFarmMovement() end
         end,
     })
 
@@ -6258,7 +5970,6 @@ if World2 then
             _G.AutoTridentW2 = Value
             _G.SaveData["AutoTridentW2_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6289,7 +6000,6 @@ if World1 then
             _G.AutoSaw = Value
             _G.SaveData["AutoSaw_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6320,7 +6030,6 @@ if World2 then
             _G.SwanCoat = Value
             _G.SaveData["SwanCoat_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6351,7 +6060,6 @@ if World1 then
             _G.MarinesCoat = Value
             _G.SaveData["MarinesCoat_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6382,7 +6090,6 @@ if World1 then
             _G.WardenBoss = Value
             _G.SaveData["WardenBoss_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6413,7 +6120,6 @@ if World1 then
             _G.AutoColShad = Value
             _G.SaveData["AutoColShad_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6444,7 +6150,6 @@ if World2 then
             _G.AutoEcBoss = Value
             _G.SaveData["AutoEcBoss_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6484,7 +6189,6 @@ if World2 then
             _G.IceBossRen = Value
             _G.SaveData["IceBossRen_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6513,7 +6217,6 @@ if World2 then
             _G.KeysRen = Value
             _G.SaveData["KeysRen_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6551,7 +6254,6 @@ if World2 or World3 then
             _G.AutoPoleV2 = Value
             _G.SaveData["AutoPoleV2_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6605,7 +6307,6 @@ if World1 then
             _G.Greybeard = Value
             _G.SaveData["Greybeard_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6640,7 +6341,6 @@ if World3 then
             _G.Auto_Soul_Guitar = Value
             _G.SaveData["Auto_Soul_Guitar_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6698,7 +6398,6 @@ if World3 then
             _G.CDK_YM = Value
             _G.SaveData["CDK_YM_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6719,7 +6418,6 @@ if World3 then
             _G.CDK = Value
             _G.SaveData["CDK_Boss_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6802,7 +6500,6 @@ if World2 then
             _G.Auto_SwanGG = Value
             _G.SaveData["Auto_SwanGG_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6833,7 +6530,6 @@ if World3 then
             _G.Auto_Cavender = Value
             _G.SaveData["Auto_Cavender_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6864,7 +6560,6 @@ if World3 then
             _G.AutoBigmom = Value
             _G.SaveData["AutoBigmom_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -6895,7 +6590,6 @@ if World3 then
             _G.DummyMan = Value
             _G.SaveData["DummyMan_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -7142,7 +6836,6 @@ sec_v6_2:AddToggle("Toggle_80", {
         Default = false,
         Callback = function(Value)
             _G.SeaBeast1 = Value
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -7151,7 +6844,6 @@ sec_v6_2:AddToggle("Toggle_81", {
     Default = false,
     Callback = function(Value)
         _G.PGB = Value
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -7167,7 +6859,6 @@ if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
         Default = false,
         Callback = function(Value)
             _G.Shark = Value
-        if not Value then StopFarmMovement() end
         end
     })
     sec_v6_2:AddToggle("Toggle_83", {
@@ -7175,7 +6866,6 @@ if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
         Default = false,
         Callback = function(Value)
             _G.Piranha = Value
-        if not Value then StopFarmMovement() end
         end
     })
     sec_v6_2:AddToggle("Toggle_84", {
@@ -7183,7 +6873,6 @@ if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
         Default = false,
         Callback = function(Value)
             _G.TerrorShark = Value
-        if not Value then StopFarmMovement() end
         end
     })
     sec_v6_2:AddToggle("Toggle_85", {
@@ -7191,7 +6880,6 @@ if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
         Default = false,
         Callback = function(Value)
             _G.MobCrew = Value
-        if not Value then StopFarmMovement() end
         end
     })
     sec_v6_2:AddToggle("Toggle_86", {
@@ -7199,7 +6887,6 @@ if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
         Default = false,
         Callback = function(Value)
             _G.HCM = Value
-        if not Value then StopFarmMovement() end
         end
     })
     sec_v6_2:AddToggle("Toggle_87", {
@@ -7207,7 +6894,6 @@ if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
         Default = false,
         Callback = function(Value)
             _G.FishBoat = Value
-        if not Value then StopFarmMovement() end
         end
     })
 end
@@ -7229,7 +6915,6 @@ if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
             _G.FrozenTP = Value
             _G.SaveData["FrozenTP_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -7251,7 +6936,6 @@ if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
         Default = false,
         Callback = function(Value)
             _G.Leviathan1 = Value
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -7264,7 +6948,6 @@ if game.PlaceId == 7449423635 or game.PlaceId == 100117331123089 then
             _G.AutofindKitIs = Value
             _G.SaveData["FindKitsune_Save"] = Value
             SaveSettings()
-        if not Value then StopFarmMovement() end
         end
     })
 
@@ -7726,7 +7409,6 @@ sec_v7_3:AddToggle("Toggle_118", {
         _G.Prehis_Find = Value
         _G.SaveData["Prehis_Find_Save"] = Value
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -8509,7 +8191,6 @@ sec_v8_2:AddToggle("Toggle_137", {
         _G.FindMirage = Value
         _G.SaveData["FindMirage_Save"] = Value
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -8848,7 +8529,6 @@ sec_v8_5:AddToggle("Toggle_145", {
         _G.Lver = Value
         _G.SaveData["Lver_Save"] = Value
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -9109,7 +8789,6 @@ sec_v8_7:AddToggle("Toggle_152", {
         _G.Auto_Mink = Value
         _G.SaveData["Auto_Mink_Save"] = Value
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -9120,7 +8799,6 @@ sec_v8_7:AddToggle("Toggle_153", {
         _G.Auto_Human = Value
         _G.SaveData["Auto_Human_Save"] = Value
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -9131,7 +8809,6 @@ sec_v8_7:AddToggle("Toggle_154", {
         _G.Auto_Skypiea = Value
         _G.SaveData["Auto_Skypiea_Save"] = Value
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -9142,7 +8819,6 @@ sec_v8_7:AddToggle("Toggle_155", {
         _G.Auto_Fish = Value
         _G.SaveData["Auto_Fish_Save"] = Value
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -9481,7 +9157,6 @@ sec_v9_2:AddToggle("Toggle_159", {
         _G.TwFruits = Value
         _G.SaveData["TwFruits_Save"] = Value
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -9982,7 +9657,6 @@ sec_v10_5:AddToggle("Toggle_167", {
         _G.AutoDungeonFarm = Value
         _G.SaveData["Raid_AutoDungeonFarm"] = Value
         if not Value then CurrentTargetIsland = nil end
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -10192,7 +9866,6 @@ sec_v10_8:AddToggle("Toggle_171", {
         _G.AutoKillOrder = Value
         _G.SaveData["Raid_AutoKillOrder"] = Value
         SaveSettings()
-        if not Value then StopFarmMovement() end
     end
 })
 
@@ -10406,7 +10079,6 @@ sec_v11_2:AddToggle("Toggle_174", {
                 end
             end)
         end
-        if not Value then StopFarmMovement() end
     end,
 })
 
@@ -10486,7 +10158,6 @@ sec_v11_4:AddToggle("Toggle_175", {
         _G.TPNpc = I
         _G.SaveData["AutoTPNPC_Save"] = I
         SaveSettings()
-        if not I then StopFarmMovement() end
     end,
 })
 
@@ -10622,7 +10293,7 @@ end)
 
 sec_v13_2 = v13:AddSection("ESP")
 
-local ESP_TAG = "QuantumModernESP"
+local NumberESP = math.random(1, 1000000)
 local PlayerESPEnabled = false
 local IslandESPEnabled = false
 local FruitESPEnabled = false
@@ -10633,438 +10304,421 @@ local AdvDealerESPEnabled = false
 local HakiColorESPEnabled = false
 local BerryESPEnabled = false
 
-local function FormatDist(studs)
-    local meters = math.floor(studs / 3)
-    if meters >= 1000 then
-        return string.format("%.1fkm", meters / 1000)
-    else
-        return tostring(meters) .. "m"
-    end
+local function isnil(obj)
+    return obj == nil
 end
 
--- Helper to create/update modern pill-badge ESP UI
-local function ApplyModernESP(adornee, id, cfg)
-    if not adornee then return end
+local function round(num)
+    return math.floor(tonumber(num) + 0.5)
+end
 
-    local guiName = ESP_TAG .. "_" .. id
-    local existing = adornee:FindFirstChild(guiName)
+local function UpdatePlayerESP()
+    for _, player in pairs(game.Players:GetChildren()) do
+        pcall(function()
+            if not isnil(player.Character) and player ~= game.Players.LocalPlayer then
+                if PlayerESPEnabled then
+                    if not isnil(player.Character.Head) and not player.Character.Head:FindFirstChild("NameESP" .. NumberESP) then
+                        local billboard = Instance.new("BillboardGui", player.Character.Head)
+                        billboard.Name = "NameESP" .. NumberESP
+                        billboard.ExtentsOffset = Vector3.new(0, 1, 0)
+                        billboard.Size = UDim2.new(1, 200, 1, 45)
+                        billboard.Adornee = player.Character.Head
+                        billboard.AlwaysOnTop = true
 
-    if not existing then
-        local billboard = Instance.new("BillboardGui")
-        billboard.Name = guiName
-        billboard.Adornee = adornee
-        billboard.AlwaysOnTop = true
-        billboard.LightInfluence = 0
-        billboard.MaxDistance = cfg.MaxDistance or 15000
-        billboard.Size = cfg.Size or UDim2.new(0, 160, 0, cfg.Height or 28)
-        billboard.ExtentsOffset = cfg.Offset or Vector3.new(0, 2.5, 0)
-        billboard.Parent = adornee
+                        local textLabel = Instance.new("TextLabel", billboard)
+                        textLabel.Font = Enum.Font.Code
+                        textLabel.TextSize = 14
+                        textLabel.TextWrapped = true
+                        textLabel.Size = UDim2.new(1, 0, 1, 0)
+                        textLabel.TextYAlignment = Enum.TextYAlignment.Top
+                        textLabel.BackgroundTransparency = 1
+                        textLabel.TextStrokeTransparency = 0.5
 
-        local pillFrame = Instance.new("Frame")
-        pillFrame.Name = "Pill"
-        pillFrame.Size = UDim2.new(1, 0, 1, 0)
-        pillFrame.BackgroundColor3 = Color3.fromRGB(15, 17, 24)
-        pillFrame.BackgroundTransparency = 0.35
-        pillFrame.BorderSizePixel = 0
-        pillFrame.Parent = billboard
+                        local hpPercent = round((player.Character.Humanoid.Health * 100) / player.Character.Humanoid.MaxHealth)
+                        local distance = round((game.Players.LocalPlayer.Character.Head.Position - player.Character.Head.Position).Magnitude / 3)
 
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 6)
-        corner.Parent = pillFrame
+                        textLabel.Text = player.Name .. "\n" .. hpPercent .. "% " .. distance .. "M"
 
-        local stroke = Instance.new("UIStroke")
-        stroke.Name = "Stroke"
-        stroke.Thickness = 1.2
-        stroke.Color = cfg.AccentColor or Color3.fromRGB(0, 229, 255)
-        stroke.Transparency = 0.25
-        stroke.Parent = pillFrame
+                        if player.Team == game.Players.LocalPlayer.Team then
+                            textLabel.TextColor3 = Color3.new(0, 0, 255)
+                        else
+                            textLabel.TextColor3 = Color3.new(255, 0, 0)
+                        end
+                    else
+                        if player.Character.Head:FindFirstChild("NameESP" .. NumberESP) then
+                            local label = player.Character.Head["NameESP" .. NumberESP].TextLabel
+                            local hpPercent = round((player.Character.Humanoid.Health * 100) / player.Character.Humanoid.MaxHealth)
+                            local distance = round((game.Players.LocalPlayer.Character.Head.Position - player.Character.Head.Position).Magnitude / 3)
 
-        local padding = Instance.new("UIPadding")
-        padding.PaddingLeft = UDim.new(0, 6)
-        padding.PaddingRight = UDim.new(0, 6)
-        padding.PaddingTop = UDim.new(0, 2)
-        padding.PaddingBottom = UDim.new(0, 2)
-        padding.Parent = pillFrame
-
-        local label = Instance.new("TextLabel")
-        label.Name = "Title"
-        label.Size = UDim2.new(1, 0, cfg.HasHealth and 0.65 or 1, 0)
-        label.BackgroundTransparency = 1
-        label.Font = Enum.Font.GothamBold
-        label.TextSize = 12
-        label.RichText = true
-        label.TextColor3 = Color3.fromRGB(255, 255, 255)
-        label.TextStrokeTransparency = 0.5
-        label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-        label.TextXAlignment = Enum.TextXAlignment.Center
-        label.TextYAlignment = Enum.TextYAlignment.Center
-        label.Text = cfg.Text or ""
-        label.Parent = pillFrame
-
-        if cfg.HasHealth then
-            local hpBg = Instance.new("Frame")
-            hpBg.Name = "HpBg"
-            hpBg.Size = UDim2.new(1, 0, 0, 3)
-            hpBg.Position = UDim2.new(0, 0, 1, -4)
-            hpBg.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-            hpBg.BorderSizePixel = 0
-            hpBg.Parent = pillFrame
-
-            local hpCorner = Instance.new("UICorner")
-            hpCorner.CornerRadius = UDim.new(1, 0)
-            hpCorner.Parent = hpBg
-
-            local hpFill = Instance.new("Frame")
-            hpFill.Name = "HpFill"
-            hpFill.Size = UDim2.new(math.clamp((cfg.HealthPercent or 100) / 100, 0, 1), 0, 1, 0)
-            hpFill.BackgroundColor3 = cfg.HealthColor or Color3.fromRGB(0, 255, 136)
-            hpFill.BorderSizePixel = 0
-            hpFill.Parent = hpBg
-
-            local hpFillCorner = Instance.new("UICorner")
-            hpFillCorner.CornerRadius = UDim.new(1, 0)
-            hpFillCorner.Parent = hpFill
-        end
-    else
-        local pill = existing:FindFirstChild("Pill")
-        if pill then
-            local label = pill:FindFirstChild("Title")
-            if label then
-                label.Text = cfg.Text or ""
-            end
-            local stroke = pill:FindFirstChild("Stroke")
-            if stroke and cfg.AccentColor then
-                stroke.Color = cfg.AccentColor
-            end
-            local hpBg = pill:FindFirstChild("HpBg")
-            if hpBg then
-                local hpFill = hpBg:FindFirstChild("HpFill")
-                if hpFill then
-                    hpFill.Size = UDim2.new(math.clamp((cfg.HealthPercent or 100) / 100, 0, 1), 0, 1, 0)
-                    if cfg.HealthColor then
-                        hpFill.BackgroundColor3 = cfg.HealthColor
+                            label.Text = player.Name .. "\n" .. hpPercent .. "% " .. distance .. "M"
+                        end
                     end
                 end
             end
-        end
+        end)
     end
 end
 
-local function RemoveModernESP(adornee, id)
-    if not adornee then return end
-    local guiName = ESP_TAG .. "_" .. id
-    local existing = adornee:FindFirstChild(guiName)
-    if existing then
-        pcall(function() existing:Destroy() end)
-    end
-end
+local function UpdateIslandESP()
+    for _, location in pairs(workspace._WorldOrigin.Locations:GetChildren()) do
+        pcall(function()
+            if IslandESPEnabled and location.Name ~= "Sea" then
+                if not location:FindFirstChild("NameESP") then
+                    local billboard = Instance.new("BillboardGui", location)
+                    billboard.Name = "NameESP"
+                    billboard.ExtentsOffset = Vector3.new(0, 1, 0)
+                    billboard.Size = UDim2.new(1, 200, 1, 30)
+                    billboard.Adornee = location
+                    billboard.AlwaysOnTop = true
 
--- 1. Player ESP Update
-local function UpdatePlayerESP()
-    local localPlr = game.Players.LocalPlayer
-    local myHrp = localPlr.Character and localPlr.Character:FindFirstChild("HumanoidRootPart")
+                    local textLabel = Instance.new("TextLabel", billboard)
+                    textLabel.Font = Enum.Font.Code
+                    textLabel.TextSize = 14
+                    textLabel.TextWrapped = true
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.TextYAlignment = Enum.TextYAlignment.Top
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.TextStrokeTransparency = 0.5
+                    textLabel.TextColor3 = Color3.fromRGB(98, 252, 252)
 
-    for _, player in ipairs(game.Players:GetPlayers()) do
-        if player ~= localPlr then
-            local char = player.Character
-            local head = char and char:FindFirstChild("Head")
-            local hum = char and char:FindFirstChildOfClass("Humanoid")
-
-            if head and hum and hum.Health > 0 and PlayerESPEnabled then
-                local dist = myHrp and (head.Position - myHrp.Position).Magnitude or 0
-                local hpPct = math.floor((hum.Health / hum.MaxHealth) * 100)
-                local isAlly = (player.Team and localPlr.Team and player.Team == localPlr.Team)
-                local accent = isAlly and Color3.fromRGB(0, 229, 255) or Color3.fromRGB(255, 59, 92)
-                local hpColor = hpPct > 50 and Color3.fromRGB(0, 255, 136) or (hpPct > 20 and Color3.fromRGB(255, 204, 0) or Color3.fromRGB(255, 50, 50))
-
-                local text = string.format("<b>%s</b> <font color=\"#AAAAAA\">[%s]</font> <font color=\"#00FF88\">%d%%</font>", player.DisplayName, FormatDist(dist), hpPct)
-
-                ApplyModernESP(head, "Player", {
-                    Text = text,
-                    AccentColor = accent,
-                    HasHealth = true,
-                    HealthPercent = hpPct,
-                    HealthColor = hpColor,
-                    Height = 32,
-                    Size = UDim2.new(0, 180, 0, 32),
-                    Offset = Vector3.new(0, 2.5, 0)
-                })
-            else
-                if head then
-                    RemoveModernESP(head, "Player")
+                    local distance = round((game.Players.LocalPlayer.Character.Head.Position - location.Position).Magnitude / 3)
+                    textLabel.Text = location.Name .. "\n" .. distance .. "M"
+                else
+                    local label = location.NameESP.TextLabel
+                    local distance = round((game.Players.LocalPlayer.Character.Head.Position - location.Position).Magnitude / 3)
+                    label.Text = location.Name .. "\n" .. distance .. "M"
                 end
             end
-        end
+        end)
     end
 end
 
--- 2. Island ESP Update
-local function UpdateIslandESP()
-    local localPlr = game.Players.LocalPlayer
-    local myHrp = localPlr.Character and localPlr.Character:FindFirstChild("HumanoidRootPart")
-    local locations = workspace:FindFirstChild("_WorldOrigin") and workspace._WorldOrigin:FindFirstChild("Locations")
-
-    if locations then
-        for _, loc in ipairs(locations:GetChildren()) do
-            if loc.Name ~= "Sea" and IslandESPEnabled then
-                local dist = myHrp and (loc.Position - myHrp.Position).Magnitude or 0
-                local text = string.format("🏝️ <b>%s</b> <font color=\"#00E5FF\">[%s]</font>", loc.Name, FormatDist(dist))
-
-                ApplyModernESP(loc, "Island", {
-                    Text = text,
-                    AccentColor = Color3.fromRGB(0, 230, 118),
-                    Height = 24,
-                    Size = UDim2.new(0, 170, 0, 24),
-                    Offset = Vector3.new(0, 10, 0)
-                })
-            else
-                RemoveModernESP(loc, "Island")
-            end
-        end
-    end
-end
-
--- 3. Fruit ESP Update
 local function UpdateFruitESP()
-    local localPlr = game.Players.LocalPlayer
-    local myHrp = localPlr.Character and localPlr.Character:FindFirstChild("HumanoidRootPart")
+    for _, obj in pairs(workspace:GetChildren()) do
+        pcall(function()
+            if FruitESPEnabled and string.find(obj.Name, "Fruit") and obj:FindFirstChild("Handle") then
+                if not obj.Handle:FindFirstChild("NameESP" .. NumberESP) then
+                    local billboard = Instance.new("BillboardGui", obj.Handle)
+                    billboard.Name = "NameESP" .. NumberESP
+                    billboard.ExtentsOffset = Vector3.new(0, 1, 0)
+                    billboard.Size = UDim2.new(1, 200, 1, 30)
+                    billboard.Adornee = obj.Handle
+                    billboard.AlwaysOnTop = true
 
-    for _, obj in ipairs(workspace:GetChildren()) do
-        if obj.Name:find("Fruit") and obj:FindFirstChild("Handle") then
-            local handle = obj.Handle
-            if FruitESPEnabled then
-                local dist = myHrp and (handle.Position - myHrp.Position).Magnitude or 0
-                local fruitName = obj.Name:gsub("Fruit", ""):gsub(" ", "") .. " Fruit"
-                local text = string.format("🍎 <b>%s</b> <font color=\"#00E5FF\">[%s]</font>", fruitName, FormatDist(dist))
+                    local textLabel = Instance.new("TextLabel", billboard)
+                    textLabel.Font = Enum.Font.Code
+                    textLabel.TextSize = 14
+                    textLabel.TextWrapped = true
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.TextYAlignment = Enum.TextYAlignment.Top
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.TextStrokeTransparency = 0.5
+                    textLabel.TextColor3 = Color3.new(255, 255, 255)
 
-                ApplyModernESP(handle, "Fruit", {
-                    Text = text,
-                    AccentColor = Color3.fromRGB(255, 145, 0),
-                    Height = 24,
-                    Size = UDim2.new(0, 180, 0, 24),
-                    Offset = Vector3.new(0, 2, 0)
-                })
-            else
-                RemoveModernESP(handle, "Fruit")
+                    local distance = round((game.Players.LocalPlayer.Character.Head.Position - obj.Handle.Position).Magnitude / 3)
+                    textLabel.Text = obj.Name .. "\n" .. distance .. "M"
+                else
+                    local label = obj.Handle["NameESP" .. NumberESP].TextLabel
+                    local distance = round((game.Players.LocalPlayer.Character.Head.Position - obj.Handle.Position).Magnitude / 3)
+                    label.Text = obj.Name .. "\n" .. distance .. "M"
+                end
             end
-        end
+        end)
     end
 end
 
--- 4. Flower ESP Update
 local function UpdateFlowerESP()
-    local localPlr = game.Players.LocalPlayer
-    local myHrp = localPlr.Character and localPlr.Character:FindFirstChild("HumanoidRootPart")
+    for _, obj in pairs(workspace:GetChildren()) do
+        pcall(function()
+            if FlowerESPEnabled and (obj.Name == "Flower2" or obj.Name == "Flower1") then
+                if not obj:FindFirstChild("NameESP" .. NumberESP) then
+                    local billboard = Instance.new("BillboardGui", obj)
+                    billboard.Name = "NameESP" .. NumberESP
+                    billboard.ExtentsOffset = Vector3.new(0, 1, 0)
+                    billboard.Size = UDim2.new(1, 200, 1, 30)
+                    billboard.Adornee = obj
+                    billboard.AlwaysOnTop = true
 
-    for _, obj in ipairs(workspace:GetChildren()) do
-        if obj.Name == "Flower1" or obj.Name == "Flower2" or obj.Name == "Flower3" then
-            if FlowerESPEnabled then
-                local dist = myHrp and (obj.Position - myHrp.Position).Magnitude or 0
-                local name = (obj.Name == "Flower1" and "Blue Flower") or (obj.Name == "Flower2" and "Red Flower") or "Yellow Flower"
-                local accent = (obj.Name == "Flower1" and Color3.fromRGB(0, 176, 255)) or (obj.Name == "Flower2" and Color3.fromRGB(255, 23, 68)) or Color3.fromRGB(255, 234, 0)
-                local text = string.format("🌸 <b>%s</b> <font color=\"#AAAAAA\">[%s]</font>", name, FormatDist(dist))
+                    local textLabel = Instance.new("TextLabel", billboard)
+                    textLabel.Font = Enum.Font.Code
+                    textLabel.TextSize = 14
+                    textLabel.TextWrapped = true
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.TextYAlignment = Enum.TextYAlignment.Top
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.TextStrokeTransparency = 0.5
+                    textLabel.TextColor3 = Color3.fromRGB(88, 214, 252)
 
-                ApplyModernESP(obj, "Flower", {
-                    Text = text,
-                    AccentColor = accent,
-                    Height = 24,
-                    Size = UDim2.new(0, 160, 0, 24),
-                    Offset = Vector3.new(0, 2, 0)
-                })
-            else
-                RemoveModernESP(obj, "Flower")
+                    local flowerName = (obj.Name == "Flower1") and "Blue Flower" or "Red Flower"
+                    local distance = round((game.Players.LocalPlayer.Character.Head.Position - obj.Position).Magnitude / 3)
+                    textLabel.Text = flowerName .. "\n" .. distance .. "M"
+                else
+                    local label = obj["NameESP" .. NumberESP].TextLabel
+                    local flowerName = (obj.Name == "Flower1") and "Blue Flower" or "Red Flower"
+                    local distance = round((game.Players.LocalPlayer.Character.Head.Position - obj.Position).Magnitude / 3)
+                    label.Text = flowerName .. "\n" .. distance .. "M"
+                end
             end
-        end
+        end)
     end
 end
 
--- 5. Chest ESP Update
 local function UpdateChestESP()
-    local localPlr = game.Players.LocalPlayer
-    local myHrp = localPlr.Character and localPlr.Character:FindFirstChild("HumanoidRootPart")
+    local CollectionService = game:GetService("CollectionService")
+    local Chests = CollectionService:GetTagged("_ChestTagged")
 
     if not ChestESPEnabled then
-        for _, chest in ipairs(CachedChests) do
-            if chest then RemoveModernESP(chest, "Chest") end
+        for _, chest in ipairs(Chests) do
+            pcall(function()
+                local attachment = chest:FindFirstChild("ChestESPAttachment")
+                if attachment then
+                    attachment:Destroy()
+                end
+            end)
         end
         return
     end
 
-    if #CachedChests == 0 or (tick() - ChestLastScan > 5) then
-        RefreshChestCache()
-    end
+    for _, chest in ipairs(Chests) do
+        pcall(function()
+            local chestPos = chest:GetPivot().Position
+            local distance = round((game.Players.LocalPlayer.Character.Head.Position - chestPos).Magnitude / 3)
+            local chestName = chest.Name:gsub("Label", "")
 
-    for _, chest in ipairs(CachedChests) do
-        if chest and chest.Parent and chest.Transparency < 1 then
-            local dist = myHrp and (chest.Position - myHrp.Position).Magnitude or 0
-            local cName = chest.Name
-            local icon = "📦"
-            local color = Color3.fromRGB(200, 200, 200)
+            local attachment = chest:FindFirstChild("ChestESPAttachment")
+            if not attachment then
+                attachment = Instance.new("Attachment")
+                attachment.Name = "ChestESPAttachment"
+                attachment.Parent = chest
+                attachment.Position = Vector3.new(0, 3, 0)
 
-            if cName:find("Diamond") then
-                icon = "💎"
-                color = Color3.fromRGB(0, 255, 255)
-            elseif cName:find("Frag") then
-                icon = "🟣"
-                color = Color3.fromRGB(213, 0, 249)
-            elseif cName:find("3") or cName:find("Gold") then
-                icon = "🟡"
-                color = Color3.fromRGB(255, 215, 0)
-            elseif cName:find("2") or cName:find("Silver") then
-                icon = "⚪"
-                color = Color3.fromRGB(224, 224, 224)
-            end
+                local billboard = Instance.new("BillboardGui", attachment)
+                billboard.Name = "NameESP"
+                billboard.Size = UDim2.new(0, 200, 0, 30)
+                billboard.Adornee = attachment
+                billboard.ExtentsOffset = Vector3.new(0, 1, 0)
+                billboard.AlwaysOnTop = true
 
-            local text = string.format("%s <b>%s</b> <font color=\"#00E5FF\">[%s]</font>", icon, cName:gsub("Chest", " Chest"), FormatDist(dist))
-
-            ApplyModernESP(chest, "Chest", {
-                Text = text,
-                AccentColor = color,
-                Height = 24,
-                Size = UDim2.new(0, 160, 0, 24),
-                Offset = Vector3.new(0, 2, 0)
-            })
-        else
-            if chest then RemoveModernESP(chest, "Chest") end
-        end
-    end
-end
-
--- 6. Mirage Gear ESP
-local function UpdateGearESP()
-    local localPlr = game.Players.LocalPlayer
-    local myHrp = localPlr.Character and localPlr.Character:FindFirstChild("HumanoidRootPart")
-    local mysticIsland = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("MysticIsland")
-
-    if mysticIsland then
-        for _, part in ipairs(mysticIsland:GetDescendants()) do
-            if part.Name == "Part" and part.Material == Enum.Material.Neon then
-                if GearESPEnabled then
-                    local dist = myHrp and (part.Position - myHrp.Position).Magnitude or 0
-                    local text = string.format("⚙️ <b>Mirage Gear</b> <font color=\"#00E5FF\">[%s]</font>", FormatDist(dist))
-                    ApplyModernESP(part, "Gear", {
-                        Text = text,
-                        AccentColor = Color3.fromRGB(0, 255, 255),
-                        Height = 24,
-                        Size = UDim2.new(0, 160, 0, 24),
-                        Offset = Vector3.new(0, 2, 0)
-                    })
-                else
-                    RemoveModernESP(part, "Gear")
+                local textLabel = Instance.new("TextLabel", billboard)
+                textLabel.Font = Enum.Font.Code
+                textLabel.TextSize = 14
+                textLabel.TextWrapped = true
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.TextYAlignment = Enum.TextYAlignment.Top
+                textLabel.BackgroundTransparency = 1
+                textLabel.TextStrokeTransparency = 0.5
+                textLabel.TextColor3 = Color3.fromRGB(80, 245, 245)
+                textLabel.Text = "[" .. chestName .. "] " .. distance .. "M"
+            else
+                if attachment:FindFirstChild("NameESP") then
+                    attachment.NameESP.TextLabel.Text = "[" .. chestName .. "] " .. distance .. "M"
                 end
             end
+        end)
+    end
+end
+
+local function UpdateGearESP()
+    local MysticIsland = workspace.Map:FindFirstChild("MysticIsland")
+    if MysticIsland then
+        for _, part in pairs(MysticIsland:GetDescendants()) do
+            pcall(function()
+                if GearESPEnabled and part.Name == "Part" and part.Material == Enum.Material.Neon then
+                    if not part:FindFirstChild("NameESP") then
+                        local billboard = Instance.new("BillboardGui", part)
+                        billboard.Name = "NameESP"
+                        billboard.ExtentsOffset = Vector3.new(0, 1, 0)
+                        billboard.Size = UDim2.new(1, 200, 1, 30)
+                        billboard.Adornee = part
+                        billboard.AlwaysOnTop = true
+
+                        local textLabel = Instance.new("TextLabel", billboard)
+                        textLabel.Font = Enum.Font.Code
+                        textLabel.TextSize = 14
+                        textLabel.TextWrapped = true
+                        textLabel.Size = UDim2.new(1, 0, 1, 0)
+                        textLabel.TextYAlignment = Enum.TextYAlignment.Top
+                        textLabel.BackgroundTransparency = 1
+                        textLabel.TextStrokeTransparency = 0.5
+                        textLabel.TextColor3 = Color3.fromRGB(80, 245, 245)
+
+                        local distance = round((game.Players.LocalPlayer.Character.Head.Position - part.Position).Magnitude / 3)
+                        textLabel.Text = "Gear\n" .. distance .. "M"
+                    else
+                        local label = part.NameESP.TextLabel
+                        local distance = round((game.Players.LocalPlayer.Character.Head.Position - part.Position).Magnitude / 3)
+                        label.Text = "Gear\n" .. distance .. "M"
+                    end
+                end
+            end)
         end
     end
 end
 
--- 7. Advanced Dealer ESP
 local function UpdateAdvDealerESP()
-    local localPlr = game.Players.LocalPlayer
-    local myHrp = localPlr.Character and localPlr.Character:FindFirstChild("HumanoidRootPart")
+    if AdvDealerESPEnabled then
+        for _, npc in pairs(replicated.NPCs:GetChildren()) do
+            if npc.Name == "Advanced Fruit Dealer" then
+                if not workspace:FindFirstChild("AdvESP") then
+                    local part = Instance.new("Part", workspace)
+                    part.Name = "AdvESP"
+                    part.Transparency = 1
+                    part.Size = Vector3.new(1, 1, 1)
+                    part.Anchored = true
+                    part.CanCollide = false
+                    part.CFrame = npc.HumanoidRootPart.CFrame
 
-    for _, npc in ipairs(replicated.NPCs:GetChildren()) do
-        if npc.Name == "Advanced Fruit Dealer" then
-            local hrp = npc:FindFirstChild("HumanoidRootPart")
-            if hrp and AdvDealerESPEnabled then
-                local dist = myHrp and (hrp.Position - myHrp.Position).Magnitude or 0
-                local text = string.format("🏪 <b>Advanced Dealer</b> <font color=\"#00E5FF\">[%s]</font>", FormatDist(dist))
-                ApplyModernESP(hrp, "AdvDealer", {
-                    Text = text,
-                    AccentColor = Color3.fromRGB(224, 64, 251),
-                    Height = 24,
-                    Size = UDim2.new(0, 180, 0, 24),
-                    Offset = Vector3.new(0, 3, 0)
-                })
-            else
-                if hrp then RemoveModernESP(hrp, "AdvDealer") end
+                    local billboard = Instance.new("BillboardGui", part)
+                    billboard.Name = "NameESP"
+                    billboard.ExtentsOffset = Vector3.new(0, 1, 0)
+                    billboard.Size = UDim2.new(1, 200, 1, 30)
+                    billboard.Adornee = part
+                    billboard.AlwaysOnTop = true
+
+                    local textLabel = Instance.new("TextLabel", billboard)
+                    textLabel.Font = Enum.Font.Code
+                    textLabel.TextSize = 14
+                    textLabel.TextWrapped = true
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.TextYAlignment = Enum.TextYAlignment.Top
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.TextStrokeTransparency = 0.5
+                    textLabel.TextColor3 = Color3.fromRGB(80, 245, 245)
+
+                    local distance = round((game.Players.LocalPlayer.Character.Head.Position - npc.HumanoidRootPart.Position).Magnitude / 3)
+                    textLabel.Text = npc.Name .. "\n" .. distance .. "M"
+                else
+                    local part = workspace.AdvESP
+                    part.CFrame = npc.HumanoidRootPart.CFrame
+                    if part.NameESP then
+                        local distance = round((game.Players.LocalPlayer.Character.Head.Position - npc.HumanoidRootPart.Position).Magnitude / 3)
+                        part.NameESP.TextLabel.Text = npc.Name .. "\n" .. distance .. "M"
+                    end
+                end
+                break
             end
+        end
+    else
+        if workspace:FindFirstChild("AdvESP") then
+            workspace.AdvESP:Destroy()
         end
     end
 end
 
--- 8. Haki Color / Master of Auras ESP
 local function UpdateHakiColorESP()
-    local localPlr = game.Players.LocalPlayer
-    local myHrp = localPlr.Character and localPlr.Character:FindFirstChild("HumanoidRootPart")
+    if HakiColorESPEnabled then
+        for _, npc in pairs(replicated.NPCs:GetChildren()) do
+            if npc.Name == "Barista Cousin" then
+                if not workspace:FindFirstChild("HakiESP") then
+                    local part = Instance.new("Part", workspace)
+                    part.Name = "HakiESP"
+                    part.Transparency = 1
+                    part.Size = Vector3.new(1, 1, 1)
+                    part.Anchored = true
+                    part.CanCollide = false
+                    part.CFrame = npc.HumanoidRootPart.CFrame
 
-    for _, npc in ipairs(replicated.NPCs:GetChildren()) do
-        if npc.Name == "Barista Cousin" or npc.Name == "Master of Auras" then
-            local hrp = npc:FindFirstChild("HumanoidRootPart")
-            if hrp and HakiColorESPEnabled then
-                local dist = myHrp and (hrp.Position - myHrp.Position).Magnitude or 0
-                local text = string.format("🎨 <b>Master of Auras</b> <font color=\"#00E5FF\">[%s]</font>", FormatDist(dist))
-                ApplyModernESP(hrp, "HakiColor", {
-                    Text = text,
-                    AccentColor = Color3.fromRGB(255, 64, 129),
-                    Height = 24,
-                    Size = UDim2.new(0, 180, 0, 24),
-                    Offset = Vector3.new(0, 3, 0)
-                })
-            else
-                if hrp then RemoveModernESP(hrp, "HakiColor") end
+                    local billboard = Instance.new("BillboardGui", part)
+                    billboard.Name = "NameESP"
+                    billboard.ExtentsOffset = Vector3.new(0, 1, 0)
+                    billboard.Size = UDim2.new(1, 200, 1, 30)
+                    billboard.Adornee = part
+                    billboard.AlwaysOnTop = true
+
+                    local textLabel = Instance.new("TextLabel", billboard)
+                    textLabel.Font = Enum.Font.Code
+                    textLabel.TextSize = 14
+                    textLabel.TextWrapped = true
+                    textLabel.Size = UDim2.new(1, 0, 1, 0)
+                    textLabel.TextYAlignment = Enum.TextYAlignment.Top
+                    textLabel.BackgroundTransparency = 1
+                    textLabel.TextStrokeTransparency = 0.5
+                    textLabel.TextColor3 = Color3.fromRGB(80, 245, 245)
+
+                    local distance = round((game.Players.LocalPlayer.Character.Head.Position - npc.HumanoidRootPart.Position).Magnitude / 3)
+                    textLabel.Text = npc.Name .. "\n" .. distance .. "M"
+                else
+                    local part = workspace.HakiESP
+                    part.CFrame = npc.HumanoidRootPart.CFrame
+                    if part.NameESP then
+                        local distance = round((game.Players.LocalPlayer.Character.Head.Position - npc.HumanoidRootPart.Position).Magnitude / 3)
+                        part.NameESP.TextLabel.Text = npc.Name .. "\n" .. distance .. "M"
+                    end
+                end
+                break
             end
+        end
+    else
+        if workspace:FindFirstChild("HakiESP") then
+            workspace.HakiESP:Destroy()
         end
     end
 end
 
--- 9. Berry ESP
 local function UpdateBerryESP()
-    local localPlr = game.Players.LocalPlayer
-    local myHrp = localPlr.Character and localPlr.Character:FindFirstChild("HumanoidRootPart")
-    local cs = game:GetService("CollectionService")
+    local CollectionService = game:GetService("CollectionService")
+    local Bushes = CollectionService:GetTagged("BerryBush")
 
-    for _, bush in ipairs(cs:GetTagged("BerryBush")) do
-        if BerryESPEnabled then
-            local pos = bush.Parent and bush.Parent:GetPivot().Position or bush.Position
-            local dist = myHrp and (pos - myHrp.Position).Magnitude or 0
+    if not BerryESPEnabled then
+        for _, obj in pairs(workspace:GetChildren()) do
+            if obj:IsA("Part") and obj.Name:match("BerryESP_.*") then
+                obj:Destroy()
+            end
+        end
+        return
+    end
+
+    for _, bush in ipairs(Bushes) do
+        pcall(function()
+            local bushPos = bush.Parent:GetPivot().Position
 
             for attrName, attrValue in pairs(bush:GetAttributes()) do
                 if attrValue then
-                    local text = string.format("🫐 <b>Berry (%s)</b> <font color=\"#00E5FF\">[%s]</font>", tostring(attrValue), FormatDist(dist))
-                    ApplyModernESP(bush, "Berry", {
-                        Text = text,
-                        AccentColor = Color3.fromRGB(118, 255, 3),
-                        Height = 24,
-                        Size = UDim2.new(0, 160, 0, 24),
-                        Offset = Vector3.new(0, 2, 0)
-                    })
+                    local partName = "BerryESP_" .. attrValue .. "_" .. tostring(bushPos)
+                    local part = workspace:FindFirstChild(partName)
+
+                    if not part then
+                        part = Instance.new("Part", workspace)
+                        part.Name = partName
+                        part.Transparency = 1
+                        part.Size = Vector3.new(1, 1, 1)
+                        part.Anchored = true
+                        part.CanCollide = false
+                        part.CFrame = CFrame.new(bushPos)
+
+                        local billboard = Instance.new("BillboardGui", part)
+                        billboard.Name = "NameESP"
+                        billboard.Size = UDim2.new(0, 200, 0, 30)
+                        billboard.Adornee = part
+                        billboard.ExtentsOffset = Vector3.new(0, 1, 0)
+                        billboard.AlwaysOnTop = true
+
+                        local textLabel = Instance.new("TextLabel", billboard)
+                        textLabel.Font = Enum.Font.Code
+                        textLabel.TextSize = 14
+                        textLabel.TextWrapped = true
+                        textLabel.Size = UDim2.new(1, 0, 1, 0)
+                        textLabel.TextYAlignment = Enum.TextYAlignment.Top
+                        textLabel.BackgroundTransparency = 1
+                        textLabel.TextStrokeTransparency = 0.5
+                        textLabel.TextColor3 = Color3.fromRGB(80, 245, 245)
+                    end
+
+                    if part and part.NameESP then
+                        local distance = round((game.Players.LocalPlayer.Character.Head.Position - bushPos).Magnitude / 3)
+                        part.NameESP.TextLabel.Text = "[" .. attrValue .. "] " .. distance .. "M"
+                    end
                 end
             end
-        else
-            RemoveModernESP(bush, "Berry")
-        end
-    end
-end
-
--- Consolidated Ultra-Smooth ESP Update Loop
-task.spawn(function()
-    while task.wait(0.25) do
-        pcall(function()
-            if PlayerESPEnabled then UpdatePlayerESP() end
-            if IslandESPEnabled then UpdateIslandESP() end
-            if FruitESPEnabled then UpdateFruitESP() end
-            if FlowerESPEnabled then UpdateFlowerESP() end
-            if ChestESPEnabled then UpdateChestESP() end
-            if GearESPEnabled then UpdateGearESP() end
-            if AdvDealerESPEnabled then UpdateAdvDealerESP() end
-            if HakiColorESPEnabled then UpdateHakiColorESP() end
-            if BerryESPEnabled then UpdateBerryESP() end
         end)
     end
-end)
+end
 
 sec_v13_2:AddToggle("Toggle_181", {
     Title = "ESP Player",
     Default = GetSetting("ESP_Player_Save", false),
     Callback = function(Value)
         PlayerESPEnabled = Value
-        if not Value then
-            for _, player in ipairs(game.Players:GetPlayers()) do
-                if player.Character and player.Character:FindFirstChild("Head") then
-                    RemoveModernESP(player.Character.Head, "Player")
-                end
-            end
-        end
         _G.SaveData["ESP_Player_Save"] = Value
         SaveSettings()
     end
@@ -11075,14 +10729,6 @@ sec_v13_2:AddToggle("Toggle_182", {
     Default = GetSetting("ESP_Island_Save", false),
     Callback = function(Value)
         IslandESPEnabled = Value
-        if not Value then
-            local locations = workspace:FindFirstChild("_WorldOrigin") and workspace._WorldOrigin:FindFirstChild("Locations")
-            if locations then
-                for _, loc in ipairs(locations:GetChildren()) do
-                    RemoveModernESP(loc, "Island")
-                end
-            end
-        end
         _G.SaveData["ESP_Island_Save"] = Value
         SaveSettings()
     end
@@ -11093,13 +10739,6 @@ sec_v13_2:AddToggle("Toggle_183", {
     Default = GetSetting("ESP_Fruit_Save", false),
     Callback = function(Value)
         FruitESPEnabled = Value
-        if not Value then
-            for _, obj in ipairs(workspace:GetChildren()) do
-                if obj:FindFirstChild("Handle") then
-                    RemoveModernESP(obj.Handle, "Fruit")
-                end
-            end
-        end
         _G.SaveData["ESP_Fruit_Save"] = Value
         SaveSettings()
     end
@@ -11110,13 +10749,6 @@ sec_v13_2:AddToggle("Toggle_184", {
     Default = GetSetting("ESP_Flower_Save", false),
     Callback = function(Value)
         FlowerESPEnabled = Value
-        if not Value then
-            for _, obj in ipairs(workspace:GetChildren()) do
-                if obj.Name:find("Flower") then
-                    RemoveModernESP(obj, "Flower")
-                end
-            end
-        end
         _G.SaveData["ESP_Flower_Save"] = Value
         SaveSettings()
     end
@@ -11127,11 +10759,6 @@ sec_v13_2:AddToggle("Toggle_185", {
     Default = GetSetting("ESP_Chest_Save", false),
     Callback = function(Value)
         ChestESPEnabled = Value
-        if not Value then
-            for _, chest in ipairs(CachedChests) do
-                if chest then RemoveModernESP(chest, "Chest") end
-            end
-        end
         _G.SaveData["ESP_Chest_Save"] = Value
         SaveSettings()
     end
@@ -11142,14 +10769,6 @@ sec_v13_2:AddToggle("Toggle_186", {
     Default = GetSetting("ESP_Gear_Save", false),
     Callback = function(Value)
         GearESPEnabled = Value
-        if not Value then
-            local mysticIsland = workspace:FindFirstChild("Map") and workspace.Map:FindFirstChild("MysticIsland")
-            if mysticIsland then
-                for _, part in ipairs(mysticIsland:GetDescendants()) do
-                    RemoveModernESP(part, "Gear")
-                end
-            end
-        end
         _G.SaveData["ESP_Gear_Save"] = Value
         SaveSettings()
     end
@@ -11160,13 +10779,6 @@ sec_v13_2:AddToggle("Toggle_187", {
     Default = GetSetting("ESP_AdvDealer_Save", false),
     Callback = function(Value)
         AdvDealerESPEnabled = Value
-        if not Value then
-            for _, npc in ipairs(replicated.NPCs:GetChildren()) do
-                if npc:FindFirstChild("HumanoidRootPart") then
-                    RemoveModernESP(npc.HumanoidRootPart, "AdvDealer")
-                end
-            end
-        end
         _G.SaveData["ESP_AdvDealer_Save"] = Value
         SaveSettings()
     end
@@ -11177,13 +10789,6 @@ sec_v13_2:AddToggle("Toggle_188", {
     Default = GetSetting("ESP_HakiColor_Save", false),
     Callback = function(Value)
         HakiColorESPEnabled = Value
-        if not Value then
-            for _, npc in ipairs(replicated.NPCs:GetChildren()) do
-                if npc:FindFirstChild("HumanoidRootPart") then
-                    RemoveModernESP(npc.HumanoidRootPart, "HakiColor")
-                end
-            end
-        end
         _G.SaveData["ESP_HakiColor_Save"] = Value
         SaveSettings()
     end
@@ -11194,16 +10799,145 @@ sec_v13_2:AddToggle("Toggle_189", {
     Default = GetSetting("ESP_Berry_Save", false),
     Callback = function(Value)
         BerryESPEnabled = Value
-        if not Value then
-            local cs = game:GetService("CollectionService")
-            for _, bush in ipairs(cs:GetTagged("BerryBush")) do
-                RemoveModernESP(bush, "Berry")
-            end
-        end
         _G.SaveData["ESP_Berry_Save"] = Value
         SaveSettings()
     end
 })
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if PlayerESPEnabled then
+            pcall(UpdatePlayerESP)
+        else
+            pcall(function()
+                for _, player in pairs(game.Players:GetChildren()) do
+                    if player.Character and player.Character:FindFirstChild("Head") then
+                        local esp = player.Character.Head:FindFirstChild("NameESP" .. NumberESP)
+                        if esp then esp:Destroy() end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if IslandESPEnabled then
+            pcall(UpdateIslandESP)
+        else
+            pcall(function()
+                for _, loc in pairs(workspace._WorldOrigin.Locations:GetChildren()) do
+                    if loc:FindFirstChild("NameESP") then
+                        loc.NameESP:Destroy()
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if FruitESPEnabled then
+            pcall(UpdateFruitESP)
+        else
+            pcall(function()
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if obj:FindFirstChild("Handle") then
+                        local esp = obj.Handle:FindFirstChild("NameESP" .. NumberESP)
+                        if esp then esp:Destroy() end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if FlowerESPEnabled then
+            pcall(UpdateFlowerESP)
+        else
+            pcall(function()
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if (obj.Name == "Flower1" or obj.Name == "Flower2") and obj:FindFirstChild("NameESP" .. NumberESP) then
+                        obj["NameESP" .. NumberESP]:Destroy()
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) do
+        pcall(UpdateChestESP)
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if GearESPEnabled then
+            pcall(UpdateGearESP)
+        else
+            pcall(function()
+                local MysticIsland = workspace.Map:FindFirstChild("MysticIsland")
+                if MysticIsland then
+                    for _, part in pairs(MysticIsland:GetDescendants()) do
+                        if part:FindFirstChild("NameESP") then
+                            part.NameESP:Destroy()
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if AdvDealerESPEnabled then
+            pcall(UpdateAdvDealerESP)
+        else
+            pcall(function()
+                if workspace:FindFirstChild("AdvESP") then
+                    workspace.AdvESP:Destroy()
+                end
+            end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if HakiColorESPEnabled then
+            pcall(UpdateHakiColorESP)
+        else
+            pcall(function()
+                if workspace:FindFirstChild("HakiESP") then
+                    workspace.HakiESP:Destroy()
+                end
+            end)
+        end
+    end
+end)
+
+task.spawn(function()
+    while task.wait(0.1) do
+        if BerryESPEnabled then
+            pcall(UpdateBerryESP)
+        else
+            pcall(function()
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if obj:IsA("Part") and obj.Name:match("BerryESP_.*") then
+                        obj:Destroy()
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 local World1 = World1 or false
 local World2 = World2 or false
