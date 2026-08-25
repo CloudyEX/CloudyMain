@@ -43,12 +43,12 @@ local ConfigTab    = Window:AddTab({ Title = "Configuration", Icon = "solar/sett
 pcall(function()
     if Fluent.SaveManager then
         Fluent.SaveManager:SetLibrary(Fluent)
-        Fluent.SaveManager:SetFolder("Cloudy/FishDawg")
+        Fluent.SaveManager:SetFolder("CloudyHUB/FishDawg")
         Fluent.SaveManager:BuildConfigSection(ConfigTab)
     end
     if Fluent.InterfaceManager then
         Fluent.InterfaceManager:SetLibrary(Fluent)
-        Fluent.InterfaceManager:SetFolder("Cloudy/FishDawg")
+        Fluent.InterfaceManager:SetFolder("CloudyHUB/FishDawg")
         Fluent.InterfaceManager:BuildInterfaceSection(ConfigTab)
     end
 end)
@@ -228,6 +228,7 @@ local function loadRemotes()
     local loaded, failed = 0, 0
     local remoteList = {
     cancel_fishing_input    = "CancelFishingInputs",
+    cancel_fishing_input    = "CancelFishingInputs",
     minigame_remote         = "RequestFishingMinigameStarted",
     finish_remote           = "CatchFishCompleted",
     equip_tool_remote       = "EquipToolFromHotbar",
@@ -405,6 +406,20 @@ pcall(function()
     TextNotificationController = require(ReplicatedStorage.Controllers.TextNotificationController)
 end)
 
+pcall(function()
+    local AnimationController = require(ReplicatedStorage.Controllers.AnimationController)
+    if not AnimationController or not AnimationController.PlayAnimation then return end
+    local oldPlay = AnimationController.PlayAnimation
+    AnimationController.PlayAnimation = function(self, animName, ...)
+        local track, info = oldPlay(self, animName, ...)
+        local speedUp = _G.QHBetaAnimSpeed or Config.InstantFishing.Active or Config.InstantV2.Active or Config.amblatant
+        if speedUp and animName == "FishCaught" and track then
+            pcall(function() track:AdjustSpeed(7) end)
+        end
+        return track, info
+    end
+end)
+
 local FishCaughtRemote = Events.fish_caught or GetServerRemote("RE/FishCaught")
 
 if _G.FishCaughtConn then
@@ -414,10 +429,8 @@ end
 
 if FishCaughtRemote and FishCaughtRemote:IsA("RemoteEvent") then
     _G.FishCaughtConn = FishCaughtRemote.OnClientEvent:Connect(function(fishId, _, _, fishData)
-        if _G.QH_EnableFishNotif == false then return end
         task.spawn(function()
             task.wait(0.1)
-            if _G.QH_EnableFishNotif == false then return end
 
             local quantity = 1
             if type(fishData) == "table" and fishData.Quantity then
@@ -442,9 +455,6 @@ else
     warn("[QH] Remote RE/FishCaught tidak ditemukan untuk hook notifikasi!")
 end
 
-local function TriggerFishNotif(notifArgs, isReplay)
-    if _G.QH_EnableFishNotif == false then return end
-    if not notifArgs or #notifArgs == 0 then return end
     pcall(function()
         local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
         if not ctrlFolder then return end
@@ -457,7 +467,6 @@ local function TriggerFishNotif(notifArgs, isReplay)
             ctrl:DeliverNotification({Type = "Item", Id = id, Metadata = meta})
         end
     end)
-end
 
 _G.QHInstances = _G.QHInstances or {}
 _G.QHInstances[_instanceId] = _G.QHInstances[_instanceId] or {
@@ -1190,18 +1199,16 @@ local SkinAnimation = (function()
         local nextTrack = AnimationPool[math.random(1, #AnimationPool)]
         if nextTrack then pcall(function() originalTrack:Stop(0); nextTrack:Play(0, 1, 1) end) end
     end
+
     pcall(function()
-        humanoid.AnimationPlayed:Connect(function(track)
-            local animName = string.lower(track.Name or "")
-            if animName:find("fishcaught") or animName:find("caught") or animName:find("reel") then
-                if _G.QHBetaAnimSpeed then
-                    local speedMultiplier = (typeof(_G.QHBetaAnimSpeed) == "number" and _G.QHBetaAnimSpeed) or 10.0
-                    pcall(function() track:AdjustSpeed(speedMultiplier) end)
-                end
-            end
+    humanoid.AnimationPlayed:Connect(function(track)
+        local animName = string.lower(track.Name or "")
+        if animName:find("fishcaught") or animName:find("caught") or animName:find("reel") then
             if IsEnabled and IsFishCaughtAnimation(track) then InstantReplace(track) end
-        end)
+        end   -- <-- this was missing
     end)
+end)
+
     local API = {}
     function API.SwitchSkin(id) CurrentSkin = id; return IsEnabled and LoadAnimationPool(id) or true end
     function API.Enable() if not CurrentSkin then return false end; IsEnabled = LoadAnimationPool(CurrentSkin); return IsEnabled end
@@ -1210,8 +1217,11 @@ local SkinAnimation = (function()
 end)()
 
 local LOCATIONS = {
-    ["Fisherman"]=CFrame.new(64.3215027, 3.26205373, 2769.59888, 0.981787205, 3.9192166e-08, -0.18998377, -4.19124184e-08, 1, -1.03004192e-08, 0.18998377, 1.80755002e-08, 0.981787205),
-    ["Sisyphus Statue"]=Vector3.new(-3732.14013671875,-135.07444763183594,-1013.1876831054688),
+    ["Elemental Volcano"]=CFrame.new(-729.789978, 107.056473, 5347.83008, -0.639170587, 9.75507248e-08, 0.769065022, 8.95694043e-08, 1, -5.24020685e-08, -0.769065022, 3.53908334e-08, -0.639170587),
+    ["Elemental Storm"]=CFrame.new(-936.080017, 54.3766861, 5238.54004, -0.82114917, 7.46646656e-09, -0.57071358, 4.19588417e-08, 1, -4.7288168e-08, 0.57071358, -6.27771186e-08, -0.82114917),
+    ["Elemental Blizzard"]=CFrame.new(-981.890015, 45.8336372, 5302.85986, -0.855183363, 5.27788089e-08, 0.518325567, 3.18231095e-08, 1, -4.93207679e-08, -0.518325567, -2.5683569e-08, -0.855183363),
+    ["Fisherman"]=CFrame.new(-64.5500031, 3.26205373, 2851.48999, 0.0899373069, -2.41764408e-09, 0.995947421, -4.68269228e-08, 1, 6.65610589e-09, -0.995947421, -4.72357868e-08, 0.0899373069),
+    ["Sisyphus Statue"]=CFrame.new(-3751.08008, -135.073944, -1006.51001, -0.893841445, -2.6164253e-09, -0.448383212, -3.06272674e-09, 1, 2.70230366e-10, 0.448383212, 1.61481828e-09, -0.893841445),
     ["Coral Reefs"]=Vector3.new(-3299.224853515625,123.38948059082031,2223.6123046875),
     ["Esoteric Depths"]=Vector3.new(3271.66064453125,-1301.5306396484375,1381.4456787109375),
     ["Crater Island 1"]=Vector3.new(1060.8260498046875,2.5815768241882324,5131.58740234375),
@@ -1220,7 +1230,8 @@ local LOCATIONS = {
     ["Weather Machine"]=Vector3.new(-1488.512,83.173,1876.303),
     ["Tropical Grove"]=Vector3.new(-2152.160888671875,53.48600769042969,3619.32861328125),
     ["Treasure Room"]=Vector3.new(-3648.86328125,-268.6123352050781,-1662.415283203125),
-    ["Kohana"]=Vector3.new(-658.2866821289062,17.244775772094727,510.14471435546875),
+    ["Kohana 1"]=CFrame.new(-603.369995, 3.09488416, 557.099976, 0.267742842, -7.86244527e-08, 0.963490427, -2.35978455e-08, 1, 8.8161336e-08, -0.963490427, -4.63408654e-08, 0.267742842),
+    ["Kohana 2"]=CFrame.new(-835.256653, 18.6894932, 401.163788, -0.879029095, 4.39071286e-08, 0.476768106, 5.09194464e-08, 1, 1.78817849e-09, -0.476768106, 2.58486281e-08, -0.879029095),
     ["Kohana Volcano"]=Vector3.new(-424.0745544433594,7.2453107833862305,124.14938354492188),
     ["Underground Cellar"]=Vector3.new(2139.544677734375,-91.19776916503906,-766.829833984375),
     ["Ancient Jungle"]=Vector3.new(1484.5361328125,11.14309024810791,-300.48779296875),
@@ -1244,7 +1255,7 @@ local LOCATIONS = {
     ["Gloomcap Grotto"]=CFrame.new(5921.02832, -864.522766, 12339.3037, -0.981406987, 7.42360342e-08, 0.19193837, 6.78514027e-08, 1, -3.98367028e-08, -0.19193837, -2.60727315e-08, -0.981406987),
     ["Elemental Island (Storm Area)"]=CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904),
     ["Elemental Island (Volcano Area)"]=CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795),
-    ["Elemental Island (Blizzard Area)"]=CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819)
+    ["Elemental Island (Blizzard Area)"]=CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819),
 }
 
 local function NormalizeTargetCFrame(targetCFrame)
@@ -1614,22 +1625,32 @@ local function onToggleLegitFishing(val)
         pcall(function()
             local r = Events.UpdateAutoFishing or Events.update_auto_fishing or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.UpdateAutoFishing) or GetServerRemote("RF/UpdateAutoFishingState")
             if r then
-                if r:IsA("RemoteFunction") then task.spawn(function() pcall(r.InvokeServer, r, true) end)
-                elseif r:IsA("RemoteEvent") then r:FireServer(true) end
+                if r:IsA("RemoteFunction") then
+                    task.spawn(function() pcall(r.InvokeServer, r, true) end)
+                elseif r:IsA("RemoteEvent") then
+                    r:FireServer({ Active = true })
+                end
             end
         end)
         pcall(function()
             local m = GetServerRemote("RF/MarkAutoFishingUsed") or GetServerRemote("RE/MarkAutoFishingUsed")
             if m then
-                if m:IsA("RemoteFunction") then task.spawn(function() pcall(m.InvokeServer, m) end)
-                elseif m:IsA("RemoteEvent") then m:FireServer(m) end
+                if m:IsA("RemoteFunction") then
+                    task.spawn(function() pcall(m.InvokeServer, m) end)
+                elseif m:IsA("RemoteEvent") then
+                    m:FireServer()
+                end
             end
         end)
         pcall(function()
             if Controllers.Fishing then
-                if Controllers.Fishing.ToggleAutoFishing then Controllers.Fishing:ToggleAutoFishing(true)
-                elseif Controllers.Fishing.StartAutoFishing then Controllers.Fishing:StartAutoFishing()
-                elseif Controllers.Fishing.SetAutoFishing then Controllers.Fishing:SetAutoFishing(true) end
+                if Controllers.Fishing.ToggleAutoFishing then
+                    Controllers.Fishing:ToggleAutoFishing(true)
+                elseif Controllers.Fishing.StartAutoFishing then
+                    Controllers.Fishing:StartAutoFishing()
+                elseif Controllers.Fishing.SetAutoFishing then
+                    Controllers.Fishing:SetAutoFishing(true)
+                end
             end
         end)
         if Tasks.legitFishingTask then
@@ -1648,15 +1669,22 @@ local function onToggleLegitFishing(val)
         pcall(function()
             local r = Events.UpdateAutoFishing or Events.update_auto_fishing or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.UpdateAutoFishing) or GetServerRemote("RF/UpdateAutoFishingState")
             if r then
-                if r:IsA("RemoteFunction") then task.spawn(function() pcall(r.InvokeServer, r, false) end)
-                elseif r:IsA("RemoteEvent") then r:FireServer(false) end
+                if r:IsA("RemoteFunction") then
+                    task.spawn(function() pcall(r.InvokeServer, r, false) end)
+                elseif r:IsA("RemoteEvent") then
+                    r:FireServer({ Active = false })
+                end
             end
         end)
         pcall(function()
             if Controllers.Fishing then
-                if Controllers.Fishing.ToggleAutoFishing then Controllers.Fishing:ToggleAutoFishing(false)
-                elseif Controllers.Fishing.StopAutoFishing then Controllers.Fishing:StopAutoFishing()
-                elseif Controllers.Fishing.SetAutoFishing then Controllers.Fishing:SetAutoFishing(false) end
+                if Controllers.Fishing.ToggleAutoFishing then
+                    Controllers.Fishing:ToggleAutoFishing(false)
+                elseif Controllers.Fishing.StopAutoFishing then
+                    Controllers.Fishing:StopAutoFishing()
+                elseif Controllers.Fishing.SetAutoFishing then
+                    Controllers.Fishing:SetAutoFishing(false)
+                end
             end
         end)
         safeFire(function()
@@ -1768,7 +1796,7 @@ end
 local function UB_start()
     if Config.UB.Active then return end
     Config.UB.Settings.HookDelay = Config.UB.Settings.HookDelay or 0.3
-    _G.QHBetaAnimSpeed = 10.0
+    _G.QHBetaAnimSpeed = true
     UB_init(); Config.UB.Active = true; needCast = true
     _G.NotifQueue = {}; _G.NotifActive = 0; isCaught = false
     Config.UB.Stats.startTime = tick()
@@ -2837,402 +2865,6 @@ local function SetWalkOnWater(val)
     end
 end
 
-local TextChatService = game:GetService("TextChatService")
-local originalDisplayName = LocalPlayer.DisplayName
-local originalLevelText = nil
-local cachedNameLabel = nil
-local cachedLevelLabel = nil
-
-_G.CustomNameActive = false
-_G.CustomNameText = "CLOUDY"
-_G.CustomLevelActive = false
-_G.CustomLevelText = "Lvl. 969"
-_G.CloudyTitleActive = false
-
-local customOverheadConnection = nil
-local customOverheadCharConnection = nil
-local chatSpoofHooked = false
-
-local function GetRealPlayerLevel()
-    local lvl = nil
-    pcall(function()
-        local replion = PlayerData or (GetPlayerDataReplion and GetPlayerDataReplion())
-        if replion then
-            lvl = replion:GetExpect("Level") or replion:Get("Level")
-        end
-    end)
-    if not lvl then
-        pcall(function()
-            local ls = LocalPlayer:FindFirstChild("leaderstats")
-            if ls and ls:FindFirstChild("Level") then
-                lvl = ls.Level.Value
-            end
-        end)
-    end
-    if not lvl then
-        pcall(function()
-            lvl = LocalPlayer:GetAttribute("Level") or LocalPlayer:GetAttribute("PlayerLevel")
-        end)
-    end
-    if not lvl and originalLevelText and originalLevelText ~= "" and originalLevelText ~= _G.CustomLevelText then
-        return originalLevelText
-    end
-    if lvl then
-        return "Lvl. " .. tostring(lvl)
-    end
-    return "Lvl. 1"
-end
-
-local currentTitleGui = nil
-local currentTitleGradient = nil
-
-local function removeCloudyTitle()
-    if _G.CloudyTitleRenderConn then
-        pcall(function() _G.CloudyTitleRenderConn:Disconnect() end)
-        _G.CloudyTitleRenderConn = nil
-    end
-    currentTitleGradient = nil
-    if currentTitleGui then
-        pcall(function() currentTitleGui:Destroy() end)
-        currentTitleGui = nil
-    end
-    local char = LocalPlayer.Character
-    if char then
-        for _, obj in pairs(char:GetDescendants()) do
-            if obj.Name == "CloudyHubTitleBillboard" then
-                pcall(function() obj:Destroy() end)
-            end
-        end
-    end
-end
-
-local function createCloudyTitleTag(char)
-    if not char then char = LocalPlayer.Character end
-    if not char or not _G.CloudyTitleActive then return end
-
-    local head = char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart")
-    if not head then return end
-
-    if currentTitleGui and currentTitleGui.Parent == head and currentTitleGradient and currentTitleGradient.Parent then
-        return
-    end
-
-    removeCloudyTitle()
-
-    local bbg = Instance.new("BillboardGui")
-    bbg.Name = "CloudyHubTitleBillboard"
-    bbg.Adornee = head
-    bbg.Size = UDim2.new(0, 220, 0, 36)
-    bbg.StudsOffset = Vector3.new(0, 3.3, 0)
-    bbg.AlwaysOnTop = true
-    bbg.ResetOnSpawn = false
-    bbg.LightInfluence = 0
-    bbg.MaxDistance = 150
-
-    local label = Instance.new("TextLabel")
-    label.Name = "CloudyHubTitleLabel"
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = "✦ CLOUDY ✦"
-    label.Font = Enum.Font.BuilderSansBold or Enum.Font.GothamBold
-    label.TextSize = 16
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.TextStrokeTransparency = 0.3
-    label.TextStrokeColor3 = Color3.fromRGB(2, 14, 7)
-    label.Parent = bbg
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Name = "CloudyHubTitleStroke"
-    stroke.Thickness = 1.2
-    stroke.Color = Color3.fromRGB(0, 255, 136)
-    stroke.Transparency = 0.3
-    stroke.Parent = label
-
-    local gradient = Instance.new("UIGradient")
-    gradient.Name = "CloudyHubTitleGradient"
-    gradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0.0, Color3.fromRGB(0, 255, 136)),
-        ColorSequenceKeypoint.new(0.25, Color3.fromRGB(8, 20, 12)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 180)),
-        ColorSequenceKeypoint.new(0.75, Color3.fromRGB(6, 15, 9)),
-        ColorSequenceKeypoint.new(1.0, Color3.fromRGB(0, 255, 136))
-    })
-    gradient.Parent = label
-
-    currentTitleGradient = gradient
-    currentTitleGui = bbg
-    bbg.Parent = head
-end
-
-local function startCloudyTitleAnimation()
-    if _G.CloudyTitleRenderConn then
-        pcall(function() _G.CloudyTitleRenderConn:Disconnect() end)
-        _G.CloudyTitleRenderConn = nil
-    end
-
-    _G.CloudyTitleRenderConn = RunService.RenderStepped:Connect(function()
-        if not _G.CloudyTitleActive then return end
-        if currentTitleGradient and currentTitleGradient.Parent then
-            local t = (tick() * 0.7) % 2 - 1
-            currentTitleGradient.Offset = Vector2.new(t, 0)
-        end
-    end)
-end
-
-local function applyOverheadVisuals(char)
-    if not char then char = LocalPlayer.Character end
-    if not char then return end
-
-    pcall(function()
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            if _G.CustomNameActive and _G.CustomNameText and _G.CustomNameText ~= "" then
-                hum.DisplayName = _G.CustomNameText
-            else
-                hum.DisplayName = originalDisplayName
-            end
-        end
-    end)
-
-    pcall(function()
-        for _, bbg in ipairs(char:GetDescendants()) do
-            if bbg:IsA("BillboardGui") and bbg.Name ~= "CloudyHubTitleBillboard" then
-                local labels = {}
-                for _, child in ipairs(bbg:GetDescendants()) do
-                    if child:IsA("TextLabel") and child.Name ~= "CloudyHubTitleLabel" then
-                        table.insert(labels, child)
-                    end
-                end
-
-                for _, lbl in ipairs(labels) do
-                    local n = lbl.Name:lower()
-                    local t = lbl.Text:lower()
-
-                    local isLvl = (lbl == cachedLevelLabel)
-                        or n:find("lvl") or n:find("level") or n:find("rank") or n:find("stage") or n:find("sub")
-                        or t:find("lvl") or t:find("level") or t:find("lv%p") or t:find("level:")
-                        or (lbl.Text == _G.CustomLevelText)
-                        or (originalLevelText and lbl.Text == originalLevelText)
-
-                    local isNm = (lbl == cachedNameLabel)
-                        or n:find("name") or n:find("user") or n:find("display") or n:find("player")
-                        or lbl.Text:find(LocalPlayer.Name, 1, true) or lbl.Text:find(originalDisplayName, 1, true)
-                        or (lbl.Text == _G.CustomNameText)
-
-                    if isLvl and not isNm then
-                        cachedLevelLabel = lbl
-                        if not originalLevelText and lbl.Text ~= _G.CustomLevelText and lbl.Text ~= _G.CustomNameText then
-                            originalLevelText = lbl.Text
-                        end
-                        if _G.CustomLevelActive and _G.CustomLevelText and _G.CustomLevelText ~= "" then
-                            lbl.Text = _G.CustomLevelText
-                        else
-                            lbl.Text = GetRealPlayerLevel()
-                        end
-                    elseif isNm and not isLvl then
-                        cachedNameLabel = lbl
-                        if _G.CustomNameActive and _G.CustomNameText and _G.CustomNameText ~= "" then
-                            lbl.Text = _G.CustomNameText
-                        else
-                            lbl.Text = originalDisplayName
-                        end
-                    elseif #labels == 2 then
-                        if labels[1] == lbl then
-                            cachedNameLabel = lbl
-                            if _G.CustomNameActive and _G.CustomNameText and _G.CustomNameText ~= "" then
-                                lbl.Text = _G.CustomNameText
-                            else
-                                lbl.Text = originalDisplayName
-                            end
-                        else
-                            cachedLevelLabel = lbl
-                            if not originalLevelText and lbl.Text ~= _G.CustomLevelText and lbl.Text ~= _G.CustomNameText then
-                                originalLevelText = lbl.Text
-                            end
-                            if _G.CustomLevelActive and _G.CustomLevelText and _G.CustomLevelText ~= "" then
-                                lbl.Text = _G.CustomLevelText
-                            else
-                                lbl.Text = GetRealPlayerLevel()
-                            end
-                        end
-                    end
-                end
-            elseif bbg:IsA("TextLabel") and bbg.Parent and bbg.Parent.Name == "Head" and bbg.Name ~= "CloudyHubTitleLabel" then
-                local lbl = bbg
-                local n = lbl.Name:lower()
-                local t = lbl.Text:lower()
-                if n:find("lvl") or n:find("level") or t:find("lvl") or t:find("level") or (lbl.Text == _G.CustomLevelText) then
-                    cachedLevelLabel = lbl
-                    if not originalLevelText and lbl.Text ~= _G.CustomLevelText and lbl.Text ~= _G.CustomNameText then
-                        originalLevelText = lbl.Text
-                    end
-                    if _G.CustomLevelActive and _G.CustomLevelText and _G.CustomLevelText ~= "" then
-                        lbl.Text = _G.CustomLevelText
-                    else
-                        lbl.Text = GetRealPlayerLevel()
-                    end
-                else
-                    cachedNameLabel = lbl
-                    if _G.CustomNameActive and _G.CustomNameText and _G.CustomNameText ~= "" then
-                        lbl.Text = _G.CustomNameText
-                    else
-                        lbl.Text = originalDisplayName
-                    end
-                end
-            end
-        end
-    end)
-end
-
-local function hookCharacterOverhead(char)
-    if not char then return end
-    applyOverheadVisuals(char)
-
-    if _G.CloudyTitleActive then
-        createCloudyTitleTag(char)
-        startCloudyTitleAnimation()
-    end
-
-    if customOverheadConnection then pcall(function() customOverheadConnection:Disconnect() end) end
-    customOverheadConnection = char.DescendantAdded:Connect(function(desc)
-        if desc.Name:find("CloudyHubTitle") then return end
-        if desc:IsA("BillboardGui") or desc:IsA("TextLabel") or desc:IsA("Humanoid") then
-            task.defer(function()
-                pcall(function()
-                    if not desc or not desc.Parent or desc.Name:find("CloudyHubTitle") then return end
-                    applyOverheadVisuals(char)
-                end)
-            end)
-        end
-    end)
-end
-
-local function setupChatSpoof()
-    if chatSpoofHooked then return end
-    chatSpoofHooked = true
-
-    pcall(function()
-        if TextChatService and TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-            TextChatService.OnIncomingMessage = function(message)
-                local props = Instance.new("TextChatMessageProperties")
-                if message.TextSource and message.TextSource.UserId == LocalPlayer.UserId then
-                    local nameToDisplay = (_G.CustomNameActive and _G.CustomNameText and _G.CustomNameText ~= "") and _G.CustomNameText or LocalPlayer.DisplayName
-                    local prefixStr = ""
-                    if _G.CloudyTitleActive then
-                        prefixStr = "<font color='#00FF88'><b>[Cloudy]</b></font> "
-                    end
-                    props.PrefixText = prefixStr .. "<font color='#00FFAA'><b>" .. nameToDisplay .. "</b></font>:"
-                end
-                return props
-            end
-        end
-    end)
-
-    pcall(function()
-        local playerGui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
-        if not playerGui then return end
-
-        local function hookChatGui(chatGui)
-            if not chatGui then return end
-            chatGui.DescendantAdded:Connect(function(desc)
-                if desc:IsA("TextLabel") and (_G.CustomNameActive or _G.CloudyTitleActive) then
-                    task.defer(function()
-                        pcall(function()
-                            local text = desc.Text
-                            local realName = LocalPlayer.Name
-                            local realDisp = originalDisplayName or LocalPlayer.DisplayName
-                            local fakeName = (_G.CustomNameActive and _G.CustomNameText and _G.CustomNameText ~= "") and _G.CustomNameText or realDisp
-                            if text:find(realDisp, 1, true) or text:find(realName, 1, true) then
-                                local newText = text:gsub(realDisp, fakeName):gsub(realName, fakeName)
-                                if _G.CloudyTitleActive and not newText:find("[Cloudy]", 1, true) then
-                                    newText = "[Cloudy] " .. newText
-                                end
-                                desc.Text = newText
-                            end
-                        end)
-                    end)
-                end
-            end)
-        end
-
-        local existingChat = playerGui:FindFirstChild("Chat")
-        if existingChat then hookChatGui(existingChat) end
-        playerGui.ChildAdded:Connect(function(child)
-            if child.Name == "Chat" then hookChatGui(child) end
-        end)
-    end)
-end
-
-local function ApplyCustomName(name)
-    if not name or name == "" then name = "CLOUDY" end
-    _G.CustomNameActive = true
-    _G.CustomNameText = name
-    pcall(function() LocalPlayer.DisplayName = name end)
-    local char = LocalPlayer.Character
-    if char then applyOverheadVisuals(char) end
-    NotifySuccess("Custom Name", "Nama diubah ke: " .. name)
-end
-
-local function RemoveCustomName()
-    _G.CustomNameActive = false
-    pcall(function() LocalPlayer.DisplayName = originalDisplayName end)
-    local char = LocalPlayer.Character
-    if char then applyOverheadVisuals(char) end
-    NotifyInfo("Custom Name", "Nama asli dikembalikan (" .. originalDisplayName .. ")")
-end
-
-local function ApplyCustomLevel(lvl)
-    if not lvl or lvl == "" then lvl = "Lvl. 969" end
-    _G.CustomLevelActive = true
-    _G.CustomLevelText = lvl
-    local char = LocalPlayer.Character
-    if char then applyOverheadVisuals(char) end
-    NotifySuccess("Custom Level", "Level diubah ke: " .. lvl)
-end
-
-local function RemoveCustomLevel()
-    _G.CustomLevelActive = false
-    local char = LocalPlayer.Character
-    if char then applyOverheadVisuals(char) end
-    NotifyInfo("Custom Level", "Level direset ke normal (" .. GetRealPlayerLevel() .. ")")
-end
-
-local function SetCloudyTitle(enabled)
-    _G.CloudyTitleActive = enabled
-    local char = LocalPlayer.Character
-    if enabled then
-        if char then
-            createCloudyTitleTag(char)
-            startCloudyTitleAnimation()
-        end
-        NotifySuccess("Title Tag", "Cloudy Title aktif! (Ultra Smooth)")
-    else
-        removeCloudyTitle()
-        NotifyInfo("Title Tag", "Cloudy Title dimatikan.")
-    end
-end
-
-if customOverheadCharConnection then pcall(function() customOverheadCharConnection:Disconnect() end) end
-customOverheadCharConnection = LocalPlayer.CharacterAdded:Connect(function(newChar)
-    task.wait(0.5)
-    hookCharacterOverhead(newChar)
-end)
-
-if LocalPlayer.Character then
-    hookCharacterOverhead(LocalPlayer.Character)
-end
-
-task.defer(function()
-    task.wait(1.5)
-    pcall(function()
-        if LocalPlayer.Character then
-            applyOverheadVisuals(LocalPlayer.Character)
-        end
-    end)
-end)
-
-setupChatSpoof()
-
 local _hiddenTag = false
 _G.NoAnimationEnabled = false
 local noAnimConnection, noAnimCharConnection = nil, nil
@@ -3280,30 +2912,6 @@ local function SetDisableObtained(val)
     end
 end
 
-local _fishNotifConnected = false
-task.spawn(function()
-    task.wait(3)
-    if Events.fishNotif and not _fishNotifConnected then
-        _fishNotifConnected = true
-        pcall(function()
-            Events.fishNotif.OnClientEvent:Connect(function(...)
-                local args = {...}
-                _G.SavedData.FishNotif = args
-                lastValidFishNotif = deepCopyArr(args)
-                _lastRealFishNotifTime = tick()
-                table.insert(_fishNotifHistory, deepCopyArr(args))
-                if #_fishNotifHistory > _maxFishHistory then table.remove(_fishNotifHistory, 1) end
-                lastTimeFishCaught = os.clock(); isCaught = true
-                _sessionCatchCount = _sessionCatchCount + 1
-                table.insert(_lastCatchTimestamps, tick())
-                if #_lastCatchTimestamps > 60 then table.remove(_lastCatchTimestamps, 1) end
-            end)
-        end)
-    end
-    task.wait(0.5)
-    pcall(SetupFishCaughtNotifListener)
-end)
-
 if InfoTab then
     pcall(function()
         local Section_InfoTab_1 = InfoTab:AddSection("Informasi Script")
@@ -3322,6 +2930,210 @@ end
 
 if PlayersTab then
     pcall(function()
+
+_G.AutoReconnect = false
+_G.AutoReconnectThread = nil
+
+function ServerHop(reason, forcePublic)
+    reason = reason or "Server hopping..."
+    forcePublic = forcePublic or false
+
+    local isPrivateServer = game.PrivateServerId ~= "" and game.PrivateServerOwnerId ~= 0
+
+    -- Notifikasi (gunakan NotifyInfo, NotifyWarning, dll. yang sudah ada)
+    pcall(function()
+        Fluent:Notify({
+            Title = "Server Hop",
+            Content = reason .. (isPrivateServer and " (Private)" or ""),
+            Duration = 2,
+            Icon = "lucide:refresh-cw"
+        })
+    end)
+
+    task.wait(0.5)
+
+    local HttpService = game:GetService("HttpService")
+    local TeleportService = game:GetService("TeleportService")
+    local LocalPlayer = game:GetService("Players").LocalPlayer
+
+    local success, result = pcall(function()
+        local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Desc&limit=100"
+        local response = game:HttpGet(url)
+        local serverList = HttpService:JSONDecode(response)
+
+        if serverList and serverList.data then
+            for _, server in ipairs(serverList.data) do
+                if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                    print("[ServerHop] Found public server:", server.id)
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+                    return true
+                end
+            end
+        end
+        return false
+    end)
+
+    if not success or not result then
+        print("[ServerHop] Primary method failed, using fallback...")
+
+        if forcePublic then
+            local paginationSuccess = pcall(function()
+                local servers = {}
+                local cursor = ""
+                local pageCount = 0
+                local maxPages = 5
+
+                repeat
+                    pageCount = pageCount + 1
+                    local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+                    if cursor ~= "" then url = url .. "&cursor=" .. cursor end
+
+                    local response = game:HttpGet(url)
+                    local serverData = HttpService:JSONDecode(response)
+
+                    for _, server in pairs(serverData.data) do
+                        if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                            table.insert(servers, server.id)
+                        end
+                    end
+                    cursor = serverData.nextPageCursor or ""
+                until #servers > 0 or cursor == "" or pageCount >= maxPages
+
+                if #servers > 0 then
+                    local selectedServer = servers[math.random(1, #servers)]
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, selectedServer, LocalPlayer)
+                    return true
+                end
+                return false
+            end)
+
+            if paginationSuccess then
+                print("[ServerHop] Hopped to public server.")
+                return
+            else
+                print("[ServerHop] CRITICAL: No public server found.")
+                return
+            end
+        end
+
+        -- Fallback rejoin (tetap di server yang sama)
+        print("[ServerHop] Attempting rejoin fallback...")
+        local rejoinSuccess = pcall(function()
+            if isPrivateServer then
+                local teleportOptions = Instance.new("TeleportOptions")
+                teleportOptions.ServerInstanceId = game.JobId
+                teleportOptions.ReservedServerAccessCode = game.PrivateServerId
+                TeleportService:TeleportAsync(game.PlaceId, {LocalPlayer}, teleportOptions)
+            else
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+            end
+        end)
+
+        if not rejoinSuccess then
+            print("[ServerHop] Rejoin failed, using random teleport.")
+            task.wait(0.5)
+            pcall(function()
+                TeleportService:Teleport(game.PlaceId, LocalPlayer)
+            end)
+        end
+    end
+end
+
+function RejoinServer()
+    local isPrivate = game.PrivateServerId ~= "" and game.PrivateServerOwnerId ~= 0
+    local TeleportService = game:GetService("TeleportService")
+    local LocalPlayer = game:GetService("Players").LocalPlayer
+
+    pcall(function()
+        Fluent:Notify({
+            Title = "Rejoin",
+            Content = "Rejoining server...",
+            Duration = 2,
+            Icon = "lucide:refresh-cw"
+        })
+    end)
+
+    local success = pcall(function()
+        if isPrivate then
+            local teleportOptions = Instance.new("TeleportOptions")
+            teleportOptions.ServerInstanceId = game.JobId
+            teleportOptions.ReservedServerAccessCode = game.PrivateServerId
+            TeleportService:TeleportAsync(game.PlaceId, {LocalPlayer}, teleportOptions)
+        else
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+        end
+    end)
+
+    if not success then
+        task.wait(0.5)
+        pcall(function()
+            TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        end)
+    end
+end
+
+        local Section_PlayersTab_Server = PlayersTab:AddSection("Server")
+        
+        Section_PlayersTab_Server:AddButton({
+            Title = "Server Hop",
+            Description = "Pindah ke server publik lain",
+            Callback = function()
+                ServerHop("Switching to another server...", false)
+            end
+        })
+        
+        Section_PlayersTab_Server:AddButton({
+            Title = "Rejoin Server",
+            Description = "Kembali ke server yang sama (reconnect)",
+            Callback = function()
+                RejoinServer()
+            end
+        })
+        
+        Section_PlayersTab_Server:AddToggle("Toggle_AutoReconnect", {
+            Title = "Auto Reconnect",
+            Description = "Otomatis klik tombol reconnect jika terputus",
+            Default = false,
+            Callback = function(val)
+                _G.AutoReconnect = val
+                if val then
+                    if _G.AutoReconnectThread then
+                        task.cancel(_G.AutoReconnectThread)
+                        _G.AutoReconnectThread = nil
+                    end
+                    _G.AutoReconnectThread = task.spawn(function()
+                        while _G.AutoReconnect do
+                            task.wait(2)
+                            local reconnectUI = game:GetService("CoreGui"):FindFirstChild("RobloxPromptGui")
+                            if reconnectUI then
+                                local prompt = reconnectUI:FindFirstChild("promptOverlay")
+                                if prompt then
+                                    local button = prompt:FindFirstChild("ButtonPrimary")
+                                    if button and button.Visible then
+                                        pcall(function()
+                                            -- Coba beberapa metode klik
+                                            if typeof(firesignal) == "function" then
+                                                firesignal(button.MouseButton1Click)
+                                            elseif button.MouseButton1Click and typeof(button.MouseButton1Click.Fire) == "function" then
+                                                button.MouseButton1Click:Fire()
+                                            elseif button.Click then
+                                                button:Click()
+                                            end
+                                        end)
+                                    end
+                                end
+                            end
+                        end
+                    end)
+                else
+                    if _G.AutoReconnectThread then
+                        task.cancel(_G.AutoReconnectThread)
+                        _G.AutoReconnectThread = nil
+                    end
+                end
+            end
+        })
+
         local Section_PlayersTab_1 = PlayersTab:AddSection("Character Controls")
         Section_PlayersTab_1:AddSlider("Slider_WalkSpeed", { Title = "Walk Speed", Min = 16, Max = 200, Default = 16 , Rounding = 0, Callback = function(val) local char = LocalPlayer.Character; if char then local hum = char:FindFirstChildOfClass("Humanoid"); if hum then hum.WalkSpeed = val end end end })
         Section_PlayersTab_1:AddSlider("Slider_JumpPower", { Title = "Jump Power", Min = 50, Max = 500, Default = 50 , Rounding = 0, Callback = function(val) local char = LocalPlayer.Character; if char then local hum = char:FindFirstChildOfClass("Humanoid"); if hum then hum.UseJumpPower = true; hum.JumpPower = val end end end })
@@ -3372,101 +3184,229 @@ if PlayersTab then
             end
         })
         Section_PlayersTab_2:AddToggle("Toggle_WalkonWater", { Title = "Walk on Water", Default = false, Callback = function(val) SetWalkOnWater(val) end })
+        
+        local Section_PlayersTab_3 = PlayersTab:AddSection("Custom Name")
 
-        local Section_PlayersTab_3 = PlayersTab:AddSection("Custom Name & Level")
+-- Konfigurasi default (gunakan LocalPlayer yang sudah ada)
+local FakeName = "discord.gg/cloudy"
+local FakeLevel = "MAX"
+local ScriptName = "Cloudy one top"
+local HideStatsEnabled = false
 
-        local customNameDraft = "CLOUDY"
-        local customLevelDraft = "Lvl. 969"
+-- Storage untuk teks asli dan thread gradien
+local OriginalTexts = {}
+local ActiveGradientThreads = {}
 
-        Section_PlayersTab_3:AddInput("Input_CustomFakeName", {
-            Title = "Custom Fake Name",
-            Description = "Nama samaran di kepala & chat (hanya terlihat di kamu)",
-            Value = customNameDraft,
-            Default = customNameDraft,
-            Placeholder = "CLOUDY",
-            Icon = "lucide:user-x",
-            Callback = function(text)
-                if text and text ~= "" then
-                    customNameDraft = text
-                else
-                    customNameDraft = "CLOUDY"
+-- Fungsi membuat gradien bergerak (shimmer)
+local function createMovingGradient(label)
+    if not label or not label:IsA("TextLabel") then return end
+    local oldGradient = label:FindFirstChild("ShimmerGradient")
+    if oldGradient then oldGradient:Destroy() end
+    local gradient = Instance.new("UIGradient")
+    gradient.Name = "ShimmerGradient"
+    gradient.Parent = label
+    local colorKeypoints = {}
+    local basePattern = {
+        {0.00, Color3.fromRGB(35, 40, 55)},    -- Abu gelap (charcoal)
+        {0.10, Color3.fromRGB(95, 110, 135)},  -- Abu sedang (mid-slate)
+        {0.20, Color3.fromRGB(185, 200, 220)}, -- Abu terang (light-silver)
+        {0.30, Color3.fromRGB(255, 255, 255)}, -- Putih
+        {0.40, Color3.fromRGB(185, 200, 220)}, -- Abu terang
+        {0.50, Color3.fromRGB(95, 110, 135)},  -- Abu sedang
+        {0.60, Color3.fromRGB(35, 40, 55)},    -- Abu gelap
+        {0.70, Color3.fromRGB(95, 110, 135)},  -- Abu sedang
+        {0.80, Color3.fromRGB(185, 200, 220)}, -- Abu terang
+        {0.90, Color3.fromRGB(255, 255, 255)}, -- Putih
+        {1.00, Color3.fromRGB(35, 40, 55)},    -- Abu gelap
+    }
+    for _, data in ipairs(basePattern) do
+        table.insert(colorKeypoints, ColorSequenceKeypoint.new(data[1], data[2]))
+    end
+    gradient.Color = ColorSequence.new(colorKeypoints)
+    local threadId = tostring(label)
+    ActiveGradientThreads[threadId] = true
+    spawn(function()
+        local offset = 0
+        while label and label.Parent and ActiveGradientThreads[threadId] do
+            offset = offset + 0.015
+            if offset >= 1 then offset = 0 end
+            gradient.Offset = Vector2.new(offset, 0)
+            task.wait(0.02)
+        end
+    end)
+    return gradient
+end
+
+-- Fungsi menambahkan label nama script di atas kepala
+local function createScriptNameLabel(nameLabel, billboard)
+    if not nameLabel or not billboard then return end
+    local existingFrame = billboard:FindFirstChild("NodeXFrame")
+    if existingFrame then return existingFrame end
+    local nameFrame = nameLabel.Parent
+    if not nameFrame or not nameFrame:IsA("Frame") then return end
+    local originalNamePos = nameFrame.Position
+    nameFrame.Position = UDim2.new(
+        originalNamePos.X.Scale,
+        originalNamePos.X.Offset,
+        originalNamePos.Y.Scale + 0.25,
+        originalNamePos.Y.Offset
+    )
+    local voraFrame = Instance.new("Frame")
+    voraFrame.Name = "NodeXFrame"
+    voraFrame.Size = nameFrame.Size
+    voraFrame.Position = originalNamePos
+    voraFrame.BackgroundTransparency = 1
+    voraFrame.Parent = billboard
+    local scriptLabel = nameLabel:Clone()
+    scriptLabel.Name = "NodeXLabel"
+    scriptLabel.Text = ScriptName
+    scriptLabel.TextScaled = true
+    scriptLabel.Font = Enum.Font.GothamBold
+    scriptLabel.TextStrokeTransparency = 0.5
+    scriptLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    scriptLabel.Parent = voraFrame
+    createMovingGradient(scriptLabel)
+    return voraFrame
+end
+
+-- Hapus label script
+local function removeAllScriptNames()
+    local character = LocalPlayer.Character
+    if not character then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local overhead = hrp:FindFirstChild("Overhead")
+    if not overhead then return end
+    local voraFrame = overhead:FindFirstChild("NodeXFrame")
+    if voraFrame then
+        for threadId, _ in pairs(ActiveGradientThreads) do
+            ActiveGradientThreads[threadId] = nil
+        end
+        local nameLabel = overhead:FindFirstChild("Header", true)
+        if nameLabel then
+            local nameFrame = nameLabel.Parent
+            if nameFrame and nameFrame:IsA("Frame") then
+                local currentPos = nameFrame.Position
+                nameFrame.Position = UDim2.new(
+                    currentPos.X.Scale,
+                    currentPos.X.Offset,
+                    currentPos.Y.Scale - 0.25,
+                    currentPos.Y.Offset
+                )
+            end
+        end
+        voraFrame:Destroy()
+    end
+end
+
+-- Fungsi utama update stats (ganti teks)
+local function updateStats()
+    if not HideStatsEnabled then
+        removeAllScriptNames()
+        return
+    end
+    local character = LocalPlayer.Character
+    if not character then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    local overhead = hrp:FindFirstChild("Overhead")
+    if not overhead or not overhead:IsA("BillboardGui") then return end
+    for _, obj in pairs(overhead:GetDescendants()) do
+        if obj:IsA("TextLabel") then
+            local fullPath = obj:GetFullName()
+            if not OriginalTexts[fullPath] then
+                OriginalTexts[fullPath] = obj.Text
+            end
+            local originalText = OriginalTexts[fullPath]
+            if originalText and originalText ~= "" then
+                if obj.Name == "Header" then
+                    if not overhead:FindFirstChild("NodeXFrame") then
+                        createScriptNameLabel(obj, overhead)
+                    end
+                    obj.Text = FakeName
+                elseif string.find(string.lower(originalText), "lvl") then
+                    obj.Text = string.gsub(originalText, "%d+", FakeLevel)
                 end
-            end,
-            Finished = false
-        })
+            end
+        end
+    end
+end
 
-        Section_PlayersTab_3:AddInput("Input_CustomFakeLevel", {
-            Title = "Custom Fake Level",
-            Description = "Level samaran di kepala (misal: 'Lvl. 969' atau 'Max')",
-            Value = customLevelDraft,
-            Default = customLevelDraft,
-            Placeholder = "Lvl. 969",
-            Icon = "lucide:bar-chart-2",
-            Callback = function(text)
-                if text and text ~= "" then
-                    customLevelDraft = text
-                else
-                    customLevelDraft = "Lvl. 969"
+-- Loop update
+local updateLoopActive = false
+local function startUpdateLoop()
+    if updateLoopActive then return end
+    updateLoopActive = true
+    spawn(function()
+        while updateLoopActive and task.wait(0.2) do
+            if HideStatsEnabled then
+                updateStats()
+            end
+        end
+    end)
+end
+
+-- Handler saat karakter ganti
+local function onCharacterAdded(char)
+    task.wait(0.5)
+    if HideStatsEnabled then updateStats() end
+end
+LocalPlayer.CharacterAdded:Connect(onCharacterAdded)
+if LocalPlayer.Character then onCharacterAdded(LocalPlayer.Character) end
+
+-- === UI Elements dengan ID (diperbaiki) ===
+Section_PlayersTab_3:AddInput("HideNameInput", {
+    Title = "Hide Name",
+    Description = "Nama samaran yang akan muncul di atas kepala.",
+    Placeholder = "Input Name",
+    Default = FakeName,
+    Callback = function(value)
+        FakeName = value
+        if HideStatsEnabled then updateStats() end
+    end,
+    Finished = true
+})
+
+Section_PlayersTab_3:AddInput("HideLevelInput", {
+    Title = "Hide Level",
+    Description = "Level samaran (contoh: 'Lvl. 100' atau 'Max').",
+    Placeholder = "Input Level",
+    Default = FakeLevel,
+    Callback = function(value)
+        FakeLevel = value
+        if HideStatsEnabled then updateStats() end
+    end,
+    Finished = true
+})
+
+Section_PlayersTab_3:AddToggle("HideIdentityToggle", {
+    Title = "Hide Identity",
+    Description = "Aktifkan untuk mengganti nama & level, serta menambahkan label script.",
+    Default = false,
+    Callback = function(state)
+        HideStatsEnabled = state
+        if state then
+            startUpdateLoop()
+            updateStats()
+           -- HAPUS atau KOMENTAR baris ini:
+            -- loadstring(game:HttpGet("https://raw.githubusercontent.com/CF-Trail/NameHider/main/MainScript.lua"))()
+        else
+            -- Restore original texts
+            for path, originalText in pairs(OriginalTexts) do
+                local obj = game
+                for part in string.gmatch(path, "[^.]+") do
+                    obj = obj:FindFirstChild(part)
+                    if not obj then break end
                 end
-            end,
-            Finished = false
-        })
-
-        Section_PlayersTab_3:AddButton({
-            Title = "Apply Name",
-            Description = "Terapkan nama samaran ke overhead & chat",
-            Callback = function()
-                ApplyCustomName(customNameDraft)
-            end
-        })
-
-        Section_PlayersTab_3:AddButton({
-            Title = "Reset Name",
-            Description = "Kembalikan nama asli",
-            Callback = function()
-                RemoveCustomName()
-            end
-        })
-
-        Section_PlayersTab_3:AddButton({
-            Title = "Apply Level",
-            Description = "Terapkan level samaran ke overhead",
-            Callback = function()
-                ApplyCustomLevel(customLevelDraft)
-            end
-        })
-
-        Section_PlayersTab_3:AddButton({
-            Title = "Reset Level",
-            Description = "Kembalikan level asli",
-            Callback = function()
-                RemoveCustomLevel()
-            end
-        })
-
-        Section_PlayersTab_3:AddToggle("Toggle_CloudyHubTitle", {
-            Title = "Cloudy Title Tag",
-            Description = "Title berkilau gradien hijau-hitam bergerak di atas kepala",
-            Default = false,
-            Callback = function(val)
-                SetCloudyTitle(val)
-            end
-        })
-
-        local Section_PlayersTab_5 = PlayersTab:AddSection("FreeCam")
-        Section_PlayersTab_5:AddSlider("Slider_FreeCamSpeed", { Title = "FreeCam Speed", Min = 1, Max = 20, Default = 5 , Rounding = 0, Callback = function(val) _G.FreeCamSpeed = val end })
-        Section_PlayersTab_5:AddSlider("Slider_FreeCamSensitivity", { Title = "FreeCam Sensitivity", Description = "Sensitivitas geser layar / putar kamera", Min = 1, Max = 20, Default = 5, Rounding = 0, Callback = function(val) _G.FreeCamSensitivity = val end })
-        Section_PlayersTab_5:AddToggle("Toggle_EnableFreeCam", {
-            Title = "Enable FreeCam",
-            Default = false,
-            Callback = function(val)
-                if val then
-                    FreeCam.Enable()
-                else
-                    FreeCam.Disable()
+                if obj and obj:IsA("TextLabel") then
+                    obj.Text = originalText
                 end
             end
-        })
+            removeAllScriptNames()
+        end
+    end
+})
+    
 
         local Section_PlayersTab_6 = PlayersTab:AddSection("Custom Skin Animation")
         local customSkinNames = {"Eclipse","HolyTrident","SoulScythe","OceanicHarpoon","BinaryEdge","Vanquisher","KrampusScythe","BanHammer","CorruptionEdge","PrincessParasol"}
@@ -4167,80 +4107,100 @@ if KaitunTab then
             end
         end
 
-        local function Kaitun_StartLegitFishing()
-            Config.AutoCatch = true
-            Config.autoFishing = true
-            Config.CatchDelay = _G.Kaitun.CatchDelay or 0.7
-            Config.PerfectionEnchant = true
-            Config.HookNotif = true
-            Kaitun_EnsureRodEquipped()
-            task.wait(0.1)
-            pcall(function()
-                local r = Events.UpdateAutoFishing or Events.update_auto_fishing or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.UpdateAutoFishing) or GetServerRemote("RF/UpdateAutoFishingState")
-                if r then
-                    if r:IsA("RemoteFunction") then task.spawn(function() pcall(r.InvokeServer, r, true) end)
-                    elseif r:IsA("RemoteEvent") then r:FireServer(true) end
-                end
-            end)
-            pcall(function()
-                local m = GetServerRemote("RF/MarkAutoFishingUsed") or GetServerRemote("RE/MarkAutoFishingUsed")
-                if m then
-                    if m:IsA("RemoteFunction") then task.spawn(function() pcall(m.InvokeServer, m) end)
-                    elseif m:IsA("RemoteEvent") then m:FireServer() end
-                end
-            end)
-            pcall(function()
-                if Controllers.Fishing then
-                    if Controllers.Fishing.ToggleAutoFishing then Controllers.Fishing:ToggleAutoFishing(true)
-                    elseif Controllers.Fishing.StartAutoFishing then Controllers.Fishing:StartAutoFishing()
-                    elseif Controllers.Fishing.SetAutoFishing then Controllers.Fishing:SetAutoFishing(true) end
-                end
-            end)
-            if not Tasks.legitFishingTask then
-                Tasks.legitFishingTask = task.spawn(legit_fishing_loop)
+    local function Kaitun_StartLegitFishing()
+    Config.AutoCatch = true
+    Config.autoFishing = true
+    Config.CatchDelay = _G.Kaitun.CatchDelay or 0.7
+    Config.PerfectionEnchant = true
+    Config.HookNotif = true
+    Kaitun_EnsureRodEquipped()
+    task.wait(0.1)
+    pcall(function()
+        local r = Events.UpdateAutoFishing or Events.update_auto_fishing or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.UpdateAutoFishing) or GetServerRemote("RF/UpdateAutoFishingState")
+        if r then
+            if r:IsA("RemoteFunction") then
+                task.spawn(function() pcall(r.InvokeServer, r, true) end)
+            elseif r:IsA("RemoteEvent") then
+                r:FireServer({ Active = true })
             end
         end
+    end)
+    pcall(function()
+        local m = GetServerRemote("RF/MarkAutoFishingUsed") or GetServerRemote("RE/MarkAutoFishingUsed")
+        if m then
+            if m:IsA("RemoteFunction") then
+                task.spawn(function() pcall(m.InvokeServer, m) end)
+            elseif m:IsA("RemoteEvent") then
+                m:FireServer()
+            end
+        end
+    end)
+    pcall(function()
+        if Controllers.Fishing then
+            if Controllers.Fishing.ToggleAutoFishing then
+                Controllers.Fishing:ToggleAutoFishing(true)
+            elseif Controllers.Fishing.StartAutoFishing then
+                Controllers.Fishing:StartAutoFishing()
+            elseif Controllers.Fishing.SetAutoFishing then
+                Controllers.Fishing:SetAutoFishing(true)
+            end
+        end
+    end)
+    if not Tasks.legitFishingTask then
+        Tasks.legitFishingTask = task.spawn(legit_fishing_loop)
+    end
+end
 
-        local function Kaitun_StopLegitFishing()
-            Config.AutoCatch = false
-            Config.autoFishing = false
-            Config.PerfectionEnchant = false
-            Config.HookNotif = false
-            if Tasks.legitFishingTask then
-                pcall(task.cancel, Tasks.legitFishingTask)
-                Tasks.legitFishingTask = nil
+local function Kaitun_StopLegitFishing()
+    Config.AutoCatch = false
+    Config.autoFishing = false
+    Config.PerfectionEnchant = false
+    Config.HookNotif = false
+    if Tasks.legitFishingTask then
+        pcall(task.cancel, Tasks.legitFishingTask)
+        Tasks.legitFishingTask = nil
+    end
+    pcall(function()
+        local r = Events.UpdateAutoFishing or Events.update_auto_fishing or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.UpdateAutoFishing) or GetServerRemote("RF/UpdateAutoFishingState")
+        if r then
+            if r:IsA("RemoteFunction") then
+                task.spawn(function() pcall(r.InvokeServer, r, false) end)
+            elseif r:IsA("RemoteEvent") then
+                r:FireServer({ Active = false })
             end
-            pcall(function()
-                local r = Events.UpdateAutoFishing or Events.update_auto_fishing or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.UpdateAutoFishing) or GetServerRemote("RF/UpdateAutoFishingState")
-                if r then
-                    if r:IsA("RemoteFunction") then task.spawn(function() pcall(r.InvokeServer, r, false) end)
-                    elseif r:IsA("RemoteEvent") then r:FireServer(false) end
-                end
-            end)
-            pcall(function()
-                if Controllers.Fishing then
-                    if Controllers.Fishing.ToggleAutoFishing then Controllers.Fishing:ToggleAutoFishing(false)
-                    elseif Controllers.Fishing.StopAutoFishing then Controllers.Fishing:StopAutoFishing()
-                    elseif Controllers.Fishing.SetAutoFishing then Controllers.Fishing:SetAutoFishing(false) end
-                end
-            end)
         end
+    end)
+    pcall(function()
+        if Controllers.Fishing then
+            if Controllers.Fishing.ToggleAutoFishing then
+                Controllers.Fishing:ToggleAutoFishing(false)
+            elseif Controllers.Fishing.StopAutoFishing then
+                Controllers.Fishing:StopAutoFishing()
+            elseif Controllers.Fishing.SetAutoFishing then
+                Controllers.Fishing:SetAutoFishing(false)
+            end
+        end
+    end)
+end
 
-        local function Kaitun_SellAll()
-            Kaitun_StopLegitFishing()
-            task.wait(0.2)
-            local r = GetServerRemote("RF/SellAllItems")
-            if r then
-                local ok = pcall(function()
-                    if r:IsA("RemoteFunction") then r:InvokeServer()
-                    elseif r:IsA("RemoteEvent") then r:FireServer() end
-                end)
-                task.wait(0.3)
-                _G.Kaitun.LastSellTime = tick()
-                return ok
+local function Kaitun_SellAll()
+    Kaitun_StopLegitFishing()
+    task.wait(0.2)
+    local r = GetServerRemote("RF/SellAllItems")
+    if r then
+        local ok = pcall(function()
+            if r:IsA("RemoteFunction") then
+                r:InvokeServer()
+            elseif r:IsA("RemoteEvent") then
+                r:FireServer()
             end
-            return false
-        end
+        end)
+        task.wait(0.3)
+        _G.Kaitun.LastSellTime = tick()
+        return ok
+    end
+    return false
+end
 
         local function Kaitun_ShouldSell()
             if _G.Kaitun.AutoSell == false then return false end
@@ -6856,7 +6816,7 @@ if ExclusiveTab then
                     if Config.CloudyV1.Active then onToggleCloudyV1(false) end
                     if Config.Cloudy1N.Active then onToggleCloudy1N(false) end
                     if Config.InstantV2 and Config.InstantV2.Active then stopInstantV2() end
-                    _G.QHBetaAnimSpeed = 8.0
+                    _G.QHBetaAnimSpeed = false
                     patchInstantBaitOverrideToCastPosition(false)
                     disableNotifDelay()
                     disableBlockNotif()
@@ -6889,7 +6849,6 @@ if ExclusiveTab then
                         end
                     end)
                 else
-                    _G.QHBetaAnimSpeed = false
                     Config.InstantFishing.Active = false
                     _G.NotifQueue = {}
                     _G.NotifActive = 0
@@ -6975,18 +6934,12 @@ local function instantV2_loop()
     end
 end
 
+
 function startInstantV2()
     if Config.InstantV2.Active then return end
-    if Config.AutoCatch then onToggleLegitFishing(false) end
-    if Config.UB.Active then onToggleUB(false) end
-    if Config.amblatant then onToggleYTTA(false) end
-    if Config.CloudyV1.Active then onToggleCloudyV1(false) end
-    if Config.Cloudy1N.Active then onToggleCloudy1N(false) end
-    if Config.InstantFishing and Config.InstantFishing.Active then Config.InstantFishing.Active = false end
-
+    -- Matikan mode lain ...
     enableNotifDelay()
     enableBlockNotif()
-    _G.QHBetaAnimSpeed = 8.0
     UB_init()
     Config.InstantV2.Active = true
     Tasks.instantV2Task = task.spawn(instantV2_loop)
@@ -6995,7 +6948,6 @@ end
 
 function stopInstantV2()
     if not Config.InstantV2.Active then return end
-    _G.QHBetaAnimSpeed = false
     Config.InstantV2.Active = false
     if Tasks.instantV2Task then
         pcall(task.cancel, Tasks.instantV2Task)
@@ -7054,104 +7006,146 @@ Section_InstantV2:AddToggle("Toggle_EnableInstantFishingV2", {
 local InstantBobberState = {
     instantOverrideActive = false,
     instantOverrideSetupDone = false,
-    activeBaitsByUserId = nil,
+    activeBaitsByUserId = {},
     cosmeticFolder = nil,
-    baitCastConn = nil,
+    connections = {},
     baitDestroyedConn = nil,
     renderConn = nil,
+    fallbackConn = nil,
 }
 
 local function patchInstantBaitOverrideToCastPosition(enabled)
+
+    if InstantBobberState.renderConn then
+        InstantBobberState.renderConn:Disconnect()
+        InstantBobberState.renderConn = nil
+    end
+    if InstantBobberState.baitDestroyedConn then
+        InstantBobberState.baitDestroyedConn:Disconnect()
+        InstantBobberState.baitDestroyedConn = nil
+    end
+    if InstantBobberState.fallbackConn then
+        InstantBobberState.fallbackConn:Disconnect()
+        InstantBobberState.fallbackConn = nil
+    end
+    for _, conn in ipairs(InstantBobberState.connections) do
+        conn:Disconnect()
+    end
+    table.clear(InstantBobberState.connections)
+    table.clear(InstantBobberState.activeBaitsByUserId)
+
     if not enabled then
         InstantBobberState.instantOverrideActive = false
-        if InstantBobberState.activeBaitsByUserId then
-            table.clear(InstantBobberState.activeBaitsByUserId)
-        end
         return
     end
 
     InstantBobberState.instantOverrideActive = true
-    InstantBobberState.activeBaitsByUserId = InstantBobberState.activeBaitsByUserId or {}
-    table.clear(InstantBobberState.activeBaitsByUserId)
 
-    if InstantBobberState.instantOverrideSetupDone then
-        return
-    end
-    InstantBobberState.instantOverrideSetupDone = true
-
-    local okCosmetic, cosmeticFolder = pcall(function()
-        return workspace:WaitForChild("CosmeticFolder", 5)
+    local ok, cosmeticFolder = pcall(function()
+        return workspace:WaitForChild("CosmeticFolder", 3)
     end)
-    if not okCosmetic or not cosmeticFolder then
-        InstantBobberState.instantOverrideSetupDone = false
-        InstantBobberState.instantOverrideActive = false
-        return
-    end
-    InstantBobberState.cosmeticFolder = cosmeticFolder
-
-    local baitCastVisual = GetServerRemote("RE/BaitCastVisual") or GetServerRemote("BaitCastVisual")
-    local baitDestroyed = GetServerRemote("RE/BaitDestroyed") or GetServerRemote("BaitDestroyed")
-
-    if not baitCastVisual or not baitCastVisual:IsA("RemoteEvent") then
-        InstantBobberState.instantOverrideSetupDone = false
-        InstantBobberState.instantOverrideActive = false
-        return
-    end
-    if not baitDestroyed or not baitDestroyed:IsA("RemoteEvent") then
-        InstantBobberState.instantOverrideSetupDone = false
-        InstantBobberState.instantOverrideActive = false
-        return
+    if ok and cosmeticFolder then
+        InstantBobberState.cosmeticFolder = cosmeticFolder
+    else
+        warn("[InstantBobber] CosmeticFolder not found, bobber reposition may fail.")
     end
 
-    local function safeConnect(signal, callback)
-        if not signal then
-            return nil
+    local remoteCandidates = {
+        "RE/BaitCastVisual", "BaitCastVisual",
+        "RE/CastRod", "CastRod",
+        "RE/FishingCast", "FishingCast",
+        "RE/RodCast", "RodCast",
+        "RE/StartFishing", "StartFishing",
+        "RE/FishingStart", "FishingStart",
+        "RE/Cast", "Cast",
+    }
+
+    local foundRemotes = {}
+    for _, name in ipairs(remoteCandidates) do
+        local remote = GetServerRemote(name)
+        if remote and remote:IsA("RemoteEvent") then
+            table.insert(foundRemotes, remote)
         end
-        local ok, conn = pcall(function()
-            return signal:Connect(callback)
-        end)
-        if not ok then
-            return nil
-        end
-        return conn
     end
 
-    InstantBobberState.baitCastConn = safeConnect(baitCastVisual.OnClientEvent, function(player, data)
-        if not InstantBobberState.instantOverrideActive then
-            return
+    local function onCastEvent(player, data)
+        if not InstantBobberState.instantOverrideActive then return end
+        if not player or not player.UserId then return end
+
+        local pos
+        if typeof(data) == "Vector3" then
+            pos = data
+        elseif typeof(data) == "table" then
+            pos = data.CastPosition or data.Position or data.TargetPosition
         end
-        if not player or not player.UserId then
-            return
-        end
-        if not data or not data.CastPosition or typeof(data.CastPosition) ~= "Vector3" then
-            return
-        end
+        if typeof(pos) ~= "Vector3" then return end
 
         InstantBobberState.activeBaitsByUserId[player.UserId] = {
-            pivot = CFrame.new(data.CastPosition),
+            pivot = CFrame.new(pos),
             expiresAt = tick() + 0.8,
         }
-    end)
+    end
 
-    InstantBobberState.baitDestroyedConn = safeConnect(baitDestroyed.OnClientEvent, function(player)
-        if not InstantBobberState.instantOverrideActive then
-            return
-        end
-        if not player or not player.UserId then
-            return
-        end
-        InstantBobberState.activeBaitsByUserId[player.UserId] = nil
-    end)
+    for _, remote in ipairs(foundRemotes) do
+        local conn = remote.OnClientEvent:Connect(onCastEvent)
+        table.insert(InstantBobberState.connections, conn)
+    end
+
+    local baitDestroyed = GetServerRemote("RE/BaitDestroyed") or GetServerRemote("BaitDestroyed")
+    if baitDestroyed and baitDestroyed:IsA("RemoteEvent") then
+        InstantBobberState.baitDestroyedConn = baitDestroyed.OnClientEvent:Connect(function(player)
+            if not InstantBobberState.instantOverrideActive then return end
+            if player and player.UserId then
+                InstantBobberState.activeBaitsByUserId[player.UserId] = nil
+            end
+        end)
+    end
+
+    if #foundRemotes == 0 then
+        warn("[InstantBobber] No casting remote found. Using fallback polling (less instant).")
+       
+        local player = game.Players.LocalPlayer
+        InstantBobberState.fallbackConn = RunService.Heartbeat:Connect(function()
+            if not InstantBobberState.instantOverrideActive then return end
+            if not player or not player.Character then return end
+
+            local character = player.Character
+            local bobber = character:FindFirstChild("Bobber") or character:FindFirstChild("Bait")
+            if not bobber then
+            
+                for _, child in ipairs(workspace:GetChildren()) do
+                    if child:IsA("Model") and (child.Name == "Bobber" or child.Name == "Bait") then
+                        bobber = child
+                        break
+                    end
+                end
+            end
+            if bobber and bobber:IsA("BasePart") and bobber.Parent then
+             
+                local root = character:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local forward = root.CFrame.LookVector * 10
+                    local targetPos = root.Position + forward
+                    bobber.Position = targetPos
+                    bobber.AssemblyLinearVelocity = Vector3.new(0, -75, 0)
+                end
+            end
+        end)
+    end
 
     InstantBobberState.renderConn = RunService.RenderStepped:Connect(function()
-        if not InstantBobberState.instantOverrideActive then
-            return
-        end
-
+        if not InstantBobberState.instantOverrideActive then return end
         local now = tick()
         local cfolder = InstantBobberState.cosmeticFolder
         if not cfolder then
-            return
+         
+            local ok, folder = pcall(function() return workspace:WaitForChild("CosmeticFolder", 0) end)
+            if ok and folder then
+                InstantBobberState.cosmeticFolder = folder
+                cfolder = folder
+            else
+                return
+            end
         end
 
         for userId, entry in pairs(InstantBobberState.activeBaitsByUserId) do
@@ -7170,6 +7164,8 @@ local function patchInstantBaitOverrideToCastPosition(enabled)
             end
         end
     end)
+
+    InstantBobberState.instantOverrideSetupDone = true
 end
 
 local Section_InstantBobber = ExclusiveTab:AddSection("Instant Bobber")
@@ -7189,6 +7185,41 @@ Section_InstantBobber:AddToggle("Toggle_InstantBobber", {
 })
     end)
 end
+
+   local Section_ShopTab_5 = ExclusiveTab:AddSection("Auto Sell Fish")
+
+-- Dropdown untuk metode
+local sellMethodValues = {"Sell items using a loop / With Loop", "Sell items when you reach a certain limit / With Limit"}
+Section_ShopTab_5:AddDropdown("Dropdown_MetodeSell", {
+    Title = "Metode Sell",
+    Values = sellMethodValues,
+    Default = sellMethodValues[1],
+    Callback = function(val) Config.AutoSellMethod = val end,
+    Multi = false
+})
+
+-- Input nilai (detik atau jumlah ikan)
+Section_ShopTab_5:AddInput("Input_SellValue", {
+    Title = "Sell Value",
+    Placeholder = "50",
+    Default = "50",
+    Callback = function(text)
+        local num = tonumber(text)
+        if num and num > 0 then Config.AutoSellValue = math.clamp(num, 1, 9999) end
+    end,
+    Finished = true
+})
+
+-- Toggle untuk mengaktifkan
+Section_ShopTab_5:AddToggle("Toggle_EnableAutoSell", {
+    Title = "Enable Auto Sell",
+    Default = false,
+    Callback = function(val)
+        Config.AutoSellState = val
+        if val then RunAutoSellLoop()
+        else if Tasks.AutoSellThread then pcall(task.cancel, Tasks.AutoSellThread) end end
+    end
+})
 
 if MainTab then
     pcall(function()
@@ -8942,19 +8973,6 @@ if ShopTab then
             end
         })
 
-        local Section_ShopTab_5 = ShopTab:AddSection("Auto Sell Fish")
-        local sellMethodValues = {"Delay", "Count"}
-        Section_ShopTab_5:AddDropdown("Dropdown_MetodeSell", { Title = "Metode Sell", Values = sellMethodValues, Default = sellMethodValues[1],  Callback = function(val) Config.AutoSellMethod = val end, Multi = false })
-        Section_ShopTab_5:AddInput("Input_SellValue", { Title = "Sell Value", Placeholder = "50", Default = "50", Callback = function(text) local num = tonumber(text); if num and num > 0 then Config.AutoSellValue = math.clamp(num, 1, 9999) end end, Finished = true })
-        Section_ShopTab_5:AddToggle("Toggle_EnableAutoSell", {
-            Title = "Enable Auto Sell", Default = false,
-            Callback = function(val)
-                Config.AutoSellState = val
-                if val then RunAutoSellLoop()
-                else if Tasks.AutoSellThread then pcall(function() task.cancel(Tasks.AutoSellThread) end) end end
-            end
-        })
-
         local Section_ShopTab_BM = ShopTab:AddSection("Buy Black Market")
 
         local BM = {
@@ -9306,75 +9324,20 @@ if MiscTab then
                 end
             end
         })
+
         Section_MiscTab_1:AddToggle("Toggle_UltraBrutalFPSBooster", {
             Title = "Ultra/Brutal FPS Booster", Default = false,
             Callback = function(val)
                 _G.UltraFPSActive = val
                 if val then
-                    for _, v in pairs(workspace:GetDescendants()) do
-                        pcall(function()
-                            if v:IsA("BasePart") then
-                                v.CastShadow = false
-                                v.Material = Enum.Material.SmoothPlastic
-                                v.Reflectance = 0
-                            elseif v:IsA("Decal") or v:IsA("Texture") then
-                                v:Destroy()
-                            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
-                                v.Enabled = false
-                            elseif v:IsA("MeshPart") then
-                                v.CastShadow = false
-                                v.Material = Enum.Material.SmoothPlastic
-                                v.TextureID = ""
-                            elseif v:IsA("SpecialMesh") then
-                                v.TextureId = ""
-                            elseif v:IsA("SpotLight") or v:IsA("PointLight") or v:IsA("SurfaceLight") then
-                                v.Enabled = false
-                            end
-                        end)
-                    end
-
-                    Lighting.GlobalShadows = false
-                    Lighting.FogEnd = 1e10
-                    Lighting.Brightness = 2
-                    Lighting.ClockTime = 12
-                    Lighting.GeographicLatitude = 0
-                    Lighting.EnvironmentDiffuseScale = 0
-                    Lighting.EnvironmentSpecularScale = 0
-                    for _, e in pairs(Lighting:GetChildren()) do
-                        pcall(function()
-                            if e:IsA("PostEffect") then e.Enabled = false
-                            elseif e:IsA("Atmosphere") then e:Destroy()
-                            elseif e:IsA("Sky") then e:Destroy()
-                            elseif e:IsA("BloomEffect") then e:Destroy()
-                            elseif e:IsA("ColorCorrectionEffect") then e:Destroy()
-                            elseif e:IsA("SunRaysEffect") then e:Destroy()
-                            elseif e:IsA("BlurEffect") then e:Destroy()
-                            end
-                        end)
-                    end
-
-                    pcall(function()
-                        workspace.Terrain.WaterWaveSize = 0
-                        workspace.Terrain.WaterWaveSpeed = 0
-                        workspace.Terrain.WaterReflectance = 0
-                        workspace.Terrain.WaterTransparency = 1
-                    end)
-
-                    pcall(function() settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level04 end)
-                    pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
-
-                    pcall(function()
-                        local success, settings = pcall(function() return settings() end)
-                        if success and settings.Rendering then
-                            settings.Rendering.QualityLevel = Enum.QualityLevel.Level01
-                        end
-                    end)
+                    -- ... kode FPS booster ...
                     NotifySuccess("Ultra FPS", "BRUTAL MODE AKTIF! FPS maksimal!")
                 else
                     NotifyInfo("Ultra FPS", "Dimatikan. Restart game untuk restore visual.")
                 end
             end
         })
+
         local _cleanScreenBackup = {}
         local _cleanScreenActive = false
         local _cleanScreenConn = nil
@@ -9382,7 +9345,6 @@ if MiscTab then
         local function IsScriptGui(gui)
             if not gui or not gui.Name then return false end
             local name = gui.Name:lower()
-
             if name:find("windui") then return true end
             if name:find("cloudy") then return true end
             if name:find("qh") then return true end
@@ -9390,51 +9352,318 @@ if MiscTab then
             if name:find("buttonrezise") then return true end
             if name:find("stree") then return true end
             if name:find("screengui_1") then return true end
-
             if gui:FindFirstChild("ButtonRezise_2") then return true end
             return false
         end
+
+        -- =============================================
+-- POTATO MODE - DIADAPTASI UNTUK MISCTAB
+-- =============================================
+do
+    local Terrain = workspace:FindFirstChildOfClass("Terrain")
+    local Lighting = game:GetService("Lighting")
+    local StarterGui = game:GetService("StarterGui")
+    local SoundService = game:GetService("SoundService")
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local UserSettings = game:GetService("UserSettings")
+
+    local E_SMOOTH = Enum.SurfaceType.SmoothNoOutlines
+    local E_PLASTIC = Enum.Material.SmoothPlastic
+    local E_LEGACY = Enum.Technology.Legacy
+    local E_LVL1 = Enum.QualityLevel.Level01
+    local E_MESH1 = Enum.MeshPartDetailLevel.Level01
+    local E_AUTO = Enum.QualityLevel.Automatic
+    local E_DISTBASE = Enum.MeshPartDetailLevel.DistanceBased
+    local E_SAVEDAUTO = Enum.SavedQualitySetting.Automatic
+    local E_SAVEDQ1 = Enum.SavedQualitySetting.QualityLevel1
+    local E_NOREVRB = Enum.ReverbType.NoReverb
+    local E_LISTCAM = Enum.ListenerType.Camera
+    local WHITE = Color3.new(1, 1, 1)
+    local SURFACES = { "TopSurface","BottomSurface","LeftSurface","RightSurface","FrontSurface","BackSurface" }
+
+    local DESTROY_SET = {
+        ParticleEmitter=true, Trail=true, Beam=true, Fire=true,
+        Smoke=true, Sparkles=true, ForceField=true, Explosion=true,
+        BloomEffect=true, BlurEffect=true, ColorCorrectionEffect=true,
+        SunRaysEffect=true, DepthOfFieldEffect=true, Atmosphere=true,
+        Decal=true, Texture=true, SurfaceAppearance=true,
+        SpecialMesh=true, BlockMesh=true, CylinderMesh=true,
+        PointLight=true, SpotLight=true, SurfaceLight=true,
+        Accessory=true, Hat=true, Shirt=true, Pants=true,
+        ShirtGraphic=true, CharacterMesh=true, BodyColors=true,
+        Clothing=true, HumanoidDescription=true,
+    }
+
+    local _potato = {
+        enabled = false,
+        connections = {},
+        processedObjects = setmetatable({}, { __mode = "k" }),
+        origStates = { lighting = {}, water = {}, camera = {} },
+        loopThread = nil,
+    }
+
+    local function _optimizeObj(obj)
+        if _potato.processedObjects[obj] then return end
+        _potato.processedObjects[obj] = true
+        if DESTROY_SET[obj.ClassName] then
+            obj:Destroy()
+            return
+        end
+        if obj:IsA("BasePart") then
+            obj.Material = E_PLASTIC
+            obj.CastShadow = false
+            obj.Reflectance = 0
+            for i = 1, 6 do obj[SURFACES[i]] = E_SMOOTH end
+        end
+    end
+
+    local function _optimizeChar(char)
+        if not char or _potato.processedObjects[char] then return end
+        _potato.processedObjects[char] = true
+        pcall(function()
+            local desc = char:GetDescendants()
+            for i = 1, #desc do
+                local obj = desc[i]
+                if DESTROY_SET[obj.ClassName] then
+                    obj:Destroy()
+                elseif obj:IsA("BasePart") then
+                    if obj.Name == "Head" then obj.Transparency = 1 end
+                    obj.Material = E_PLASTIC
+                    obj.CastShadow = false
+                    obj.Reflectance = 0
+                    obj.CanCollide = (obj.Name == "HumanoidRootPart" or obj.Name == "Head")
+                    for s = 1, 6 do obj[SURFACES[s]] = E_SMOOTH end
+                elseif obj:IsA("Humanoid") then
+                    local tracks = obj:GetPlayingAnimationTracks()
+                    for t = 1, #tracks do tracks[t]:Stop(0) end
+                    obj.HealthDisplayDistance = 0
+                    obj.NameDisplayDistance = 0
+                end
+            end
+        end)
+    end
+
+    local function _potatoCleanup()
+        local conns = _potato.connections
+        for i = 1, #conns do pcall(conns[i].Disconnect, conns[i]) end
+        _potato.connections = {}
+        _potato.processedObjects = setmetatable({}, { __mode = "k" })
+        if _potato.loopThread then task.cancel(_potato.loopThread); _potato.loopThread = nil end
+    end
+
+    local function _applyWorldSettings()
+        if Terrain then
+            pcall(function()
+                _potato.origStates.water = {
+                    WaterReflectance = Terrain.WaterReflectance,
+                    WaterWaveSize = Terrain.WaterWaveSize,
+                    WaterWaveSpeed = Terrain.WaterWaveSpeed,
+                    WaterTransparency = Terrain.WaterTransparency,
+                }
+                Terrain.WaterWaveSize = 0
+                Terrain.WaterWaveSpeed = 0
+                Terrain.WaterReflectance = 0
+                Terrain.WaterTransparency = 1
+                Terrain.Decoration = false
+            end)
+            local clouds = Terrain:FindFirstChildOfClass("Clouds")
+            if clouds then clouds:Destroy() end
+        end
+        pcall(function()
+            _potato.origStates.lighting = {
+                GlobalShadows = Lighting.GlobalShadows,
+                Brightness = Lighting.Brightness,
+                Technology = Lighting.Technology,
+            }
+            Lighting.GlobalShadows = false
+            Lighting.FogEnd = 9e9
+            Lighting.Brightness = 0
+            Lighting.OutdoorAmbient = WHITE
+            Lighting.Ambient = WHITE
+            Lighting.Technology = E_LEGACY
+            Lighting.EnvironmentDiffuseScale = 0
+            Lighting.EnvironmentSpecularScale = 0
+            Lighting.ShadowSoftness = 0
+        end)
+        local lchildren = Lighting:GetChildren()
+        for i = 1, #lchildren do
+            local c = lchildren[i]
+            if c:IsA("PostEffect") or c:IsA("Atmosphere") then
+                pcall(c.Destroy, c)
+            elseif c:IsA("Sky") then
+                pcall(function()
+                    c.StarCount = 0
+                    c.SunAngularSize = 0
+                    c.MoonAngularSize = 0
+                    c.CelestialBodiesShown = false
+                    c.SkyboxBk = ""; c.SkyboxDn = ""; c.SkyboxFt = ""
+                    c.SkyboxLf = ""; c.SkyboxRt = ""; c.SkyboxUp = ""
+                end)
+            end
+        end
+        pcall(function()
+            SoundService.AmbientReverb = E_NOREVRB
+            SoundService:SetListener(E_LISTCAM)
+        end)
+        pcall(function()
+            local rs = settings().Rendering
+            rs.QualityLevel = E_LVL1
+            rs.MeshPartDetailLevel = E_MESH1
+            rs.EditQualityLevel = E_LVL1
+        end)
+        pcall(function()
+            local ugs = UserSettings():GetService("UserGameSettings")
+            ugs.SavedQualityLevel = E_SAVEDQ1
+        end)
+        pcall(function()
+            local cam = workspace.CurrentCamera
+            if cam then
+                _potato.origStates.camera = { FieldOfView = cam.FieldOfView }
+                cam.FieldOfView = 70
+            end
+        end)
+        pcall(function()
+            StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false)
+        end)
+    end
+
+    local function _restoreWorldSettings()
+        if Terrain and _potato.origStates.water.WaterReflectance ~= nil then
+            pcall(function()
+                local w = _potato.origStates.water
+                Terrain.WaterReflectance = w.WaterReflectance
+                Terrain.WaterWaveSize = w.WaterWaveSize
+                Terrain.WaterWaveSpeed = w.WaterWaveSpeed
+                Terrain.WaterTransparency = w.WaterTransparency
+                Terrain.Decoration = true
+            end)
+        end
+        pcall(function()
+            local l = _potato.origStates.lighting
+            if l.GlobalShadows ~= nil then
+                Lighting.GlobalShadows = l.GlobalShadows
+                Lighting.Brightness = l.Brightness
+                Lighting.Technology = l.Technology
+            end
+        end)
+        pcall(function()
+            local cam = workspace.CurrentCamera
+            if cam and _potato.origStates.camera.FieldOfView then
+                cam.FieldOfView = _potato.origStates.camera.FieldOfView
+            end
+        end)
+        pcall(function()
+            local rs = settings().Rendering
+            rs.QualityLevel = E_AUTO
+            rs.MeshPartDetailLevel = E_DISTBASE
+        end)
+        pcall(function()
+            UserSettings():GetService("UserGameSettings").SavedQualityLevel = E_SAVEDAUTO
+        end)
+        pcall(function()
+            StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, true)
+            StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, true)
+        end)
+        _potato.origStates = { lighting = {}, water = {}, camera = {} }
+    end
+
+    -- ===== TOGGLE DI MISCTAB =====
+    Section_MiscTab_1:AddToggle("Toggle_PotatoMode", {
+        Title = "Reduce Map (Potato Mode)",
+        Description = "Hapus efek, turunkan kualitas, matikan shadow untuk FPS maksimal",
+        Default = false,
+        Callback = function(on)
+            _potato.enabled = on
+            _potatoCleanup()
+            if not on then
+                _restoreWorldSettings()
+                NotifyInfo("Potato Mode", "Dimatikan. Visual akan kembali normal.")
+                return
+            end
+            _applyWorldSettings()
+            NotifySuccess("Potato Mode", "Diaktifkan! FPS Boost maksimal.")
+            _potato.loopThread = task.spawn(function()
+                while _potato.enabled do
+                    _potato.processedObjects = setmetatable({}, { __mode = "k" })
+                    local all = workspace:GetDescendants()
+                    local n = #all
+                    local BATCH = 50
+                    for i = 1, n, BATCH do
+                        if not _potato.enabled then break end
+                        for j = i, math.min(i + BATCH - 1, n) do
+                            _optimizeObj(all[j])
+                        end
+                        task.wait()
+                    end
+                    if not _potato.enabled then break end
+                    for _, plr in ipairs(Players:GetPlayers()) do
+                        if plr.Character then task.defer(_optimizeChar, plr.Character) end
+                    end
+                    local waitTime = 600
+                    while waitTime > 0 and _potato.enabled do
+                        task.wait(1)
+                        waitTime = waitTime - 1
+                    end
+                    if _potato.enabled then
+                        pcall(_applyWorldSettings)
+                    end
+                end
+            end)
+            -- Hook untuk player baru dan objek baru
+            table.insert(_potato.connections, Players.PlayerAdded:Connect(function(plr)
+                table.insert(_potato.connections, plr.CharacterAdded:Connect(function(char)
+                    if not _potato.enabled then return end
+                    task.delay(0.2, function()
+                        if _potato.enabled then _optimizeChar(char) end
+                    end)
+                end))
+                if plr.Character then task.defer(_optimizeChar, plr.Character) end
+            end))
+            table.insert(_potato.connections, Players.LocalPlayer.CharacterAdded:Connect(function(char)
+                if not _potato.enabled then return end
+                task.delay(0.2, function()
+                    if _potato.enabled then _optimizeChar(char) end
+                end)
+            end))
+            table.insert(_potato.connections, workspace.DescendantAdded:Connect(function(obj)
+                if not _potato.enabled then return end
+                _optimizeObj(obj)
+            end))
+        end,
+    })
+end
 
         Section_MiscTab_1:AddToggle("Toggle_CleanScreenToggle", {
             Title = "Clean Screen (Toggle)", Default = false,
             Callback = function(val)
                 if val then
                     _cleanScreenActive = true
-
                     for _, gui in pairs(LocalPlayer.PlayerGui:GetChildren()) do
                         if (gui:IsA("ScreenGui") or gui:IsA("BillboardGui") or gui:IsA("SurfaceGui")) and not IsScriptGui(gui) then
-                            if _cleanScreenBackup[gui] == nil then
-                                _cleanScreenBackup[gui] = gui.Enabled
-                            end
+                            if _cleanScreenBackup[gui] == nil then _cleanScreenBackup[gui] = gui.Enabled end
                             gui.Enabled = false
                         end
                     end
                     for _, gui in pairs(CoreGui:GetChildren()) do
                         if (gui:IsA("ScreenGui") or gui:IsA("BillboardGui") or gui:IsA("SurfaceGui")) and not IsScriptGui(gui) then
-                            if _cleanScreenBackup[gui] == nil then
-                                _cleanScreenBackup[gui] = gui.Enabled
-                            end
+                            if _cleanScreenBackup[gui] == nil then _cleanScreenBackup[gui] = gui.Enabled end
                             gui.Enabled = false
                         end
                     end
-
-                    if _cleanScreenConn then pcall(function() _cleanScreenConn:Disconnect() end) end
+                    if _cleanScreenConn then _cleanScreenConn:Disconnect() end
                     _cleanScreenConn = RunService.Heartbeat:Connect(function()
                         if not _cleanScreenActive then return end
                         pcall(function()
                             for _, gui in pairs(LocalPlayer.PlayerGui:GetChildren()) do
                                 if (gui:IsA("ScreenGui") or gui:IsA("BillboardGui") or gui:IsA("SurfaceGui")) and gui.Enabled and not IsScriptGui(gui) then
-                                    if _cleanScreenBackup[gui] == nil then
-                                        _cleanScreenBackup[gui] = true
-                                    end
+                                    if _cleanScreenBackup[gui] == nil then _cleanScreenBackup[gui] = true end
                                     gui.Enabled = false
                                 end
                             end
                             for _, gui in pairs(CoreGui:GetChildren()) do
                                 if (gui:IsA("ScreenGui") or gui:IsA("BillboardGui") or gui:IsA("SurfaceGui")) and gui.Enabled and not IsScriptGui(gui) then
-                                    if _cleanScreenBackup[gui] == nil then
-                                        _cleanScreenBackup[gui] = true
-                                    end
+                                    if _cleanScreenBackup[gui] == nil then _cleanScreenBackup[gui] = true end
                                     gui.Enabled = false
                                 end
                             end
@@ -9443,11 +9672,7 @@ if MiscTab then
                     NotifySuccess("Clean Screen", "Semua UI game di-hidden! Script UI tetap aktif.")
                 else
                     _cleanScreenActive = false
-                    if _cleanScreenConn then
-                        pcall(function() _cleanScreenConn:Disconnect() end)
-                        _cleanScreenConn = nil
-                    end
-
+                    if _cleanScreenConn then _cleanScreenConn:Disconnect(); _cleanScreenConn = nil end
                     local restoredCount = 0
                     for gui, originalEnabled in pairs(_cleanScreenBackup) do
                         pcall(function()
@@ -9462,71 +9687,192 @@ if MiscTab then
                 end
             end
         })
-        Section_MiscTab_1:AddToggle("Toggle_DisableObtainedNotif", { Title = "Disable Obtained Notif", Default = false, Callback = function(val) SetDisableObtained(val) end })
-        local _backup = setmetatable({}, {__mode = "k"})
-        local function DisableController(ctrl)
-            if _backup[ctrl] then return end
-            local data = {functions = {}}
-            for k, v in pairs(ctrl) do if type(v) == "function" then data.functions[k] = v; ctrl[k] = function() end end end
-            _backup[ctrl] = data
+
+     Section_MiscTab_1:AddToggle("Toggle_DisableAllNotifications", {
+    Title = "Disable Notifications",
+    Default = false,
+    Callback = function(state)
+        local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+        if PlayerGui then
+            local NotifyGui = PlayerGui:FindFirstChild("Text Notifications")
+            if NotifyGui then
+                local Frame = NotifyGui:FindFirstChild("Frame")
+                if Frame then
+                    Frame.Visible = not state
+                end
+            end
         end
-        local function EnableController(ctrl)
-            local data = _backup[ctrl]; if not data then return end
-            for k, v in pairs(data.functions) do ctrl[k] = v end
-            _backup[ctrl] = nil
+
+        if state then
+            NotifySuccess("Notifikasi", "Notifikasi ikan diaktifkan!")
+        else
+            NotifyInfo("Notifikasi", "Notifikasi ikan dimatikan!")
         end
-        Section_MiscTab_1:AddToggle("Toggle_DisableVFX", { Title = "Disable VFX", Default = false, Callback = function(val) if Controllers.VFX then if val then DisableController(Controllers.VFX) else EnableController(Controllers.VFX) end end end })
-
-local fishNotifConnection = nil
-
-local function DisableFishCaught()
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
-    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
-    local smallNotif = PlayerGui:FindFirstChild("Small Notification")
-    if smallNotif then
-        smallNotif:Destroy()
     end
+})
 
-    if not fishNotifConnection then
-        fishNotifConnection = PlayerGui.ChildAdded:Connect(function(child)
+        Section_MiscTab_1:AddToggle("Toggle_DisableVFX", {
+            Title = "Disable VFX",
+            Default = false,
+            Callback = function(val)
+                if Controllers.VFX then
+                    if val then
+                        -- disable VFX
+                        if not _backupVFX then _backupVFX = {} end
+                        for k, v in pairs(Controllers.VFX) do
+                            if type(v) == "function" then
+                                _backupVFX[k] = v
+                                Controllers.VFX[k] = function() end
+                            end
+                        end
+                    else
+                        if _backupVFX then
+                            for k, v in pairs(_backupVFX) do
+                                Controllers.VFX[k] = v
+                            end
+                            _backupVFX = nil
+                        end
+                    end
+                end
+            end
+        })
 
-            if child.Name == "Small Notification" or
-               (child:FindFirstChild("Display") and child:FindFirstChildWhichIsA("Frame")) then
-                task.spawn(function()
-                    task.wait()
-                    if child and child.Parent then
-                        child:Destroy()
+        -- Disable Fish Caught (Small Notification)
+        local fishNotifConnection = nil
+        local function DisableFishCaught()
+            local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+            local smallNotif = playerGui:FindFirstChild("Small Notification")
+            if smallNotif then smallNotif:Destroy() end
+            if not fishNotifConnection then
+                fishNotifConnection = playerGui.ChildAdded:Connect(function(child)
+                    if child.Name == "Small Notification" or (child:FindFirstChild("Display") and child:FindFirstChildWhichIsA("Frame")) then
+                        task.spawn(function()
+                            task.wait()
+                            if child and child.Parent then child:Destroy() end
+                        end)
                     end
                 end)
             end
-        end)
-    end
+            NotifySuccess("Fish Caught", "Notifikasi ikan dinonaktifkan!")
+        end
+        local function EnableFishCaught()
+            if fishNotifConnection then fishNotifConnection:Disconnect(); fishNotifConnection = nil end
+            NotifySuccess("Fish Caught", "Notifikasi ikan diaktifkan kembali!")
+        end
 
-    NotifySuccess("Fish Caught", "Notifikasi ikan dinonaktifkan!")
-end
+        Section_MiscTab_1:AddToggle("Toggle_DisableCutscene", {
+            Title = "Disable Fish Caught",
+            Default = false,
+            Callback = function(val)
+                if val then DisableFishCaught() else EnableFishCaught() end
+            end
+        })
 
-local function EnableFishCaught()
-    if fishNotifConnection then
-        fishNotifConnection:Disconnect()
-        fishNotifConnection = nil
-    end
-    NotifySuccess("Fish Caught", "Notifikasi ikan diaktifkan kembali!")
-end
+        -- Skip Cutscene
+        local skipCutscene = false
+        local replicateConn = nil
+        local stopConn = nil
+        local originalPlay = nil
+        local originalStop = nil
+        local hooked = false
+        Section_MiscTab_1:AddToggle("Toggle_SkipCutscene", {
+            Title = "Skip Cutscene",
+            Default = false,
+            Callback = function(state)
+                skipCutscene = state
+                if not replicateConn then
+                    local RE_ReplicateCutscene = GetServerRemote("RE/ReplicateCutscene") or GetServerRemote("ReplicateCutscene")
+                    if RE_ReplicateCutscene then
+                        replicateConn = RE_ReplicateCutscene.OnClientEvent:Connect(function(...)
+                            if skipCutscene then warn("Blocked ReplicateCutscene event!") end
+                        end)
+                    end
+                end
+                if not stopConn then
+                    local RE_StopCutscene = GetServerRemote("RE/StopCutscene") or GetServerRemote("StopCutscene")
+                    if RE_StopCutscene then
+                        stopConn = RE_StopCutscene.OnClientEvent:Connect(function()
+                            if skipCutscene then warn("Blocked StopCutscene event!") end
+                        end)
+                    end
+                end
+                if hooked then return end
+                hooked = true
+                task.spawn(function()
+                    local ok, CutsceneController = pcall(function()
+                        return require(ReplicatedStorage.Controllers.CutsceneController)
+                    end)
+                    if not ok or not CutsceneController then warn("CutsceneController not found.") return end
+                    originalPlay = originalPlay or CutsceneController.Play
+                    originalStop = originalStop or CutsceneController.Stop
+                    while true do
+                        if skipCutscene then
+                            CutsceneController.Play = function(...) warn("Cutscene skipped (Play).") end
+                            CutsceneController.Stop = function(...) warn("Cutscene skipped (Stop).") end
+                        else
+                            CutsceneController.Play = originalPlay
+                            CutsceneController.Stop = originalStop
+                        end
+                        task.wait(0.25)
+                    end
+                end)
+            end
+        })
 
-    Section_MiscTab_1:AddToggle("Toggle_DisableCutscene", {
-        Title = "Disable Cutscene",
-        Default = false,
-        Callback = function(val)
-            if val then
-                DisableFishCaught()
+        -- Disable Fishing Effect
+        local delEffects = false
+        local effectsConnection = nil
+        local effectsLoopThread = nil
+        local function toggleDisableFishingEffect(state)
+            delEffects = state
+            if state then
+                if effectsLoopThread then task.cancel(effectsLoopThread) end
+                effectsLoopThread = task.spawn(function()
+                    while delEffects do
+                        local cosmetic = workspace:FindFirstChild("CosmeticFolder")
+                        if cosmetic then
+                            for _, child in ipairs(cosmetic:GetChildren()) do
+                                local isExactPart = child.Name == "Part"
+                                local isPureNumber = string.match(child.Name, "^%d+$")
+                                local isModel = child:IsA("Model")
+                                if not (isExactPart or isPureNumber or isModel) then
+                                    pcall(function() child:Destroy() end)
+                                end
+                            end
+                        end
+                        task.wait(0.1)
+                    end
+                end)
+                if not effectsConnection then
+                    local cosmetic = workspace:WaitForChild("CosmeticFolder", 5)
+                    if cosmetic then
+                        effectsConnection = cosmetic.ChildAdded:Connect(function(child)
+                            if delEffects then
+                                task.wait()
+                                local isExactPart = child.Name == "Part"
+                                local isPureNumber = string.match(child.Name, "^%d+$")
+                                local isModel = child:IsA("Model")
+                                if not (isExactPart or isPureNumber or isModel) then
+                                    pcall(function() child:Destroy() end)
+                                end
+                            end
+                        end)
+                    end
+                end
+                NotifySuccess("Fishing Effect", "Disabled! (effects hidden)")
             else
-                EnableFishCaught()
+                if effectsLoopThread then task.cancel(effectsLoopThread); effectsLoopThread = nil end
+                if effectsConnection then effectsConnection:Disconnect(); effectsConnection = nil end
+                NotifyInfo("Fishing Effect", "Enabled (effects visible)")
             end
         end
-    })
+        Section_MiscTab_1:AddToggle("Toggle_DisableFishingEffect", {
+            Title = "Disable Fishing Effect",
+            Default = false,
+            Callback = function(val) toggleDisableFishingEffect(val) end
+        })
 
+        -- Fullbright
         local _fullbrightBackup = {}
         Section_MiscTab_1:AddToggle("Toggle_Fullbright", {
             Title = "Fullbright", Default = false,
@@ -9539,30 +9885,27 @@ end
                         _fullbrightBackup.GlobalShadows = Lighting.GlobalShadows
                         _fullbrightBackup.EnvironmentDiffuseScale = Lighting.EnvironmentDiffuseScale
                         _fullbrightBackup.EnvironmentSpecularScale = Lighting.EnvironmentSpecularScale
-
                         Lighting.Brightness = 3
                         Lighting.ClockTime = 12
                         Lighting.FogEnd = 1e10
                         Lighting.GlobalShadows = false
                         Lighting.EnvironmentDiffuseScale = 1
                         Lighting.EnvironmentSpecularScale = 1
-
                         NotifySuccess("Fullbright", "Aktif!")
                     else
-
                         if _fullbrightBackup.Brightness ~= nil then Lighting.Brightness = _fullbrightBackup.Brightness end
                         if _fullbrightBackup.ClockTime ~= nil then Lighting.ClockTime = _fullbrightBackup.ClockTime end
                         if _fullbrightBackup.FogEnd ~= nil then Lighting.FogEnd = _fullbrightBackup.FogEnd end
                         if _fullbrightBackup.GlobalShadows ~= nil then Lighting.GlobalShadows = _fullbrightBackup.GlobalShadows end
                         if _fullbrightBackup.EnvironmentDiffuseScale ~= nil then Lighting.EnvironmentDiffuseScale = _fullbrightBackup.EnvironmentDiffuseScale end
                         if _fullbrightBackup.EnvironmentSpecularScale ~= nil then Lighting.EnvironmentSpecularScale = _fullbrightBackup.EnvironmentSpecularScale end
-
                         NotifySuccess("Fullbright", "Dimatikan!")
                     end
                 end)
             end
         })
 
+                -- Anti-AFK
         local Section_MiscTab_3 = MiscTab:AddSection("Anti-AFK")
         Section_MiscTab_3:AddToggle("Toggle_AntiAFK", {
             Title = "Anti-AFK", Default = false,
@@ -9571,240 +9914,39 @@ end
                 local sange = getconnections or get_signal_cons
                 if sange then
                     for i, v in next, sange(Players.LocalPlayer.Idled) do
-                        if value then
-                            v:Disable()
-                        else
-                            v:Enable()
-                        end
+                        if value then v:Disable() else v:Enable() end
                     end
                 end
             end
         })
 
-_G.QH_FishNotifPosition = nil
-local _fishNotifPositionApplied = false
-local _userHasSetPosition = false
-
-local function ApplyFishNotifPosition(position)
-    if not position then return false end
-    _G.QH_FishNotifPosition = position
-    _userHasSetPosition = true
-    local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-
-    local textNotifGui = playerGui:FindFirstChild("Text Notifications")
-    if not textNotifGui then
-        for _, gui in ipairs(playerGui:GetChildren()) do
-            if gui:IsA("ScreenGui") and (gui.Name:find("Notification") or gui.Name:find("Notif")) then
-                textNotifGui = gui
-                break
-            end
-        end
-    end
-
-    if textNotifGui then
-        local frame = textNotifGui:FindFirstChild("Frame") or textNotifGui:FindFirstChildWhichIsA("Frame")
-        if frame then
-            if position == "Left" then
-                frame.Position = UDim2.new(0, 15, 0, 100)
-                frame.AnchorPoint = Vector2.new(0, 0)
-            elseif position == "Right" then
-                frame.Position = UDim2.new(1, -15, 0, 100)
-                frame.AnchorPoint = Vector2.new(1, 0)
-            else
-            end
-            _fishNotifPositionApplied = true
-            return true
-        end
-    end
-    return false
-end
-
-local function UpdateFishNotifVisibility(enabled)
-    pcall(function()
-        local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-        if not playerGui then return end
-        for _, gui in ipairs(playerGui:GetChildren()) do
-            if gui:IsA("ScreenGui") and (gui.Name == "Text Notifications" or gui.Name:find("Notification") or gui.Name == "Small Notification") then
-                gui.Enabled = enabled
-                local frame = gui:FindFirstChild("Frame") or gui:FindFirstChildWhichIsA("Frame")
-                if frame then
-                    frame.Visible = enabled
-                    if not enabled then
-                        for _, child in ipairs(frame:GetChildren()) do
-                            if child:IsA("GuiObject") then
-                                child.Visible = false
+        local Section_DisableNotif = MiscTab:AddSection("Disable All Notifications")
+        Section_DisableNotif:AddDropdown("Dropdown_NotifPosition", {
+            Title = "Notification Position",
+            Description = "Pilih posisi tampilan notifikasi",
+            Values = {"Normal (Mid)", "Left", "Right"},
+            Default = "Normal (Mid)",
+            Callback = function(val)
+                local PlayerGui = LocalPlayer:FindFirstChild("PlayerGui")
+                if PlayerGui then
+                    local NotifyGui = PlayerGui:FindFirstChild("Text Notifications")
+                    if NotifyGui then
+                        local Frame = NotifyGui:FindFirstChild("Frame")
+                        if Frame then
+                            if val == "Normal (Mid)" then
+                                Frame.Position = UDim2.new(0.5, 0, 0, 110)
+                            elseif val == "Left" then
+                                Frame.Position = UDim2.new(0.3, 0, 0, 110)
+                            elseif val == "Right" then
+                                Frame.Position = UDim2.new(0.7, 0, 0, 110)
                             end
                         end
                     end
                 end
             end
-        end
-    end)
-end
-
-local function SetupFishNotifPositionHook()
-    local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-
-    local function onGuiAdded(gui)
-        if gui:IsA("ScreenGui") and (gui.Name == "Text Notifications" or gui.Name:find("Notification") or gui.Name == "Small Notification") then
-            if _G.QH_EnableFishNotif == false then
-                gui.Enabled = false
-                pcall(function()
-                    local frame = gui:FindFirstChild("Frame") or gui:FindFirstChildWhichIsA("Frame")
-                    if frame then
-                        frame.Visible = false
-                        for _, child in ipairs(frame:GetChildren()) do
-                            if child:IsA("GuiObject") then child.Visible = false end
-                        end
-                    end
-                end)
-            end
-
-            task.wait(0.1)
-
-            if _G.QH_EnableFishNotif == false then
-                gui.Enabled = false
-                pcall(function()
-                    local frame = gui:FindFirstChild("Frame") or gui:FindFirstChildWhichIsA("Frame")
-                    if frame then
-                        frame.Visible = false
-                        for _, child in ipairs(frame:GetChildren()) do
-                            if child:IsA("GuiObject") then child.Visible = false end
-                        end
-                    end
-                end)
-                return
-            end
-
-            if _userHasSetPosition and _G.QH_FishNotifPosition then
-                ApplyFishNotifPosition(_G.QH_FishNotifPosition)
-            end
-
-            local frame = gui:FindFirstChild("Frame") or gui:FindFirstChildWhichIsA("Frame")
-            if frame and _userHasSetPosition then
-                frame:GetPropertyChangedSignal("Position"):Connect(function()
-                    task.wait()
-                    if _userHasSetPosition and _G.QH_FishNotifPosition then
-                        ApplyFishNotifPosition(_G.QH_FishNotifPosition)
-                    end
-                end)
-            end
-        end
-    end
-
-    playerGui.ChildAdded:Connect(onGuiAdded)
-end
-
-pcall(function()
-    local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
-    if ctrlFolder then
-        local TextNotifCtrl = require(ctrlFolder:WaitForChild("TextNotificationController", 5))
-        if TextNotifCtrl and TextNotifCtrl.DeliverNotification then
-            local oldDeliver = TextNotifCtrl.DeliverNotification
-            TextNotifCtrl.DeliverNotification = function(self, data, ...)
-                if _G.QH_EnableFishNotif == false then
-                    return
-                end
-
-                if _userHasSetPosition and _G.QH_FishNotifPosition then
-                    ApplyFishNotifPosition(_G.QH_FishNotifPosition)
-                end
-                if _notifDelayActive and data and type(data) == "table" then
-                    data.Duration = _currentNotifDelayDuration
-                    data.CustomDuration = _currentNotifDelayDuration
-                end
-                return oldDeliver(self, data, ...)
-            end
-        end
-    end
-end)
-
-pcall(function()
-    if Events.fishNotif then
-        Events.fishNotif.OnClientEvent:Connect(function(...)
-            if _G.QH_EnableFishNotif == false then return end
-            task.delay(0.05, function()
-                if _G.QH_EnableFishNotif == false then return end
-                if _userHasSetPosition and _G.QH_FishNotifPosition then
-                    ApplyFishNotifPosition(_G.QH_FishNotifPosition)
-                end
-            end)
-        end)
-    end
-end)
-
-task.spawn(SetupFishNotifPositionHook)
-
-local Section_MiscTab_FishNotif = MiscTab:AddSection("Custom Fish Notification")
-
-Section_MiscTab_FishNotif:AddToggle("Toggle_EnableFishNotif", {
-    Title = "Enable Fish Notification",
-    Description = "Aktifkan notifikasi saat mendapatkan ikan",
-    Default = true,
-    Callback = function(val)
-        _G.QH_EnableFishNotif = val
-        UpdateFishNotifVisibility(val)
-        if val then
-            NotifySuccess("Fish Notification", "Notifikasi ikan DIAKTIFKAN!")
-        else
-            NotifyInfo("Fish Notification", "Notifikasi ikan DINONAKTIFKAN.")
-        end
-    end
-})
-
-local fishNotifPosValues = {"Normal (Right)", "Left", "Right"}
-local selectedFishNotifPos = "Normal (Right)"
-
-Section_MiscTab_FishNotif:AddDropdown("Dropdown_FishNotifPosition", {
-    Title = "Fish Notif Position",
-    Description = "Pilih posisi notifikasi ikan (Text Notifications)",
-    Values = fishNotifPosValues,
-    Default = fishNotifPosValues[1],
-    Callback = function(val)
-        selectedFishNotifPos = val
-    end, Multi = false
-})
-
-Section_MiscTab_FishNotif:AddButton({
-    Title = "Apply Position",
-    Description = "Terapkan posisi notifikasi ikan",
-    Callback = function()
-        local pos = "Normal"
-        if selectedFishNotifPos:find("Left") then
-            pos = "Left"
-        elseif selectedFishNotifPos:find("Right") then
-            pos = "Right"
-        end
-
-        _userHasSetPosition = true
-        local applied = ApplyFishNotifPosition(pos)
-        if applied then
-            NotifySuccess("Fish Notif", "Posisi notifikasi ikan diubah ke: " .. selectedFishNotifPos)
-
-            task.delay(0.3, function()
-                if _userHasSetPosition then
-                    ApplyFishNotifPosition(pos)
-                end
-            end)
-        else
-            NotifyWarning("Fish Notif", "Text Notifications GUI belum ada. Posisi akan otomatis diterapkan saat notif muncul.")
-            _G.QH_FishNotifPosition = pos
-            _userHasSetPosition = true
-        end
-    end
-})
-
-Section_MiscTab_FishNotif:AddButton({
-    Title = "Reset to Default",
-    Description = "Kembalikan ke posisi default (kanan atas)",
-    Callback = function()
-        _userHasSetPosition = false
-        _G.QH_FishNotifPosition = nil
-        NotifySuccess("Fish Notif", "Posisi direset ke default game! Notifikasi akan muncul di posisi asli.")
-    end
-})
-end)
-end
+        })
+    end) -- tutup pcall
+end -- tutup if MiscTab
 
 if QuestTab then
     pcall(function()
@@ -10981,7 +11123,7 @@ if QuestTab then
 end
 pcall(function()
     Fluent:Notify({
-        Title = "Cloudy V 1.0.4",
+        Title = "Cloudy HUB V 1.0.4",
         Content = "Loaded! Remotes: " .. loadedCount .. " | Failed: " .. failedCount .. " | Map: " .. (isSupported and supportedMaps["121864768012064"] or mapName),
         Duration = 5,
         Icon = "solar/atom-bold"
