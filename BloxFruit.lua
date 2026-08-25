@@ -1087,6 +1087,68 @@ local function IsAnyFarmActive()
 	return false
 end
 
+CheckBypassEntrance = function(targetPos)
+	if not targetPos then return end
+	if typeof(targetPos) == "CFrame" then targetPos = targetPos.Position end
+	local hrp = GetHRP()
+	if not hrp then return end
+	local myPos = hrp.Position
+	local dist = (targetPos - myPos).Magnitude
+	if dist < 3500 then return end
+
+	pcall(function()
+		if World1 then
+			-- Underwater / Fishman Island
+			if targetPos.X > 50000 and targetPos.Z < 5000 then
+				if (myPos - Vector3.new(61163.85, 11.68, 1819.78)).Magnitude > 4000 then
+					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(61163.8515625, 11.6796875, 1819.7841796875))
+					task.wait(0.25)
+				end
+			-- Upper Sky
+			elseif targetPos.Y > 4000 then
+				if (myPos - Vector3.new(-7894.62, 5547.14, -380.29)).Magnitude > 4000 then
+					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-7894.6176757813, 5547.1416015625, -380.29119873047))
+					task.wait(0.25)
+				end
+			-- Lower Sky
+			elseif targetPos.Y > 800 and targetPos.Y <= 4000 then
+				if (myPos - Vector3.new(-4607.82, 872.54, -1667.56)).Magnitude > 4000 then
+					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-4607.82275, 872.54248, -1667.55688))
+					task.wait(0.25)
+				end
+			end
+		elseif World2 then
+			-- Cursed Ship
+			if targetPos.Z > 30000 then
+				if (myPos - Vector3.new(923.21, 126.98, 32852.83)).Magnitude > 4000 then
+					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(923.21252441406, 126.9760055542, 32852.83203125))
+					task.wait(0.25)
+				end
+			end
+		elseif World3 then
+			-- Mansion
+			if (targetPos - Vector3.new(-12463.87, 374.91, -7523.77)).Magnitude < 2500 then
+				if (myPos - Vector3.new(-12463.87, 374.91, -7523.77)).Magnitude > 4000 then
+					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-12463.874023438, 374.91445922852, -7523.7739257812))
+					task.wait(0.25)
+				end
+			-- Castle on the Sea
+			elseif (targetPos - Vector3.new(-5085.24, 316.40, -3156.26)).Magnitude < 2500 then
+				if (myPos - Vector3.new(-5085.24, 316.40, -3156.26)).Magnitude > 4000 then
+					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5085.23681640625, 316.4043273925781, -3156.264892578125))
+					task.wait(0.25)
+				end
+			-- Hydra Island
+			elseif (targetPos - Vector3.new(5749.79, 611.97, -276.05)).Magnitude < 2500 then
+				if (myPos - Vector3.new(5749.79, 611.97, -276.05)).Magnitude > 4000 then
+					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5749.7861328125, 611.9736938476562, -276.0497741699219))
+					task.wait(0.25)
+				end
+			end
+		end
+	end)
+end
+
 StopTween = function()
 	if CurrentTween then
 		pcall(function()
@@ -1100,16 +1162,18 @@ StopTween = function()
 
 	local hrp = GetHRP()
 	if hrp then
+		if C then
+			C.CFrame = hrp.CFrame
+		end
 		for _, child in ipairs(hrp:GetChildren()) do
 			if child.Name == "BodyClip" or child:IsA("BodyVelocity") or child:IsA("BodyPosition") or child:IsA("BodyGyro") then
 				pcall(function() child:Destroy() end)
 			end
 		end
-		if C then
-			C.CFrame = hrp.CFrame
-		end
 		pcall(function()
-			hrp.AssemblyLinearVelocity = Vector3.zero
+			hrp.Velocity = Vector3.new(0, 0, 0)
+			hrp.RotVelocity = Vector3.new(0, 0, 0)
+			hrp.AssemblyLinearVelocity = Vector3.new(0, -0.5, 0)
 			hrp.AssemblyAngularVelocity = Vector3.zero
 		end)
 	end
@@ -1232,7 +1296,15 @@ _tp = function(targetCFrame)
 
 	local dist = (targetCFrame.Position - hrp.Position).Magnitude
 
-	if dist <= 1.5 then
+	if dist > 3500 then
+		CheckBypassEntrance(targetCFrame.Position)
+		hrp = GetHRP()
+		if hrp then
+			dist = (targetCFrame.Position - hrp.Position).Magnitude
+		end
+	end
+
+	if dist <= 2.5 then
 		if CurrentTween then
 			pcall(function() CurrentTween:Cancel() end)
 			CurrentTween = nil
@@ -1260,7 +1332,7 @@ _tp = function(targetCFrame)
 	getgenv().OnFarm = true
 
 	local speed = dist <= 50 and 1200 or (dist <= 150 and (getgenv().TweenSpeedNear or 1000) or (getgenv().TweenSpeedFar or 350))
-	local duration = math.clamp(dist / speed, 0.01, 60)
+	local duration = math.clamp(dist / speed, 0.01, 120)
 	local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 
 	CurrentTarget = targetCFrame
@@ -4129,29 +4201,94 @@ spawn(function()
 	end;
 end);
 
+local CurrentChestTarget = nil
+
+local function IsChestCollectable(chest)
+    if not chest or not chest.Parent or not chest:IsDescendantOf(workspace) then
+        return false
+    end
+    if chest:GetAttribute("IsDisabled") == true then
+        return false
+    end
+    if SelectedIsland and not chest:IsDescendantOf(SelectedIsland) then
+        return false
+    end
+    return true
+end
+
 spawn(function()
-    while wait(Sec) do
+    while task.wait(0.1) do
         if _G.AutoFarmChest then
             pcall(function()
+                local plr = game.Players.LocalPlayer
+                local char = plr.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
                 local CollectionService = game:GetService("CollectionService")
-                local Players = game:GetService("Players")
-                local plrChar = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-                local d = plrChar:GetPivot().Position
                 local Chests = CollectionService:GetTagged("_ChestTagged")
-                local minDist, nearestChest = math.huge, nil
-                for _, chest in pairs(Chests) do
-                    local dist = (chest:GetPivot().Position - d).Magnitude
-                    if not SelectedIsland or chest:IsDescendantOf(SelectedIsland) then
-                        if not chest:GetAttribute("IsDisabled") and dist < minDist then
-                            minDist = dist
-                            nearestChest = chest
+
+                if not IsChestCollectable(CurrentChestTarget) then
+                    CurrentChestTarget = nil
+                    local myPos = hrp.Position
+                    local minDist, bestChest = math.huge, nil
+
+                    for _, chest in ipairs(Chests) do
+                        if IsChestCollectable(chest) then
+                            local chestPos = chest:GetPivot().Position
+                            local dist = (chestPos - myPos).Magnitude
+                            if dist < minDist then
+                                minDist = dist
+                                bestChest = chest
+                            end
                         end
                     end
+
+                    CurrentChestTarget = bestChest
                 end
-                if nearestChest then
-                    _tp(nearestChest:GetPivot())
+
+                if CurrentChestTarget and IsChestCollectable(CurrentChestTarget) then
+                    local chestCFrame = CurrentChestTarget:GetPivot()
+                    local dist = (chestCFrame.Position - hrp.Position).Magnitude
+
+                    if dist > 3500 then
+                        CheckBypassEntrance(chestCFrame.Position)
+                        hrp = GetHRP()
+                        if hrp then
+                            dist = (chestCFrame.Position - hrp.Position).Magnitude
+                        end
+                    end
+
+                    if dist > 8 then
+                        _tp(chestCFrame)
+                    else
+                        _tp(chestCFrame)
+
+                        local chestPart = CurrentChestTarget:IsA("BasePart") and CurrentChestTarget or CurrentChestTarget:FindFirstChildWhichIsA("BasePart") or CurrentChestTarget:FindFirstChild("RootPart") or CurrentChestTarget.PrimaryPart
+                        if chestPart then
+                            pcall(function()
+                                firetouchinterest(hrp, chestPart, 0)
+                                task.wait(0.05)
+                                firetouchinterest(hrp, chestPart, 1)
+                            end)
+                        end
+
+                        local prompt = CurrentChestTarget:FindFirstChildOfClass("ProximityPrompt") or (chestPart and chestPart:FindFirstChildOfClass("ProximityPrompt"))
+                        if prompt then
+                            pcall(function()
+                                fireproximityprompt(prompt)
+                            end)
+                        end
+
+                        task.wait(0.15)
+                        CurrentChestTarget = nil
+                    end
+                else
+                    CurrentChestTarget = nil
                 end
             end)
+        else
+            CurrentChestTarget = nil
         end
     end
 end)
@@ -8339,6 +8476,7 @@ sec_v8_2:AddToggle("Toggle_141", {
     Default = GetSetting("FarmChestM_Save", false),
     Callback = function(Value)
         _G.FarmChestM = Value
+        if not Value then StopTween() end
         _G.SaveData["FarmChestM_Save"] = Value
         SaveSettings()
     end
@@ -8466,8 +8604,10 @@ spawn(function()
     end
 end)
 
+local CurrentMirageChestTarget = nil
+
 spawn(function()
-    while wait(0.2) do
+    while task.wait(0.1) do
         if _G.FarmChestM then
             pcall(function()
                 local MysticIsland = workspace.Map:FindFirstChild("MysticIsland")
@@ -8475,25 +8615,74 @@ spawn(function()
                     if MysticIsland.Chests:FindFirstChild("DiamondChest") or MysticIsland.Chests:FindFirstChild("FragChest") then
                         local CollectionService = game:GetService("CollectionService")
                         local Chests = CollectionService:GetTagged("_ChestTagged")
-                        local minDist, nearestChest = math.huge, nil
-                        local myPos = plr.Character and plr.Character:GetPivot().Position
+                        local char = plr.Character
+                        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                        if not hrp then return end
 
-                        if myPos then
-                            for _, chest in pairs(Chests) do
-                                local dist = (chest:GetPivot().Position - myPos).Magnitude
-                                if not chest:GetAttribute("IsDisabled") and dist < minDist then
-                                    minDist = dist
-                                    nearestChest = chest
-                                end
+                        local function IsMirageChestValid(chest)
+                            if not chest or not chest.Parent or not chest:IsDescendantOf(workspace) then
+                                return false
                             end
+                            if chest:GetAttribute("IsDisabled") == true then
+                                return false
+                            end
+                            return true
                         end
 
-                        if nearestChest then
-                            _tp(nearestChest:GetPivot())
+                        if not IsMirageChestValid(CurrentMirageChestTarget) then
+                            CurrentMirageChestTarget = nil
+                            local myPos = hrp.Position
+                            local minDist, bestChest = math.huge, nil
+
+                            for _, chest in pairs(Chests) do
+                                if IsMirageChestValid(chest) then
+                                    local dist = (chest:GetPivot().Position - myPos).Magnitude
+                                    if dist < minDist then
+                                        minDist = dist
+                                        bestChest = chest
+                                    end
+                                end
+                            end
+
+                            CurrentMirageChestTarget = bestChest
+                        end
+
+                        if CurrentMirageChestTarget and IsMirageChestValid(CurrentMirageChestTarget) then
+                            local chestCFrame = CurrentMirageChestTarget:GetPivot()
+                            local dist = (chestCFrame.Position - hrp.Position).Magnitude
+
+                            if dist > 8 then
+                                _tp(chestCFrame)
+                            else
+                                _tp(chestCFrame)
+
+                                local chestPart = CurrentMirageChestTarget:IsA("BasePart") and CurrentMirageChestTarget or CurrentMirageChestTarget:FindFirstChildWhichIsA("BasePart") or CurrentMirageChestTarget:FindFirstChild("RootPart") or CurrentMirageChestTarget.PrimaryPart
+                                if chestPart then
+                                    pcall(function()
+                                        firetouchinterest(hrp, chestPart, 0)
+                                        task.wait(0.05)
+                                        firetouchinterest(hrp, chestPart, 1)
+                                    end)
+                                end
+
+                                local prompt = CurrentMirageChestTarget:FindFirstChildOfClass("ProximityPrompt") or (chestPart and chestPart:FindFirstChildOfClass("ProximityPrompt"))
+                                if prompt then
+                                    pcall(function()
+                                        fireproximityprompt(prompt)
+                                    end)
+                                end
+
+                                task.wait(0.15)
+                                CurrentMirageChestTarget = nil
+                            end
+                        else
+                            CurrentMirageChestTarget = nil
                         end
                     end
                 end
             end)
+        else
+            CurrentMirageChestTarget = nil
         end
     end
 end)
