@@ -563,42 +563,25 @@ local TweenInfoBring = TweenInfo.new(
 )
 
 local function FarmAtivo()
-    if _G.StartFarm and (
+
+    if _G.FarmPriorityElf or _G.FarmElfLevelCustom then
+        return true
+    end
+
+    if _G.FarmMastery_S then
+        return true
+    end
+
+    return _G.StartFarm and (
         _G.Level or
         _G.AutoFarm_Bone or
         _G.AutoFarm_Cake or
-        _G.AutoTyrant
-    ) then
-        return true
-    end
-
-    if _G.FarmPriorityElf or _G.FarmElfLevelCustom or _G.FarmMastery_S or _G.FarmMastery_Dev or _G.FarmMastery_G or
-       (getgenv()).AutoMaterial or _G.AutoFarmNear or _G.AutoFarmChest or _G.AutoBerry or _G.AutoBoss or _G.FarmAllBoss or
-       _G.AutoFactory or _G.AutoRaidCastle or _G.AutoHytHallow or _G.Pray or _G.Praying or _G.Trylux or _G.TryLucky or
-       _G.FarmEliteHunt or _G.AutoBigmom or _G.Doughv2 or _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.AutoZou or
-       _G.CraftVM or _G.DarkBladev3 or _G.AutoFarmRaid or _G.Auto_Cake_Prince or _G.Shark or _G.TerrorShark or
-       _G.Piranha or _G.MobCrew or _G.SeaBeast1 or _G.FishBoat or _G.Auto or _G.AutoPoleV2 or _G.Auto_SuperHuman or
-       _G.AutoDeathStep or _G.Auto_SharkMan_Karate or _G.Auto_Electric_Claw or _G.AutoDragonTalon or _G.Auto_Def_DarkCoat or
-       _G.Auto_God_Human or _G.Auto_Tushita or _G.AutoMatSoul or _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or
-       _G.Auto_Soul_Guitar or _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or _G.AutoEvoRace or
-       _G.AutoGetQuestBounty or _G.MarinesCoat or _G.TravelDres or _G.Defeating or _G.DummyMan or _G.Auto_Yama or
-       _G.Auto_SwanGG or _G.SwanCoat or _G.AutoEcBoss or _G.Auto_Mink or _G.Auto_Human or _G.Auto_Skypiea or _G.Auto_Fish or
-       _G.CDK_TS or _G.CDK_YM or _G.CDK or _G.AutoFarmGodChalice or _G.AutoFistDarkness or _G.AutoMiror or _G.Teleport or
-       _G.AutoKilo or _G.AutoGetUsoap or _G.AutoColShad or _G.AutoUnHaki or _G.Auto_DonAcces or _G.AutoRipIngay or
-       _G.DragoV3 or _G.DragoV1 or _G.SailBoats or NextIs or _G.FarmGodChalice or _G.IceBossRen or senth or senth2 or
-       _G.Lvthan or _G.beasthunter or _G.DangerLV or _G.Relic123 or _G.tweenKitsune or _G.Collect_Ember or
-       _G.AutofindKitIs or _G.snaguine or _G.TwFruits or _G.tweenKitShrine or _G.Tp_LgS or _G.Tp_MasterA or _G.tweenShrine or
-       _G.AutoBuyMelee or _G.AutoKillOrder or _G.AutoDungeonFarm or _G.AutoLawKak or _G.AutoHolyTorch or _G.AutoSaber or
-       _G.CitizenQuest or _G.AutoEctoplasm or _G.KeysRen or _G.Auto_Rainbow_Haki or _G.obsFarm or _G.Bartilo_Quest or
-       _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.Addealer or _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or
-       _G.SailBoat_Hydra or _G.WardenBoss or _G.HighestMirage or _G.HCM or _G.PGB or _G.Leviathan1 or _G.UPGDrago or
-       _G.Complete_Trials or _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or _G.DT_Uzoth or _G.Prehis_Find or
-       _G.Prehis_Skills or _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or _G.TpLab or
-       _G.AutoPhoenixF or _G.LongsWord or _G.BlackSpikey or _G.TrainDrago then
-        return true
-    end
-
-    return false
+        _G.FarmMastery_Dev or
+        _G.FarmMastery_G or
+        (getgenv()).AutoMaterial or
+        _G.AutoTyrant or
+        _G.SailBoat_Hydra or _G.WardenBoss or _G.AutoFactory or _G.HighestMirage or _G.HCM or _G.PGB or _G.Leviathan1 or _G.UPGDrago or _G.Complete_Trials or _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or _G.DT_Uzoth or _G.AutoBerry or _G.Prehis_Find or _G.Prehis_Skills or _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or _G.AutoLawKak or _G.TpLab or _G.AutoPhoenixF or _G.AutoFarmChest or _G.AutoHytHallow or _G.LongsWord or _G.BlackSpikey or _G.AutoHolyTorch or _G.TrainDrago or _G.AutoSaber or _G.FarmMastery_Dev or _G.CitizenQuest or _G.AutoEctoplasm or _G.KeysRen or _G.Auto_Rainbow_Haki or _G.obsFarm or _G.AutoBigmom or _G.Doughv2 or _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.TpPly or _G.Bartilo_Quest or _G.Level or _G.FarmEliteHunt or _G.AutoZou or _G.AutoFarm_Bone or (getgenv()).AutoMaterial or _G.CraftVM or _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.AutoFarmNear or _G.AutoRaidCastle or _G.DarkBladev3 or _G.AutoFarmRaid or _G.Auto_Cake_Prince or _G.Addealer or _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or _G.Shark or _G.TerrorShark or _G.Piranha or _G.MobCrew or _G.SeaBeast1 or _G.FishBoat or _G.Auto or _G.AutoPoleV2 or _G.Auto_SuperHuman or _G.AutoDeathStep or _G.Auto_SharkMan_Karate or _G.Auto_Electric_Claw or _G.AutoDragonTalon or _G.Auto_Def_DarkCoat or _G.Auto_God_Human or _G.Auto_Tushita or _G.AutoMatSoul or _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or _G.Auto_Soul_Guitar or _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or _G.AutoEvoRace or _G.AutoGetQuestBounty or _G.MarinesCoat or _G.TravelDres or _G.Defeating or _G.DummyMan or _G.Auto_Yama or _G.Auto_SwanGG or _G.SwanCoat or _G.AutoEcBoss or _G.Auto_Mink or _G.Auto_Human or _G.Auto_Skypiea or _G.Auto_Fish or _G.CDK_TS or _G.CDK_YM or _G.CDK or _G.AutoFarmGodChalice or _G.AutoFistDarkness or _G.AutoMiror or _G.Teleport or _G.AutoKilo or _G.AutoGetUsoap or _G.Praying or _G.TryLucky or _G.AutoColShad or _G.AutoUnHaki or _G.Auto_DonAcces or _G.AutoRipIngay or _G.DragoV3 or _G.DragoV1 or _G.SailBoats or NextIs or _G.FarmGodChalice or _G.IceBossRen or senth or senth2 or _G.Lvthan or _G.beasthunter or _G.DangerLV or _G.Relic123 or _G.tweenKitsune or _G.Collect_Ember or _G.AutofindKitIs or _G.snaguine or _G.TwFruits or _G.tweenKitShrine or _G.Tp_LgS or _G.Tp_MasterA or _G.tweenShrine or _G.FarmMastery_G or _G.FarmMastery_S
+    )
 end
 
 local function IsRaidMob(mob)
@@ -1049,159 +1032,24 @@ local function GetHRP()
 end
 
 local function IsAnyFarmActive()
-	if _G.StartFarm and (
+	if _G.FarmPriorityElf or _G.FarmElfLevelCustom or _G.FarmMastery_S then
+		return true
+	end
+	return _G.StartFarm and (
 		_G.Level or
 		_G.AutoFarm_Bone or
 		_G.AutoFarm_Cake or
-		_G.AutoTyrant
-	) then
-		return true
-	end
-
-	if _G.FarmPriorityElf or _G.FarmElfLevelCustom or _G.FarmMastery_S or _G.FarmMastery_Dev or _G.FarmMastery_G or
-	   (getgenv()).AutoMaterial or _G.AutoFarmNear or _G.AutoFarmChest or _G.AutoBerry or _G.AutoBoss or _G.FarmAllBoss or
-	   _G.AutoFactory or _G.AutoRaidCastle or _G.AutoHytHallow or _G.Pray or _G.Praying or _G.Trylux or _G.TryLucky or
-	   _G.FarmEliteHunt or _G.AutoBigmom or _G.Doughv2 or _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.AutoZou or
-	   _G.CraftVM or _G.DarkBladev3 or _G.AutoFarmRaid or _G.Auto_Cake_Prince or _G.Shark or _G.TerrorShark or
-	   _G.Piranha or _G.MobCrew or _G.SeaBeast1 or _G.FishBoat or _G.Auto or _G.AutoPoleV2 or _G.Auto_SuperHuman or
-	   _G.AutoDeathStep or _G.Auto_SharkMan_Karate or _G.Auto_Electric_Claw or _G.AutoDragonTalon or _G.Auto_Def_DarkCoat or
-	   _G.Auto_God_Human or _G.Auto_Tushita or _G.AutoMatSoul or _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or
-	   _G.Auto_Soul_Guitar or _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or _G.AutoEvoRace or
-	   _G.AutoGetQuestBounty or _G.MarinesCoat or _G.TravelDres or _G.Defeating or _G.DummyMan or _G.Auto_Yama or
-	   _G.Auto_SwanGG or _G.SwanCoat or _G.AutoEcBoss or _G.Auto_Mink or _G.Auto_Human or _G.Auto_Skypiea or _G.Auto_Fish or
-	   _G.CDK_TS or _G.CDK_YM or _G.CDK or _G.AutoFarmGodChalice or _G.AutoFistDarkness or _G.AutoMiror or _G.Teleport or
-	   _G.AutoKilo or _G.AutoGetUsoap or _G.AutoColShad or _G.AutoUnHaki or _G.Auto_DonAcces or _G.AutoRipIngay or
-	   _G.DragoV3 or _G.DragoV1 or _G.SailBoats or NextIs or _G.FarmGodChalice or _G.IceBossRen or senth or senth2 or
-	   _G.Lvthan or _G.beasthunter or _G.DangerLV or _G.Relic123 or _G.tweenKitsune or _G.Collect_Ember or
-	   _G.AutofindKitIs or _G.snaguine or _G.TwFruits or _G.tweenKitShrine or _G.Tp_LgS or _G.Tp_MasterA or _G.tweenShrine or
-	   _G.AutoBuyMelee or _G.AutoKillOrder or _G.AutoDungeonFarm or _G.AutoLawKak or _G.AutoHolyTorch or _G.AutoSaber or
-	   _G.CitizenQuest or _G.AutoEctoplasm or _G.KeysRen or _G.Auto_Rainbow_Haki or _G.obsFarm or _G.Bartilo_Quest or
-	   _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.Addealer or _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or
-	   _G.SailBoat_Hydra or _G.WardenBoss or _G.HighestMirage or _G.HCM or _G.PGB or _G.Leviathan1 or _G.UPGDrago or
-	   _G.Complete_Trials or _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or _G.DT_Uzoth or _G.Prehis_Find or
-	   _G.Prehis_Skills or _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or _G.TpLab or
-	   _G.AutoPhoenixF or _G.LongsWord or _G.BlackSpikey or _G.TrainDrago then
-		return true
-	end
-
-	return false
+		_G.FarmMastery_Dev or
+		_G.FarmMastery_G or
+		(getgenv()).AutoMaterial or
+		_G.AutoTyrant or
+		_G.SailBoat_Hydra or _G.WardenBoss or _G.AutoFactory or _G.HighestMirage or _G.HCM or _G.PGB or _G.Leviathan1 or _G.UPGDrago or _G.Complete_Trials or _G.TpDrago_Prehis or _G.BuyDrago or _G.AutoFireFlowers or _G.DT_Uzoth or _G.AutoBerry or _G.Prehis_Find or _G.Prehis_Skills or _G.Prehis_DB or _G.Prehis_DE or _G.FarmBlazeEM or _G.Dojoo or _G.CollectPresent or _G.AutoLawKak or _G.TpLab or _G.AutoPhoenixF or _G.AutoFarmChest or _G.AutoHytHallow or _G.LongsWord or _G.BlackSpikey or _G.AutoHolyTorch or _G.TrainDrago or _G.AutoSaber or _G.FarmMastery_Dev or _G.CitizenQuest or _G.AutoEctoplasm or _G.KeysRen or _G.Auto_Rainbow_Haki or _G.obsFarm or _G.AutoBigmom or _G.Doughv2 or _G.AuraBoss or _G.Raiding or _G.Auto_Cavender or _G.TpPly or _G.Bartilo_Quest or _G.FarmEliteHunt or _G.AutoZou or _G.CraftVM or _G.FrozenTP or _G.TPDoor or _G.AcientOne or _G.AutoFarmNear or _G.AutoRaidCastle or _G.DarkBladev3 or _G.AutoFarmRaid or _G.Auto_Cake_Prince or _G.Addealer or _G.TPNpc or _G.TwinHook or _G.FindMirage or _G.FarmChestM or _G.Shark or _G.TerrorShark or _G.Piranha or _G.MobCrew or _G.SeaBeast1 or _G.FishBoat or _G.Auto or _G.AutoPoleV2 or _G.Auto_SuperHuman or _G.AutoDeathStep or _G.Auto_SharkMan_Karate or _G.Auto_Electric_Claw or _G.AutoDragonTalon or _G.Auto_Def_DarkCoat or _G.Auto_God_Human or _G.Auto_Tushita or _G.AutoMatSoul or _G.AutoKenVTWO or _G.AutoSerpentBow or _G.AutoFMon or _G.Auto_Soul_Guitar or _G.TPGEAR or _G.AutoSaw or _G.AutoTridentW2 or _G.Auto_StartRaid or _G.AutoEvoRace or _G.AutoGetQuestBounty or _G.MarinesCoat or _G.TravelDres or _G.Defeating or _G.DummyMan or _G.Auto_Yama or _G.Auto_SwanGG or _G.SwanCoat or _G.AutoEcBoss or _G.Auto_Mink or _G.Auto_Human or _G.Auto_Skypiea or _G.Auto_Fish or _G.CDK_TS or _G.CDK_YM or _G.CDK or _G.AutoFarmGodChalice or _G.AutoFistDarkness or _G.AutoMiror or _G.Teleport or _G.AutoKilo or _G.AutoGetUsoap or _G.Praying or _G.TryLucky or _G.AutoColShad or _G.AutoUnHaki or _G.Auto_DonAcces or _G.AutoRipIngay or _G.DragoV3 or _G.DragoV1 or _G.SailBoats or NextIs or _G.FarmGodChalice or _G.IceBossRen or senth or senth2 or _G.Lvthan or _G.beasthunter or _G.DangerLV or _G.Relic123 or _G.tweenKitsune or _G.Collect_Ember or _G.AutofindKitIs or _G.snaguine or _G.TwFruits or _G.tweenKitShrine or _G.Tp_LgS or _G.Tp_MasterA or _G.tweenShrine
+	)
 end
-
-CheckBypassEntrance = function(targetPos)
-	if not targetPos then return end
-	if typeof(targetPos) == "CFrame" then targetPos = targetPos.Position end
-	local hrp = GetHRP()
-	if not hrp then return end
-	local myPos = hrp.Position
-	local dist = (targetPos - myPos).Magnitude
-	if dist < 3500 then return end
-
-	pcall(function()
-		if World1 then
-			-- Underwater / Fishman Island
-			if targetPos.X > 50000 and targetPos.Z < 5000 then
-				if (myPos - Vector3.new(61163.85, 11.68, 1819.78)).Magnitude > 4000 then
-					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(61163.8515625, 11.6796875, 1819.7841796875))
-					task.wait(0.25)
-				end
-			-- Upper Sky
-			elseif targetPos.Y > 4000 then
-				if (myPos - Vector3.new(-7894.62, 5547.14, -380.29)).Magnitude > 4000 then
-					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-7894.6176757813, 5547.1416015625, -380.29119873047))
-					task.wait(0.25)
-				end
-			-- Lower Sky
-			elseif targetPos.Y > 800 and targetPos.Y <= 4000 then
-				if (myPos - Vector3.new(-4607.82, 872.54, -1667.56)).Magnitude > 4000 then
-					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-4607.82275, 872.54248, -1667.55688))
-					task.wait(0.25)
-				end
-			end
-		elseif World2 then
-			-- Cursed Ship
-			if targetPos.Z > 30000 then
-				if (myPos - Vector3.new(923.21, 126.98, 32852.83)).Magnitude > 4000 then
-					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(923.21252441406, 126.9760055542, 32852.83203125))
-					task.wait(0.25)
-				end
-			end
-		elseif World3 then
-			-- Mansion
-			if (targetPos - Vector3.new(-12463.87, 374.91, -7523.77)).Magnitude < 2500 then
-				if (myPos - Vector3.new(-12463.87, 374.91, -7523.77)).Magnitude > 4000 then
-					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-12463.874023438, 374.91445922852, -7523.7739257812))
-					task.wait(0.25)
-				end
-			-- Castle on the Sea
-			elseif (targetPos - Vector3.new(-5085.24, 316.40, -3156.26)).Magnitude < 2500 then
-				if (myPos - Vector3.new(-5085.24, 316.40, -3156.26)).Magnitude > 4000 then
-					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5085.23681640625, 316.4043273925781, -3156.264892578125))
-					task.wait(0.25)
-				end
-			-- Hydra Island
-			elseif (targetPos - Vector3.new(5749.79, 611.97, -276.05)).Magnitude < 2500 then
-				if (myPos - Vector3.new(5749.79, 611.97, -276.05)).Magnitude > 4000 then
-					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5749.7861328125, 611.9736938476562, -276.0497741699219))
-					task.wait(0.25)
-				end
-			end
-		end
-	end)
-end
-
-StopTween = function()
-	if CurrentTween then
-		pcall(function()
-			CurrentTween:Cancel()
-		end)
-		CurrentTween = nil
-	end
-	CurrentTarget = nil
-	shouldTween = false
-	getgenv().OnFarm = false
-
-	local hrp = GetHRP()
-	if hrp then
-		if C then
-			C.CFrame = hrp.CFrame
-		end
-		for _, child in ipairs(hrp:GetChildren()) do
-			if child.Name == "BodyClip" or child:IsA("BodyVelocity") or child:IsA("BodyPosition") or child:IsA("BodyGyro") then
-				pcall(function() child:Destroy() end)
-			end
-		end
-		pcall(function()
-			hrp.Velocity = Vector3.new(0, 0, 0)
-			hrp.RotVelocity = Vector3.new(0, 0, 0)
-			hrp.AssemblyLinearVelocity = Vector3.new(0, -0.5, 0)
-			hrp.AssemblyAngularVelocity = Vector3.zero
-		end)
-	end
-
-	local char = plr.Character
-	if char then
-		local hum = char:FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum.Sit = false
-			pcall(function()
-				hum:ChangeState(Enum.HumanoidStateType.Freefall)
-			end)
-		end
-		if not _G.NoClip then
-			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") then
-					pcall(function() part.CanCollide = true end)
-				end
-			end
-		end
-	end
-end
-getgenv().StopTween = StopTween
 
 RunSer.Stepped:Connect(function()
 	pcall(function()
-		local isTweenPlaying = (CurrentTween ~= nil and CurrentTween.PlaybackState == Enum.PlaybackState.Playing)
-		local isMoving = isTweenPlaying or IsAnyFarmActive()
+		local isMoving = shouldTween or IsAnyFarmActive() or (CurrentTween and CurrentTween.PlaybackState == Enum.PlaybackState.Playing)
 		if isMoving then
 			local char = plr.Character
 			if char then
@@ -1221,11 +1069,9 @@ end)
 
 RunSer.Heartbeat:Connect(function()
 	pcall(function()
-		local isTweenPlaying = (CurrentTween ~= nil and CurrentTween.PlaybackState == Enum.PlaybackState.Playing)
-		local isMoving = isTweenPlaying or IsAnyFarmActive()
+		local isMoving = shouldTween or IsAnyFarmActive() or (CurrentTween and CurrentTween.PlaybackState == Enum.PlaybackState.Playing)
 		local hrp = GetHRP()
 		if not hrp then return end
-
 		if not C or C.Parent ~= workspace then
 			C = Instance.new("Part", workspace)
 			C.Size = Vector3.new(1, 1, 1)
@@ -1253,17 +1099,10 @@ RunSer.Heartbeat:Connect(function()
 			hrp.RotVelocity = Vector3.new(0, 0, 0)
 		else
 			getgenv().OnFarm = false
-			shouldTween = false
-			if CurrentTween then
-				pcall(function() CurrentTween:Cancel() end)
-				CurrentTween = nil
-			end
-			CurrentTarget = nil
 			C.CFrame = hrp.CFrame
-			for _, child in ipairs(hrp:GetChildren()) do
-				if child.Name == "BodyClip" or (child:IsA("BodyVelocity") and child.Velocity == Vector3.new(0, 0, 0)) then
-					pcall(function() child:Destroy() end)
-				end
+			local bodyClip = hrp:FindFirstChild("BodyClip")
+			if bodyClip then
+				bodyClip:Destroy()
 			end
 		end
 	end)
@@ -1296,23 +1135,14 @@ _tp = function(targetCFrame)
 
 	local dist = (targetCFrame.Position - hrp.Position).Magnitude
 
-	if dist > 3500 then
-		CheckBypassEntrance(targetCFrame.Position)
-		hrp = GetHRP()
-		if hrp then
-			dist = (targetCFrame.Position - hrp.Position).Magnitude
-		end
-	end
-
-	if dist <= 2.5 then
+	if dist <= 1.5 then
 		if CurrentTween then
-			pcall(function() CurrentTween:Cancel() end)
+			CurrentTween:Cancel()
 			CurrentTween = nil
 		end
 		CurrentTarget = targetCFrame
 		C.CFrame = targetCFrame
 		hrp.CFrame = targetCFrame
-		shouldTween = false
 		return
 	end
 
@@ -1324,7 +1154,7 @@ _tp = function(targetCFrame)
 	end
 
 	if CurrentTween then
-		pcall(function() CurrentTween:Cancel() end)
+		CurrentTween:Cancel()
 		CurrentTween = nil
 	end
 
@@ -1332,7 +1162,7 @@ _tp = function(targetCFrame)
 	getgenv().OnFarm = true
 
 	local speed = dist <= 50 and 1200 or (dist <= 150 and (getgenv().TweenSpeedNear or 1000) or (getgenv().TweenSpeedFar or 350))
-	local duration = math.clamp(dist / speed, 0.01, 120)
+	local duration = math.clamp(dist / speed, 0.01, 60)
 	local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 
 	CurrentTarget = targetCFrame
@@ -1348,14 +1178,9 @@ _tp = function(targetCFrame)
 			if status == Enum.PlaybackState.Completed then
 				if CurrentTarget == targetCFrame then
 					CurrentTween = nil
-					shouldTween = false
 				end
-			else
-				shouldTween = false
 			end
 		end)
-	else
-		shouldTween = false
 	end
 end
 
@@ -1364,7 +1189,11 @@ TeleportToTarget = function(I)
 end
 
 notween = function(I)
-	StopTween()
+	if CurrentTween then
+		CurrentTween:Cancel()
+		CurrentTween = nil
+	end
+	CurrentTarget = nil
 	local hrp = GetHRP()
 	if hrp then
 		hrp.CFrame = I
@@ -3453,8 +3282,6 @@ sec_v2_1:AddToggle("Toggle_6", {
             elseif _G.SelectedFarmMode == "Tyrant Of The Skies" then
                 _G.AutoTyrant = true
             end
-        else
-            StopTween()
         end
 
         _G.SaveData["StartFarm_Save"] = v
@@ -3957,7 +3784,6 @@ sec_v2_2:AddToggle("Toggle_8", {
     Default = GetSetting("AutoFarmNear_Save", false),
     Callback = function(I)
         _G.AutoFarmNear = I
-        if not I then StopTween() end
 
         _G.SaveData["AutoFarmNear_Save"] = I
 
@@ -4028,7 +3854,6 @@ sec_v2_2:AddToggle("Toggle_9", {
     Default = GetSetting("AutoFactory_Save", false),
     Callback = function(Value)
         _G.AutoFactory = Value
-        if not Value then StopTween() end
 
         _G.SaveData["AutoFactory_Save"] = Value
 
@@ -4077,7 +3902,6 @@ sec_v2_2:AddToggle("Toggle_10", {
     Default = GetSetting("AutoRaidCastle_Save", false),
     Callback = function(I)
         _G.AutoRaidCastle = I
-        if not I then StopTween() end
 
         _G.SaveData["AutoRaidCastle_Save"] = I
 
@@ -4150,7 +3974,6 @@ sec_v2_3:AddToggle("Toggle_11", {
     Default = GetSetting("AutoFarmChest_Save", false),
     Callback = function(I)
         _G.AutoFarmChest = I
-        if not I then StopTween() end
 
         _G.SaveData["AutoFarmChest_Save"] = I
 
@@ -4164,7 +3987,6 @@ sec_v2_3:AddToggle("Toggle_12", {
 	Default = GetSetting("AutoBerry_Save", false),
 	Callback = function(I)
 		_G.AutoBerry = I
-		if not I then StopTween() end
 
         _G.SaveData["AutoBerry_Save"] = I
 
@@ -4201,94 +4023,29 @@ spawn(function()
 	end;
 end);
 
-local CurrentChestTarget = nil
-
-local function IsChestCollectable(chest)
-    if not chest or not chest.Parent or not chest:IsDescendantOf(workspace) then
-        return false
-    end
-    if chest:GetAttribute("IsDisabled") == true then
-        return false
-    end
-    if SelectedIsland and not chest:IsDescendantOf(SelectedIsland) then
-        return false
-    end
-    return true
-end
-
 spawn(function()
-    while task.wait(0.1) do
+    while wait(Sec) do
         if _G.AutoFarmChest then
             pcall(function()
-                local plr = game.Players.LocalPlayer
-                local char = plr.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-
                 local CollectionService = game:GetService("CollectionService")
+                local Players = game:GetService("Players")
+                local plrChar = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+                local d = plrChar:GetPivot().Position
                 local Chests = CollectionService:GetTagged("_ChestTagged")
-
-                if not IsChestCollectable(CurrentChestTarget) then
-                    CurrentChestTarget = nil
-                    local myPos = hrp.Position
-                    local minDist, bestChest = math.huge, nil
-
-                    for _, chest in ipairs(Chests) do
-                        if IsChestCollectable(chest) then
-                            local chestPos = chest:GetPivot().Position
-                            local dist = (chestPos - myPos).Magnitude
-                            if dist < minDist then
-                                minDist = dist
-                                bestChest = chest
-                            end
+                local minDist, nearestChest = math.huge, nil
+                for _, chest in pairs(Chests) do
+                    local dist = (chest:GetPivot().Position - d).Magnitude
+                    if not SelectedIsland or chest:IsDescendantOf(SelectedIsland) then
+                        if not chest:GetAttribute("IsDisabled") and dist < minDist then
+                            minDist = dist
+                            nearestChest = chest
                         end
                     end
-
-                    CurrentChestTarget = bestChest
                 end
-
-                if CurrentChestTarget and IsChestCollectable(CurrentChestTarget) then
-                    local chestCFrame = CurrentChestTarget:GetPivot()
-                    local dist = (chestCFrame.Position - hrp.Position).Magnitude
-
-                    if dist > 3500 then
-                        CheckBypassEntrance(chestCFrame.Position)
-                        hrp = GetHRP()
-                        if hrp then
-                            dist = (chestCFrame.Position - hrp.Position).Magnitude
-                        end
-                    end
-
-                    if dist > 8 then
-                        _tp(chestCFrame)
-                    else
-                        _tp(chestCFrame)
-
-                        local chestPart = CurrentChestTarget:IsA("BasePart") and CurrentChestTarget or CurrentChestTarget:FindFirstChildWhichIsA("BasePart") or CurrentChestTarget:FindFirstChild("RootPart") or CurrentChestTarget.PrimaryPart
-                        if chestPart then
-                            pcall(function()
-                                firetouchinterest(hrp, chestPart, 0)
-                                task.wait(0.05)
-                                firetouchinterest(hrp, chestPart, 1)
-                            end)
-                        end
-
-                        local prompt = CurrentChestTarget:FindFirstChildOfClass("ProximityPrompt") or (chestPart and chestPart:FindFirstChildOfClass("ProximityPrompt"))
-                        if prompt then
-                            pcall(function()
-                                fireproximityprompt(prompt)
-                            end)
-                        end
-
-                        task.wait(0.15)
-                        CurrentChestTarget = nil
-                    end
-                else
-                    CurrentChestTarget = nil
+                if nearestChest then
+                    _tp(nearestChest:GetPivot())
                 end
             end)
-        else
-            CurrentChestTarget = nil
         end
     end
 end)
@@ -4314,7 +4071,6 @@ sec_v2_4:AddToggle("Toggle_13", {
 	Default = GetSetting("AutoMaterial_Save", false),
 	Callback = function(I)
 		(getgenv()).AutoMaterial = I
-		if not I then StopTween() end
 
         _G.SaveData["AutoMaterial_Save"] = I
         SaveSettings()
@@ -4385,7 +4141,6 @@ sec_v2_5:AddToggle("Toggle_15", {
     Default = false,
     Callback = function(v)
         _G.AutoHytHallow = v
-        if not v then StopTween() end
     end,
 })
 
@@ -4424,7 +4179,6 @@ sec_v2_5:AddToggle("Toggle_16", {
     Default = false,
     Callback = function(v)
         _G.Pray = v
-        if not v then StopTween() end
     end
 })
 
@@ -4457,7 +4211,6 @@ sec_v2_5:AddToggle("Toggle_17", {
     Default = false,
     Callback = function(v)
         _G.Trylux = v
-        if not v then StopTween() end
     end
 })
 
@@ -4557,7 +4310,7 @@ sec_v2_6:AddToggle("Toggle_18", {
     Default = GetSetting("AutoBoss_Save", false),
     Callback = function(v)
         _G.AutoBoss = v
-        if v then _G.FarmAllBoss = false else StopTween() end
+        if v then _G.FarmAllBoss = false end
         _G.SaveData["AutoBoss_Save"] = v
         SaveSettings()
     end
@@ -4578,7 +4331,7 @@ sec_v2_6:AddToggle("Toggle_20", {
     Default = GetSetting("FarmAllBosses_Save", false),
     Callback = function(v)
         _G.FarmAllBoss = v
-        if v then _G.AutoBoss = false else StopTween() end
+        if v then _G.AutoBoss = false end
         _G.CurrentTargetBoss = nil
         _G.SaveData["FarmAllBosses_Save"] = v
         SaveSettings()
@@ -8476,7 +8229,6 @@ sec_v8_2:AddToggle("Toggle_141", {
     Default = GetSetting("FarmChestM_Save", false),
     Callback = function(Value)
         _G.FarmChestM = Value
-        if not Value then StopTween() end
         _G.SaveData["FarmChestM_Save"] = Value
         SaveSettings()
     end
@@ -8604,10 +8356,8 @@ spawn(function()
     end
 end)
 
-local CurrentMirageChestTarget = nil
-
 spawn(function()
-    while task.wait(0.1) do
+    while wait(0.2) do
         if _G.FarmChestM then
             pcall(function()
                 local MysticIsland = workspace.Map:FindFirstChild("MysticIsland")
@@ -8615,74 +8365,25 @@ spawn(function()
                     if MysticIsland.Chests:FindFirstChild("DiamondChest") or MysticIsland.Chests:FindFirstChild("FragChest") then
                         local CollectionService = game:GetService("CollectionService")
                         local Chests = CollectionService:GetTagged("_ChestTagged")
-                        local char = plr.Character
-                        local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                        if not hrp then return end
+                        local minDist, nearestChest = math.huge, nil
+                        local myPos = plr.Character and plr.Character:GetPivot().Position
 
-                        local function IsMirageChestValid(chest)
-                            if not chest or not chest.Parent or not chest:IsDescendantOf(workspace) then
-                                return false
-                            end
-                            if chest:GetAttribute("IsDisabled") == true then
-                                return false
-                            end
-                            return true
-                        end
-
-                        if not IsMirageChestValid(CurrentMirageChestTarget) then
-                            CurrentMirageChestTarget = nil
-                            local myPos = hrp.Position
-                            local minDist, bestChest = math.huge, nil
-
+                        if myPos then
                             for _, chest in pairs(Chests) do
-                                if IsMirageChestValid(chest) then
-                                    local dist = (chest:GetPivot().Position - myPos).Magnitude
-                                    if dist < minDist then
-                                        minDist = dist
-                                        bestChest = chest
-                                    end
+                                local dist = (chest:GetPivot().Position - myPos).Magnitude
+                                if not chest:GetAttribute("IsDisabled") and dist < minDist then
+                                    minDist = dist
+                                    nearestChest = chest
                                 end
                             end
-
-                            CurrentMirageChestTarget = bestChest
                         end
 
-                        if CurrentMirageChestTarget and IsMirageChestValid(CurrentMirageChestTarget) then
-                            local chestCFrame = CurrentMirageChestTarget:GetPivot()
-                            local dist = (chestCFrame.Position - hrp.Position).Magnitude
-
-                            if dist > 8 then
-                                _tp(chestCFrame)
-                            else
-                                _tp(chestCFrame)
-
-                                local chestPart = CurrentMirageChestTarget:IsA("BasePart") and CurrentMirageChestTarget or CurrentMirageChestTarget:FindFirstChildWhichIsA("BasePart") or CurrentMirageChestTarget:FindFirstChild("RootPart") or CurrentMirageChestTarget.PrimaryPart
-                                if chestPart then
-                                    pcall(function()
-                                        firetouchinterest(hrp, chestPart, 0)
-                                        task.wait(0.05)
-                                        firetouchinterest(hrp, chestPart, 1)
-                                    end)
-                                end
-
-                                local prompt = CurrentMirageChestTarget:FindFirstChildOfClass("ProximityPrompt") or (chestPart and chestPart:FindFirstChildOfClass("ProximityPrompt"))
-                                if prompt then
-                                    pcall(function()
-                                        fireproximityprompt(prompt)
-                                    end)
-                                end
-
-                                task.wait(0.15)
-                                CurrentMirageChestTarget = nil
-                            end
-                        else
-                            CurrentMirageChestTarget = nil
+                        if nearestChest then
+                            _tp(nearestChest:GetPivot())
                         end
                     end
                 end
             end)
-        else
-            CurrentMirageChestTarget = nil
         end
     end
 end)
