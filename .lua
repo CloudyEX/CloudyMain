@@ -1235,7 +1235,10 @@ local LOCATIONS = {
     ["Deeper Mariana Trench"]=CFrame.new(-9124.98046875, -269.54022216796875, 813.3509521484375, 0.9547055959701538, -1.5112282980567215e-08, -0.29755207896232605, 2.008871291536707e-08, 1, 1.3666594966821322e-08, 0.29755207896232605, -1.9025012676365805e-08, 0.9547055959701538),
     ["Black Market"]=CFrame.new(-9029.9609375, -269.54022216796875, 786.406494140625, 0.46099039912223816, 1.19627179273607e-08, -0.8874050974845886, -1.4245764567988317e-08, 1, 6.080151049303595e-09, 0.8874050974845886, 9.838872827572231e-09, 0.46099039912223816),
     ["Starfall Garden"]=CFrame.new(-22193.46875, -251.7716064453125, -7988.5947265625, -0.9948872923851013, -3.658737668388312e-08, 0.10099118947982788, -3.739847542760799e-08, 1, -6.138063390892512e-09, -0.10099118947982788, -9.883597940074651e-09, -0.9948872923851013),
-    ["Gloomcap Grotto"]=CFrame.new(5921.02832, -864.522766, 12339.3037, -0.981406987, 7.42360342e-08, 0.19193837, 6.78514027e-08, 1, -3.98367028e-08, -0.19193837, -2.60727315e-08, -0.981406987)
+    ["Gloomcap Grotto"]=CFrame.new(5921.02832, -864.522766, 12339.3037, -0.981406987, 7.42360342e-08, 0.19193837, 6.78514027e-08, 1, -3.98367028e-08, -0.19193837, -2.60727315e-08, -0.981406987),
+    ["Elemental Island (Storm Area)"]=CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904),
+    ["Elemental Island (Volcano Area)"]=CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795),
+    ["Elemental Island (Blizzard Area)"]=CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819)
 }
 
 local function NormalizeTargetCFrame(targetCFrame)
@@ -5932,6 +5935,140 @@ if MainTab then
         local Section_MainTab_8 = MainTab:AddSection("Event Teleport")
         Section_MainTab_8:AddButton({ Title = "TP Leviathan", Callback = function() local hrp = getHRP(); if hrp then TeleportTo(CFrame.new(3474.053,-287.775,3472.634)) end end })
         Section_MainTab_8:AddButton({ Title = "TP Thunderzilla", Callback = function() local hrp = getHRP(); if hrp then TeleportTo(CFrame.new(2067.866,2.028,10.831)) end end })
+
+        local Section_MainTab_Elemental = MainTab:AddSection("Auto Event (Elemental Island)")
+
+        local ELEMENTAL_EVENT_MAP = {
+            ["Storm Elemental Event"] = {
+                Name = "Storm Elemental Event",
+                CFrame = LOCATIONS["Elemental Island (Storm Area)"] or CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904)
+            },
+            ["Blizzard Elemental Event"] = {
+                Name = "Blizzard Elemental Event",
+                CFrame = LOCATIONS["Elemental Island (Blizzard Area)"] or CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819)
+            },
+            ["Volcano Elemental Event"] = {
+                Name = "Volcano Elemental Event",
+                CFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795)
+            }
+        }
+
+        local selectedElementalEvents = {
+            ["Storm Elemental Event"] = true
+        }
+
+        local function isElementalEventActive(eventName)
+            local rs = game:GetService("ReplicatedStorage")
+            local eventsFolder = rs:FindFirstChild("Events")
+            if not eventsFolder then return false end
+            local ev = eventsFolder:FindFirstChild(eventName)
+            if not ev then return false end
+            if ev.Parent ~= eventsFolder then return false end
+            if ev:IsA("BoolValue") then
+                return ev.Value == true
+            end
+            return true
+        end
+
+        local elementalAutoTPState = false
+        local elementalAutoTPThread = nil
+        local elementalSavedCFrame = nil
+        local elementalCurrentEvent = nil
+
+        local function runElementalEventLoop()
+            while elementalAutoTPState do
+                pcall(function()
+                    if elementalCurrentEvent then
+                        local stillActive = isElementalEventActive(elementalCurrentEvent)
+                        if not stillActive then
+                            NotifyInfo("Elemental Event", "Event " .. tostring(elementalCurrentEvent) .. " selesai! Kembali ke posisi semula...")
+                            if elementalSavedCFrame then
+                                task.wait(0.5)
+                                TeleportTo(elementalSavedCFrame)
+                            end
+                            elementalCurrentEvent = nil
+                            elementalSavedCFrame = nil
+                        end
+                    else
+                        for evName, isSelected in pairs(selectedElementalEvents) do
+                            if isSelected and isElementalEventActive(evName) then
+                                local targetData = ELEMENTAL_EVENT_MAP[evName]
+                                if targetData and targetData.CFrame then
+                                    local hrp = getHRP()
+                                    if hrp then
+                                        elementalSavedCFrame = hrp.CFrame
+                                        elementalCurrentEvent = evName
+                                        NotifySuccess("Elemental Event", "Event " .. tostring(evName) .. " aktif! Teleporting...")
+                                        TeleportTo(targetData.CFrame)
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+                task.wait(1)
+            end
+        end
+
+        Section_MainTab_Elemental:AddDropdown("MultiDropdown_SelectElementalEvent", {
+            Title = "Select Elemental Event",
+            Values = {"Storm Elemental Event", "Blizzard Elemental Event", "Volcano Elemental Event"},
+            Default = {"Storm Elemental Event"},
+            Multi = true,
+            Callback = function(val)
+                selectedElementalEvents = {}
+                if typeof(val) == "table" then
+                    for k, v in pairs(val) do
+                        if v == true then
+                            selectedElementalEvents[k] = true
+                        elseif typeof(v) == "string" then
+                            selectedElementalEvents[v] = true
+                        end
+                    end
+                elseif typeof(val) == "string" then
+                    selectedElementalEvents[val] = true
+                end
+            end
+        })
+
+        Section_MainTab_Elemental:AddToggle("Toggle_AutoElementalEvent", {
+            Title = "Auto Teleport To Selected Event",
+            Description = "Scan event aktif -> Teleport -> Balik ke posisi awal saat selesai",
+            Default = false,
+            Callback = function(state)
+                elementalAutoTPState = state
+                if state then
+                    local hasSelected = false
+                    for _, v in pairs(selectedElementalEvents) do
+                        if v then hasSelected = true; break end
+                    end
+                    if not hasSelected then
+                        NotifyWarning("Elemental Event", "Pilih minimal 1 event di dropdown!")
+                        elementalAutoTPState = false
+                        return
+                    end
+
+                    if elementalAutoTPThread then
+                        pcall(function() task.cancel(elementalAutoTPThread) end)
+                    end
+                    elementalAutoTPThread = task.spawn(runElementalEventLoop)
+                    NotifySuccess("Elemental Event", "Auto Event Aktif! Menunggu event muncul...")
+                else
+                    if elementalAutoTPThread then
+                        pcall(function() task.cancel(elementalAutoTPThread) end)
+                        elementalAutoTPThread = nil
+                    end
+                    if elementalCurrentEvent and elementalSavedCFrame then
+                        NotifyInfo("Elemental Event", "Auto Event dimatikan. Kembali ke posisi awal...")
+                        TeleportTo(elementalSavedCFrame)
+                    end
+                    elementalCurrentEvent = nil
+                    elementalSavedCFrame = nil
+                    NotifyInfo("Elemental Event", "Auto Event Dimatikan.")
+                end
+            end
+        })
     end)
 end
 
