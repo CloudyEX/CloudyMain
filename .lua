@@ -82,16 +82,21 @@ _G.S.TweenService = TweenService
 _G.S.LocalPlayer = LocalPlayer
 _G.S.isMobile = UserInputService.TouchEnabled
 
+local _scriptInitialized = false
 local function NotifySuccess(title, text)
+    if not _scriptInitialized then return end
     pcall(function() if Fluent and Fluent.Notify then Fluent:Notify({ Title = "[OK] "   .. title, Content = text, Duration = 3, Icon = "solar/check-circle-bold" }) end end)
 end
 local function NotifyWarning(title, text)
+    if not _scriptInitialized then return end
     pcall(function() if Fluent and Fluent.Notify then Fluent:Notify({ Title = "[WARN] " .. title, Content = text, Duration = 3, Icon = "solar/danger-triangle-bold" }) end end)
 end
 local function NotifyError(title, text)
+    if not _scriptInitialized then return end
     pcall(function() if Fluent and Fluent.Notify then Fluent:Notify({ Title = "[ERR] "  .. title, Content = text, Duration = 3, Icon = "solar/close-circle-bold" }) end end)
 end
 local function NotifyInfo(title, text)
+    if not _scriptInitialized then return end
     pcall(function() if Fluent and Fluent.Notify then Fluent:Notify({ Title = "[INFO] " .. title, Content = text, Duration = 3, Icon = "solar/info-circle-bold" }) end end)
 end
 local cloneref = (cloneref or clonereference or function(i) return i end)
@@ -6152,26 +6157,6 @@ if MainTab then
         end)
 
         pcall(function()
-            local playerGui = LocalPlayer:WaitForChild("PlayerGui", 5)
-            if playerGui then
-                local function scanTextInstance(inst)
-                    if inst:IsA("TextLabel") or inst:IsA("TextBox") then
-                        processEventText(inst.Text)
-                        inst:GetPropertyChangedSignal("Text"):Connect(function()
-                            processEventText(inst.Text)
-                        end)
-                    end
-                end
-                for _, d in ipairs(playerGui:GetDescendants()) do
-                    scanTextInstance(d)
-                end
-                playerGui.DescendantAdded:Connect(function(desc)
-                    scanTextInstance(desc)
-                end)
-            end
-        end)
-
-        pcall(function()
             local TextChatService = game:GetService("TextChatService")
             if TextChatService then
                 TextChatService.MessageReceived:Connect(function(msg)
@@ -10918,6 +10903,10 @@ pcall(function()
         Duration = 5,
         Icon = "solar/atom-bold"
     })
+end)
+
+task.delay(1.5, function()
+    _scriptInitialized = true
 end)
 
 pcall(function()
