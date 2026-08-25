@@ -5942,29 +5942,26 @@ if MainTab then
             ["Storm Elemental Event"] = {
                 Active = false,
                 StartTime = 0,
-                Duration = 360,
-                Keywords = {"massive storm", "storm is accurring", "storm is occurring", "storm has started", "a massive storm"},
+                Duration = 3600,
+                Keywords = {"a massive storm is accurring", "a massive storm is occurring", "a massive storm", "massive storm", "storm is accurring", "storm is occurring"},
                 EndKeywords = {"storm has ended", "storm has passed", "storm has cleared", "storm is over", "storm cleared"},
-                CFrame = LOCATIONS["Elemental Island (Storm Area)"] or CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904),
-                RSName = "Storm Elemental Event"
+                CFrame = LOCATIONS["Elemental Island (Storm Area)"] or CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904)
             },
             ["Blizzard Elemental Event"] = {
                 Active = false,
                 StartTime = 0,
-                Duration = 360,
-                Keywords = {"blizzard has started", "blizzard is occurring", "blizzard is accurring", "a blizzard has", "blizzard started"},
+                Duration = 3600,
+                Keywords = {"a blizzard has started", "blizzard has started", "blizzard is occurring", "blizzard is accurring", "a blizzard has"},
                 EndKeywords = {"blizzard has ended", "blizzard has passed", "blizzard has cleared", "blizzard is over", "blizzard cleared"},
-                CFrame = LOCATIONS["Elemental Island (Blizzard Area)"] or CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819),
-                RSName = "Blizzard Elemental Event"
+                CFrame = LOCATIONS["Elemental Island (Blizzard Area)"] or CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819)
             },
             ["Volcano Elemental Event"] = {
                 Active = false,
                 StartTime = 0,
-                Duration = 360,
-                Keywords = {"volcano has erupted", "volcano is erupting", "volcano eruption", "the volcano has", "volcano erupted"},
+                Duration = 3600,
+                Keywords = {"the volcano has erupted", "volcano has erupted", "volcano is erupting", "the volcano has", "volcano eruption"},
                 EndKeywords = {"volcano has stopped", "volcano has calmed", "volcano is over", "volcano cleared", "volcano eruption ended"},
-                CFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795),
-                RSName = "Volcano Elemental Event"
+                CFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795)
             }
         }
 
@@ -6001,72 +5998,88 @@ if MainTab then
             end
         end
 
-        local function checkRSEventActive(rsName)
-            local rs = game:GetService("ReplicatedStorage")
-            local eventsFolder = rs:FindFirstChild("Events")
-            if not eventsFolder then return false end
-            local ev = eventsFolder:FindFirstChild(rsName)
-            if not ev then return false end
-
-            local ok, attrs = pcall(function() return ev:GetAttributes() end)
-            if ok and attrs then
-                if attrs.Active == true or attrs.Enabled == true or attrs.Started == true then return true end
-                if attrs.TimeLeft and type(attrs.TimeLeft) == "number" and attrs.TimeLeft > 0 then return true end
-                if attrs.Duration and type(attrs.Duration) == "number" and attrs.Duration > 0 then return true end
-                if attrs.Remaining and type(attrs.Remaining) == "number" and attrs.Remaining > 0 then return true end
-            end
-
-            local activeVal = ev:FindFirstChild("Active") or ev:FindFirstChild("Enabled") or ev:FindFirstChild("Started")
-            if activeVal and activeVal:IsA("BoolValue") and activeVal.Value == true then
-                return true
-            end
-            local timerVal = ev:FindFirstChild("TimeLeft") or ev:FindFirstChild("Timer") or ev:FindFirstChild("Duration")
-            if timerVal and (timerVal:IsA("NumberValue") or timerVal:IsA("IntValue")) and timerVal.Value > 0 then
-                return true
-            end
-
-            return false
+        local function checkControllersForEvents()
+            local activeList = {}
+            pcall(function()
+                local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
+                if not ctrlFolder then return end
+                for _, cMod in ipairs(ctrlFolder:GetChildren()) do
+                    if cMod:IsA("ModuleScript") then
+                        local name = cMod.Name:lower()
+                        if name:find("event") or name:find("weather") or name:find("zone") then
+                            local ok2, ctrl = pcall(require, cMod)
+                            if ok2 and type(ctrl) == "table" then
+                                for _, fnName in ipairs({"GetActiveEvents", "GetEvents", "GetActiveWeather", "GetCurrentEvents"}) do
+                                    if type(ctrl[fnName]) == "function" then
+                                        local ok3, res = pcall(function() return ctrl[fnName](ctrl) end)
+                                        if ok3 and type(res) == "table" then
+                                            for k, v in pairs(res) do
+                                                local s = tostring(type(k) == "string" and k or v):lower()
+                                                if s:find("blizzard") then activeList["Blizzard Elemental Event"] = true end
+                                                if s:find("storm") then activeList["Storm Elemental Event"] = true end
+                                                if s:find("volcano") then activeList["Volcano Elemental Event"] = true end
+                                            end
+                                        end
+                                    end
+                                end
+                                for _, propName in ipairs({"ActiveEvents", "Events", "CurrentEvents", "ActiveWeather", "CurrentWeather"}) do
+                                    if type(ctrl[propName]) == "table" then
+                                        for k, v in pairs(ctrl[propName]) do
+                                            local s = tostring(type(k) == "string" and k or v):lower()
+                                            if s:find("blizzard") then activeList["Blizzard Elemental Event"] = true end
+                                            if s:find("storm") then activeList["Storm Elemental Event"] = true end
+                                            if s:find("volcano") then activeList["Volcano Elemental Event"] = true end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+            return activeList
         end
 
-        local function checkWorldWeatherActive(eventKey)
-            local ws = game:GetService("Workspace")
-            local zones = ws:FindFirstChild("Zones") or ws:FindFirstChild("Islands") or ws:FindFirstChild("Weather")
-            if zones then
-                for _, item in ipairs(zones:GetDescendants()) do
-                    local nameLower = item.Name:lower()
-                    local matchesEvent = false
-                    if eventKey == "Storm Elemental Event" and (nameLower:find("storm") or nameLower:find("thunder")) then
-                        matchesEvent = true
-                    elseif eventKey == "Blizzard Elemental Event" and nameLower:find("blizzard") then
-                        matchesEvent = true
-                    elseif eventKey == "Volcano Elemental Event" and (nameLower:find("volcano") or nameLower:find("eruption")) then
-                        matchesEvent = true
-                    end
-
-                    if matchesEvent then
-                        if item:IsA("ParticleEmitter") and item.Enabled then return true end
-                        if item:IsA("Sound") and item.Playing then return true end
-                        if item:IsA("BoolValue") and item.Value == true then return true end
-                        local ok, a = pcall(function() return item:GetAttribute("Active") end)
-                        if ok and a == true then return true end
+        local function checkDynamicFolders()
+            local activeList = {}
+            pcall(function()
+                for _, parent in ipairs({ ReplicatedStorage, Workspace }) do
+                    for _, folderName in ipairs({"ActiveEvents", "RunningEvents", "CurrentEvents", "ActiveWeather"}) do
+                        local f = parent:FindFirstChild(folderName)
+                        if f then
+                            for _, child in ipairs(f:GetChildren()) do
+                                local n = child.Name:lower()
+                                if n:find("blizzard") then activeList["Blizzard Elemental Event"] = true end
+                                if n:find("storm") then activeList["Storm Elemental Event"] = true end
+                                if n:find("volcano") then activeList["Volcano Elemental Event"] = true end
+                            end
+                        end
                     end
                 end
-            end
+            end)
+            return activeList
+        end
 
-            local lighting = game:GetService("Lighting")
-            for _, obj in ipairs(lighting:GetChildren()) do
-                local n = obj.Name:lower()
-                local isWeatherObj = false
-                if eventKey == "Storm Elemental Event" and n:find("storm") then isWeatherObj = true
-                elseif eventKey == "Blizzard Elemental Event" and n:find("blizzard") then isWeatherObj = true
-                elseif eventKey == "Volcano Elemental Event" and (n:find("volcano") or n:find("ash")) then isWeatherObj = true end
-
-                if isWeatherObj and (obj:IsA("Atmosphere") or obj:IsA("Clouds") or obj:IsA("ColorCorrectionEffect") or obj:IsA("ParticleEmitter")) then
-                    return true
+        local function checkReplionForEvents()
+            local activeList = {}
+            pcall(function()
+                if not Replion or not Replion.Client then return end
+                for _, repName in ipairs({"Events", "ActiveEvents", "Weather", "World", "Environment"}) do
+                    local ok, r = pcall(function() return Replion.Client:GetReplion(repName) end)
+                    if ok and r then
+                        local data = r:GetValue() or r:GetExpect()
+                        if type(data) == "table" then
+                            for k, v in pairs(data) do
+                                local s = tostring(type(k) == "string" and k or v):lower()
+                                if s:find("blizzard") then activeList["Blizzard Elemental Event"] = true end
+                                if s:find("storm") then activeList["Storm Elemental Event"] = true end
+                                if s:find("volcano") then activeList["Volcano Elemental Event"] = true end
+                            end
+                        end
+                    end
                 end
-            end
-
-            return false
+            end)
+            return activeList
         end
 
         local function isElementalEventActive(eventKey)
@@ -6074,7 +6087,8 @@ if MainTab then
             if not info then return false end
 
             if info.Active then
-                if (tick() - info.StartTime) <= (info.Duration or 360) then
+                local elapsed = tick() - info.StartTime
+                if elapsed <= (info.Duration or 3600) then
                     return true
                 else
                     info.Active = false
@@ -6082,7 +6096,8 @@ if MainTab then
                 end
             end
 
-            if checkRSEventActive(info.RSName) then
+            local ctrlActive = checkControllersForEvents()
+            if ctrlActive[eventKey] then
                 if not info.Active then
                     info.Active = true
                     info.StartTime = tick()
@@ -6090,7 +6105,17 @@ if MainTab then
                 return true
             end
 
-            if checkWorldWeatherActive(eventKey) then
+            local dynActive = checkDynamicFolders()
+            if dynActive[eventKey] then
+                if not info.Active then
+                    info.Active = true
+                    info.StartTime = tick()
+                end
+                return true
+            end
+
+            local repActive = checkReplionForEvents()
+            if repActive[eventKey] then
                 if not info.Active then
                     info.Active = true
                     info.StartTime = tick()
@@ -6235,15 +6260,11 @@ if MainTab then
                         return
                     end
 
-                    for evName in pairs(selectedElementalEvents) do
-                        isElementalEventActive(evName)
-                    end
-
                     if elementalAutoTPThread then
                         pcall(function() task.cancel(elementalAutoTPThread) end)
                     end
                     elementalAutoTPThread = task.spawn(runElementalEventLoop)
-                    NotifySuccess("Elemental Event", "Auto Event Aktif! Menunggu/memindai event...")
+                    NotifySuccess("Elemental Event", "Auto Event Aktif! Menunggu event muncul...")
                 else
                     if elementalAutoTPThread then
                         pcall(function() task.cancel(elementalAutoTPThread) end)
