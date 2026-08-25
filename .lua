@@ -2843,9 +2843,9 @@ local originalLevelText = nil
 local cachedNameLabel = nil
 local cachedLevelLabel = nil
 
-_G.CustomNameActive = true
+_G.CustomNameActive = false
 _G.CustomNameText = "CLOUDY"
-_G.CustomLevelActive = true
+_G.CustomLevelActive = false
 _G.CustomLevelText = "Lvl. 969"
 _G.CloudyTitleActive = false
 
@@ -3375,23 +3375,21 @@ if PlayersTab then
 
         local Section_PlayersTab_3 = PlayersTab:AddSection("Custom Name & Level")
 
-        local customName = "CLOUDY"
-        local customLevel = "Lvl. 969"
+        local customNameDraft = "CLOUDY"
+        local customLevelDraft = "Lvl. 969"
 
         Section_PlayersTab_3:AddInput("Input_CustomFakeName", {
             Title = "Custom Fake Name",
             Description = "Nama samaran di kepala & chat (hanya terlihat di kamu)",
-            Value = customName,
-            Default = customName,
+            Value = customNameDraft,
+            Default = customNameDraft,
             Placeholder = "CLOUDY",
             Icon = "lucide:user-x",
             Callback = function(text)
                 if text and text ~= "" then
-                    customName = text
-                    _G.CustomNameText = text
-                    if _G.CustomNameActive then
-                        ApplyCustomName(text)
-                    end
+                    customNameDraft = text
+                else
+                    customNameDraft = "CLOUDY"
                 end
             end,
             Finished = false
@@ -3400,17 +3398,15 @@ if PlayersTab then
         Section_PlayersTab_3:AddInput("Input_CustomFakeLevel", {
             Title = "Custom Fake Level",
             Description = "Level samaran di kepala (misal: 'Lvl. 969' atau 'Max')",
-            Value = customLevel,
-            Default = customLevel,
+            Value = customLevelDraft,
+            Default = customLevelDraft,
             Placeholder = "Lvl. 969",
             Icon = "lucide:bar-chart-2",
             Callback = function(text)
                 if text and text ~= "" then
-                    customLevel = text
-                    _G.CustomLevelText = text
-                    if _G.CustomLevelActive then
-                        ApplyCustomLevel(text)
-                    end
+                    customLevelDraft = text
+                else
+                    customLevelDraft = "Lvl. 969"
                 end
             end,
             Finished = false
@@ -3420,7 +3416,7 @@ if PlayersTab then
             Title = "Apply Name",
             Description = "Terapkan nama samaran ke overhead & chat",
             Callback = function()
-                ApplyCustomName(customName)
+                ApplyCustomName(customNameDraft)
             end
         })
 
@@ -3434,9 +3430,9 @@ if PlayersTab then
 
         Section_PlayersTab_3:AddButton({
             Title = "Apply Level",
-            Description = "Terapkan level samaran secara terpisah",
+            Description = "Terapkan level samaran ke overhead",
             Callback = function()
-                ApplyCustomLevel(customLevel)
+                ApplyCustomLevel(customLevelDraft)
             end
         })
 
@@ -5949,24 +5945,24 @@ if MainTab then
                 Active = false,
                 StartTime = 0,
                 Duration = 3600,
-                Keywords = {"a massive storm is accurring", "a massive storm is occurring", "a massive storm", "massive storm", "storm is accurring", "storm is occurring"},
-                EndKeywords = {"storm has ended", "storm has passed", "storm has cleared", "storm is over", "storm cleared"},
+                Keywords = {"storm is accurring", "storm is occurring", "massive storm", "storm elemental", "storm event", "stormshell", "a storm has", "storm started", "storm has started", "strom"},
+                EndKeywords = {"storm has ended", "storm has passed", "storm has cleared", "storm is over", "storm cleared", "storm ended"},
                 CFrame = LOCATIONS["Elemental Island (Storm Area)"] or CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904)
             },
             ["Blizzard Elemental Event"] = {
                 Active = false,
                 StartTime = 0,
                 Duration = 3600,
-                Keywords = {"a blizzard has started", "blizzard has started", "blizzard is occurring", "blizzard is accurring", "a blizzard has"},
-                EndKeywords = {"blizzard has ended", "blizzard has passed", "blizzard has cleared", "blizzard is over", "blizzard cleared"},
+                Keywords = {"blizzard has started", "blizzard is occurring", "blizzard is accurring", "blizzard elemental", "blizzard event", "wintertusk", "a blizzard has", "blizzard started", "blizard"},
+                EndKeywords = {"blizzard has ended", "blizzard has passed", "blizzard has cleared", "blizzard is over", "blizzard cleared", "blizzard ended"},
                 CFrame = LOCATIONS["Elemental Island (Blizzard Area)"] or CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819)
             },
             ["Volcano Elemental Event"] = {
                 Active = false,
                 StartTime = 0,
                 Duration = 3600,
-                Keywords = {"the volcano has erupted", "volcano has erupted", "volcano is erupting", "the volcano has", "volcano eruption"},
-                EndKeywords = {"volcano has stopped", "volcano has calmed", "volcano is over", "volcano cleared", "volcano eruption ended"},
+                Keywords = {"volcano has erupted", "volcano is erupting", "volcano eruption", "volcano elemental", "volcano event", "volcanic event", "volcanic elemental", "pyrocoil", "the volcano has", "volcano erupted"},
+                EndKeywords = {"volcano has stopped", "volcano has calmed", "volcano is over", "volcano cleared", "volcano eruption ended", "volcano ended"},
                 CFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795)
             }
         }
@@ -5975,22 +5971,25 @@ if MainTab then
             ["Storm Elemental Event"] = true
         }
 
+        local function resolveCanonicalEventKey(query)
+            if not query then return nil end
+            local q = tostring(query):lower()
+            if q:find("storm") or q:find("strom") or q:find("atmospher") then
+                return "Storm Elemental Event"
+            elseif q:find("blizzard") or q:find("blizard") or q:find("glacial") or q:find("ice") then
+                return "Blizzard Elemental Event"
+            elseif q:find("volcano") or q:find("volcanic") or q:find("magma") or q:find("erupt") then
+                return "Volcano Elemental Event"
+            end
+            return nil
+        end
+
         local function processEventText(text)
             if type(text) ~= "string" or text == "" then return end
             local lower = text:lower()
 
+            -- Check end keywords first
             for eventKey, info in pairs(ElementalEventState) do
-                for _, kw in ipairs(info.Keywords) do
-                    if lower:find(kw, 1, true) then
-                        if not info.Active then
-                            info.Active = true
-                            info.StartTime = tick()
-                            NotifySuccess("Elemental Event", "Peringatan Terdeteksi: " .. eventKey .. "!")
-                        end
-                        return
-                    end
-                end
-
                 for _, ekw in ipairs(info.EndKeywords) do
                     if lower:find(ekw, 1, true) then
                         if info.Active then
@@ -6002,7 +6001,124 @@ if MainTab then
                     end
                 end
             end
+
+            -- Check start keywords
+            for eventKey, info in pairs(ElementalEventState) do
+                for _, kw in ipairs(info.Keywords) do
+                    if lower:find(kw, 1, true) then
+                        if not info.Active then
+                            info.Active = true
+                            info.StartTime = tick()
+                            NotifySuccess("Elemental Event", "Event Terdeteksi: " .. eventKey .. "!")
+                        end
+                        return
+                    end
+                end
+            end
         end
+
+        local function extractAndProcessAnyData(...)
+            local args = {...}
+            for _, val in ipairs(args) do
+                if type(val) == "string" then
+                    processEventText(val)
+                elseif type(val) == "table" then
+                    for _, k in ipairs({"Text", "Message", "Content", "Title", "Description", "Header", "Body", "EventName", "Name", "Desc", "Weather", "Event"}) do
+                        if val[k] and type(val[k]) == "string" then
+                            processEventText(val[k])
+                        end
+                    end
+                    for _, sub in pairs(val) do
+                        if type(sub) == "string" then
+                            processEventText(sub)
+                        elseif type(sub) == "table" then
+                            for _, sub2 in pairs(sub) do
+                                if type(sub2) == "string" then
+                                    processEventText(sub2)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Layer 1: Universal Remote Hook (Net Package)
+        pcall(function()
+            if net then
+                for _, rem in ipairs(net:GetChildren()) do
+                    if rem:IsA("RemoteEvent") then
+                        rem.OnClientEvent:Connect(function(...)
+                            extractAndProcessAnyData(...)
+                        end)
+                    end
+                end
+            end
+        end)
+
+        -- Layer 2: Universal Controllers Hook
+        pcall(function()
+            local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
+            if ctrlFolder then
+                for _, mod in ipairs(ctrlFolder:GetChildren()) do
+                    if mod:IsA("ModuleScript") then
+                        pcall(function()
+                            local req = require(mod)
+                            if type(req) == "table" then
+                                for _, fnName in ipairs({"DeliverNotification", "Notify", "ShowNotification", "DeliverTextNotification", "SendNotification", "OnNotification"}) do
+                                    if type(req[fnName]) == "function" then
+                                        local orig = req[fnName]
+                                        req[fnName] = function(...)
+                                            extractAndProcessAnyData(...)
+                                            return orig(...)
+                                        end
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                end
+            end
+        end)
+
+        -- Layer 3: Notification ScreenGuis Listener
+        pcall(function()
+            local playerGui = LocalPlayer:WaitForChild("PlayerGui", 5)
+            if playerGui then
+                local function monitorGui(gui)
+                    if gui:IsA("ScreenGui") and (gui.Name == "Text Notifications" or gui.Name:lower():find("notif") or gui.Name:lower():find("announc") or gui.Name:lower():find("message")) then
+                        local function checkDesc(d)
+                            if d:IsA("TextLabel") or d:IsA("TextBox") then
+                                processEventText(d.Text)
+                                d:GetPropertyChangedSignal("Text"):Connect(function()
+                                    processEventText(d.Text)
+                                end)
+                            end
+                        end
+                        for _, d in ipairs(gui:GetDescendants()) do checkDesc(d) end
+                        gui.DescendantAdded:Connect(checkDesc)
+                    end
+                end
+
+                for _, g in ipairs(playerGui:GetChildren()) do monitorGui(g) end
+                playerGui.ChildAdded:Connect(monitorGui)
+            end
+        end)
+
+        -- Layer 4: TextChatService Hook
+        pcall(function()
+            local TextChatService = game:GetService("TextChatService")
+            if TextChatService then
+                TextChatService.MessageReceived:Connect(function(msg)
+                    if msg and msg.Text then
+                        processEventText(msg.Text)
+                    end
+                end)
+            end
+            LocalPlayer.Chatted:Connect(function(msg)
+                if msg then processEventText(msg) end
+            end)
+        end)
 
         local function checkControllersForEvents()
             local activeList = {}
@@ -6011,31 +6127,26 @@ if MainTab then
                 if not ctrlFolder then return end
                 for _, cMod in ipairs(ctrlFolder:GetChildren()) do
                     if cMod:IsA("ModuleScript") then
-                        local name = cMod.Name:lower()
-                        if name:find("event") or name:find("weather") or name:find("zone") then
-                            local ok2, ctrl = pcall(require, cMod)
-                            if ok2 and type(ctrl) == "table" then
-                                for _, fnName in ipairs({"GetActiveEvents", "GetEvents", "GetActiveWeather", "GetCurrentEvents"}) do
-                                    if type(ctrl[fnName]) == "function" then
-                                        local ok3, res = pcall(function() return ctrl[fnName](ctrl) end)
-                                        if ok3 and type(res) == "table" then
-                                            for k, v in pairs(res) do
-                                                local s = tostring(type(k) == "string" and k or v):lower()
-                                                if s:find("blizzard") then activeList["Blizzard Elemental Event"] = true end
-                                                if s:find("storm") then activeList["Storm Elemental Event"] = true end
-                                                if s:find("volcano") then activeList["Volcano Elemental Event"] = true end
-                                            end
+                        local ok2, ctrl = pcall(require, cMod)
+                        if ok2 and type(ctrl) == "table" then
+                            for _, fnName in ipairs({"GetActiveEvents", "GetEvents", "GetActiveWeather", "GetCurrentEvents", "GetActiveZones"}) do
+                                if type(ctrl[fnName]) == "function" then
+                                    local ok3, res = pcall(function() return ctrl[fnName](ctrl) end)
+                                    if ok3 and type(res) == "table" then
+                                        for k, v in pairs(res) do
+                                            local s = tostring(type(k) == "string" and k or v):lower()
+                                            local key = resolveCanonicalEventKey(s)
+                                            if key then activeList[key] = true end
                                         end
                                     end
                                 end
-                                for _, propName in ipairs({"ActiveEvents", "Events", "CurrentEvents", "ActiveWeather", "CurrentWeather"}) do
-                                    if type(ctrl[propName]) == "table" then
-                                        for k, v in pairs(ctrl[propName]) do
-                                            local s = tostring(type(k) == "string" and k or v):lower()
-                                            if s:find("blizzard") then activeList["Blizzard Elemental Event"] = true end
-                                            if s:find("storm") then activeList["Storm Elemental Event"] = true end
-                                            if s:find("volcano") then activeList["Volcano Elemental Event"] = true end
-                                        end
+                            end
+                            for _, propName in ipairs({"ActiveEvents", "Events", "CurrentEvents", "ActiveWeather", "CurrentWeather", "ActiveZones"}) do
+                                if type(ctrl[propName]) == "table" then
+                                    for k, v in pairs(ctrl[propName]) do
+                                        local s = tostring(type(k) == "string" and k or v):lower()
+                                        local key = resolveCanonicalEventKey(s)
+                                        if key then activeList[key] = true end
                                     end
                                 end
                             end
@@ -6050,14 +6161,12 @@ if MainTab then
             local activeList = {}
             pcall(function()
                 for _, parent in ipairs({ ReplicatedStorage, Workspace }) do
-                    for _, folderName in ipairs({"ActiveEvents", "RunningEvents", "CurrentEvents", "ActiveWeather"}) do
+                    for _, folderName in ipairs({"ActiveEvents", "RunningEvents", "CurrentEvents", "ActiveWeather", "CurrentWeather", "Weather"}) do
                         local f = parent:FindFirstChild(folderName)
                         if f then
                             for _, child in ipairs(f:GetChildren()) do
-                                local n = child.Name:lower()
-                                if n:find("blizzard") then activeList["Blizzard Elemental Event"] = true end
-                                if n:find("storm") then activeList["Storm Elemental Event"] = true end
-                                if n:find("volcano") then activeList["Volcano Elemental Event"] = true end
+                                local key = resolveCanonicalEventKey(child.Name)
+                                if key then activeList[key] = true end
                             end
                         end
                     end
@@ -6069,17 +6178,17 @@ if MainTab then
         local function checkReplionForEvents()
             local activeList = {}
             pcall(function()
-                if not Replion or not Replion.Client then return end
-                for _, repName in ipairs({"Events", "ActiveEvents", "Weather", "World", "Environment"}) do
-                    local ok, r = pcall(function() return Replion.Client:GetReplion(repName) end)
+                local repClient = Replion and Replion.Client
+                if not repClient then return end
+                for _, repName in ipairs({"Events", "ActiveEvents", "Weather", "World", "Environment", "Zone", "Zones"}) do
+                    local ok, r = pcall(function() return repClient:GetReplion(repName) end)
                     if ok and r then
                         local data = r:GetValue() or r:GetExpect()
                         if type(data) == "table" then
                             for k, v in pairs(data) do
                                 local s = tostring(type(k) == "string" and k or v):lower()
-                                if s:find("blizzard") then activeList["Blizzard Elemental Event"] = true end
-                                if s:find("storm") then activeList["Storm Elemental Event"] = true end
-                                if s:find("volcano") then activeList["Volcano Elemental Event"] = true end
+                                local key = resolveCanonicalEventKey(s)
+                                if key then activeList[key] = true end
                             end
                         end
                     end
@@ -6088,7 +6197,27 @@ if MainTab then
             return activeList
         end
 
-        local function isElementalEventActive(eventKey)
+        local function checkLightingAndWorld()
+            local activeList = {}
+            pcall(function()
+                local lighting = game:GetService("Lighting")
+                if lighting then
+                    for _, obj in ipairs(lighting:GetChildren()) do
+                        local key = resolveCanonicalEventKey(obj.Name)
+                        if key then activeList[key] = true end
+                    end
+                    for attrName, attrVal in pairs(lighting:GetAttributes()) do
+                        local key = resolveCanonicalEventKey(tostring(attrName) .. " " .. tostring(attrVal))
+                        if key then activeList[key] = true end
+                    end
+                end
+            end)
+            return activeList
+        end
+
+        local function isElementalEventActive(eventQuery)
+            local eventKey = resolveCanonicalEventKey(eventQuery)
+            if not eventKey then return false end
             local info = ElementalEventState[eventKey]
             if not info then return false end
 
@@ -6102,70 +6231,21 @@ if MainTab then
                 end
             end
 
-            local ctrlActive = checkControllersForEvents()
-            if ctrlActive[eventKey] then
-                if not info.Active then
-                    info.Active = true
-                    info.StartTime = tick()
-                end
-                return true
+            if checkControllersForEvents()[eventKey] then
+                info.Active = true; info.StartTime = tick(); return true
             end
-
-            local dynActive = checkDynamicFolders()
-            if dynActive[eventKey] then
-                if not info.Active then
-                    info.Active = true
-                    info.StartTime = tick()
-                end
-                return true
+            if checkDynamicFolders()[eventKey] then
+                info.Active = true; info.StartTime = tick(); return true
             end
-
-            local repActive = checkReplionForEvents()
-            if repActive[eventKey] then
-                if not info.Active then
-                    info.Active = true
-                    info.StartTime = tick()
-                end
-                return true
+            if checkReplionForEvents()[eventKey] then
+                info.Active = true; info.StartTime = tick(); return true
+            end
+            if checkLightingAndWorld()[eventKey] then
+                info.Active = true; info.StartTime = tick(); return true
             end
 
             return false
         end
-
-        pcall(function()
-            local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
-            if ctrlFolder then
-                local TextNotifCtrl = require(ctrlFolder:WaitForChild("TextNotificationController", 5))
-                if TextNotifCtrl and TextNotifCtrl.DeliverNotification then
-                    local originalDeliver = TextNotifCtrl.DeliverNotification
-                    TextNotifCtrl.DeliverNotification = function(self, data, ...)
-                        if data then
-                            if type(data) == "string" then
-                                processEventText(data)
-                            elseif type(data) == "table" then
-                                if data.Text then processEventText(tostring(data.Text)) end
-                                if data.Message then processEventText(tostring(data.Message)) end
-                                if data.Content then processEventText(tostring(data.Content)) end
-                                if data.Title then processEventText(tostring(data.Title)) end
-                                if data.Description then processEventText(tostring(data.Description)) end
-                            end
-                        end
-                        return originalDeliver(self, data, ...)
-                    end
-                end
-            end
-        end)
-
-        pcall(function()
-            local TextChatService = game:GetService("TextChatService")
-            if TextChatService then
-                TextChatService.MessageReceived:Connect(function(msg)
-                    if msg and msg.Text then
-                        processEventText(msg.Text)
-                    end
-                end)
-            end
-        end)
 
         local elementalAutoTPState = false
         local elementalAutoTPThread = nil
@@ -6188,16 +6268,19 @@ if MainTab then
                         end
                     else
                         for evName, isSelected in pairs(selectedElementalEvents) do
-                            if isSelected and isElementalEventActive(evName) then
-                                local targetData = ElementalEventState[evName]
-                                if targetData and targetData.CFrame then
-                                    local hrp = getHRP()
-                                    if hrp then
-                                        elementalSavedCFrame = hrp.CFrame
-                                        elementalCurrentEvent = evName
-                                        NotifySuccess("Elemental Event", "Event " .. tostring(evName) .. " aktif! Teleporting ke lokasi...")
-                                        TeleportTo(targetData.CFrame)
-                                        break
+                            if isSelected then
+                                local canonicalKey = resolveCanonicalEventKey(evName)
+                                if canonicalKey and isElementalEventActive(canonicalKey) then
+                                    local targetData = ElementalEventState[canonicalKey]
+                                    if targetData and targetData.CFrame then
+                                        local hrp = getHRP()
+                                        if hrp then
+                                            elementalSavedCFrame = hrp.CFrame
+                                            elementalCurrentEvent = canonicalKey
+                                            NotifySuccess("Elemental Event", "Event " .. tostring(canonicalKey) .. " aktif! Teleporting ke lokasi...")
+                                            TeleportTo(targetData.CFrame)
+                                            break
+                                        end
                                     end
                                 end
                             end
@@ -6250,7 +6333,7 @@ if MainTab then
                         pcall(function() task.cancel(elementalAutoTPThread) end)
                     end
                     elementalAutoTPThread = task.spawn(runElementalEventLoop)
-                    NotifySuccess("Elemental Event", "Auto Event Aktif! Menunggu event muncul...")
+                    NotifySuccess("Elemental Event", "Auto Event Aktif! Memindai event...")
                 else
                     if elementalAutoTPThread then
                         pcall(function() task.cancel(elementalAutoTPThread) end)
