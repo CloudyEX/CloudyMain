@@ -1087,7 +1087,6 @@ local function IsAnyFarmActive()
 	return false
 end
 
-local LastBypassTime = 0
 CheckBypassEntrance = function(targetPos)
 	if not targetPos then return end
 	if typeof(targetPos) == "CFrame" then targetPos = targetPos.Position end
@@ -1096,28 +1095,24 @@ CheckBypassEntrance = function(targetPos)
 	local myPos = hrp.Position
 	local dist = (targetPos - myPos).Magnitude
 	if dist < 3500 then return end
-	if tick() - LastBypassTime < 3 then return end
 
 	pcall(function()
 		if World1 then
 			-- Underwater / Fishman Island
 			if targetPos.X > 50000 and targetPos.Z < 5000 then
 				if (myPos - Vector3.new(61163.85, 11.68, 1819.78)).Magnitude > 4000 then
-					LastBypassTime = tick()
 					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(61163.8515625, 11.6796875, 1819.7841796875))
 					task.wait(0.25)
 				end
 			-- Upper Sky
 			elseif targetPos.Y > 4000 then
 				if (myPos - Vector3.new(-7894.62, 5547.14, -380.29)).Magnitude > 4000 then
-					LastBypassTime = tick()
 					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-7894.6176757813, 5547.1416015625, -380.29119873047))
 					task.wait(0.25)
 				end
 			-- Lower Sky
 			elseif targetPos.Y > 800 and targetPos.Y <= 4000 then
 				if (myPos - Vector3.new(-4607.82, 872.54, -1667.56)).Magnitude > 4000 then
-					LastBypassTime = tick()
 					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-4607.82275, 872.54248, -1667.55688))
 					task.wait(0.25)
 				end
@@ -1126,7 +1121,6 @@ CheckBypassEntrance = function(targetPos)
 			-- Cursed Ship
 			if targetPos.Z > 30000 then
 				if (myPos - Vector3.new(923.21, 126.98, 32852.83)).Magnitude > 4000 then
-					LastBypassTime = tick()
 					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(923.21252441406, 126.9760055542, 32852.83203125))
 					task.wait(0.25)
 				end
@@ -1135,21 +1129,18 @@ CheckBypassEntrance = function(targetPos)
 			-- Mansion
 			if (targetPos - Vector3.new(-12463.87, 374.91, -7523.77)).Magnitude < 2500 then
 				if (myPos - Vector3.new(-12463.87, 374.91, -7523.77)).Magnitude > 4000 then
-					LastBypassTime = tick()
 					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-12463.874023438, 374.91445922852, -7523.7739257812))
 					task.wait(0.25)
 				end
 			-- Castle on the Sea
 			elseif (targetPos - Vector3.new(-5085.24, 316.40, -3156.26)).Magnitude < 2500 then
 				if (myPos - Vector3.new(-5085.24, 316.40, -3156.26)).Magnitude > 4000 then
-					LastBypassTime = tick()
 					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5085.23681640625, 316.4043273925781, -3156.264892578125))
 					task.wait(0.25)
 				end
 			-- Hydra Island
 			elseif (targetPos - Vector3.new(5749.79, 611.97, -276.05)).Magnitude < 2500 then
 				if (myPos - Vector3.new(5749.79, 611.97, -276.05)).Magnitude > 4000 then
-					LastBypassTime = tick()
 					replicated.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5749.7861328125, 611.9736938476562, -276.0497741699219))
 					task.wait(0.25)
 				end
@@ -1171,7 +1162,7 @@ StopTween = function()
 
 	local hrp = GetHRP()
 	if hrp then
-		if C and C.Parent == workspace then
+		if C then
 			C.CFrame = hrp.CFrame
 		end
 		for _, child in ipairs(hrp:GetChildren()) do
@@ -1211,7 +1202,7 @@ RunSer.Stepped:Connect(function()
 	pcall(function()
 		local isTweenPlaying = (CurrentTween ~= nil and CurrentTween.PlaybackState == Enum.PlaybackState.Playing)
 		local isMoving = isTweenPlaying or IsAnyFarmActive()
-		if isMoving or _G.NoClip then
+		if isMoving then
 			local char = plr.Character
 			if char then
 				local hum = char:FindFirstChildOfClass("Humanoid")
@@ -1235,18 +1226,19 @@ RunSer.Heartbeat:Connect(function()
 		local hrp = GetHRP()
 		if not hrp then return end
 
+		if not C or C.Parent ~= workspace then
+			C = Instance.new("Part", workspace)
+			C.Size = Vector3.new(1, 1, 1)
+			C.Name = "Rip_Indra"
+			C.Anchored = true
+			C.CanCollide = false
+			C.CanTouch = false
+			C.CanQuery = false
+			C.Transparency = 1
+			C.CFrame = hrp.CFrame
+		end
+
 		if isMoving then
-			if not C or C.Parent ~= workspace then
-				C = Instance.new("Part", workspace)
-				C.Size = Vector3.new(1, 1, 1)
-				C.Name = "Rip_Indra"
-				C.Anchored = true
-				C.CanCollide = false
-				C.CanTouch = false
-				C.CanQuery = false
-				C.Transparency = 1
-				C.CFrame = hrp.CFrame
-			end
 			getgenv().OnFarm = true
 			local bodyClip = hrp:FindFirstChild("BodyClip")
 			if not bodyClip then
@@ -1267,9 +1259,7 @@ RunSer.Heartbeat:Connect(function()
 				CurrentTween = nil
 			end
 			CurrentTarget = nil
-			if C and C.Parent == workspace then
-				C.CFrame = hrp.CFrame
-			end
+			C.CFrame = hrp.CFrame
 			for _, child in ipairs(hrp:GetChildren()) do
 				if child.Name == "BodyClip" or (child:IsA("BodyVelocity") and child.Velocity == Vector3.new(0, 0, 0)) then
 					pcall(function() child:Destroy() end)
@@ -4227,7 +4217,7 @@ local function IsChestCollectable(chest)
 end
 
 spawn(function()
-    while task.wait(0.2) do
+    while task.wait(0.1) do
         if _G.AutoFarmChest then
             pcall(function()
                 local plr = game.Players.LocalPlayer
@@ -4236,12 +4226,12 @@ spawn(function()
                 if not hrp then return end
 
                 local CollectionService = game:GetService("CollectionService")
+                local Chests = CollectionService:GetTagged("_ChestTagged")
 
                 if not IsChestCollectable(CurrentChestTarget) then
                     CurrentChestTarget = nil
                     local myPos = hrp.Position
                     local minDist, bestChest = math.huge, nil
-                    local Chests = CollectionService:GetTagged("_ChestTagged")
 
                     for _, chest in ipairs(Chests) do
                         if IsChestCollectable(chest) then
@@ -4261,20 +4251,18 @@ spawn(function()
                     local chestCFrame = CurrentChestTarget:GetPivot()
                     local dist = (chestCFrame.Position - hrp.Position).Magnitude
 
-                    if dist > 8 then
-                        _tp(chestCFrame)
-                        while _G.AutoFarmChest and IsChestCollectable(CurrentChestTarget) do
-                            local currentDist = (CurrentChestTarget:GetPivot().Position - hrp.Position).Magnitude
-                            if currentDist <= 8 then
-                                break
-                            end
-                            task.wait(0.25)
+                    if dist > 3500 then
+                        CheckBypassEntrance(chestCFrame.Position)
+                        hrp = GetHRP()
+                        if hrp then
+                            dist = (chestCFrame.Position - hrp.Position).Magnitude
                         end
                     end
 
-                    if _G.AutoFarmChest and CurrentChestTarget and IsChestCollectable(CurrentChestTarget) then
-                        local finalCFrame = CurrentChestTarget:GetPivot()
-                        _tp(finalCFrame)
+                    if dist > 8 then
+                        _tp(chestCFrame)
+                    else
+                        _tp(chestCFrame)
 
                         local chestPart = CurrentChestTarget:IsA("BasePart") and CurrentChestTarget or CurrentChestTarget:FindFirstChildWhichIsA("BasePart") or CurrentChestTarget:FindFirstChild("RootPart") or CurrentChestTarget.PrimaryPart
                         if chestPart then
@@ -4292,17 +4280,15 @@ spawn(function()
                             end)
                         end
 
-                        task.wait(0.2)
+                        task.wait(0.15)
                         CurrentChestTarget = nil
                     end
                 else
                     CurrentChestTarget = nil
-                    task.wait(0.5)
                 end
             end)
         else
             CurrentChestTarget = nil
-            task.wait(0.5)
         end
     end
 end)
@@ -5241,20 +5227,31 @@ sec_v4_2:AddToggle("Toggle_36", {
     Default = GetSetting("NoClip_Save", false),
     Callback = function(value)
         _G.NoClip = value
-        if not value and not IsAnyFarmActive() then
-            local char = plr.Character
-            if char then
-                for _, part in ipairs(char:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        pcall(function() part.CanCollide = true end)
-                    end
-                end
-            end
-        end
         _G.SaveData["NoClip_Save"] = value
         SaveSettings()
     end
 })
+spawn(function()
+    local player = game:GetService("Players").LocalPlayer
+    local runService = game:GetService("RunService")
+    runService.Stepped:Connect(function()
+        pcall(function()
+            if player.Character and _G.NoClip then
+                for _, part in pairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            elseif player.Character and not _G.NoClip then
+                for _, part in pairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end)
+    end)
+end)
 
 _G.AutoHopServer = _G.AutoHopServer or false
 _G.HopDelay = _G.HopDelay or (30 * 60)
@@ -11021,16 +11018,6 @@ sec_v13_2:AddToggle("Toggle_181", {
     Default = GetSetting("ESP_Player_Save", false),
     Callback = function(Value)
         PlayerESPEnabled = Value
-        if not Value then
-            pcall(function()
-                for _, player in ipairs(game.Players:GetChildren()) do
-                    if player.Character and player.Character:FindFirstChild("Head") then
-                        local esp = player.Character.Head:FindFirstChild("NameESP" .. NumberESP)
-                        if esp then esp:Destroy() end
-                    end
-                end
-            end)
-        end
         _G.SaveData["ESP_Player_Save"] = Value
         SaveSettings()
     end
@@ -11041,13 +11028,6 @@ sec_v13_2:AddToggle("Toggle_182", {
     Default = GetSetting("ESP_Island_Save", false),
     Callback = function(Value)
         IslandESPEnabled = Value
-        if not Value then
-            pcall(function()
-                for _, loc in ipairs(workspace._WorldOrigin.Locations:GetChildren()) do
-                    if loc:FindFirstChild("NameESP") then loc.NameESP:Destroy() end
-                end
-            end)
-        end
         _G.SaveData["ESP_Island_Save"] = Value
         SaveSettings()
     end
@@ -11058,15 +11038,6 @@ sec_v13_2:AddToggle("Toggle_183", {
     Default = GetSetting("ESP_Fruit_Save", false),
     Callback = function(Value)
         FruitESPEnabled = Value
-        if not Value then
-            pcall(function()
-                for _, obj in ipairs(workspace:GetChildren()) do
-                    if obj:FindFirstChild("Handle") and obj.Handle:FindFirstChild("NameESP" .. NumberESP) then
-                        obj.Handle["NameESP" .. NumberESP]:Destroy()
-                    end
-                end
-            end)
-        end
         _G.SaveData["ESP_Fruit_Save"] = Value
         SaveSettings()
     end
@@ -11077,15 +11048,6 @@ sec_v13_2:AddToggle("Toggle_184", {
     Default = GetSetting("ESP_Flower_Save", false),
     Callback = function(Value)
         FlowerESPEnabled = Value
-        if not Value then
-            pcall(function()
-                for _, obj in ipairs(workspace:GetChildren()) do
-                    if (obj.Name == "Flower1" or obj.Name == "Flower2") and obj:FindFirstChild("NameESP" .. NumberESP) then
-                        obj["NameESP" .. NumberESP]:Destroy()
-                    end
-                end
-            end)
-        end
         _G.SaveData["ESP_Flower_Save"] = Value
         SaveSettings()
     end
@@ -11096,15 +11058,6 @@ sec_v13_2:AddToggle("Toggle_185", {
     Default = GetSetting("ESP_Chest_Save", false),
     Callback = function(Value)
         ChestESPEnabled = Value
-        if not Value then
-            pcall(function()
-                local Chests = game:GetService("CollectionService"):GetTagged("_ChestTagged")
-                for _, chest in ipairs(Chests) do
-                    local attachment = chest:FindFirstChild("ChestESPAttachment")
-                    if attachment then attachment:Destroy() end
-                end
-            end)
-        end
         _G.SaveData["ESP_Chest_Save"] = Value
         SaveSettings()
     end
@@ -11115,16 +11068,6 @@ sec_v13_2:AddToggle("Toggle_186", {
     Default = GetSetting("ESP_Gear_Save", false),
     Callback = function(Value)
         GearESPEnabled = Value
-        if not Value then
-            pcall(function()
-                local MysticIsland = workspace.Map:FindFirstChild("MysticIsland")
-                if MysticIsland then
-                    for _, part in ipairs(MysticIsland:GetDescendants()) do
-                        if part:FindFirstChild("NameESP") then part.NameESP:Destroy() end
-                    end
-                end
-            end)
-        end
         _G.SaveData["ESP_Gear_Save"] = Value
         SaveSettings()
     end
@@ -11135,11 +11078,6 @@ sec_v13_2:AddToggle("Toggle_187", {
     Default = GetSetting("ESP_AdvDealer_Save", false),
     Callback = function(Value)
         AdvDealerESPEnabled = Value
-        if not Value then
-            pcall(function()
-                if workspace:FindFirstChild("AdvESP") then workspace.AdvESP:Destroy() end
-            end)
-        end
         _G.SaveData["ESP_AdvDealer_Save"] = Value
         SaveSettings()
     end
@@ -11150,11 +11088,6 @@ sec_v13_2:AddToggle("Toggle_188", {
     Default = GetSetting("ESP_HakiColor_Save", false),
     Callback = function(Value)
         HakiColorESPEnabled = Value
-        if not Value then
-            pcall(function()
-                if workspace:FindFirstChild("HakiESP") then workspace.HakiESP:Destroy() end
-            end)
-        end
         _G.SaveData["ESP_HakiColor_Save"] = Value
         SaveSettings()
     end
@@ -11165,104 +11098,142 @@ sec_v13_2:AddToggle("Toggle_189", {
     Default = GetSetting("ESP_Berry_Save", false),
     Callback = function(Value)
         BerryESPEnabled = Value
-        if not Value then
-            pcall(function()
-                for _, obj in ipairs(workspace:GetChildren()) do
-                    if obj:IsA("Part") and obj.Name:match("BerryESP_.*") then obj:Destroy() end
-                end
-            end)
-        end
         _G.SaveData["ESP_Berry_Save"] = Value
         SaveSettings()
     end
 })
 
 task.spawn(function()
-    while task.wait(0.25) do
+    while task.wait(0.1) do
         if PlayerESPEnabled then
             pcall(UpdatePlayerESP)
         else
-            task.wait(1)
+            pcall(function()
+                for _, player in pairs(game.Players:GetChildren()) do
+                    if player.Character and player.Character:FindFirstChild("Head") then
+                        local esp = player.Character.Head:FindFirstChild("NameESP" .. NumberESP)
+                        if esp then esp:Destroy() end
+                    end
+                end
+            end)
         end
     end
 end)
 
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.1) do
         if IslandESPEnabled then
             pcall(UpdateIslandESP)
         else
-            task.wait(1)
+            pcall(function()
+                for _, loc in pairs(workspace._WorldOrigin.Locations:GetChildren()) do
+                    if loc:FindFirstChild("NameESP") then
+                        loc.NameESP:Destroy()
+                    end
+                end
+            end)
         end
     end
 end)
 
 task.spawn(function()
-    while task.wait(0.3) do
+    while task.wait(0.1) do
         if FruitESPEnabled then
             pcall(UpdateFruitESP)
         else
-            task.wait(1)
+            pcall(function()
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if obj:FindFirstChild("Handle") then
+                        local esp = obj.Handle:FindFirstChild("NameESP" .. NumberESP)
+                        if esp then esp:Destroy() end
+                    end
+                end
+            end)
         end
     end
 end)
 
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.1) do
         if FlowerESPEnabled then
             pcall(UpdateFlowerESP)
         else
-            task.wait(1)
+            pcall(function()
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if (obj.Name == "Flower1" or obj.Name == "Flower2") and obj:FindFirstChild("NameESP" .. NumberESP) then
+                        obj["NameESP" .. NumberESP]:Destroy()
+                    end
+                end
+            end)
         end
     end
 end)
 
 task.spawn(function()
-    while task.wait(0.3) do
-        if ChestESPEnabled then
-            pcall(UpdateChestESP)
-        else
-            task.wait(1)
-        end
+    while task.wait(0.1) do
+        pcall(UpdateChestESP)
     end
 end)
 
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.1) do
         if GearESPEnabled then
             pcall(UpdateGearESP)
         else
-            task.wait(1)
+            pcall(function()
+                local MysticIsland = workspace.Map:FindFirstChild("MysticIsland")
+                if MysticIsland then
+                    for _, part in pairs(MysticIsland:GetDescendants()) do
+                        if part:FindFirstChild("NameESP") then
+                            part.NameESP:Destroy()
+                        end
+                    end
+                end
+            end)
         end
     end
 end)
 
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.1) do
         if AdvDealerESPEnabled then
             pcall(UpdateAdvDealerESP)
         else
-            task.wait(1)
+            pcall(function()
+                if workspace:FindFirstChild("AdvESP") then
+                    workspace.AdvESP:Destroy()
+                end
+            end)
         end
     end
 end)
 
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.1) do
         if HakiColorESPEnabled then
             pcall(UpdateHakiColorESP)
         else
-            task.wait(1)
+            pcall(function()
+                if workspace:FindFirstChild("HakiESP") then
+                    workspace.HakiESP:Destroy()
+                end
+            end)
         end
     end
 end)
 
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.1) do
         if BerryESPEnabled then
             pcall(UpdateBerryESP)
         else
-            task.wait(1)
+            pcall(function()
+                for _, obj in pairs(workspace:GetChildren()) do
+                    if obj:IsA("Part") and obj.Name:match("BerryESP_.*") then
+                        obj:Destroy()
+                    end
+                end
+            end)
         end
     end
 end)
