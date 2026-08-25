@@ -1,6 +1,6 @@
 local Scripts = {
     [92416421522960]  = { name = "Slime RNG",        url = "" },
-    [121864768012064] = { name = "Fish It",          url = "" },
+    [121864768012064] = { name = "Fish It",          url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/Fishit.lua" },
     [93978595733734]  = { name = "Violence District", url = "" },
     [126884695634066] = { name = "QH Community",     url = "" },
     [83369512629707]  = { name = "Quantum Sawah",    url = "" },
