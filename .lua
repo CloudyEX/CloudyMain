@@ -15,8 +15,15 @@ local Window = Fluent:CreateWindow({
     Size = UDim2.fromOffset(525, 290),
     Acrylic = false,
     Theme = "Cloudy",
-    MinimizeKey = Enum.KeyCode.LeftControl
+    MinimizeKey = Enum.KeyCode.LeftControl,
+    MinimizeIcon = "rbxassetid://109388426525855"
 })
+
+pcall(function()
+    if Window.SetMinimizeIcon then
+        Window:SetMinimizeIcon("rbxassetid://109388426525855")
+    end
+end)
 
 local InfoTab      = Window:AddTab({ Title = "Info", Icon = "solar/info-circle-bold" })
 local PlayersTab   = Window:AddTab({ Title = "Players", Icon = "solar/user-bold" })
