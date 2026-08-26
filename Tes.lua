@@ -101,34 +101,49 @@ local function NotifyInfo(title, text)
 end
 local cloneref = (cloneref or clonereference or function(i) return i end)
 local net
+local _remoteMap = {}
+local _remoteReverseMap = {}
+local function _buildRemoteCache()
+    if not net then return end
+    local newMap, newRevMap = {}, {}
+    local allRemotes = net:GetChildren()
+    for i, remote in ipairs(allRemotes) do
+        if allRemotes[i + 1] then newMap[remote.Name] = allRemotes[i + 1] end
+        if allRemotes[i - 1] then newRevMap[remote.Name] = allRemotes[i - 1] end
+    end
+    _remoteMap = newMap
+    _remoteReverseMap = newRevMap
+end
+
 pcall(function()
     net = ReplicatedStorage:WaitForChild("Packages", 10)
         :WaitForChild("_Index", 10)
         :WaitForChild("sleitnick_net@0.2.0", 10)
         :WaitForChild("net", 10)
 end)
-if net then pcall(function() print("[QH] Remotes: " .. #net:GetChildren()) end) end
+if net then
+    pcall(function()
+        _buildRemoteCache()
+        print("[QH] Remotes: " .. #net:GetChildren())
+        net.ChildAdded:Connect(function() pcall(_buildRemoteCache) end)
+        net.ChildRemoved:Connect(function() pcall(_buildRemoteCache) end)
+    end)
+end
 
 local function GetServerRemote(targetName)
     if not net then return nil end
-    local allRemotes = net:GetChildren()
-    for i, remote in ipairs(allRemotes) do
-        if remote.Name == targetName then
-            if allRemotes[i + 1] then return allRemotes[i + 1] end
-        end
-    end
-    return nil
+    local cached = _remoteMap[targetName]
+    if cached and cached.Parent then return cached end
+    _buildRemoteCache()
+    return _remoteMap[targetName]
 end
 
 local function GetServerRemoteReverse(targetName)
     if not net then return nil end
-    local allRemotes = net:GetChildren()
-    for i, remote in ipairs(allRemotes) do
-        if remote.Name == targetName then
-            if allRemotes[i - 1] then return allRemotes[i - 1] end
-        end
-    end
-    return nil
+    local cached = _remoteReverseMap[targetName]
+    if cached and cached.Parent then return cached end
+    _buildRemoteCache()
+    return _remoteReverseMap[targetName]
 end
 
 local function CallRemote(remote, ...)
@@ -994,8 +1009,11 @@ local function deepCopyArr(t)
     end
     return out
 end
+local _paragraphCache = setmetatable({}, {__mode = "k"})
 local function SafeUpdateParagraph(paragraphObj, newText)
     if not paragraphObj then return false end
+    if _paragraphCache[paragraphObj] == newText then return true end
+    _paragraphCache[paragraphObj] = newText
     local success = pcall(function()
         if paragraphObj.SetDesc and typeof(paragraphObj.SetDesc) == "function" then
             paragraphObj:SetDesc(newText)
@@ -1015,6 +1033,7 @@ local function SafeUpdateParagraph(paragraphObj, newText)
     end)
     return success
 end
+local UpdateParagraph = SafeUpdateParagraph
 
 local function IsLocalPlayerCatch(arg1)
     if arg1 == nil then return true end
@@ -1114,12 +1133,35 @@ local InstantBobberState = {
 local function patchInstantBaitOverrideToCastPosition(enabled)
     if not enabled then
         InstantBobberState.instantOverrideActive = false
+        if InstantBobberState.renderConn then
+            pcall(function() InstantBobberState.renderConn:Disconnect() end)
+            InstantBobberState.renderConn = nil
+        end
         if InstantBobberState.activeBaitsByUserId then table.clear(InstantBobberState.activeBaitsByUserId) end
         return
     end
     InstantBobberState.instantOverrideActive = true
     InstantBobberState.activeBaitsByUserId = InstantBobberState.activeBaitsByUserId or {}
     table.clear(InstantBobberState.activeBaitsByUserId)
+    if not InstantBobberState.renderConn then
+        InstantBobberState.renderConn = RunService.RenderStepped:Connect(function()
+            if not InstantBobberState.instantOverrideActive then return end
+            local now = tick()
+            local cf = InstantBobberState.cosmeticFolder
+            if not cf then return end
+            for userId, entry in pairs(InstantBobberState.activeBaitsByUserId) do
+                if now > entry.expiresAt then InstantBobberState.activeBaitsByUserId[userId] = nil
+                else
+                    local model = cf:FindFirstChild(tostring(userId))
+                    if model and model.PivotTo then
+                        model:PivotTo(entry.pivot)
+                        if model:IsA("Model") and model.PrimaryPart then model.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, -75, 0)
+                        elseif model:IsA("BasePart") then model.AssemblyLinearVelocity = Vector3.new(0, -75, 0) end
+                    end
+                end
+            end
+        end)
+    end
     if InstantBobberState.instantOverrideSetupDone then return end
     InstantBobberState.instantOverrideSetupDone = true
     local okCosmetic, cosmeticFolder = pcall(function() return workspace:WaitForChild("CosmeticFolder", 5) end)
@@ -1145,23 +1187,6 @@ local function patchInstantBaitOverrideToCastPosition(enabled)
         if not InstantBobberState.instantOverrideActive then return end
         if not player or not player.UserId then return end
         InstantBobberState.activeBaitsByUserId[player.UserId] = nil
-    end)
-    InstantBobberState.renderConn = RunService.RenderStepped:Connect(function()
-        if not InstantBobberState.instantOverrideActive then return end
-        local now = tick()
-        local cf = InstantBobberState.cosmeticFolder
-        if not cf then return end
-        for userId, entry in pairs(InstantBobberState.activeBaitsByUserId) do
-            if now > entry.expiresAt then InstantBobberState.activeBaitsByUserId[userId] = nil
-            else
-                local model = cf:FindFirstChild(tostring(userId))
-                if model and model.PivotTo then
-                    model:PivotTo(entry.pivot)
-                    if model:IsA("Model") and model.PrimaryPart then model.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, -75, 0)
-                    elseif model:IsA("BasePart") then model.AssemblyLinearVelocity = Vector3.new(0, -75, 0) end
-                end
-            end
-        end
     end)
 end
 
@@ -2430,44 +2455,47 @@ local function CreateCloudyPanel()
     end)
 
     local frames = 0
-    local fps = 0
-    local last = tick()
+    local fps = 60
+    local lastFpsTime = tick()
 
     local fpsConn = RunService.RenderStepped:Connect(function()
-        pcall(function()
-            frames = (frames or 0) + 1
-            if tick() - last >= 1 then
-                fps = frames
-                frames = 0
-                last = tick()
-            end
-        end)
+        frames = frames + 1
+        local now = tick()
+        if now - lastFpsTime >= 1 then
+            fps = frames
+            frames = 0
+            lastFpsTime = now
+        end
     end)
 
     local function getPing()
         local networkStats = Stats:FindFirstChild("Network")
-        if networkStats and networkStats:FindFirstChild("ServerStatsItem") then
-            local pingData = networkStats.ServerStatsItem:FindFirstChild("Data Ping")
-            if pingData then
-                local val = pingData:GetValue()
-                if val then return math.floor(val) end
+        if networkStats then
+            local serverStats = networkStats:FindFirstChild("ServerStatsItem")
+            if serverStats then
+                local pingData = serverStats:FindFirstChild("Data Ping")
+                if pingData then
+                    local val = pingData:GetValue()
+                    if val then return math.floor(val) end
+                end
             end
         end
         return 0
     end
 
+    local _cachedNotifFrame = nil
     local function getTotalNotifications()
         local count = 0
         pcall(function()
-            local playerGui = LocalPlayer:WaitForChild("PlayerGui", 2)
-            local textNotifications = playerGui and playerGui:FindFirstChild("Text Notifications")
-            if textNotifications then
-                local frame = textNotifications:FindFirstChild("Frame")
-                if frame then
-                    for _, child in ipairs(frame:GetChildren()) do
-                        if child.Name == "Tile" then
-                            count = count + 1
-                        end
+            if not _cachedNotifFrame or not _cachedNotifFrame.Parent then
+                local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+                local textNotifications = playerGui and playerGui:FindFirstChild("Text Notifications")
+                _cachedNotifFrame = textNotifications and textNotifications:FindFirstChild("Frame")
+            end
+            if _cachedNotifFrame then
+                for _, child in ipairs(_cachedNotifFrame:GetChildren()) do
+                    if child.Name == "Tile" then
+                        count = count + 1
                     end
                 end
             end
@@ -2475,6 +2503,7 @@ local function CreateCloudyPanel()
         return count
     end
 
+    local lastPingText, lastNotifText, lastFpsText = "", "", ""
     local updateThread = task.spawn(function()
         while gui and gui.Parent do
             pcall(function()
@@ -2482,37 +2511,25 @@ local function CreateCloudyPanel()
                 local ping = getPing()
                 local notifCount = getTotalNotifications()
 
-                local pingColor
-                if ping < 80 then
-                    pingColor = "#A0E0A0"
-                elseif ping < 150 then
-                    pingColor = "#FFD166"
-                else
-                    pingColor = "#FF8080"
-                end
-
-                local fpsColor
-                if fps >= 50 then
-                    fpsColor = "#D0E0FF"
-                elseif fps >= 30 then
-                    fpsColor = "#FFD166"
-                else
-                    fpsColor = "#FF8080"
-                end
-
+                local pingColor = (ping < 80 and "#A0E0A0") or (ping < 150 and "#FFD166") or "#FF8080"
+                local fpsColor = (fps >= 50 and "#D0E0FF") or (fps >= 30 and "#FFD166") or "#FF8080"
                 local notifColor = notifCount > 0 and "#FFD166" or "#A0C4FF"
 
-                pingLabel.Text = string.format("<font color='#8A96A8'>PING</font> <font color='%s'>%dms</font>", pingColor, ping)
-                notifLabel.Text = string.format("<font color='#8A96A8'>NOTIF</font> <font color='%s'>%d</font>", notifColor, notifCount)
-                fpsLabel.Text = string.format("<font color='#8A96A8'>FPS</font> <font color='%s'>%d</font>", fpsColor, fps)
+                local pText = string.format("<font color='#8A96A8'>PING</font> <font color='%s'>%dms</font>", pingColor, ping)
+                local nText = string.format("<font color='#8A96A8'>NOTIF</font> <font color='%s'>%d</font>", notifColor, notifCount)
+                local fText = string.format("<font color='#8A96A8'>FPS</font> <font color='%s'>%d</font>", fpsColor, fps)
+
+                if pText ~= lastPingText then lastPingText = pText; pingLabel.Text = pText end
+                if nText ~= lastNotifText then lastNotifText = nText; notifLabel.Text = nText end
+                if fText ~= lastFpsText then lastFpsText = fText; fpsLabel.Text = fText end
             end)
-            task.wait(0.5)
+            task.wait(1)
         end
     end)
 
     gui.Destroying:Connect(function()
-        pcall(function() fpsConn:Disconnect() end)
-        pcall(function() task.cancel(updateThread) end)
+        if fpsConn then pcall(function() fpsConn:Disconnect() end); fpsConn = nil end
+        if updateThread then pcall(function() task.cancel(updateThread) end); updateThread = nil end
     end)
 
     return gui
@@ -4995,6 +5012,7 @@ end
             end
         end
 
+        task.wait()
         local Section_KaitunTab_1 = KaitunTab:AddSection("Auto Kaitun (1-Click Progression)")
 
         local KaitunParagraph = Section_KaitunTab_1:AddParagraph({
@@ -5003,29 +5021,41 @@ end
         })
 
         task.spawn(function()
-            while task.wait(0.5) do
-                pcall(function()
-                    if _G.Kaitun.Active then
+            local lastContent = ""
+            while true do
+                if _G.Kaitun.Active then
+                    pcall(function()
                         UpdateKaitunUI()
-                    end
-                    if KaitunParagraph then
-                        local elapsed = _G.Kaitun.StartTime > 0 and math.floor(tick() - _G.Kaitun.StartTime) or 0
-                        local hrs = math.floor(elapsed / 3600)
-                        local mins = math.floor((elapsed % 3600) / 60)
-                        local secs = elapsed % 60
-                        local timeStr = string.format("%02d:%02d:%02d", hrs, mins, secs)
+                        if KaitunParagraph then
+                            local elapsed = _G.Kaitun.StartTime > 0 and math.floor(tick() - _G.Kaitun.StartTime) or 0
+                            local hrs = math.floor(elapsed / 3600)
+                            local mins = math.floor((elapsed % 3600) / 60)
+                            local secs = elapsed % 60
+                            local timeStr = string.format("%02d:%02d:%02d", hrs, mins, secs)
 
-                        local statusColor = _G.Kaitun.Active and "#39FF14" or "#84B4B4"
-                        local statusText = _G.Kaitun.Active and "RUNNING" or "IDLE / STOPPED"
-                        local currentCoins = Kaitun_GetCoins()
-                        local currentFish = Kaitun_GetFishCount()
+                            local currentCoins = Kaitun_GetCoins()
+                            local currentFish = Kaitun_GetFishCount()
 
-                        local content = string.format("Status: <font color='%s'>%s</font>\nStage: <font color='#00BFFF'>Stage %d/5 (%s)</font>\nObjective: <font color='#FFD700'>%s</font>\nCoins: <font color='#39FF14'>%d Coins</font> | Fish: <font color='#00FFFF'>%d</font>\nRuntime: <font color='#FFFFFF'>%s</font>",
-                            statusColor, statusText, _G.Kaitun.Stage, _G.Kaitun.Status, _G.Kaitun.SubStatus, currentCoins, currentFish, timeStr
-                        )
-                        UpdateParagraph(KaitunParagraph, content)
-                    end
-                end)
+                            local content = string.format("Status: <font color='#39FF14'>RUNNING</font>\nStage: <font color='#00BFFF'>Stage %d/5 (%s)</font>\nObjective: <font color='#FFD700'>%s</font>\nCoins: <font color='#39FF14'>%d Coins</font> | Fish: <font color='#00FFFF'>%d</font>\nRuntime: <font color='#FFFFFF'>%s</font>",
+                                _G.Kaitun.Stage, _G.Kaitun.Status, _G.Kaitun.SubStatus, currentCoins, currentFish, timeStr
+                            )
+                            if content ~= lastContent then
+                                lastContent = content
+                                SafeUpdateParagraph(KaitunParagraph, content)
+                            end
+                        end
+                    end)
+                    task.wait(1)
+                else
+                    pcall(function()
+                        if KaitunParagraph and lastContent ~= "IDLE" then
+                            lastContent = "IDLE"
+                            local content = "Status: <font color='#84B4B4'>IDLE / READY</font>\nStage: <font color='#00BFFF'>Stage 1: Starter Farming</font>\nTarget: <font color='#FFD700'>Element Rod (Endgame)</font>\nCoins: <font color='#39FF14'>0</font>\nRuntime: <font color='#B4B4B4'>00:00:00</font>"
+                            SafeUpdateParagraph(KaitunParagraph, content)
+                        end
+                    end)
+                    task.wait(2)
+                end
             end
         end)
 
@@ -5338,6 +5368,7 @@ end
 
 if MainTab then
     pcall(function()
+        task.wait()
         local Section_MainTab_2 = MainTab:AddSection("Auto Enchant")
 
         local enchantParagraph = Section_MainTab_2:AddParagraph({
@@ -7876,10 +7907,8 @@ if MainTab then
         -- Periodic live update for Ruin Door UI
         task.spawn(function()
             while true do
-                pcall(function()
-                    UpdateRuinDoorUI()
-                end)
-                task.wait(1)
+                pcall(UpdateRuinDoorUI)
+                task.wait(AUTO_UNLOCK_RUIN_STATE and 1 or 3)
             end
         end)
 
@@ -8087,6 +8116,7 @@ end
 
 if ExclusiveTab then
     pcall(function()
+        task.wait()
         local Section_ExclusiveTab_1 = ExclusiveTab:AddSection("Cloudy Fishing (Ultra Blatant)")
         Section_ExclusiveTab_1:AddToggle("Toggle_UseCastMode", {
             Title = "Use Cast Mode",
@@ -10039,6 +10069,7 @@ end
 
 if FlyTab then
     pcall(function()
+        task.wait()
         local Section_FlyTab_1 = FlyTab:AddSection("Map Locations")
         local locationNames = {}; for name in pairs(LOCATIONS) do table.insert(locationNames, name) end; table.sort(locationNames)
         local selectedLocation = locationNames[1]
@@ -10309,6 +10340,7 @@ end
 
 if ShopTab then
     pcall(function()
+        task.wait()
         local Section_ShopTab_1 = ShopTab:AddSection("Buy Weather Event")
         local weatherMap = {["Windy (10k)"]="Wind",["Foggy (20k)"]="Fog",["Snow (15k)"]="Snow",["Stormy (35k)"]="Storm",["Radiant (50k)"]="Radiant",["Shark Hunt (300k)"]="Shark Hunt",["Treasure Hunt (750k)"]="Treasure Hunt"}
         local weatherNames = {}; for name in pairs(weatherMap) do table.insert(weatherNames, name) end; table.sort(weatherNames)
@@ -10757,6 +10789,7 @@ end
 
 if MiscTab then
     pcall(function()
+        task.wait()
         local Section_MiscTab_1 = MiscTab:AddSection("Visual & Performance")
 
         Section_MiscTab_1:AddToggle("Toggle_DisableCloudyPanel", {
@@ -11241,6 +11274,7 @@ end
         local originalPlay = nil
         local originalStop = nil
         local hooked = false
+        local CutsceneController = nil
         Section_MiscTab_1:AddToggle("Toggle_SkipCutscene", {
             Title = "Skip Cutscene",
             Default = false,
@@ -11262,26 +11296,24 @@ end
                         end)
                     end
                 end
-                if hooked then return end
-                hooked = true
-                task.spawn(function()
-                    local ok, CutsceneController = pcall(function()
-                        return require(ReplicatedStorage.Controllers.CutsceneController)
+                if not CutsceneController then
+                    pcall(function()
+                        CutsceneController = require(ReplicatedStorage.Controllers.CutsceneController)
                     end)
-                    if not ok or not CutsceneController then warn("CutsceneController not found.") return end
-                    originalPlay = originalPlay or CutsceneController.Play
-                    originalStop = originalStop or CutsceneController.Stop
-                    while true do
-                        if skipCutscene then
-                            CutsceneController.Play = function(...) warn("Cutscene skipped (Play).") end
-                            CutsceneController.Stop = function(...) warn("Cutscene skipped (Stop).") end
-                        else
-                            CutsceneController.Play = originalPlay
-                            CutsceneController.Stop = originalStop
-                        end
-                        task.wait(0.25)
+                    if CutsceneController then
+                        originalPlay = CutsceneController.Play
+                        originalStop = CutsceneController.Stop
                     end
-                end)
+                end
+                if CutsceneController then
+                    if skipCutscene then
+                        CutsceneController.Play = function(...) warn("Cutscene skipped (Play).") end
+                        CutsceneController.Stop = function(...) warn("Cutscene skipped (Stop).") end
+                    else
+                        if originalPlay then CutsceneController.Play = originalPlay end
+                        if originalStop then CutsceneController.Stop = originalStop end
+                    end
+                end
             end
         })
 
@@ -11577,14 +11609,17 @@ if QuestTab then
             local lastNotifCount = 0
             task.spawn(function()
                 while true do
-                    task.wait(1)
-                    if not GhostfinQuest.Active then continue end
-                    local currentNotif = _G.SavedData and _G.SavedData.FishNotif
-                    if currentNotif and #currentNotif > 0 then
-                        if #currentNotif ~= lastNotifCount then
-                            lastNotifCount = #currentNotif
-                            OnFish(currentNotif)
+                    if not GhostfinQuest.Active then
+                        task.wait(2)
+                    else
+                        local currentNotif = _G.SavedData and _G.SavedData.FishNotif
+                        if currentNotif and #currentNotif > 0 then
+                            if #currentNotif ~= lastNotifCount then
+                                lastNotifCount = #currentNotif
+                                OnFish(currentNotif)
+                            end
                         end
+                        task.wait(1)
                     end
                 end
             end)
@@ -11740,14 +11775,17 @@ if QuestTab then
             local lastNotifCount = 0
             task.spawn(function()
                 while true do
-                    task.wait(1)
-                    if not ElementQuest.Active then continue end
-                    local currentNotif = _G.SavedData and _G.SavedData.FishNotif
-                    if currentNotif and #currentNotif > 0 then
-                        if #currentNotif ~= lastNotifCount then
-                            lastNotifCount = #currentNotif
-                            OnFish(currentNotif)
+                    if not ElementQuest.Active then
+                        task.wait(2)
+                    else
+                        local currentNotif = _G.SavedData and _G.SavedData.FishNotif
+                        if currentNotif and #currentNotif > 0 then
+                            if #currentNotif ~= lastNotifCount then
+                                lastNotifCount = #currentNotif
+                                OnFish(currentNotif)
+                            end
                         end
+                        task.wait(1)
                     end
                 end
             end)
@@ -11860,6 +11898,7 @@ if QuestTab then
             UpdateElementStatus()
         end
 
+        task.wait()
         local Section_QuestTab_1 = QuestTab:AddSection("Ghostfin Quest")
         Section_QuestTab_1:AddParagraph({
             Title = "Deep Sea Quest Info",
@@ -12361,13 +12400,21 @@ if QuestTab then
 
         task.spawn(function()
             while true do
-                task.wait(0.2)
-                pcall(UpdateESPEngine)
+                if _G.ESP_Master then
+                    task.wait(0.2)
+                    pcall(UpdateESPEngine)
+                else
+                    if next(ESP_Cache) ~= nil then
+                        pcall(ClearAllESP)
+                    end
+                    task.wait(1)
+                end
             end
         end)
 
         if VisualTab then
             pcall(function()
+                task.wait()
                 local Section_VisualTab_ESP = VisualTab:AddSection("ESP")
 
                 Section_VisualTab_ESP:AddToggle("Toggle_EnableESP", {
