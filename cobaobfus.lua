@@ -2377,14 +2377,15 @@ local function CreateCloudyPanel()
 
     local statsLayout = Instance.new("UIListLayout")
     statsLayout.FillDirection = Enum.FillDirection.Horizontal
-    statsLayout.HorizontalAlignment = Enum.HorizontalAlignment.SpaceBetween
+    statsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     statsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    statsLayout.Padding = UDim.new(0, 5)
     statsLayout.Parent = statsBar
 
     local function makeStatPill(tag, defaultVal, colorHex)
         local pill = Instance.new("Frame")
         pill.Name = tag .. "Pill"
-        pill.Size = UDim2.new(0.315, 0, 1, 0)
+        pill.Size = UDim2.new(0, 64, 1, 0)
         pill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         pill.BackgroundTransparency = 0.95
         pill.BorderSizePixel = 0
