@@ -1,5 +1,14 @@
-local raw = game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua")
-  
+local Fluent
+do
+    local raw = game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua")
+    if not raw:find("v%.TitleBar%s*=%s*e%(p%.TitleBar%)") then
+        raw = raw:gsub("v%.Root%s*=%s*s%s*%(%s*\"Frame\"%s*,", "v.TitleBar = e(p.TitleBar) { Title = t.Title, SubTitle = t.SubTitle, Icon = t.TitleIcon, TopbarHeight = topbarHeight, Parent = nil }\n            v.Root = s(\"Frame\",")
+        raw = raw:gsub("{%s*v%.AcrylicPaint%.Frame%s*,%s*v%.TabDisplay", "{v.AcrylicPaint.Frame, v.TitleBar.Frame, v.TabDisplay")
+    end
+    raw = raw:gsub("v%.TitleBar%.Frame%.InputBegan", "(v.TitleBar and v.TitleBar.Frame or v.TabDisplay or v.Root).InputBegan")
+    Fluent = loadstring(raw)()
+end
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
