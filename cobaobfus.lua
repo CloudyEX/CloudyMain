@@ -2274,6 +2274,15 @@ local function runMultiEventTP()
 end
 
 local function CreateCloudyPanel()
+    pcall(function()
+        if CoreGui:FindFirstChild("CloudyPanelV4") then
+            CoreGui.CloudyPanelV4:Destroy()
+        end
+        if LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.PlayerGui:FindFirstChild("CloudyPanelV4") then
+            LocalPlayer.PlayerGui.CloudyPanelV4:Destroy()
+        end
+    end)
+
     local gui = Instance.new("ScreenGui")
     gui.Name = "CloudyPanelV4"
     gui.IgnoreGuiInset = true
