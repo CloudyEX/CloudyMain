@@ -7058,7 +7058,7 @@ if MainTab then
         })
 
         -- =================================================================
-        -- ANCIENT LOCHNESS EVENT (AUTOMATION TAB) - DEEP TRACKER SCANNER
+        -- ANCIENT LOCHNESS EVENT (AUTOMATION TAB) - ACCURATE TRACKER
         -- =================================================================
         local Section_MainTab_Lochness = MainTab:AddSection("Ancient Lochness Event")
 
@@ -7067,208 +7067,119 @@ if MainTab then
         local LOCHNESS_POS = Vector3.new(6063.347, -585.925, 4713.696)
         local LOCHNESS_LOOK = Vector3.new(-0.376, -0.000, -0.927)
         local LochnessSyncThread = nil
-        local cachedLochnessGuiElements = nil
-        local lastTrackerSource = "Searching..."
 
         local LochnessMonitorParagraph = Section_MainTab_Lochness:AddParagraph({
             Title = "Ancient Lochness Live Monitor",
-            Content = "Status: Memulai deep scan tracker event...\nStart In: N/A\nTimer: N/A | Caught: N/A | Chance: N/A\nAuto Join: OFF"
+            Content = "Status: Mencoba sinkronisasi event...\nStart In: N/A\nTimer: N/A | Caught: N/A | Chance: N/A\nAuto Join: OFF"
         })
 
-        -- Helper to parse time strings into seconds and Indonesian human-readable format
-        local function ParseTimeRemaining(rawStr)
-            if not rawStr or type(rawStr) ~= "string" or rawStr == "" or rawStr == "N/A" then
-                return 0, "N/A", 0, 0, 0
-            end
-
-            local s = rawStr:upper():gsub(",", ""):gsub("%s+", " "):match("^%s*(.-)%s*$")
-
-            local hours = tonumber(s:match("(%d+)%s*H")) or 0
-            local mins = tonumber(s:match("(%d+)%s*M")) or 0
-            local secs = tonumber(s:match("(%d+)%s*S")) or 0
-
-            -- Check format like 01:23:45 or 23:45
-            if hours == 0 and mins == 0 and secs == 0 then
-                local h, m, sec = s:match("(%d+):(%d+):(%d+)")
-                if h and m and sec then
-                    hours = tonumber(h) or 0
-                    mins = tonumber(m) or 0
-                    secs = tonumber(sec) or 0
-                else
-                    local m2, sec2 = s:match("(%d+):(%d+)")
-                    if m2 and sec2 then
-                        mins = tonumber(m2) or 0
-                        secs = tonumber(sec2) or 0
-                    end
+        -- Exact locator for the official Fish It Event Tracker board
+        local function GetEventGUI()
+            local success, gui = pcall(function()
+                local menuRings = workspace:FindFirstChild("!!! MENU RINGS")
+                if not menuRings then
+                    menuRings = workspace:WaitForChild("!!! MENU RINGS", 3)
                 end
-            end
+                if not menuRings then return nil end
 
-            local totalSeconds = (hours * 3600) + (mins * 60) + secs
-            local parts = {}
-            if hours > 0 then table.insert(parts, string.format("%d Jam", hours)) end
-            if mins > 0 or hours > 0 then table.insert(parts, string.format("%d Menit", mins)) end
-            table.insert(parts, string.format("%d Detik", secs))
-            local readable = table.concat(parts, " ")
+                local eventTracker = menuRings:FindFirstChild("Event Tracker")
+                if not eventTracker then return nil end
 
-            return totalSeconds, readable, hours, mins, secs
-        end
+                local container = eventTracker:FindFirstChild("Main") or eventTracker:FindFirstChild("Board")
+                if not container then return nil end
 
-        local function ExtractTextFromInstance(inst)
-            if not inst then return "" end
-            if inst:IsA("TextLabel") or inst:IsA("TextBox") or inst:IsA("TextButton") then
-                return (inst.ContentText ~= "" and inst.ContentText) or inst.Text or ""
-            end
-            local lbl = inst:FindFirstChild("Label") or inst:FindFirstChildOfClass("TextLabel")
-            if lbl then
-                return (lbl.ContentText ~= "" and lbl.ContentText) or lbl.Text or ""
-            end
-            return ""
-        end
+                local guiObj = container:FindFirstChild("Gui")
+                if not guiObj then return nil end
 
-        local function InspectGuiHierarchy(root)
-            if not root then return nil end
+                local content = guiObj:FindFirstChild("Content")
+                if not content then return nil end
 
-            local countdownLbl = nil
-            local timerLbl = nil
-            local quantityLbl = nil
-            local oddsLbl = nil
+                local contentItems = content:FindFirstChild("Items") or content
 
-            -- Pattern 1: Content.Items (Standard Fish It Menu Rings structure)
-            local content = root:FindFirstChild("Content", true) or root:FindFirstChild("Items", true) or root
-            if content then
-                local cd = content:FindFirstChild("Countdown", true)
-                if cd then
-                    countdownLbl = (cd:IsA("TextLabel") and cd) or cd:FindFirstChild("Label") or cd:FindFirstChildOfClass("TextLabel") or cd
-                end
+                local countdownObj = contentItems:FindFirstChild("Countdown")
+                local countdown = countdownObj and (countdownObj:FindFirstChild("Label") or countdownObj)
 
-                local stats = content:FindFirstChild("Stats", true) or content
-                if stats then
-                    local tm = stats:FindFirstChild("Timer", true)
-                    if tm then timerLbl = (tm:IsA("TextLabel") and tm) or tm:FindFirstChild("Label") or tm:FindFirstChildOfClass("TextLabel") or tm end
+                local statsContainer = contentItems:FindFirstChild("Stats")
+                local timer = statsContainer and (statsContainer:FindFirstChild("Timer") and (statsContainer.Timer:FindFirstChild("Label") or statsContainer.Timer))
+                local quantity = statsContainer and (statsContainer:FindFirstChild("Quantity") and (statsContainer.Quantity:FindFirstChild("Label") or statsContainer.Quantity))
+                local odds = statsContainer and (statsContainer:FindFirstChild("Odds") and (statsContainer.Odds:FindFirstChild("Label") or statsContainer.Odds))
 
-                    local qt = stats:FindFirstChild("Quantity", true) or stats:FindFirstChild("Caught", true)
-                    if qt then quantityLbl = (qt:IsA("TextLabel") and qt) or qt:FindFirstChild("Label") or qt:FindFirstChildOfClass("TextLabel") or qt end
+                if not countdown or not statsContainer then return nil end
 
-                    local od = stats:FindFirstChild("Odds", true) or stats:FindFirstChild("Chance", true)
-                    if od then oddsLbl = (od:IsA("TextLabel") and od) or od:FindFirstChild("Label") or od:FindFirstChildOfClass("TextLabel") or od end
-                end
-            end
-
-            -- Pattern 2: Deep search all TextLabels in this container
-            if not countdownLbl or not timerLbl then
-                for _, desc in ipairs(root:GetDescendants()) do
-                    if desc:IsA("TextLabel") then
-                        local nameLower = desc.Name:lower()
-                        local parentLower = desc.Parent and desc.Parent.Name:lower() or ""
-                        local text = (desc.ContentText ~= "" and desc.ContentText) or desc.Text or ""
-
-                        if (nameLower:find("countdown") or parentLower:find("countdown")) and not countdownLbl then
-                            countdownLbl = desc
-                        elseif (nameLower:find("timer") or parentLower:find("timer")) and not timerLbl then
-                            timerLbl = desc
-                        elseif (nameLower:find("quantity") or parentLower:find("quantity") or nameLower:find("caught")) and not quantityLbl then
-                            quantityLbl = desc
-                        elseif (nameLower:find("odds") or parentLower:find("odds") or nameLower:find("chance")) and not oddsLbl then
-                            oddsLbl = desc
-                        end
-                    end
-                end
-            end
-
-            if countdownLbl or timerLbl then
                 return {
-                    Countdown = countdownLbl,
-                    Timer = timerLbl,
-                    Quantity = quantityLbl,
-                    Odds = oddsLbl,
-                    Root = root
+                    Countdown = countdown,
+                    Timer = timer,
+                    Quantity = quantity,
+                    Odds = odds,
                 }
+            end)
+
+            if success and gui then
+                return gui
             end
             return nil
         end
 
-        local function FindLochnessEventGUI()
-            -- 1. If cached elements are still valid and in hierarchy, use them
-            if cachedLochnessGuiElements and cachedLochnessGuiElements.Root and cachedLochnessGuiElements.Root.Parent then
-                return cachedLochnessGuiElements
+        local function ReadText(obj)
+            if not obj then return "N/A" end
+            if typeof(obj) == "Instance" then
+                if obj:IsA("TextLabel") or obj:IsA("TextBox") or obj:IsA("TextButton") then
+                    local t = (obj.ContentText ~= "" and obj.ContentText) or obj.Text
+                    if t and t ~= "" then return t end
+                end
+                local lbl = obj:FindFirstChild("Label") or obj:FindFirstChildOfClass("TextLabel")
+                if lbl then
+                    local t = (lbl.ContentText ~= "" and lbl.ContentText) or lbl.Text
+                    if t and t ~= "" then return t end
+                end
+            end
+            return "N/A"
+        end
+
+        local function FormatEventTime(rawStr)
+            if not rawStr or rawStr == "N/A" or rawStr == "" then
+                return "N/A", 0
             end
 
-            -- 2. Priority 1: Search in Workspace MENU RINGS variants
-            local ringFolderNames = {"!!! MENU RINGS", "MENU RINGS", "Menu Rings", "MenuRings", "Interactables", "Trackers", "Events"}
-            for _, fName in ipairs(ringFolderNames) do
-                local folder = workspace:FindFirstChild(fName)
-                if folder then
-                    for _, child in ipairs(folder:GetChildren()) do
-                        local cName = child.Name:lower()
-                        if cName:find("event") or cName:find("lochness") or cName:find("tracker") then
-                            local found = InspectGuiHierarchy(child)
-                            if found then
-                                cachedLochnessGuiElements = found
-                                lastTrackerSource = fName .. "/" .. child.Name
-                                return found
-                            end
-                        end
+            local clean = rawStr:upper():gsub(",", ""):gsub("%s+", " "):match("^%s*(.-)%s*$")
+
+            local hours = tonumber(clean:match("(%d+)%s*H")) or 0
+            local mins = tonumber(clean:match("(%d+)%s*M")) or 0
+            local secs = tonumber(clean:match("(%d+)%s*S")) or 0
+
+            if hours == 0 and mins == 0 and secs == 0 then
+                local h, m, s = clean:match("(%d+):(%d+):(%d+)")
+                if h and m and s then
+                    hours, mins, secs = tonumber(h) or 0, tonumber(m) or 0, tonumber(s) or 0
+                else
+                    local m2, s2 = clean:match("(%d+):(%d+)")
+                    if m2 and s2 then
+                        mins, secs = tonumber(m2) or 0, tonumber(s2) or 0
                     end
                 end
             end
 
-            -- 3. Priority 2: Direct workspace search for any Model / Folder named Event Tracker or Lochness
-            for _, child in ipairs(workspace:GetChildren()) do
-                local cName = child.Name:lower()
-                if (cName:find("event") or cName:find("lochness")) and (cName:find("tracker") or child:FindFirstChildWhichIsA("SurfaceGui", true)) then
-                    local found = InspectGuiHierarchy(child)
-                    if found then
-                        cachedLochnessGuiElements = found
-                        lastTrackerSource = "Workspace/" .. child.Name
-                        return found
-                    end
-                end
+            local totalSecs = (hours * 3600) + (mins * 60) + secs
+            local formatted = ""
+            if hours > 0 then
+                formatted = string.format("%d Jam %d Menit %d Detik (%s)", hours, mins, secs, rawStr)
+            elseif mins > 0 then
+                formatted = string.format("%d Menit %d Detik (%s)", mins, secs, rawStr)
+            elseif secs > 0 then
+                formatted = string.format("%d Detik (%s)", secs, rawStr)
+            else
+                formatted = rawStr
             end
 
-            -- 4. Priority 3: Deep search in all SurfaceGuis and BillboardGuis in Workspace
-            for _, gui in ipairs(workspace:GetDescendants()) do
-                if gui:IsA("SurfaceGui") or gui:IsA("BillboardGui") then
-                    local p = gui.Parent
-                    local pName = p and p.Name:lower() or ""
-                    local gName = gui.Name:lower()
-                    if pName:find("event") or pName:find("tracker") or pName:find("lochness") or gName:find("event") or gName:find("tracker") or gName:find("lochness") then
-                        local found = InspectGuiHierarchy(gui)
-                        if found then
-                            cachedLochnessGuiElements = found
-                            lastTrackerSource = pName .. "/" .. gui.Name
-                            return found
-                        end
-                    end
-                end
-            end
-
-            -- 5. Priority 4: Search PlayerGui
-            local pGui = LocalPlayer and LocalPlayer:FindFirstChildOfClass("PlayerGui")
-            if pGui then
-                for _, gui in ipairs(pGui:GetChildren()) do
-                    local gName = gui.Name:lower()
-                    if gName:find("event") or gName:find("tracker") or gName:find("lochness") then
-                        local found = InspectGuiHierarchy(gui)
-                        if found then
-                            cachedLochnessGuiElements = found
-                            lastTrackerSource = "PlayerGui/" .. gui.Name
-                            return found
-                        end
-                    end
-                end
-            end
-
-            return nil
+            return formatted, totalSecs, hours, mins, secs
         end
 
         local function UpdateLochnessStatsUI()
-            local gui = FindLochnessEventGUI()
-
+            local gui = GetEventGUI()
             if not gui then
                 local content = string.format(
-                    "Status: <font color='#FFA500'>🔍 Sedang Mencari Tracker di Workspace...</font>\n" ..
-                    "• Keterangan: Tracker 'Event Tracker' belum termuat atau belum spawn.\n" ..
-                    "• Auto-Detect: Script otomatis memindai seluruh Workspace & Menu Rings.\n" ..
+                    "Status: <font color='#FFA500'>Event Tracker Belum Terdeteksi ⏳</font>\n" ..
+                    "• Keterangan: Pastikan berada di server / area spawn (!!! MENU RINGS).\n" ..
                     "• Auto Join: %s",
                     autoJoinLochnessActive and "<font color='#39FF14'>AKTIF (Standby)</font>" or "<font color='#B4B4B4'>NONAKTIF</font>"
                 )
@@ -7276,66 +7187,43 @@ if MainTab then
                 return false
             end
 
-            local rawCountdown = ExtractTextFromInstance(gui.Countdown)
-            local rawTimer = ExtractTextFromInstance(gui.Timer)
-            local rawQuantity = ExtractTextFromInstance(gui.Quantity)
-            local rawOdds = ExtractTextFromInstance(gui.Odds)
+            local countdownText = ReadText(gui.Countdown)
+            local timerText = ReadText(gui.Timer)
+            local quantityText = ReadText(gui.Quantity)
+            local oddsText = ReadText(gui.Odds)
 
-            if rawCountdown == "" then rawCountdown = "N/A" end
-            if rawTimer == "" then rawTimer = "N/A" end
-            if rawQuantity == "" then rawQuantity = "N/A" end
-            if rawOdds == "" then rawOdds = "N/A" end
+            local countdownFormatted, cdSecs = FormatEventTime(countdownText)
+            local timerFormatted, timerSecs = FormatEventTime(timerText)
 
-            local cdSeconds, cdReadable, cdHours, cdMins, cdSecs = ParseTimeRemaining(rawCountdown)
-            local timerSeconds, timerReadable = ParseTimeRemaining(rawTimer)
+            local isEventActive = timerText:find("M") and timerText:find("S") and not timerText:match("^0+M%s*0+S")
 
-            local isEventActive = (rawTimer:find("M") and rawTimer:find("S") and not rawTimer:match("^0+M%s*0+S"))
-                or (timerSeconds > 0)
-                or (rawCountdown:upper():find("ACTIVE") ~= nil)
-
-            local statusStr = ""
-            local countdownDisplay = ""
-            local durationDisplay = ""
+            local statusStr
+            local countdownDisplay
+            local timerDisplay
 
             if isEventActive then
-                statusStr = "<font color='#39FF14'><b>EVENT SEDANG AKTIF 🔥</b></font>"
-                countdownDisplay = "<font color='#39FF14'>SEDANG BERLANGSUNG</font>"
-                if timerSeconds > 0 then
-                    durationDisplay = string.format("<font color='#00FFFF'><b>%s</b></font> <font color='#84B4B4'>(%s)</font>", timerReadable, rawTimer)
-                else
-                    durationDisplay = string.format("<font color='#00FFFF'>%s</font>", rawTimer)
-                end
+                statusStr = "<font color='#39FF14'><b>EVENT SEDANG BERLANGSUNG 🔥</b></font>"
+                countdownDisplay = "<font color='#39FF14'><b>EVENT AKTIF</b></font>"
+                timerDisplay = string.format("<font color='#00FFFF'><b>%s</b></font>", timerFormatted)
             else
                 statusStr = "<font color='#00BFFF'><b>MENUNGGU EVENT (COUNTDOWN ⏳)</b></font>"
-                if cdSeconds > 0 then
-                    if cdHours > 0 then
-                        countdownDisplay = string.format("<font color='#FFD700'><b>%d Jam %d Menit %d Detik</b></font> <font color='#84B4B4'>(%s)</font>", cdHours, cdMins, cdSecs, rawCountdown)
-                    elseif cdMins > 0 then
-                        countdownDisplay = string.format("<font color='#FFD700'><b>%d Menit %d Detik</b></font> <font color='#84B4B4'>(%s)</font>", cdMins, cdSecs, rawCountdown)
-                    else
-                        countdownDisplay = string.format("<font color='#FFD700'><b>%d Detik</b></font> <font color='#84B4B4'>(%s)</font>", cdSecs, rawCountdown)
-                    end
-                else
-                    countdownDisplay = string.format("<font color='#FFD700'>%s</font>", rawCountdown)
-                end
-                durationDisplay = string.format("<font color='#B4B4B4'>Menunggu Event Mulai (%s)</font>", rawTimer)
+                countdownDisplay = string.format("<font color='#FFD700'><b>%s</b></font>", countdownFormatted)
+                timerDisplay = string.format("<font color='#84B4B4'>Menunggu Event (%s)</font>", timerText)
             end
 
             local content = string.format(
                 "Status Event: %s\n" ..
                 "• <b>Mulai Dalam (Countdown):</b> %s\n" ..
-                "• <b>Sisa Durasi Event:</b> %s\n" ..
-                "• <b>Ikan Tertangkap (Caught):</b> <font color='#39FF14'>%s</font>\n" ..
-                "• <b>Peluang (Odds / Chance):</b> <font color='#FFA500'>%s</font>\n" ..
-                "• <b>Sumber Tracker:</b> <font color='#84B4B4'>%s</font>\n" ..
+                "• <b>Sisa Waktu Event:</b> %s\n" ..
+                "• <b>Total Ikan Tertangkap:</b> <font color='#39FF14'>%s</font>\n" ..
+                "• <b>Peluang (Odds):</b> <font color='#FFA500'>%s</font>\n" ..
                 "• <b>Auto Join:</b> %s",
                 statusStr,
                 countdownDisplay,
-                durationDisplay,
-                rawQuantity,
-                rawOdds,
-                lastTrackerSource,
-                autoJoinLochnessActive and "<font color='#39FF14'>AKTIF (Auto TP saat mulai & Balik 15s)</font>" or "<font color='#B4B4B4'>NONAKTIF</font>"
+                timerDisplay,
+                quantityText,
+                oddsText,
+                autoJoinLochnessActive and "<font color='#39FF14'>AKTIF (Auto TP & Balik 15s)</font>" or "<font color='#B4B4B4'>NONAKTIF</font>"
             )
 
             SafeUpdateParagraph(LochnessMonitorParagraph, content)
@@ -7411,20 +7299,6 @@ if MainTab then
                 local targetCF = CFrame.new(LOCHNESS_POS, LOCHNESS_POS + LOCHNESS_LOOK) * CFrame.new(0, 0.5, 0)
                 TeleportTo(targetCF)
                 NotifySuccess("Lochness Event", "Teleport ke spot Ancient Lochness.")
-            end
-        })
-
-        Section_MainTab_Lochness:AddButton({
-            Title = "Scan & Refresh Tracker (Deep Scan)",
-            Description = "Pindai ulang seluruh Workspace & Menu Rings untuk mencari Event Tracker",
-            Callback = function()
-                cachedLochnessGuiElements = nil
-                local ok = UpdateLochnessStatsUI()
-                if cachedLochnessGuiElements then
-                    NotifySuccess("Lochness Tracker", "Tracker ditemukan di: " .. lastTrackerSource)
-                else
-                    NotifyWarning("Lochness Tracker", "Tracker belum spawn di server ini.")
-                end
             end
         })
 
