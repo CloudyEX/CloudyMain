@@ -10091,6 +10091,72 @@ if ShopTab then
         local MERCHANT_LOOK = Vector3.new(-0.920, 0.000, -0.392)
         local MERCHANT_CFRAME = CFrame.lookAt(MERCHANT_POS, MERCHANT_POS + MERCHANT_LOOK)
 
+        local cachedMerchantRemote = nil
+        local function FindMerchantRemote()
+            if cachedMerchantRemote then return cachedMerchantRemote end
+            local names = {
+                "RF/PurchaseMarketItem",
+                "PurchaseMarketItem",
+                "RE/PurchaseMarketItem",
+                "RF/BuyMarketItem",
+                "RE/BuyMarketItem"
+            }
+            for _, name in ipairs(names) do
+                local r = GetServerRemote(name) or (net and net:FindFirstChild(name))
+                if r then
+                    cachedMerchantRemote = r
+                    return r
+                end
+            end
+            if net then
+                for _, child in ipairs(net:GetChildren()) do
+                    if child.Name:find("PurchaseMarketItem") or child.Name:find("MarketItem") then
+                        cachedMerchantRemote = child
+                        return child
+                    end
+                end
+            end
+            return nil
+        end
+
+        local cachedMerchantReplion = nil
+        local cachedMarketItemData = nil
+        local cachedItemUtility = nil
+
+        local function getMerchantReplion()
+            if cachedMerchantReplion then return cachedMerchantReplion end
+            pcall(function()
+                local client = (Replion and Replion.Client)
+                if not client then
+                    local repMod = FindReplionModule()
+                    if repMod then
+                        client = require(repMod).Client
+                    end
+                end
+                if client then
+                    cachedMerchantReplion = client:GetReplion("Merchant")
+                end
+            end)
+            return cachedMerchantReplion
+        end
+
+        pcall(function()
+            local mid = ReplicatedStorage:FindFirstChild("Shared") and ReplicatedStorage.Shared:FindFirstChild("MarketItemData")
+            if mid then cachedMarketItemData = require(mid) end
+            local iu = ReplicatedStorage:FindFirstChild("Shared") and ReplicatedStorage.Shared:FindFirstChild("ItemUtility")
+            if iu then cachedItemUtility = require(iu) end
+        end)
+
+        local MerchantStaticItems = {
+            {Name = "Fluorescent Rod", ID = 1, Identifier = "Fluorescent Rod", Price = 685000, Currency = "Coins"},
+            {Name = "Hazmat Rod", ID = 2, Identifier = "Hazmat Rod", Price = 1380000, Currency = "Coins"},
+            {Name = "Singularity Bait", ID = 3, Identifier = "Singularity Bait", Price = 8200000, Currency = "Coins"},
+            {Name = "Royal Bait", ID = 4, Identifier = "Royal Bait", Price = 425000, Currency = "Coins"},
+            {Name = "Luck Totem", ID = 5, Identifier = "Luck Totem", Price = 650000, Currency = "Coins"},
+            {Name = "Shiny Totem", ID = 7, Identifier = "Shiny Totem", Price = 400000, Currency = "Coins"},
+            {Name = "Mutation Totem", ID = 8, Identifier = "Mutation Totem", Price = 800000, Currency = "Coins"}
+        }
+
         local function getMerchantRefreshTimeString()
             local serverTime = workspace:GetServerTimeNow()
             local secondsInDay = 86400
@@ -10104,36 +10170,27 @@ if ShopTab then
 
         local function getMerchantStockDetails()
             local itemDetails = {}
-            local merchantReplion = nil
-            pcall(function()
-                local RepModule = ReplicatedStorage:FindFirstChild("Packages") and ReplicatedStorage.Packages:FindFirstChild("Replion")
-                if RepModule then
-                    local RClient = require(RepModule).Client
-                    merchantReplion = RClient:GetReplion("Merchant") or RClient:WaitReplion("Merchant", 2)
-                end
-            end)
+            local replion = getMerchantReplion()
+            local merchantData = replion and replion.Data
+            local itemsList = merchantData and merchantData.Items
 
-            local merchantData = merchantReplion and merchantReplion.Data
-            local marketItemDataModule = ReplicatedStorage:FindFirstChild("Shared") and ReplicatedStorage.Shared:FindFirstChild("MarketItemData")
-            local marketItemData = marketItemDataModule and require(marketItemDataModule)
-            local itemUtilModule = ReplicatedStorage:FindFirstChild("Shared") and ReplicatedStorage.Shared:FindFirstChild("ItemUtility")
-            local itemUtility = itemUtilModule and require(itemUtilModule)
-
-            if merchantData and merchantData.Items and type(merchantData.Items) == "table" and marketItemData then
-                for _, itemID in ipairs(merchantData.Items) do
-                    local marketData = nil
-                    for _, data in ipairs(marketItemData) do
-                        if data.Id == itemID then
-                            marketData = data
-                            break
+            if itemsList and type(itemsList) == "table" and #itemsList > 0 then
+                for _, itemID in ipairs(itemsList) do
+                    local mData = nil
+                    if cachedMarketItemData then
+                        for _, d in ipairs(cachedMarketItemData) do
+                            if d.Id == itemID then
+                                mData = d
+                                break
+                            end
                         end
                     end
 
-                    if marketData and not marketData.SkinCrate and marketData.Price then
-                        local name = marketData.Identifier or "Item " .. tostring(itemID)
-                        if itemUtility and itemUtility.GetItemDataFromItemType then
+                    if mData and not mData.SkinCrate and mData.Price then
+                        local name = mData.Identifier or ("Item " .. tostring(itemID))
+                        if cachedItemUtility and cachedItemUtility.GetItemDataFromItemType then
                             pcall(function()
-                                local detail = itemUtility:GetItemDataFromItemType(marketData.Type, marketData.Identifier)
+                                local detail = cachedItemUtility:GetItemDataFromItemType(mData.Type, mData.Identifier)
                                 if detail and detail.Data and detail.Data.Name then
                                     name = detail.Data.Name
                                 end
@@ -10143,20 +10200,31 @@ if ShopTab then
                         table.insert(itemDetails, {
                             Name = name,
                             ID = itemID,
-                            Price = marketData.Price,
-                            Currency = marketData.Currency or "Coins"
+                            Price = mData.Price,
+                            Currency = mData.Currency or "Coins"
                         })
+                    else
+                        for _, sItem in ipairs(MerchantStaticItems) do
+                            if sItem.ID == itemID then
+                                table.insert(itemDetails, sItem)
+                                break
+                            end
+                        end
                     end
                 end
             end
 
-            return itemDetails, merchantReplion
+            return itemDetails, replion
         end
 
         local function buyMerchantItem(itemID, itemName)
-            local remote = GetServerRemote("RF/PurchaseMarketItem") or GetServerRemote("PurchaseMarketItem") or GetServerRemote("RE/PurchaseMarketItem")
+            if not itemID then
+                NotifyWarning("Merchant", "Item ID tidak valid.")
+                return false
+            end
+            local remote = FindMerchantRemote()
             if not remote then
-                NotifyWarning("Merchant", "Remote pembelian tidak ditemukan.")
+                NotifyError("Merchant", "Remote pembelian tidak ditemukan.")
                 return false
             end
             local success, res = pcall(function()
@@ -10168,7 +10236,7 @@ if ShopTab then
                 end
             end)
             if success then
-                NotifySuccess("Merchant", "Berhasil membeli: " .. (itemName or tostring(itemID)))
+                NotifySuccess("Merchant", "Mencoba membeli: " .. tostring(itemName or itemID))
                 return true
             else
                 NotifyError("Merchant", "Gagal membeli: " .. tostring(res or "Error"))
@@ -10176,9 +10244,10 @@ if ShopTab then
             end
         end
 
-        local function formatMerchantParagraphText(itemDetails)
+        local function formatMerchantParagraphText(itemDetails, timeStr)
             local lines = {}
-            table.insert(lines, "Reset Stok: " .. getMerchantRefreshTimeString())
+            timeStr = timeStr or getMerchantRefreshTimeString()
+            table.insert(lines, "Reset Stok: " .. timeStr)
             table.insert(lines, string.format("Jumlah Stok: %d Item Tersedia", #itemDetails))
             if #itemDetails == 0 then
                 table.insert(lines, "Stok saat ini kosong atau sedang memuat data.")
@@ -10188,7 +10257,7 @@ if ShopTab then
                     if type(item.Price) == "number" then
                         priceStr = string.format("%d", item.Price)
                     end
-                    table.insert(lines, string.format("- %s: %s %s", item.Name, priceStr, item.Currency))
+                    table.insert(lines, string.format("- %s: %s %s", item.Name, priceStr, item.Currency or "Coins"))
                 end
             end
             return table.concat(lines, "\n")
@@ -10200,18 +10269,75 @@ if ShopTab then
             Content = formatMerchantParagraphText(initialMerchantStock)
         })
 
+        local selectedMerchantItemName = nil
+        local selectedMerchantItemId = nil
+        local merchantDropdownRef = nil
+
+        local function updateMerchantDropdownValues(details)
+            if not merchantDropdownRef then return end
+            local options = {}
+            if #details > 0 then
+                for _, item in ipairs(details) do
+                    table.insert(options, item.Name)
+                end
+            else
+                for _, item in ipairs(MerchantStaticItems) do
+                    table.insert(options, item.Name)
+                end
+            end
+            if #options == 0 then
+                table.insert(options, "Tidak ada stok")
+            end
+            pcall(function()
+                if merchantDropdownRef.SetValues then
+                    merchantDropdownRef:SetValues(options)
+                elseif merchantDropdownRef.Values then
+                    merchantDropdownRef.Values = options
+                end
+            end)
+        end
+
         local function updateMerchantParagraphUI()
             local details, _ = getMerchantStockDetails()
-            local formatted = formatMerchantParagraphText(details)
+            local timeStr = getMerchantRefreshTimeString()
+            local formatted = formatMerchantParagraphText(details, timeStr)
             SafeUpdateParagraph(merchantStatusParagraph, formatted)
+            updateMerchantDropdownValues(details)
             return details
         end
+
+        task.spawn(function()
+            task.wait(1)
+            pcall(function()
+                local client = (Replion and Replion.Client)
+                if not client then
+                    local repMod = FindReplionModule()
+                    if repMod then client = require(repMod).Client end
+                end
+                if client then
+                    cachedMerchantReplion = client:GetReplion("Merchant") or client:WaitReplion("Merchant", 3)
+                    if cachedMerchantReplion and cachedMerchantReplion.OnChange then
+                        cachedMerchantReplion:OnChange("Items", function()
+                            pcall(function()
+                                updateMerchantParagraphUI()
+                            end)
+                        end)
+                    end
+                end
+                updateMerchantParagraphUI()
+            end)
+        end)
 
         task.spawn(function()
             while true do
                 task.wait(1)
                 pcall(function()
-                    updateMerchantParagraphUI()
+                    if merchantStatusParagraph then
+                        local details, _ = getMerchantStockDetails()
+                        local timeStr = getMerchantRefreshTimeString()
+                        local formatted = formatMerchantParagraphText(details, timeStr)
+                        SafeUpdateParagraph(merchantStatusParagraph, formatted)
+                    end
                 end)
             end
         end)
@@ -10225,35 +10351,34 @@ if ShopTab then
             end
         })
 
-        local selectedMerchantItemName = nil
-        local selectedMerchantItemId = nil
-
-        local function getMerchantDropdownOptions()
-            local options = {}
-            local details = getMerchantStockDetails()
-            for _, item in ipairs(details) do
-                table.insert(options, item.Name)
-            end
-            if #options == 0 then
-                table.insert(options, "Tidak ada stok")
-            end
-            return options, details
+        local initialDropdownOptions = {}
+        for _, itm in ipairs(MerchantStaticItems) do
+            table.insert(initialDropdownOptions, itm.Name)
         end
 
-        local initialOptions, initialItems = getMerchantDropdownOptions()
-        local merchantDropdownRef = Section_ShopTab_Merchant:AddDropdown("Dropdown_SelectMerchantStockItem", {
+        merchantDropdownRef = Section_ShopTab_Merchant:AddDropdown("Dropdown_SelectMerchantStockItem", {
             Title = "Select Merchant Item",
-            Values = initialOptions,
-            Default = initialOptions[1],
+            Values = initialDropdownOptions,
+            Default = initialDropdownOptions[1],
             Multi = false,
             Callback = function(val)
                 if val and val ~= "Tidak ada stok" then
                     selectedMerchantItemName = val
                     local currentDetails = getMerchantStockDetails()
+                    local found = false
                     for _, item in ipairs(currentDetails) do
                         if item.Name == val then
                             selectedMerchantItemId = item.ID
+                            found = true
                             break
+                        end
+                    end
+                    if not found then
+                        for _, item in ipairs(MerchantStaticItems) do
+                            if item.Name == val then
+                                selectedMerchantItemId = item.ID
+                                break
+                            end
                         end
                     end
                 end
@@ -10264,11 +10389,12 @@ if ShopTab then
             Title = "Buy Selected Item",
             Description = "Beli 1x item yang dipilih di dropdown",
             Callback = function()
-                if not selectedMerchantItemId then
-                    local currentDetails = getMerchantStockDetails()
-                    if #currentDetails > 0 then
-                        selectedMerchantItemId = currentDetails[1].ID
-                        selectedMerchantItemName = currentDetails[1].Name
+                if not selectedMerchantItemId and selectedMerchantItemName then
+                    for _, item in ipairs(MerchantStaticItems) do
+                        if item.Name == selectedMerchantItemName then
+                            selectedMerchantItemId = item.ID
+                            break
+                        end
                     end
                 end
                 if selectedMerchantItemId then
