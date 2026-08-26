@@ -2535,6 +2535,7 @@ local function CreateCloudyPanel()
     return gui
 end
 local statsPanelGui = CreateCloudyPanel()
+_G.CloudyStatsPanelGui = statsPanelGui
 
 pcall(function()
     for _, v in pairs(getconnections(LocalPlayer.Idled)) do
@@ -5984,23 +5985,23 @@ if MainTab then
             ["Storm Elemental Event"] = {
                 Active = false,
                 StartTime = 0,
-                Duration = 3600,
-                Keywords = {"storm is accurring", "storm is occurring", "massive storm", "storm elemental", "storm event", "stormshell", "a storm has", "storm started", "storm has started", "strom"},
+                Duration = 600,
+                Keywords = {"storm is accurring", "storm is occurring", "massive storm", "storm elemental", "storm event", "stormshell", "a storm has", "storm started", "storm has started"},
                 EndKeywords = {"storm has ended", "storm has passed", "storm has cleared", "storm is over", "storm cleared", "storm ended"},
                 CFrame = LOCATIONS["Elemental Island (Storm Area)"] or CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904)
             },
             ["Blizzard Elemental Event"] = {
                 Active = false,
                 StartTime = 0,
-                Duration = 3600,
-                Keywords = {"blizzard has started", "blizzard is occurring", "blizzard is accurring", "blizzard elemental", "blizzard event", "wintertusk", "a blizzard has", "blizzard started", "blizard"},
+                Duration = 600,
+                Keywords = {"blizzard has started", "blizzard is occurring", "blizzard is accurring", "blizzard elemental", "blizzard event", "wintertusk", "a blizzard has", "blizzard started"},
                 EndKeywords = {"blizzard has ended", "blizzard has passed", "blizzard has cleared", "blizzard is over", "blizzard cleared", "blizzard ended"},
                 CFrame = LOCATIONS["Elemental Island (Blizzard Area)"] or CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819)
             },
             ["Volcano Elemental Event"] = {
                 Active = false,
                 StartTime = 0,
-                Duration = 3600,
+                Duration = 600,
                 Keywords = {"volcano has erupted", "volcano is erupting", "volcano eruption", "volcano elemental", "volcano event", "volcanic event", "volcanic elemental", "pyrocoil", "the volcano has", "volcano erupted"},
                 EndKeywords = {"volcano has stopped", "volcano has calmed", "volcano is over", "volcano cleared", "volcano eruption ended", "volcano ended"},
                 CFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795)
@@ -6013,14 +6014,24 @@ if MainTab then
 
         local function resolveCanonicalEventKey(query)
             if not query then return nil end
-            local q = tostring(query):lower()
-            if q:find("storm") or q:find("strom") or q:find("atmospher") then
+            local q = tostring(query):lower():gsub("^%s*(.-)%s*$", "%1")
+            if q == "" then return nil end
+
+            -- Strict Storm match (do NOT match "atmosphere" or generic words)
+            if q == "storm" or q == "stormy" or q == "elemental storm" or q == "storm elemental" or q:find("storm elemental event") or q:find("massive storm") or q:find("storm is occurring") or q:find("storm is accurring") or q:find("storm started") or q:find("storm has started") or q:find("stormshell") then
                 return "Storm Elemental Event"
-            elseif q:find("blizzard") or q:find("blizard") or q:find("glacial") or q:find("ice") then
+            end
+
+            -- Strict Blizzard match (do NOT match generic "ice" or "device")
+            if q == "blizzard" or q == "blizzard elemental" or q:find("blizzard elemental event") or q:find("blizzard is occurring") or q:find("blizzard is accurring") or q:find("blizzard has started") or q:find("blizzard started") or q:find("wintertusk") then
                 return "Blizzard Elemental Event"
-            elseif q:find("volcano") or q:find("volcanic") or q:find("magma") or q:find("erupt") then
+            end
+
+            -- Strict Volcano match (do NOT match static island parts)
+            if q == "volcano" or q == "volcanic" or q == "volcano eruption" or q == "volcano elemental" or q:find("volcano elemental event") or q:find("volcano has erupted") or q:find("volcano is erupting") or q:find("volcano erupted") or q:find("volcanic event") or q:find("pyrocoil") then
                 return "Volcano Elemental Event"
             end
+
             return nil
         end
 
@@ -6169,22 +6180,22 @@ if MainTab then
                     if cMod:IsA("ModuleScript") then
                         local ok2, ctrl = pcall(require, cMod)
                         if ok2 and type(ctrl) == "table" then
-                            for _, fnName in ipairs({"GetActiveEvents", "GetEvents", "GetActiveWeather", "GetCurrentEvents", "GetActiveZones"}) do
+                            for _, fnName in ipairs({"GetActiveEvents", "GetEvents", "GetActiveWeather", "GetCurrentEvents"}) do
                                 if type(ctrl[fnName]) == "function" then
                                     local ok3, res = pcall(function() return ctrl[fnName](ctrl) end)
                                     if ok3 and type(res) == "table" then
                                         for k, v in pairs(res) do
-                                            local s = tostring(type(k) == "string" and k or v):lower()
+                                            local s = tostring(type(v) == "string" and v or k):lower()
                                             local key = resolveCanonicalEventKey(s)
                                             if key then activeList[key] = true end
                                         end
                                     end
                                 end
                             end
-                            for _, propName in ipairs({"ActiveEvents", "Events", "CurrentEvents", "ActiveWeather", "CurrentWeather", "ActiveZones"}) do
+                            for _, propName in ipairs({"ActiveEvents", "Events", "CurrentEvents", "ActiveWeather", "CurrentWeather"}) do
                                 if type(ctrl[propName]) == "table" then
                                     for k, v in pairs(ctrl[propName]) do
-                                        local s = tostring(type(k) == "string" and k or v):lower()
+                                        local s = tostring(type(v) == "string" and v or k):lower()
                                         local key = resolveCanonicalEventKey(s)
                                         if key then activeList[key] = true end
                                     end
@@ -6201,12 +6212,15 @@ if MainTab then
             local activeList = {}
             pcall(function()
                 for _, parent in ipairs({ ReplicatedStorage, Workspace }) do
-                    for _, folderName in ipairs({"ActiveEvents", "RunningEvents", "CurrentEvents", "ActiveWeather", "CurrentWeather", "Weather"}) do
+                    for _, folderName in ipairs({"ActiveEvents", "RunningEvents", "CurrentEvents", "ActiveWeather", "WeatherEvents"}) do
                         local f = parent:FindFirstChild(folderName)
                         if f then
                             for _, child in ipairs(f:GetChildren()) do
-                                local key = resolveCanonicalEventKey(child.Name)
-                                if key then activeList[key] = true end
+                                local nameLower = child.Name:lower()
+                                if not nameLower:find("map") and not nameLower:find("island") then
+                                    local key = resolveCanonicalEventKey(child.Name)
+                                    if key then activeList[key] = true end
+                                end
                             end
                         end
                     end
@@ -6220,35 +6234,20 @@ if MainTab then
             pcall(function()
                 local repClient = Replion and Replion.Client
                 if not repClient then return end
-                for _, repName in ipairs({"Events", "ActiveEvents", "Weather", "World", "Environment", "Zone", "Zones"}) do
+                for _, repName in ipairs({"Events", "ActiveEvents", "Weather"}) do
                     local ok, r = pcall(function() return repClient:GetReplion(repName) end)
                     if ok and r then
                         local data = r:GetValue() or r:GetExpect()
                         if type(data) == "table" then
                             for k, v in pairs(data) do
-                                local s = tostring(type(k) == "string" and k or v):lower()
+                                local s = tostring(type(v) == "string" and v or k):lower()
                                 local key = resolveCanonicalEventKey(s)
                                 if key then activeList[key] = true end
                             end
+                        elseif type(data) == "string" then
+                            local key = resolveCanonicalEventKey(data)
+                            if key then activeList[key] = true end
                         end
-                    end
-                end
-            end)
-            return activeList
-        end
-
-        local function checkLightingAndWorld()
-            local activeList = {}
-            pcall(function()
-                local lighting = game:GetService("Lighting")
-                if lighting then
-                    for _, obj in ipairs(lighting:GetChildren()) do
-                        local key = resolveCanonicalEventKey(obj.Name)
-                        if key then activeList[key] = true end
-                    end
-                    for attrName, attrVal in pairs(lighting:GetAttributes()) do
-                        local key = resolveCanonicalEventKey(tostring(attrName) .. " " .. tostring(attrVal))
-                        if key then activeList[key] = true end
                     end
                 end
             end)
@@ -6262,8 +6261,8 @@ if MainTab then
             if not info then return false end
 
             if info.Active then
-                local elapsed = tick() - info.StartTime
-                if elapsed <= (info.Duration or 3600) then
+                local elapsed = tick() - (info.StartTime or 0)
+                if elapsed <= (info.Duration or 600) then
                     return true
                 else
                     info.Active = false
@@ -6271,17 +6270,20 @@ if MainTab then
                 end
             end
 
-            if checkControllersForEvents()[eventKey] then
-                info.Active = true; info.StartTime = tick(); return true
+            if checkReplionForEvents()[eventKey] then
+                info.Active = true
+                info.StartTime = tick()
+                return true
             end
             if checkDynamicFolders()[eventKey] then
-                info.Active = true; info.StartTime = tick(); return true
+                info.Active = true
+                info.StartTime = tick()
+                return true
             end
-            if checkReplionForEvents()[eventKey] then
-                info.Active = true; info.StartTime = tick(); return true
-            end
-            if checkLightingAndWorld()[eventKey] then
-                info.Active = true; info.StartTime = tick(); return true
+            if checkControllersForEvents()[eventKey] then
+                info.Active = true
+                info.StartTime = tick()
+                return true
             end
 
             return false
@@ -6704,6 +6706,262 @@ if MainTab then
                     end
                     regulatorSavedPos = nil
                     NotifyInfo("Auto Regulator", "Auto Repair Regulator Dimatikan.")
+                end
+            end
+        })
+
+        -- ===== AUTO COMPLETE ARTIFACT SECTION =====
+        local Section_MainTab_Artifact = MainTab:AddSection("Auto Complete Artifact")
+
+        local ARTIFACT_CONFIG = {
+            ["Diamond Artifact"] = {
+                Id = 267,
+                Name = "Diamond Artifact",
+                CFrame = CFrame.new(1830.89062, 6.62499952, -318.583954, 0.210125715, 6.01540435e-08, -0.977674365, -7.80481457e-08, 1, 4.47532678e-08, 0.977674365, 6.69018547e-08, 0.210125715)
+            },
+            ["Crescent Artifact"] = {
+                Id = 266,
+                Name = "Crescent Artifact",
+                CFrame = CFrame.new(1405.80164, 6.5850091, 117.956322, -0.894793928, -7.91023282e-08, 0.446479321, -9.44120657e-08, 1, -1.20431469e-08, -0.446479321, -5.29291704e-08, -0.894793928)
+            },
+            ["Arrow Artifact"] = {
+                Id = 265,
+                Name = "Arrow Artifact",
+                CFrame = CFrame.new(885.653564, 6.62499857, -334.422882, -0.281357497, 6.11953732e-09, 0.959603012, 1.1393773e-08, 1, -3.0364784e-09, -0.959603012, 1.00791633e-08, -0.281357497)
+            },
+            ["Hourglass Diamond Artifact"] = {
+                Id = 271,
+                Name = "Hourglass Diamond Artifact",
+                CFrame = CFrame.new(1474.5802, 6.59433651, -850.140198, -0.955496132, -4.85804108e-08, 0.295003653, -5.27604911e-08, 1, -6.21021012e-09, -0.295003653, -2.14983693e-08, -0.955496132)
+            }
+        }
+
+        local ARTIFACT_ORDER = {
+            "Diamond Artifact",
+            "Crescent Artifact",
+            "Arrow Artifact",
+            "Hourglass Diamond Artifact"
+        }
+
+        local function scanArtifactsInventory()
+            local status = {}
+            local totalOwned = 0
+
+            for _, name in ipairs(ARTIFACT_ORDER) do
+                local cfg = ARTIFACT_CONFIG[name]
+                local count = 0
+                local targetId = cfg.Id
+                local targetNameLower = cfg.Name:lower()
+
+                -- Scan Replion PlayerData Inventory
+                pcall(function()
+                    local replion = GetPlayerDataReplion and GetPlayerDataReplion()
+                    if replion then
+                        local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
+                        if ok and inv then
+                            for categoryName, catItems in pairs(inv) do
+                                if type(catItems) == "table" then
+                                    for _, item in pairs(catItems) do
+                                        if type(item) == "table" then
+                                            local iId = tonumber(item.Id)
+                                            local iName = tostring(item.Name or item.Id or ""):lower()
+                                            if (targetId and iId == targetId) or (iName:find(targetNameLower, 1, true)) then
+                                                local q = tonumber(item.Quantity or item.Count or 1) or 1
+                                                count = count + q
+                                            end
+                                        elseif type(item) == "string" or type(item) == "number" then
+                                            local iId = tonumber(item)
+                                            local iName = tostring(item):lower()
+                                            if (targetId and iId == targetId) or (iName:find(targetNameLower, 1, true)) then
+                                                count = count + 1
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+
+                -- Scan Backpack & Character
+                pcall(function()
+                    local lp = Players.LocalPlayer
+                    local bp = lp and lp:FindFirstChild("Backpack")
+                    if bp then
+                        for _, tool in ipairs(bp:GetChildren()) do
+                            local tName = tool.Name:lower()
+                            local tId = tonumber(tool:GetAttribute("ItemId"))
+                            if (targetId and tId == targetId) or tName:find(targetNameLower, 1, true) then
+                                count = count + 1
+                            end
+                        end
+                    end
+                    local char = lp and lp.Character
+                    if char then
+                        for _, tool in ipairs(char:GetChildren()) do
+                            if tool:IsA("Tool") then
+                                local tName = tool.Name:lower()
+                                local tId = tonumber(tool:GetAttribute("ItemId"))
+                                if (targetId and tId == targetId) or tName:find(targetNameLower, 1, true) then
+                                    count = count + 1
+                                end
+                            end
+                        end
+                    end
+                end)
+
+                status[name] = {
+                    Owned = count > 0,
+                    Count = count,
+                    Id = cfg.Id,
+                    CFrame = cfg.CFrame
+                }
+                if count > 0 then
+                    totalOwned = totalOwned + 1
+                end
+            end
+
+            return status, totalOwned
+        end
+
+        local function formatArtifactStatusText(status, totalOwned)
+            local lines = {}
+            table.insert(lines, string.format("📦 Status Inventory: %d/4 Artifact Ditemukan", totalOwned))
+            table.insert(lines, "────────────────────────────")
+            for _, name in ipairs(ARTIFACT_ORDER) do
+                local data = status[name]
+                if data and data.Owned then
+                    table.insert(lines, string.format("✅ %s (ID: %d) : Ada x%d di Inventory", name, data.Id, data.Count))
+                else
+                    table.insert(lines, string.format("❌ %s (ID: %d) : Belum Ada di Inventory", name, data and data.Id or 0))
+                end
+            end
+            table.insert(lines, "────────────────────────────")
+            if totalOwned > 0 then
+                table.insert(lines, "💡 Siap diserahkan! Nyalakan 'Auto Complete Artifact' di bawah.")
+            else
+                table.insert(lines, "⚠️ Tidak ada artifact di inventory. Dapatkan artifact terlebih dahulu.")
+            end
+            return table.concat(lines, "\n")
+        end
+
+        local initialStatus, initialTotal = scanArtifactsInventory()
+        local artifactStatusParagraph = Section_MainTab_Artifact:AddParagraph({
+            Title = "📜 Status Inventory Artifact",
+            Content = formatArtifactStatusText(initialStatus, initialTotal)
+        })
+
+        local function updateArtifactParagraphUI()
+            local status, total = scanArtifactsInventory()
+            local formatted = formatArtifactStatusText(status, total)
+            SafeUpdateParagraph(artifactStatusParagraph, formatted)
+            return status, total
+        end
+
+        Section_MainTab_Artifact:AddButton({
+            Title = "🔄 Refresh Artifact Status",
+            Description = "Pindai ulang isi inventory dan perbarui info status artifact",
+            Callback = function()
+                local _, total = updateArtifactParagraphUI()
+                NotifyInfo("Artifact Status", string.format("Inventory di-refresh! Ditemukan %d/4 artifact.", total))
+            end
+        })
+
+        local selectedArtifactForTP = "Diamond Artifact"
+        Section_MainTab_Artifact:AddDropdown("Dropdown_SelectArtifactLocation", {
+            Title = "Select Artifact Location",
+            Values = ARTIFACT_ORDER,
+            Default = "Diamond Artifact",
+            Multi = false,
+            Callback = function(val)
+                if type(val) == "string" and ARTIFACT_CONFIG[val] then
+                    selectedArtifactForTP = val
+                end
+            end
+        })
+
+        Section_MainTab_Artifact:AddButton({
+            Title = "📍 Teleport to Selected Artifact",
+            Description = "Teleport langsung ke lokasi altar artifact yang dipilih",
+            Callback = function()
+                local cfg = ARTIFACT_CONFIG[selectedArtifactForTP]
+                if cfg and cfg.CFrame then
+                    TeleportTo(cfg.CFrame)
+                    NotifySuccess("Artifact TP", "Teleport ke altar " .. selectedArtifactForTP .. "!")
+                else
+                    NotifyWarning("Artifact TP", "Lokasi artifact tidak ditemukan.")
+                end
+            end
+        })
+
+        local autoCompleteArtifactActive = false
+        local autoCompleteArtifactThread = nil
+
+        local function runAutoCompleteArtifactLoop()
+            while autoCompleteArtifactActive do
+                local status, totalOwned = updateArtifactParagraphUI()
+                if totalOwned == 0 then
+                    NotifyWarning("Auto Artifact", "Tidak ada artifact yang terdeteksi di Inventory!")
+                    autoCompleteArtifactActive = false
+                    break
+                end
+
+                local completedCount = 0
+                for _, name in ipairs(ARTIFACT_ORDER) do
+                    if not autoCompleteArtifactActive then break end
+                    local data = status[name]
+                    if data and data.Owned then
+                        NotifyInfo("Auto Artifact", "Menuju altar " .. name .. "...")
+                        TeleportTo(data.CFrame)
+                        task.wait(1)
+
+                        if unequipAllTools then unequipAllTools() end
+                        task.wait(0.5)
+
+                        local interacted = triggerNearestProximityPrompt and triggerNearestProximityPrompt(35)
+                        if interacted then
+                            NotifySuccess("Auto Artifact", "Berhasil memasang " .. name .. "!")
+                            completedCount = completedCount + 1
+                        else
+                            task.wait(1)
+                            if triggerNearestProximityPrompt then
+                                triggerNearestProximityPrompt(35)
+                            end
+                        end
+                        task.wait(1.5)
+                        updateArtifactParagraphUI()
+                    end
+                end
+
+                if completedCount > 0 then
+                    NotifySuccess("Auto Artifact", string.format("Selesai! %d artifact berhasil dipasang.", completedCount))
+                else
+                    NotifyInfo("Auto Artifact", "Semua artifact yang ada telah diproses.")
+                end
+
+                autoCompleteArtifactActive = false
+                break
+            end
+        end
+
+        Section_MainTab_Artifact:AddToggle("Toggle_AutoCompleteArtifact", {
+            Title = "Auto Complete Artifact",
+            Description = "Otomatis teleport & submit artifact yang ada di inventory ke altarnya",
+            Default = false,
+            Callback = function(state)
+                autoCompleteArtifactActive = state
+                if state then
+                    if autoCompleteArtifactThread then
+                        pcall(function() task.cancel(autoCompleteArtifactThread) end)
+                    end
+                    autoCompleteArtifactThread = task.spawn(runAutoCompleteArtifactLoop)
+                    NotifySuccess("Auto Artifact", "Auto Complete Artifact Aktif! Memulai proses...")
+                else
+                    if autoCompleteArtifactThread then
+                        pcall(function() task.cancel(autoCompleteArtifactThread) end)
+                        autoCompleteArtifactThread = nil
+                    end
+                    NotifyInfo("Auto Artifact", "Auto Complete Artifact Dimatikan.")
                 end
             end
         })
@@ -9391,6 +9649,25 @@ end
 if MiscTab then
     pcall(function()
         local Section_MiscTab_1 = MiscTab:AddSection("Visual & Performance")
+
+        Section_MiscTab_1:AddToggle("Toggle_DisableCloudyPanel", {
+            Title = "Disable Cloudy Panel",
+            Description = "Sembunyikan / matikan tampilan panel Ping, Notif & FPS Cloudy",
+            Default = false,
+            Callback = function(val)
+                _G.DisableCloudyPanel = val
+                local targetGui = statsPanelGui or _G.CloudyStatsPanelGui or (gethui and gethui():FindFirstChild("CloudyPanelV4")) or CoreGui:FindFirstChild("CloudyPanelV4") or (LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui") and LocalPlayer.PlayerGui:FindFirstChild("CloudyPanelV4"))
+                if targetGui then
+                    targetGui.Enabled = not val
+                end
+                if val then
+                    NotifyInfo("Cloudy Panel", "Panel Ping & FPS disembunyikan.")
+                else
+                    NotifySuccess("Cloudy Panel", "Panel Ping & FPS ditampilkan.")
+                end
+            end
+        })
+
         Section_MiscTab_1:AddToggle("Toggle_NoAnimation", {
             Title = "No Animation", Default = false,
             Callback = function(val)
