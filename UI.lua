@@ -4570,9 +4570,11 @@ local aa = {
                 end
             )
             v.Maximize = function() end
-            m.AddSignal(
-                v.TitleBar.Frame.InputBegan,
-                function(M)
+            local _dragTarget = (v.TitleBar and v.TitleBar.Frame) or v.TabDisplay or v.Root
+            if _dragTarget then
+                m.AddSignal(
+                    _dragTarget.InputBegan,
+                    function(M)
                     if (M.UserInputType == Enum.UserInputType.MouseButton1 or M.UserInputType == Enum.UserInputType.Touch) and not _isDragging then
                         _isDragging = true
                         _dragInput = M
@@ -4591,6 +4593,7 @@ local aa = {
                     end
                 end
             )
+            end
             m.AddSignal(
                 E.InputBegan,
                 function(M)
