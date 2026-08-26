@@ -910,6 +910,7 @@ local function interactPirateChest(chest, savedCFrame)
 end
 
 local _lastEquipTime = 0
+local _lastReplionEquipTime = 0
 local function ensureRodEquipped(force)
     local lp = Players.LocalPlayer
     local char = lp and lp.Character
@@ -919,55 +920,55 @@ local function ensureRodEquipped(force)
     if held then return true end
 
     local now = os.clock()
-    if not force and (now - _lastEquipTime < 1.2) then
+    if not force and (now - _lastEquipTime < 1.0) then
         return false
     end
     _lastEquipTime = now
 
-    -- 1. Check Backpack
+    -- 1. Check Backpack first (fast, client-side Humanoid:EquipTool)
     local bp = lp:FindFirstChild("Backpack")
     if bp then
         local tool = bp:FindFirstChildOfClass("Tool")
-        if tool and char:FindFirstChild("Humanoid") then
+        if tool and char:FindFirstChildOfClass("Humanoid") then
             pcall(function() char.Humanoid:EquipTool(tool) end)
-            task.wait(0.05)
             if char:FindFirstChildOfClass("Tool") then return true end
         end
     end
 
-    -- 2. Call Hotbar equip remote
-    local eq = Events.equip or Events.equipToolRemote or Events.equip_tool_remote or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.equip) or GetServerRemote("RF/EquipToolFromHotbar")
+    -- 2. Call Hotbar equip remote ONLY if still not holding
+    local eq = Events.equip or Events.equipToolRemote or Events.equip_tool_remote or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.equip) or GetServerRemote("RF/EquipToolFromHotbar") or (net and net:FindFirstChild("RE/EquipToolFromHotbar"))
     if eq then
         pcall(function() CallRemote(eq, 1) end)
-        task.wait(0.05)
         if char:FindFirstChildOfClass("Tool") then return true end
     end
 
-    -- 3. If still not holding, equip best rod from Replion Inventory
-    pcall(function()
-        local replion = GetPlayerDataReplion and GetPlayerDataReplion()
-        if replion then
-            local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
-            if ok and inv and inv["Fishing Rods"] and #inv["Fishing Rods"] > 0 then
-                local priority = {257, 169, 126, 5, 7, 6, 80, 4, 78, 77, 85, 76, 79, 1}
-                local bestRod = nil
-                for _, id in ipairs(priority) do
-                    for _, r in ipairs(inv["Fishing Rods"]) do
-                        if tonumber(r.Id) == id then bestRod = r; break end
+    -- 3. Only if completely empty and with cooldown (5s), equip best rod from Replion Inventory
+    if (now - _lastReplionEquipTime) > 5.0 then
+        _lastReplionEquipTime = now
+        pcall(function()
+            local replion = GetPlayerDataReplion and GetPlayerDataReplion()
+            if replion then
+                local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
+                if ok and inv and inv["Fishing Rods"] and #inv["Fishing Rods"] > 0 then
+                    local priority = {257, 169, 126, 5, 7, 6, 80, 4, 78, 77, 85, 76, 79, 1}
+                    local bestRod = nil
+                    for _, id in ipairs(priority) do
+                        for _, r in ipairs(inv["Fishing Rods"]) do
+                            if tonumber(r.Id) == id then bestRod = r; break end
+                        end
+                        if bestRod then break end
                     end
-                    if bestRod then break end
-                end
-                if not bestRod then bestRod = inv["Fishing Rods"][1] end
+                    if not bestRod then bestRod = inv["Fishing Rods"][1] end
 
-                local equipItem = Events.equipItemRemote or Events.equip_item or GetServerRemote("RF/EquipItem")
-                if bestRod and bestRod.UUID and equipItem then
-                    CallRemote(equipItem, bestRod.UUID, "Fishing Rods")
-                    task.wait(0.08)
-                    if eq then CallRemote(eq, 1) end
+                    local equipItem = Events.equipItemRemote or Events.equip_item or GetServerRemote("RF/EquipItem")
+                    if bestRod and bestRod.UUID and equipItem then
+                        CallRemote(equipItem, bestRod.UUID, "Fishing Rods")
+                        if eq then CallRemote(eq, 1) end
+                    end
                 end
             end
-        end
-    end)
+        end)
+    end
 
     return char:FindFirstChildOfClass("Tool") ~= nil
 end
@@ -1955,12 +1956,14 @@ UB_init()
 task.spawn(function()
     while true do
         task.wait(5)
-        local anyActive = Config.UB.Active or Config.CloudyV1.Active
-        if anyActive and lastTimeFishCaught ~= nil and os.clock() - lastTimeFishCaught >= 20 and blatantFishCycleCount > 1 then
-            needCast = true; saveCount = 0; blatantFishCycleCount = 1; lastTimeFishCaught = os.clock()
-            safeFire(function() if Config.UB.Remotes.CancelFishingInputs then CallRemote(Config.UB.Remotes.CancelFishingInputs) end end)
-            task.wait(0.3)
-            equipRod()
+        local anyActive = (Config.UB and Config.UB.Active) or (Config.CloudyV1 and Config.CloudyV1.Active) or (Config.Cloudy1N and Config.Cloudy1N.Active) or Config.AutoCatch
+        if anyActive then
+            local lp = Players.LocalPlayer
+            local char = lp and lp.Character
+            local isHolding = char and char:FindFirstChildOfClass("Tool")
+            if not isHolding then
+                ensureRodEquipped(false)
+            end
         end
     end
 end)
