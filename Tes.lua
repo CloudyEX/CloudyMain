@@ -5968,24 +5968,87 @@ if MainTab then
                 Active = false,
                 StartTime = 0,
                 Duration = 3600,
-                Keywords = {"storm is accurring", "storm is occurring", "massive storm", "storm elemental", "storm event", "stormshell", "a storm has", "storm started", "storm has started", "strom"},
-                EndKeywords = {"storm has ended", "storm has passed", "storm has cleared", "storm is over", "storm cleared", "storm ended"},
+                Keywords = {
+                    "a massive storm is occurring",
+                    "a massive storm is accurring",
+                    "a storm is occurring",
+                    "a storm is accurring",
+                    "storm is occurring",
+                    "storm is accurring",
+                    "massive storm",
+                    "storm elemental event",
+                    "storm elemental",
+                    "storm event",
+                    "a storm has started",
+                    "storm has started",
+                    "storm started",
+                    "a storm has arrived",
+                    "a storm is brewing",
+                    "stormshell brute"
+                },
+                EndKeywords = {
+                    "storm has ended",
+                    "storm has passed",
+                    "storm has cleared",
+                    "storm is over",
+                    "storm cleared",
+                    "storm ended"
+                },
                 CFrame = LOCATIONS["Elemental Island (Storm Area)"] or CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904)
             },
             ["Blizzard Elemental Event"] = {
                 Active = false,
                 StartTime = 0,
                 Duration = 3600,
-                Keywords = {"blizzard has started", "blizzard is occurring", "blizzard is accurring", "blizzard elemental", "blizzard event", "wintertusk", "a blizzard has", "blizzard started", "blizard"},
-                EndKeywords = {"blizzard has ended", "blizzard has passed", "blizzard has cleared", "blizzard is over", "blizzard cleared", "blizzard ended"},
+                Keywords = {
+                    "a blizzard has started",
+                    "blizzard has started",
+                    "a blizzard is occurring",
+                    "blizzard is occurring",
+                    "blizzard is accurring",
+                    "blizzard elemental event",
+                    "blizzard elemental",
+                    "blizzard event",
+                    "blizzard started",
+                    "a blizzard has arrived",
+                    "wintertusk mammofin"
+                },
+                EndKeywords = {
+                    "blizzard has ended",
+                    "blizzard has passed",
+                    "blizzard has cleared",
+                    "blizzard is over",
+                    "blizzard cleared",
+                    "blizzard ended"
+                },
                 CFrame = LOCATIONS["Elemental Island (Blizzard Area)"] or CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819)
             },
             ["Volcano Elemental Event"] = {
                 Active = false,
                 StartTime = 0,
                 Duration = 3600,
-                Keywords = {"volcano has erupted", "volcano is erupting", "volcano eruption", "volcano elemental", "volcano event", "volcanic event", "volcanic elemental", "pyrocoil", "the volcano has", "volcano erupted"},
-                EndKeywords = {"volcano has stopped", "volcano has calmed", "volcano is over", "volcano cleared", "volcano eruption ended", "volcano ended"},
+                Keywords = {
+                    "the volcano has erupted",
+                    "volcano has erupted",
+                    "volcano is erupting",
+                    "volcano eruption",
+                    "volcano elemental event",
+                    "volcano elemental",
+                    "volcano event",
+                    "volcanic event",
+                    "volcanic elemental",
+                    "volcano erupted",
+                    "pyrocoil"
+                },
+                EndKeywords = {
+                    "volcano has stopped",
+                    "volcano has calmed",
+                    "volcano is over",
+                    "volcano cleared",
+                    "volcano eruption ended",
+                    "volcano ended",
+                    "eruption has ended"
+                },
                 CFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795)
             }
         }
@@ -5994,14 +6057,17 @@ if MainTab then
             ["Storm Elemental Event"] = true
         }
 
+        -- Strict matching function: prevents false positive from Atmosphere, ice, service, device, static map names
         local function resolveCanonicalEventKey(query)
             if not query then return nil end
-            local q = tostring(query):lower()
-            if q:find("storm") or q:find("strom") or q:find("atmospher") then
+            local q = tostring(query):lower():gsub("^%s*(.-)%s*$", "%1")
+            if q == "" then return nil end
+
+            if q == "storm elemental event" or q == "storm event" or q == "storm" or q == "stormy" or q == "heavy storm" or q == "massive storm" or q:find("storm elemental") or q:find("storm started") or q:find("storm has started") or q:find("storm is occurring") or q:find("storm is accurring") or q:find("massive storm") or q:find("a storm has") then
                 return "Storm Elemental Event"
-            elseif q:find("blizzard") or q:find("blizard") or q:find("glacial") or q:find("ice") then
+            elseif q == "blizzard elemental event" or q == "blizzard event" or q == "blizzard" or q:find("blizzard elemental") or q:find("blizzard started") or q:find("blizzard has started") or q:find("blizzard is occurring") or q:find("blizzard is accurring") or q:find("a blizzard has") or q:find("wintertusk") then
                 return "Blizzard Elemental Event"
-            elseif q:find("volcano") or q:find("volcanic") or q:find("magma") or q:find("erupt") then
+            elseif q == "volcano elemental event" or q == "volcano event" or q == "volcano eruption" or q == "volcanic event" or q:find("volcano elemental") or q:find("volcanic elemental") or q:find("volcano is erupting") or q:find("volcano has erupted") or q:find("volcano erupted") or q:find("pyrocoil") then
                 return "Volcano Elemental Event"
             end
             return nil
@@ -6025,7 +6091,7 @@ if MainTab then
                 end
             end
 
-            -- Check start keywords
+            -- Check start keywords (Strict)
             for eventKey, info in pairs(ElementalEventState) do
                 for _, kw in ipairs(info.Keywords) do
                     if lower:find(kw, 1, true) then
@@ -6143,47 +6209,36 @@ if MainTab then
             end)
         end)
 
+        -- Layer 5: Dynamic Controller State Scanner
         local function checkControllersForEvents()
             local activeList = {}
             pcall(function()
                 local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
                 if not ctrlFolder then return end
-                for _, cMod in ipairs(ctrlFolder:GetChildren()) do
-                    if cMod:IsA("ModuleScript") then
-                        local ok2, ctrl = pcall(require, cMod)
-                        if ok2 and type(ctrl) == "table" then
-                            for _, fnName in ipairs({"GetActiveEvents", "GetEvents", "GetActiveWeather", "GetCurrentEvents", "GetActiveZones"}) do
-                                if type(ctrl[fnName]) == "function" then
-                                    local ok3, res = pcall(function() return ctrl[fnName](ctrl) end)
-                                    if ok3 and type(res) == "table" then
-                                        for k, v in pairs(res) do
-                                            local s = tostring(type(k) == "string" and k or v):lower()
-                                            local key = resolveCanonicalEventKey(s)
-                                            if key then activeList[key] = true end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
                 for _, ctrlName in ipairs({"WeatherController", "EventController", "EnvironmentController", "WorldController", "NotificationController", "ZoneController"}) do
                     local ctrl = Controllers[ctrlName]
-                    if not ctrl then
-                        local cFolder = ReplicatedStorage:FindFirstChild("Controllers")
-                        if cFolder and cFolder:FindFirstChild(ctrlName) then
-                            local ok, req = pcall(require, cFolder[ctrlName])
-                            if ok and req then Controllers[ctrlName] = req; ctrl = req end
+                    if not ctrl and ctrlFolder:FindFirstChild(ctrlName) then
+                        local ok, req = pcall(require, ctrlFolder[ctrlName])
+                        if ok and req then
+                            Controllers[ctrlName] = req
+                            ctrl = req
                         end
                     end
                     if ctrl and type(ctrl) == "table" then
-                        for _, methodName in ipairs({"GetCurrentWeather", "GetWeather", "GetActiveEvents", "GetEvents", "GetCurrentEvent", "GetZone", "GetEnvironment"}) do
+                        for _, methodName in ipairs({"GetCurrentWeather", "GetWeather", "GetActiveEvents", "GetEvents", "GetCurrentEvent", "GetActiveWeather"}) do
                             if type(ctrl[methodName]) == "function" then
                                 local ok, res = pcall(ctrl[methodName], ctrl)
                                 if ok and res then
-                                    local str = tostring(type(res) == "table" and (res.Name or res.Weather or res.Event or HttpService:JSONEncode(res)) or res):lower()
-                                    local key = resolveCanonicalEventKey(str)
-                                    if key then activeList[key] = true end
+                                    if type(res) == "string" then
+                                        local key = resolveCanonicalEventKey(res)
+                                        if key then activeList[key] = true end
+                                    elseif type(res) == "table" then
+                                        for k, v in pairs(res) do
+                                            local itemStr = type(v) == "string" and v or (type(v) == "table" and (v.Name or v.Weather or v.Event or v.Id or "")) or tostring(k)
+                                            local key = resolveCanonicalEventKey(tostring(itemStr))
+                                            if key then activeList[key] = true end
+                                        end
+                                    end
                                 end
                             end
                         end
@@ -6193,19 +6248,62 @@ if MainTab then
             return activeList
         end
 
+        -- Layer 6: Replion Data Scanner
+        local function checkReplionForEvents()
+            local activeList = {}
+            pcall(function()
+                if Replion and Replion.Client then
+                    local replions = nil
+                    if type(Replion.Client.GetReplions) == "function" then
+                        replions = Replion.Client:GetReplions()
+                    elseif type(Replion.Client.Replions) == "table" then
+                        replions = Replion.Client.Replions
+                    end
+                    if replions then
+                        for _, rep in pairs(replions) do
+                            pcall(function()
+                                if type(rep) == "table" and type(rep.GetExpect) == "function" then
+                                    local name = tostring(rep.Name or ""):lower()
+                                    if name:find("weather") or name:find("event") or name:find("world") or name:find("environment") then
+                                        for _, field in ipairs({"ActiveEvents", "Events", "Weather", "CurrentWeather", "CurrentEvent", "ActiveWeather"}) do
+                                            local ok, val = pcall(function() return rep:GetExpect(field) end)
+                                            if ok and val then
+                                                if type(val) == "string" then
+                                                    local key = resolveCanonicalEventKey(val)
+                                                    if key then activeList[key] = true end
+                                                elseif type(val) == "table" then
+                                                    for k, v in pairs(val) do
+                                                        local s = tostring(type(k) == "string" and k or v)
+                                                        local key = resolveCanonicalEventKey(s)
+                                                        if key then activeList[key] = true end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end)
+                        end
+                    end
+                end
+            end)
+            return activeList
+        end
+
+        -- Layer 7: Dynamic Active Folders / ValueObjects (Strict - No static map / lighting objects)
         local function checkDynamicFolders()
             local activeList = {}
             pcall(function()
-                for _, folderName in ipairs({"Events", "ActiveEvents", "Weather", "Environment", "Zones", "ActiveWeather"}) do
+                for _, folderName in ipairs({"ActiveEvents", "ActiveWeather", "CurrentEvents"}) do
                     local folder = Workspace:FindFirstChild(folderName) or ReplicatedStorage:FindFirstChild(folderName)
                     if folder then
                         for _, child in ipairs(folder:GetChildren()) do
                             local key = resolveCanonicalEventKey(child.Name)
                             if key then activeList[key] = true end
-                        end
-                        for attrName, attrVal in pairs(folder:GetAttributes()) do
-                            local key = resolveCanonicalEventKey(tostring(attrName) .. " " .. tostring(attrVal))
-                            if key then activeList[key] = true end
+                            if child:IsA("StringValue") and child.Value ~= "" then
+                                local k2 = resolveCanonicalEventKey(child.Value)
+                                if k2 then activeList[k2] = true end
+                            end
                         end
                     end
                 end
@@ -6230,16 +6328,19 @@ if MainTab then
             end
 
             if checkControllersForEvents()[eventKey] then
-                info.Active = true; info.StartTime = tick(); return true
-            end
-            if checkDynamicFolders()[eventKey] then
-                info.Active = true; info.StartTime = tick(); return true
+                info.Active = true
+                info.StartTime = tick()
+                return true
             end
             if checkReplionForEvents()[eventKey] then
-                info.Active = true; info.StartTime = tick(); return true
+                info.Active = true
+                info.StartTime = tick()
+                return true
             end
-            if checkLightingAndWorld()[eventKey] then
-                info.Active = true; info.StartTime = tick(); return true
+            if checkDynamicFolders()[eventKey] then
+                info.Active = true
+                info.StartTime = tick()
+                return true
             end
 
             return false
@@ -6352,7 +6453,7 @@ if MainTab then
 
         Section_MainTab_Regulator:AddParagraph({
             Title = "📖 Panduan Auto Repair Regulator",
-            Content = "1. Pilih Regulator yang ingin diperbaiki di dropdown.\n2. Aktifkan toggle 'Auto Repair Regulator'.\n3. Saat Event terkait aktif, script otomatis teleport ke Area Event & equip rod.\n4. Silakan aktifkan fitur Auto Fishing manual yang ingin kamu gunakan.\n5. Setelah item khusus didapatkan, script otomatis unequip rod, teleport ke mesin regulator, dan berinteraksi dengan ProximityPrompt untuk memperbaiki mesin."
+            Content = "1. Pilih Regulator yang ingin diperbaiki di dropdown.\n2. Aktifkan toggle 'Auto Repair Regulator'.\n3. Saat Event terkait aktif, script otomatis teleport ke Area Event & equip rod.\n4. Silakan aktifkan fitur Auto Fishing manual yang ingin kamu gunakan.\n5. Setelah item khusus didapatkan, script otomatis unequip rod, teleport ke mesin regulator, dan berinteraksi dengan ProximityPrompt untuk memperbaiki mesin.\n6. Karakter akan otomatis kembali ke posisi semula setelah selesai atau saat event berakhir."
         })
 
         local REGULATOR_CONFIG = {
@@ -6373,7 +6474,7 @@ if MainTab then
             ["Magma Regulator"] = {
                 EventName = "Volcano Elemental Event",
                 AreaCFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795),
-                MachineCFrame = nil,
+                MachineCFrame = LOCATIONS["Elemental Volcano"] or CFrame.new(-729.789978, 107.056473, 5347.83008, -0.639170587, 9.75507248e-08, 0.769065022, 8.95694043e-08, 1, -5.24020685e-08, -0.769065022, 3.53908334e-08, -0.639170587),
                 ItemName = "Pyrocoil",
                 ItemId = 1197
             }
@@ -6537,6 +6638,10 @@ if MainTab then
                             local hasItem, count = hasRequiredItemInInventory(config.ItemName, config.ItemId)
 
                             if hasItem and config.MachineCFrame and activePhase ~= "REPAIRING" and activePhase ~= "DONE" then
+                                local hrp = getHRP()
+                                if hrp and not regulatorSavedPos then
+                                    regulatorSavedPos = hrp.CFrame
+                                end
                                 activePhase = "REPAIRING"
                                 NotifySuccess("Auto Regulator", config.ItemName .. " terdeteksi di Inventory! Mempersiapkan perbaikan " .. regName .. "...")
                                 unequipAllTools()
@@ -6552,6 +6657,13 @@ if MainTab then
                                 end
                                 activePhase = "DONE"
                                 NotifySuccess("Auto Regulator", "Proses perbaikan " .. regName .. " selesai!")
+                                task.wait(1.5)
+                                if regulatorSavedPos then
+                                    TeleportTo(regulatorSavedPos)
+                                    regulatorSavedPos = nil
+                                end
+                                activePhase = "SCANNING"
+                                activeRegName = nil
                                 break
                             elseif not hasItem then
                                 local isEventActive = isElementalEventActive(config.EventName)
@@ -6587,6 +6699,13 @@ if MainTab then
                                                 end
                                                 activePhase = "DONE"
                                                 NotifySuccess("Auto Regulator", "Perbaikan " .. regName .. " selesai!")
+                                                task.wait(1.5)
+                                                if regulatorSavedPos then
+                                                    TeleportTo(regulatorSavedPos)
+                                                    regulatorSavedPos = nil
+                                                end
+                                                activePhase = "SCANNING"
+                                                activeRegName = nil
                                             else
                                                 NotifyInfo("Auto Regulator", "Item " .. config.ItemName .. " berhasil didapatkan! Mesin " .. regName .. " belum memiliki CFrame lokasi mesin.")
                                                 activePhase = "DONE"
@@ -6601,6 +6720,7 @@ if MainTab then
                                         activeRegName = nil
                                         if regulatorSavedPos then
                                             TeleportTo(regulatorSavedPos)
+                                            regulatorSavedPos = nil
                                         end
                                     end
                                 end
@@ -6660,7 +6780,11 @@ if MainTab then
                         pcall(function() task.cancel(regulatorThread) end)
                         regulatorThread = nil
                     end
-                    regulatorSavedPos = nil
+                    if regulatorSavedPos then
+                        NotifyInfo("Auto Regulator", "Auto Repair Regulator dimatikan. Kembali ke posisi awal...")
+                        TeleportTo(regulatorSavedPos)
+                        regulatorSavedPos = nil
+                    end
                     NotifyInfo("Auto Regulator", "Auto Repair Regulator Dimatikan.")
                 end
             end
