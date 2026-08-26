@@ -2377,8 +2377,9 @@ local function CreateCloudyPanel()
 
     local statsLayout = Instance.new("UIListLayout")
     statsLayout.FillDirection = Enum.FillDirection.Horizontal
-    statsLayout.HorizontalAlignment = Enum.HorizontalAlignment.SpaceAround
+    statsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     statsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    statsLayout.Padding = UDim.new(0, 16)
     statsLayout.Parent = bottomStats
 
     local function makeStatItem(tag)
@@ -6686,6 +6687,282 @@ if MainTab then
                     end
                     regulatorSavedPos = nil
                     NotifyInfo("Auto Regulator", "Auto Repair Regulator Dimatikan.")
+                end
+            end
+        })
+
+        local Section_MainTab_Artifact = MainTab:AddSection("Auto Complete Artifact")
+
+        local ARTIFACT_DATA = {
+            ["Diamond Artifact"] = {
+                Id = 267,
+                FishSpot = Vector3.new(1763, -3, -406),
+                LeverCF = CFrame.new(1822.6333, 7.62499857, -287.22287, -0.922478795, -2.37723281e-08, 0.386047751, 6.27265351e-09, 1, 7.65675168e-08, -0.386047751, 7.30534566e-08, -0.922478795)
+            },
+            ["Crescent Artifact"] = {
+                Id = 266,
+                FishSpot = Vector3.new(1478, -3, 117),
+                LeverCF = CFrame.new(1416.04443, 30.3749943, 79.3558807, -0.16176784, 1.06205214e-08, -0.986828864, 5.36473053e-08, 1, 1.96803418e-09, 0.986828864, -5.26223438e-08, -0.16176784)
+            },
+            ["Arrow Artifact"] = {
+                Id = 265,
+                FishSpot = Vector3.new(981, -3, -374),
+                LeverCF = CFrame.new(894.176575, 7.62499857, -361.110962, 0.18843244, -5.4785108e-08, -0.982086182, 6.02529866e-08, 1, -4.42237109e-08, 0.982086182, -5.08404412e-08, 0.18843244)
+            },
+            ["Hourglass Artifact"] = {
+                Id = 271,
+                FishSpot = Vector3.new(1440, -3, -762),
+                LeverCF = CFrame.new(1485.67529, 7.58990526, -858.379211, 0.934665918, 3.00795797e-08, 0.355527252, -5.52280746e-08, 1, 6.05866859e-08, -0.355527252, -7.62633974e-08, 0.934665918)
+            }
+        }
+
+        local ARTIFACT_ORDER = {
+            "Diamond Artifact",
+            "Crescent Artifact",
+            "Arrow Artifact",
+            "Hourglass Artifact"
+        }
+
+        local function scanArtifactsInInventory()
+            local counts = {
+                ["Diamond Artifact"] = 0,
+                ["Crescent Artifact"] = 0,
+                ["Arrow Artifact"] = 0,
+                ["Hourglass Artifact"] = 0
+            }
+            local uuids = {
+                ["Diamond Artifact"] = {},
+                ["Crescent Artifact"] = {},
+                ["Arrow Artifact"] = {},
+                ["Hourglass Artifact"] = {}
+            }
+            pcall(function()
+                local replion = GetPlayerDataReplion and GetPlayerDataReplion()
+                if replion then
+                    local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
+                    if ok and inv and inv.Items and type(inv.Items) == "table" then
+                        for _, item in ipairs(inv.Items) do
+                            for name, data in pairs(ARTIFACT_DATA) do
+                                if item.Id == data.Id then
+                                    counts[name] = counts[name] + 1
+                                    if item.UUID then
+                                        table.insert(uuids[name], item.UUID)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+            return counts, uuids
+        end
+
+        local function getArtifactUUID(artifactName)
+            local _, uuids = scanArtifactsInInventory()
+            if uuids[artifactName] and #uuids[artifactName] > 0 then
+                return uuids[artifactName][1]
+            end
+            return nil
+        end
+
+        local function formatArtifactStatusText(counts)
+            local lines = {}
+            table.insert(lines, "Status Artifact Tas:")
+            local totalHave = 0
+            for _, name in ipairs(ARTIFACT_ORDER) do
+                local c = counts[name] or 0
+                if c > 0 then
+                    totalHave = totalHave + 1
+                    table.insert(lines, string.format("- %s: Ada (x%d)", name, c))
+                else
+                    table.insert(lines, string.format("- %s: Belum ada (x0)", name))
+                end
+            end
+            table.insert(lines, string.format("Total: %d/4 Tersedia", totalHave))
+            return table.concat(lines, "\n")
+        end
+
+        local initialArtifactCounts, _ = scanArtifactsInInventory()
+        local artifactStatusParagraph = Section_MainTab_Artifact:AddParagraph({
+            Title = "Status Artifact",
+            Content = formatArtifactStatusText(initialArtifactCounts)
+        })
+
+        local function updateArtifactParagraphUI()
+            local counts, _ = scanArtifactsInInventory()
+            local formatted = formatArtifactStatusText(counts)
+            SafeUpdateParagraph(artifactStatusParagraph, formatted)
+            return counts
+        end
+
+        Section_MainTab_Artifact:AddButton({
+            Title = "Refresh Artifact Status",
+            Description = "Pindai ulang jumlah 4 jenis artifact di dalam tas",
+            Callback = function()
+                updateArtifactParagraphUI()
+                NotifyInfo("Artifact", "Status artifact tas diperbarui.")
+            end
+        })
+
+        local selectedArtifactName = "Diamond Artifact"
+        Section_MainTab_Artifact:AddDropdown("Dropdown_SelectArtifactSpot", {
+            Title = "Select Artifact Spot",
+            Values = ARTIFACT_ORDER,
+            Default = ARTIFACT_ORDER[1],
+            Multi = false,
+            Callback = function(val)
+                if val then selectedArtifactName = val end
+            end
+        })
+
+        Section_MainTab_Artifact:AddButton({
+            Title = "Teleport To Artifact Fishing Spot",
+            Description = "Teleport ke spot mancing artifact yang dipilih di dropdown",
+            Callback = function()
+                local data = ARTIFACT_DATA[selectedArtifactName]
+                if data then
+                    createAndTeleportToPlatform(data.FishSpot, 4)
+                    NotifySuccess("Teleport", "Teleport ke spot mancing: " .. selectedArtifactName)
+                end
+            end
+        })
+
+        Section_MainTab_Artifact:AddButton({
+            Title = "Teleport To Artifact Lever Spot",
+            Description = "Teleport ke posisi tuas lever artifact yang dipilih di dropdown",
+            Callback = function()
+                local data = ARTIFACT_DATA[selectedArtifactName]
+                if data then
+                    destroyEventPlatform()
+                    TeleportTo(data.LeverCF)
+                    NotifySuccess("Teleport", "Teleport ke tuas: " .. selectedArtifactName)
+                end
+            end
+        })
+
+        local function activateLeverAtLocation(leverCF, artifactName)
+            local hrp = getHRP()
+            if not hrp then return false end
+            TeleportTo(leverCF)
+            task.wait(0.5)
+
+            local itemUUID = getArtifactUUID(artifactName)
+            local placeRemote = GetServerRemote("RE/PlaceLeverItem") or (net and net:FindFirstChild("RE/PlaceLeverItem")) or GetServerRemoteReverse("RE/PlaceLeverItem")
+            if placeRemote and itemUUID then
+                pcall(function()
+                    placeRemote:FireServer(itemUUID)
+                end)
+            end
+
+            for _ = 1, 3 do
+                pcall(function()
+                    for _, desc in ipairs(workspace:GetDescendants()) do
+                        if desc:IsA("ProximityPrompt") and desc.Enabled then
+                            local parentPart = desc.Parent
+                            if parentPart and parentPart:IsA("BasePart") then
+                                if (parentPart.Position - hrp.Position).Magnitude <= 18 then
+                                    fireproximityprompt(desc)
+                                end
+                            end
+                        end
+                    end
+                end)
+                task.wait(0.3)
+            end
+            return true
+        end
+
+        Section_MainTab_Artifact:AddButton({
+            Title = "Activate Lever At Current Spot",
+            Description = "Pasang item artifact & klik tuas lever di lokasi saat ini",
+            Callback = function()
+                local data = ARTIFACT_DATA[selectedArtifactName]
+                if data then
+                    activateLeverAtLocation(data.LeverCF, selectedArtifactName)
+                    NotifySuccess("Artifact", "Mencoba memasang & mengaktifkan tuas: " .. selectedArtifactName)
+                    updateArtifactParagraphUI()
+                end
+            end
+        })
+
+        local autoCompleteArtifactActive = false
+        local autoCompleteArtifactThread = nil
+
+        local function runAutoCompleteArtifactLoop()
+            while autoCompleteArtifactActive do
+                local counts, _ = scanArtifactsInInventory()
+                local allDone = true
+
+                for _, artName in ipairs(ARTIFACT_ORDER) do
+                    if not autoCompleteArtifactActive then break end
+                    local data = ARTIFACT_DATA[artName]
+                    local currentCount = counts[artName] or 0
+
+                    if currentCount == 0 then
+                        allDone = false
+                        NotifyInfo("Auto Artifact", "Mancing untuk: " .. artName)
+                        local targetPos = data.FishSpot
+                        local hrp = getHRP()
+                        if hrp then
+                            createAndTeleportToPlatform(targetPos, 4)
+                        end
+                        task.wait(0.6)
+                        equipBestFishingRod()
+                        task.wait(0.4)
+
+                        local maxFishWait = 180
+                        local startWait = tick()
+                        while autoCompleteArtifactActive and (tick() - startWait < maxFishWait) do
+                            local cCheck, _ = scanArtifactsInInventory()
+                            if (cCheck[artName] or 0) > 0 then
+                                NotifySuccess("Auto Artifact", "Mendapatkan " .. artName .. "! Teleport ke tuas...")
+                                break
+                            end
+                            task.wait(1)
+                        end
+                    end
+
+                    local cNow, _ = scanArtifactsInInventory()
+                    if (cNow[artName] or 0) > 0 then
+                        destroyEventPlatform()
+                        task.wait(0.3)
+                        NotifyInfo("Auto Artifact", "Memasang " .. artName .. " ke tuas...")
+                        activateLeverAtLocation(data.LeverCF, artName)
+                        task.wait(1.5)
+                        updateArtifactParagraphUI()
+                    end
+                end
+
+                if allDone then
+                    destroyEventPlatform()
+                    NotifySuccess("Auto Artifact", "Semua 4 Artifact telah selesai dipasang!")
+                    autoCompleteArtifactActive = false
+                    break
+                end
+                task.wait(2)
+            end
+            destroyEventPlatform()
+        end
+
+        Section_MainTab_Artifact:AddToggle("Toggle_AutoCompleteArtifact", {
+            Title = "Auto Complete Artifact",
+            Description = "Otomatis mancing 4 jenis artifact bergantian lalu teleport & pasang ke tuas",
+            Default = false,
+            Callback = function(state)
+                autoCompleteArtifactActive = state
+                if state then
+                    if autoCompleteArtifactThread then
+                        pcall(function() task.cancel(autoCompleteArtifactThread) end)
+                    end
+                    autoCompleteArtifactThread = task.spawn(runAutoCompleteArtifactLoop)
+                    NotifySuccess("Auto Artifact", "Auto Complete Artifact Aktif!")
+                else
+                    if autoCompleteArtifactThread then
+                        pcall(function() task.cancel(autoCompleteArtifactThread) end)
+                        autoCompleteArtifactThread = nil
+                    end
+                    destroyEventPlatform()
+                    NotifyInfo("Auto Artifact", "Auto Complete Artifact Dimatikan.")
                 end
             end
         })
