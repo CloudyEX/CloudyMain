@@ -350,10 +350,11 @@ local lastValidCaughtVisual = {}
 local lastValidFishNotif = {}
 local saveCount = 0
 local _lastRecordedCatchTime = 0
+local _lastSellNotifyTime = 0
 
 local function OnFishCaughtRecorded(source, data)
     local now = tick()
-    if (now - _lastRecordedCatchTime) < 0.05 then return end
+    if (now - _lastRecordedCatchTime) < 0.35 then return end
     _lastRecordedCatchTime = now
     _sessionCatchCount = (_sessionCatchCount or 0) + 1
     saveCount = (saveCount or 0) + 1
@@ -2056,52 +2057,62 @@ local function RunAutoSellLoop()
         while Config.AutoSellState do
             if IsAutoSellCountMode() then
                 local targetCount = math.clamp(tonumber(Config.AutoSellValue) or 1, 1, 9999)
-                local currentInvCount = GetInventoryFishCount()
                 local catchesSinceLastSell = (_sessionCatchCount or 0) - lastCatchBaseline
 
-                if currentInvCount >= targetCount or catchesSinceLastSell >= targetCount then
-                    local soldCount = math.max(currentInvCount, catchesSinceLastSell, targetCount)
+                -- Tunggu sampai player BENAR-BENAR menarik/menangkap sejumlah targetCount ikan baru
+                if catchesSinceLastSell >= targetCount then
+                    local invCount = GetInventoryFishCount()
                     local ok = PerformSellAll()
+                    lastCatchBaseline = _sessionCatchCount or 0
                     if ok then
-                        lastCatchBaseline = _sessionCatchCount or 0
-                        pcall(function()
-                            if Fluent and Fluent.Notify then
-                                Fluent:Notify({
-                                    Title = "[OK] Auto Sell",
-                                    Content = "Berhasil menjual " .. tostring(soldCount) .. " ikan!",
-                                    Duration = 1.5,
-                                    Icon = "lucide:circle-check"
-                                })
-                            end
-                        end)
+                        local now = tick()
+                        if (now - _lastSellNotifyTime) >= 2 then
+                            _lastSellNotifyTime = now
+                            pcall(function()
+                                if Fluent and Fluent.Notify then
+                                    local countDisplay = invCount > 0 and tostring(invCount) or tostring(catchesSinceLastSell)
+                                    Fluent:Notify({
+                                        Title = "[OK] Auto Sell",
+                                        Content = "Berhasil menjual " .. countDisplay .. " ikan!",
+                                        Duration = 1.5,
+                                        Icon = "lucide:circle-check"
+                                    })
+                                end
+                            end)
+                        end
                     end
-                    task.wait(0.4)
+                    task.wait(1.0)
                 else
                     task.wait(0.15)
                 end
             else
-                -- Delay / Loop Mode
+                -- Delay / Loop Mode (detik)
                 local delaySeconds = math.clamp(tonumber(Config.AutoSellValue) or 50, 1, 9999)
                 local startTime = tick()
                 while Config.AutoSellState and not IsAutoSellCountMode() and (tick() - startTime) < delaySeconds do
-                    task.wait(0.1)
+                    task.wait(0.2)
                 end
                 if Config.AutoSellState and not IsAutoSellCountMode() then
+                    local invCount = GetInventoryFishCount()
                     local ok = PerformSellAll()
+                    lastCatchBaseline = _sessionCatchCount or 0
                     if ok then
-                        lastCatchBaseline = _sessionCatchCount or 0
-                        pcall(function()
-                            if Fluent and Fluent.Notify then
-                                Fluent:Notify({
-                                    Title = "[OK] Auto Sell",
-                                    Content = "Auto Sell (Delay) dieksekusi!",
-                                    Duration = 1.5,
-                                    Icon = "lucide:circle-check"
-                                })
-                            end
-                        end)
+                        local now = tick()
+                        if (now - _lastSellNotifyTime) >= 2 then
+                            _lastSellNotifyTime = now
+                            pcall(function()
+                                if Fluent and Fluent.Notify then
+                                    Fluent:Notify({
+                                        Title = "[OK] Auto Sell",
+                                        Content = "Auto Sell (Delay " .. tostring(delaySeconds) .. "s) dieksekusi!",
+                                        Duration = 1.5,
+                                        Icon = "lucide:circle-check"
+                                    })
+                                end
+                            end)
+                        end
                     end
-                    task.wait(0.4)
+                    task.wait(1.0)
                 end
             end
         end
