@@ -4299,11 +4299,19 @@ local aa = {
                 MinSize = Vector2.new(440, 250),
                 MaxSize = Vector2.new(3840, 2160),
             })
+            v.TitleBar =
+                e(p.TitleBar) {
+                    Title = t.Title,
+                    SubTitle = t.SubTitle,
+                    Icon = t.TitleIcon,
+                    TopbarHeight = topbarHeight,
+                    Parent = nil
+                }
             v.Root =
                 s(
                 "Frame",
                 {BackgroundTransparency = 1, Size = FIXED_SIZE, Position = v.Position, Parent = t.Parent},
-                {v.AcrylicPaint.Frame, v.TabDisplay, v.ContainerHolder, F, E, sizeConstraint}
+                {v.AcrylicPaint.Frame, v.TitleBar.Frame, v.TabDisplay, v.ContainerHolder, F, E, sizeConstraint}
             )
             function v.SetSize(self, newSize)
                 if typeof(newSize) == "UDim2" then
