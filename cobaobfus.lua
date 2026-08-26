@@ -5953,7 +5953,7 @@ if MainTab then
                 Active = false,
                 StartTime = 0,
                 Duration = 600,
-                Keywords = {"storm is accurring", "storm is occurring", "massive storm", "storm elemental", "storm event", "stormshell", "a storm has", "storm started", "storm has started"},
+                Keywords = {"storm is accurring", "storm is occurring", "massive storm", "storm elemental", "storm event", "stormshell", "a storm has", "storm started", "storm has started", "storm"},
                 EndKeywords = {"storm has ended", "storm has passed", "storm has cleared", "storm is over", "storm cleared", "storm ended"},
                 CFrame = LOCATIONS["Elemental Island (Storm Area)"] or CFrame.new(-853.494629, 93.8661575, 5541.74609, 0.68788904, -3.32617915e-08, 0.725815892, 2.66287898e-08, 1, 2.05894359e-08, -0.725815892, 5.1643525e-09, 0.68788904)
             },
@@ -5961,7 +5961,7 @@ if MainTab then
                 Active = false,
                 StartTime = 0,
                 Duration = 600,
-                Keywords = {"blizzard has started", "blizzard is occurring", "blizzard is accurring", "blizzard elemental", "blizzard event", "wintertusk", "a blizzard has", "blizzard started"},
+                Keywords = {"blizzard has started", "blizzard is occurring", "blizzard is accurring", "blizzard elemental", "blizzard event", "wintertusk", "a blizzard has", "blizzard started", "blizzard"},
                 EndKeywords = {"blizzard has ended", "blizzard has passed", "blizzard has cleared", "blizzard is over", "blizzard cleared", "blizzard ended"},
                 CFrame = LOCATIONS["Elemental Island (Blizzard Area)"] or CFrame.new(-1082.68604, 124.093239, 5538.86182, -0.394805819, 5.95509704e-08, -0.918764591, -6.92057398e-08, 1, 9.45550127e-08, 0.918764591, 1.00914647e-07, -0.394805819)
             },
@@ -5969,31 +5969,29 @@ if MainTab then
                 Active = false,
                 StartTime = 0,
                 Duration = 600,
-                Keywords = {"volcano has erupted", "volcano is erupting", "volcano eruption", "volcano elemental", "volcano event", "volcanic event", "volcanic elemental", "pyrocoil", "the volcano has", "volcano erupted"},
+                Keywords = {"volcano has erupted", "volcano is erupting", "volcano eruption", "volcano elemental", "volcano event", "volcanic event", "volcanic elemental", "pyrocoil", "the volcano has", "volcano erupted", "volcano", "eruption"},
                 EndKeywords = {"volcano has stopped", "volcano has calmed", "volcano is over", "volcano cleared", "volcano eruption ended", "volcano ended"},
                 CFrame = LOCATIONS["Elemental Island (Volcano Area)"] or CFrame.new(-619.441223, 107.02948, 5522.54736, -0.351876795, 4.22376578e-09, 0.936046302, 3.75576299e-08, 1, 9.60624735e-09, -0.936046302, 3.85358945e-08, -0.351876795)
             }
         }
 
-        local selectedElementalEvents = {
-            ["Storm Elemental Event"] = true
-        }
+        local elementalSelectedChoice = "All Elemental Events"
 
         local function resolveCanonicalEventKey(query)
             if not query then return nil end
             local q = tostring(query):lower():gsub("^%s*(.-)%s*$", "%1")
             if q == "" then return nil end
 
-            if q == "storm" or q == "stormy" or q == "elemental storm" or q == "storm elemental" or q:find("storm elemental event") or q:find("massive storm") or q:find("storm is occurring") or q:find("storm is accurring") or q:find("storm started") or q:find("storm has started") or q:find("stormshell") then
-                return "Storm Elemental Event"
-            end
-
-            if q == "blizzard" or q == "blizzard elemental" or q:find("blizzard elemental event") or q:find("blizzard is occurring") or q:find("blizzard is accurring") or q:find("blizzard has started") or q:find("blizzard started") or q:find("wintertusk") then
+            if q:find("blizzard") or q:find("wintertusk") or q:find("glacial") or q == "blizzard elemental event" then
                 return "Blizzard Elemental Event"
             end
 
-            if q == "volcano" or q == "volcanic" or q == "volcano eruption" or q == "volcano elemental" or q:find("volcano elemental event") or q:find("volcano has erupted") or q:find("volcano is erupting") or q:find("volcano erupted") or q:find("volcanic event") or q:find("pyrocoil") then
+            if q:find("volcano") or q:find("volcanic") or q:find("pyrocoil") or q:find("eruption") or q:find("magma") or q == "volcano elemental event" then
                 return "Volcano Elemental Event"
+            end
+
+            if q:find("storm") or q:find("stormshell") or q:find("atmospheric") or q == "storm elemental event" then
+                return "Storm Elemental Event"
             end
 
             return nil
@@ -6252,6 +6250,21 @@ if MainTab then
         local elementalSavedCFrame = nil
         local elementalCurrentEvent = nil
 
+        local function getSelectedCanonicalEvents()
+            local list = {}
+            if elementalSelectedChoice == "All Elemental Events" or elementalSelectedChoice == "All Events" then
+                table.insert(list, "Storm Elemental Event")
+                table.insert(list, "Blizzard Elemental Event")
+                table.insert(list, "Volcano Elemental Event")
+            else
+                local key = resolveCanonicalEventKey(elementalSelectedChoice)
+                if key then
+                    table.insert(list, key)
+                end
+            end
+            return list
+        end
+
         local function runElementalEventLoop()
             while elementalAutoTPState do
                 pcall(function()
@@ -6267,20 +6280,18 @@ if MainTab then
                             elementalSavedCFrame = nil
                         end
                     else
-                        for evName, isSelected in pairs(selectedElementalEvents) do
-                            if isSelected then
-                                local canonicalKey = resolveCanonicalEventKey(evName)
-                                if canonicalKey and isElementalEventActive(canonicalKey) then
-                                    local targetData = ElementalEventState[canonicalKey]
-                                    if targetData and targetData.CFrame then
-                                        local hrp = getHRP()
-                                        if hrp then
-                                            elementalSavedCFrame = hrp.CFrame
-                                            elementalCurrentEvent = canonicalKey
-                                            NotifySuccess("Elemental Event", "Event " .. tostring(canonicalKey) .. " aktif! Teleporting ke lokasi...")
-                                            TeleportTo(targetData.CFrame)
-                                            break
-                                        end
+                        local targetEvents = getSelectedCanonicalEvents()
+                        for _, canonicalKey in ipairs(targetEvents) do
+                            if isElementalEventActive(canonicalKey) then
+                                local targetData = ElementalEventState[canonicalKey]
+                                if targetData and targetData.CFrame then
+                                    local hrp = getHRP()
+                                    if hrp then
+                                        elementalSavedCFrame = hrp.CFrame
+                                        elementalCurrentEvent = canonicalKey
+                                        NotifySuccess("Elemental Event", "Event " .. tostring(canonicalKey) .. " aktif! Teleporting ke lokasi...")
+                                        TeleportTo(targetData.CFrame)
+                                        break
                                     end
                                 end
                             end
@@ -6291,23 +6302,22 @@ if MainTab then
             end
         end
 
-        Section_MainTab_Elemental:AddDropdown("MultiDropdown_SelectElementalEvent", {
+        local elementalEventDropdownValues = {
+            "All Elemental Events",
+            "Storm Elemental Event",
+            "Blizzard Elemental Event",
+            "Volcano Elemental Event"
+        }
+
+        Section_MainTab_Elemental:AddDropdown("Dropdown_SelectElementalEvent", {
             Title = "Select Elemental Event",
-            Values = {"Storm Elemental Event", "Blizzard Elemental Event", "Volcano Elemental Event"},
-            Default = {"Storm Elemental Event"},
-            Multi = true,
+            Values = elementalEventDropdownValues,
+            Default = "All Elemental Events",
+            Multi = false,
             Callback = function(val)
-                selectedElementalEvents = {}
-                if typeof(val) == "table" then
-                    for k, v in pairs(val) do
-                        if v == true then
-                            selectedElementalEvents[k] = true
-                        elseif typeof(v) == "string" then
-                            selectedElementalEvents[v] = true
-                        end
-                    end
-                elseif typeof(val) == "string" then
-                    selectedElementalEvents[val] = true
+                if type(val) == "string" and val ~= "" then
+                    elementalSelectedChoice = val
+                    NotifyInfo("Elemental Event", "Event terpilih: " .. val)
                 end
             end
         })
@@ -6319,21 +6329,11 @@ if MainTab then
             Callback = function(state)
                 elementalAutoTPState = state
                 if state then
-                    local hasSelected = false
-                    for _, v in pairs(selectedElementalEvents) do
-                        if v then hasSelected = true; break end
-                    end
-                    if not hasSelected then
-                        NotifyWarning("Elemental Event", "Pilih minimal 1 event di dropdown!")
-                        elementalAutoTPState = false
-                        return
-                    end
-
                     if elementalAutoTPThread then
                         pcall(function() task.cancel(elementalAutoTPThread) end)
                     end
                     elementalAutoTPThread = task.spawn(runElementalEventLoop)
-                    NotifySuccess("Elemental Event", "Auto Event Aktif! Memindai event...")
+                    NotifySuccess("Elemental Event", "Auto Event Aktif! Memantau: " .. tostring(elementalSelectedChoice))
                 else
                     if elementalAutoTPThread then
                         pcall(function() task.cancel(elementalAutoTPThread) end)
@@ -6353,7 +6353,7 @@ if MainTab then
         local Section_MainTab_Regulator = MainTab:AddSection("Auto Repair Regulator (Elemental Island)")
 
         Section_MainTab_Regulator:AddParagraph({
-            Title = "📖 Panduan Auto Repair Regulator",
+            Title = "Panduan Auto Repair Regulator",
             Content = "1. Pilih Regulator yang ingin diperbaiki di dropdown.\n2. Aktifkan toggle 'Auto Repair Regulator'.\n3. Saat Event terkait aktif, script otomatis teleport ke Area Event & equip rod.\n4. Silakan aktifkan fitur Auto Fishing manual yang ingin kamu gunakan.\n5. Setelah item khusus didapatkan, script otomatis unequip rod, teleport ke mesin regulator, dan berinteraksi dengan ProximityPrompt untuk memperbaiki mesin."
         })
 
@@ -6464,63 +6464,46 @@ if MainTab then
                         if RE_Unequip:IsA("RemoteEvent") then
                             RE_Unequip:FireServer()
                         elseif RE_Unequip:IsA("RemoteFunction") then
-                            RE_Unequip:InvokeServer()
-                        end
-                    end)
-                end
-                if Events.unequip then
-                    pcall(function() Events.unequip:FireServer() end)
-                end
-            end)
-        end
-
         local function triggerNearestProximityPrompt(maxDist)
-            maxDist = maxDist or 35
-            local char = LocalPlayer.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
+            maxDist = maxDist or 30
+            local hrp = getHRP()
             if not hrp then return false end
 
-            local targetPrompt = nil
+            local closestPrompt = nil
             local closestDist = maxDist
 
-            for _, desc in ipairs(Workspace:GetDescendants()) do
-                if desc:IsA("ProximityPrompt") and desc.Enabled then
-                    local pPos = nil
-                    if desc.Parent:IsA("BasePart") then
-                        pPos = desc.Parent.Position
-                    elseif desc.Parent:IsA("Model") and desc.Parent.PrimaryPart then
-                        pPos = desc.Parent.PrimaryPart.Position
-                    elseif desc.Parent:IsA("Attachment") then
-                        pPos = desc.Parent.WorldPosition
-                    end
-
-                    if pPos then
-                        local d = (hrp.Position - pPos).Magnitude
-                        if d < closestDist then
-                            closestDist = d
-                            targetPrompt = desc
+            pcall(function()
+                for _, prompt in ipairs(workspace:GetDescendants()) do
+                    if prompt:IsA("ProximityPrompt") and prompt.Enabled then
+                        local promptPart = prompt.Parent
+                        if promptPart and promptPart:IsA("BasePart") then
+                            local d = (promptPart.Position - hrp.Position).Magnitude
+                            if d <= closestDist then
+                                closestDist = d
+                                closestPrompt = prompt
+                            end
                         end
                     end
                 end
-            end
+            end)
 
-            if targetPrompt then
-                targetPrompt.RequiresLineOfSight = false
-                targetPrompt.MaxActivationDistance = math.max(targetPrompt.MaxActivationDistance or 10, 35)
-                local holdTime = (targetPrompt.HoldDuration and targetPrompt.HoldDuration > 0) and targetPrompt.HoldDuration or 0.5
+            if closestPrompt then
+                closestPrompt.RequiresLineOfSight = false
+                closestPrompt.MaxActivationDistance = math.max(closestPrompt.MaxActivationDistance or 10, 35)
+                local holdTime = (closestPrompt.HoldDuration and closestPrompt.HoldDuration > 0) and closestPrompt.HoldDuration or 0.5
 
                 if typeof(fireproximityprompt) == "function" then
-                    pcall(function() fireproximityprompt(targetPrompt, 0) end)
-                    pcall(function() fireproximityprompt(targetPrompt, holdTime) end)
-                    pcall(function() fireproximityprompt(targetPrompt) end)
+                    pcall(function() fireproximityprompt(closestPrompt, 0) end)
+                    pcall(function() fireproximityprompt(closestPrompt, holdTime) end)
+                    pcall(function() fireproximityprompt(closestPrompt) end)
                 end
 
-                pcall(function() targetPrompt:InputHoldBegin() end)
+                pcall(function() closestPrompt:InputHoldBegin() end)
                 task.wait(holdTime + 0.1)
-                pcall(function() targetPrompt:InputHoldEnd() end)
+                pcall(function() closestPrompt:InputHoldEnd() end)
 
                 if typeof(fireproximityprompt) == "function" then
-                    pcall(function() fireproximityprompt(targetPrompt) end)
+                    pcall(function() fireproximityprompt(closestPrompt) end)
                 end
                 return true
             end
@@ -6533,9 +6516,10 @@ if MainTab then
 
             while regulatorState do
                 pcall(function()
-                    for regName, isSelected in pairs(selectedRegulators) do
-                        if isSelected and REGULATOR_CONFIG[regName] then
-                            local config = REGULATOR_CONFIG[regName]
+                    local targetRegulators = getSelectedRegulatorsList()
+                    for _, regName in ipairs(targetRegulators) do
+                        local config = REGULATOR_CONFIG[regName]
+                        if config then
                             local hasItem, count = hasRequiredItemInInventory(config.ItemName, config.ItemId)
 
                             if hasItem and config.MachineCFrame and activePhase ~= "REPAIRING" and activePhase ~= "DONE" then
@@ -6614,23 +6598,22 @@ if MainTab then
             end
         end
 
-        Section_MainTab_Regulator:AddDropdown("MultiDropdown_SelectRegulator", {
+        local regulatorDropdownValues = {
+            "Atmospheric Regulator",
+            "Glacial Regulator",
+            "Magma Regulator",
+            "All Regulators"
+        }
+
+        Section_MainTab_Regulator:AddDropdown("Dropdown_SelectRegulator", {
             Title = "Select Regulator",
-            Values = {"Atmospheric Regulator", "Glacial Regulator", "Magma Regulator"},
-            Default = {"Atmospheric Regulator"},
-            Multi = true,
+            Values = regulatorDropdownValues,
+            Default = "Atmospheric Regulator",
+            Multi = false,
             Callback = function(val)
-                selectedRegulators = {}
-                if typeof(val) == "table" then
-                    for k, v in pairs(val) do
-                        if v == true then
-                            selectedRegulators[k] = true
-                        elseif typeof(v) == "string" then
-                            selectedRegulators[v] = true
-                        end
-                    end
-                elseif typeof(val) == "string" then
-                    selectedRegulators[val] = true
+                if type(val) == "string" and val ~= "" then
+                    selectedRegulatorChoice = val
+                    NotifyInfo("Auto Regulator", "Regulator terpilih: " .. val)
                 end
             end
         })
@@ -6642,27 +6625,21 @@ if MainTab then
             Callback = function(state)
                 regulatorState = state
                 if state then
-                    local hasSelected = false
-                    for _, v in pairs(selectedRegulators) do
-                        if v then hasSelected = true; break end
-                    end
-                    if not hasSelected then
-                        NotifyWarning("Auto Regulator", "Pilih minimal 1 regulator di dropdown!")
-                        regulatorState = false
-                        return
-                    end
-
                     if regulatorThread then
                         pcall(function() task.cancel(regulatorThread) end)
                     end
                     regulatorThread = task.spawn(runAutoRegulatorLoop)
-                    NotifySuccess("Auto Regulator", "Auto Repair Regulator Aktif! Memindai event...")
+                    NotifySuccess("Auto Regulator", "Auto Repair Aktif! Memantau: " .. tostring(selectedRegulatorChoice))
                 else
                     if regulatorThread then
                         pcall(function() task.cancel(regulatorThread) end)
                         regulatorThread = nil
                     end
-                    regulatorSavedPos = nil
+                    if regulatorSavedPos then
+                        NotifyInfo("Auto Regulator", "Auto Repair dimatikan. Kembali ke posisi awal...")
+                        TeleportTo(regulatorSavedPos)
+                        regulatorSavedPos = nil
+                    end
                     NotifyInfo("Auto Regulator", "Auto Repair Regulator Dimatikan.")
                 end
             end
@@ -6786,21 +6763,19 @@ if MainTab then
 
         local function formatArtifactStatusText(status, totalOwned)
             local lines = {}
-            table.insert(lines, string.format("📦 Status Koleksi: %d/4 Artifact di Inventory", totalOwned))
-            table.insert(lines, "────────────────────────────")
+            table.insert(lines, string.format("Total: %d/4 Artifact Dimiliki", totalOwned))
             for _, name in ipairs(ARTIFACT_ORDER) do
                 local data = status[name]
                 if data and data.Owned then
-                    table.insert(lines, string.format("✅ %s : Ada di Inventory (x%d)", name, data.Count))
+                    table.insert(lines, string.format("- %s: Ada (x%d)", name, data.Count))
                 else
-                    table.insert(lines, string.format("❌ %s : Belum Ada di Inventory", name))
+                    table.insert(lines, string.format("- %s: Belum ada", name))
                 end
             end
-            table.insert(lines, "────────────────────────────")
             if totalOwned >= 4 then
-                table.insert(lines, "🎉 Semua 4 Artifact sudah ada di inventory! Siap dipasang ke lever.")
+                table.insert(lines, "Status: Semua 4 artifact lengkap.")
             else
-                table.insert(lines, "🎣 Nyalakan 'Auto Complete Artifact' di bawah untuk otomatis memancing di spot & pasang ke lever.")
+                table.insert(lines, "Status: Menunggu pemancingan artifact selesai.")
             end
             return table.concat(lines, "\n")
         end
@@ -7083,25 +7058,23 @@ if MainTab then
 
         local function formatRuinDoorStatusText(doorStatus, fishStatus, totalOwned, missingList)
             local lines = {}
-            local doorIcon = (doorStatus == "UNLOCKED") and "🔓 UNLOCKED (Terbuka)" or "🔒 LOCKED (Terkunci)"
-            table.insert(lines, string.format("🚪 Status Pintu Ruin: %s", doorIcon))
-            table.insert(lines, string.format("🐟 Koleksi Ikan: %d/4 Jenis Terkumpul", totalOwned))
-            table.insert(lines, "────────────────────────────")
+            local doorText = (doorStatus == "UNLOCKED") and "Unlocked (Terbuka)" or "Locked (Terkunci)"
+            table.insert(lines, string.format("Pintu Ruin: %s", doorText))
+            table.insert(lines, string.format("Ikan Terkumpul: %d/4", totalOwned))
             for _, fishName in ipairs(RUIN_FISH_ITEMS) do
                 local data = fishStatus[fishName]
                 if data and data.Owned then
-                    table.insert(lines, string.format("✅ %s : Ada di Inventory (x%d)", fishName, data.Count))
+                    table.insert(lines, string.format("- %s: Ada (x%d)", fishName, data.Count))
                 else
-                    table.insert(lines, string.format("❌ %s : Kurang / Belum Ada", fishName))
+                    table.insert(lines, string.format("- %s: Belum ada", fishName))
                 end
             end
-            table.insert(lines, "────────────────────────────")
             if doorStatus == "UNLOCKED" then
-                table.insert(lines, "🎉 Pintu Ruin sudah terbuka! Kamu bisa masuk ke dalam.")
+                table.insert(lines, "Status: Pintu sudah terbuka.")
             elseif totalOwned >= 4 then
-                table.insert(lines, "💡 Semua 4 ikan sudah lengkap! Aktifkan toggle untuk otomatis unlock pintu.")
+                table.insert(lines, "Status: 4 ikan lengkap, siap unlock pintu.")
             else
-                table.insert(lines, string.format("🎣 Ikan yang masih dicari: %s", table.concat(missingList, ", ")))
+                table.insert(lines, string.format("Kurang: %s", table.concat(missingList, ", ")))
             end
             return table.concat(lines, "\n")
         end
@@ -7334,26 +7307,16 @@ if MainTab then
         local function formatLochnessStatusText(trackerData)
             local lines = {}
             if not trackerData.Found then
-                table.insert(lines, "📡 Event Tracker: Memindai GUI Tracker di Workspace...")
-                table.insert(lines, "────────────────────────────")
-                table.insert(lines, "⏳ Mulai Dalam: N/A")
-                table.insert(lines, "⏱️ Sisa Durasi: N/A")
-                table.insert(lines, "🐟 Tertangkap: N/A | Chance: N/A")
-                table.insert(lines, "────────────────────────────")
-                table.insert(lines, "⚠️ Pastikan 'Event Tracker' sudah dimuat di server/workspace.")
+                table.insert(lines, "Tracker: Menunggu event tracker dimuat...")
+                table.insert(lines, "Countdown: N/A")
+                table.insert(lines, "Durasi: N/A")
+                table.insert(lines, "Tertangkap: N/A")
             else
-                local statusIcon = trackerData.IsActive and "🟢 SEDANG BERLANGSUNG" or "🔴 BELUM DIMULAI"
-                table.insert(lines, string.format("📡 Status Event: %s", statusIcon))
-                table.insert(lines, "────────────────────────────")
-                table.insert(lines, string.format("⏳ Mulai Dalam: %s", trackerData.Countdown))
-                table.insert(lines, string.format("⏱️ Sisa Durasi Event: %s", trackerData.Timer))
-                table.insert(lines, string.format("🐟 Tertangkap: %s | Peluang: %s", trackerData.Quantity, trackerData.Odds))
-                table.insert(lines, "────────────────────────────")
-                if trackerData.IsActive then
-                    table.insert(lines, "🔥 Event Ancient Lochness sedang aktif! Segera pancing.")
-                else
-                    table.insert(lines, "💡 Aktifkan toggle di bawah untuk otomatis teleport saat event dimulai & kembali saat selesai.")
-                end
+                local statusText = trackerData.IsActive and "Sedang Berlangsung" or "Belum Mulai"
+                table.insert(lines, string.format("Status Event: %s", statusText))
+                table.insert(lines, string.format("Mulai Dalam: %s", trackerData.Countdown))
+                table.insert(lines, string.format("Sisa Waktu: %s", trackerData.Timer))
+                table.insert(lines, string.format("Tertangkap: %s | Chance: %s", trackerData.Quantity, trackerData.Odds))
             end
             return table.concat(lines, "\n")
         end
@@ -10121,7 +10084,266 @@ if ShopTab then
                 UpdateBMStatus()
             end)
         end)
- end)
+
+        local Section_ShopTab_Merchant = ShopTab:AddSection("Traveling Merchant")
+
+        local MERCHANT_POS = Vector3.new(-127.747, 2.718, 2759.031)
+        local MERCHANT_LOOK = Vector3.new(-0.920, 0.000, -0.392)
+        local MERCHANT_CFRAME = CFrame.lookAt(MERCHANT_POS, MERCHANT_POS + MERCHANT_LOOK)
+
+        local function getMerchantRefreshTimeString()
+            local serverTime = workspace:GetServerTimeNow()
+            local secondsInDay = 86400
+            local nextRefreshTime = (math.floor(serverTime / secondsInDay) + 1) * secondsInDay
+            local timeRemaining = math.max(nextRefreshTime - serverTime, 0)
+            local h = math.floor(timeRemaining / 3600)
+            local m = math.floor((timeRemaining % 3600) / 60)
+            local s = math.floor(timeRemaining % 60)
+            return string.format("%dh %dm %ds", h, m, s)
+        end
+
+        local function getMerchantStockDetails()
+            local itemDetails = {}
+            local merchantReplion = nil
+            pcall(function()
+                local RepModule = ReplicatedStorage:FindFirstChild("Packages") and ReplicatedStorage.Packages:FindFirstChild("Replion")
+                if RepModule then
+                    local RClient = require(RepModule).Client
+                    merchantReplion = RClient:GetReplion("Merchant") or RClient:WaitReplion("Merchant", 2)
+                end
+            end)
+
+            local merchantData = merchantReplion and merchantReplion.Data
+            local marketItemDataModule = ReplicatedStorage:FindFirstChild("Shared") and ReplicatedStorage.Shared:FindFirstChild("MarketItemData")
+            local marketItemData = marketItemDataModule and require(marketItemDataModule)
+            local itemUtilModule = ReplicatedStorage:FindFirstChild("Shared") and ReplicatedStorage.Shared:FindFirstChild("ItemUtility")
+            local itemUtility = itemUtilModule and require(itemUtilModule)
+
+            if merchantData and merchantData.Items and type(merchantData.Items) == "table" and marketItemData then
+                for _, itemID in ipairs(merchantData.Items) do
+                    local marketData = nil
+                    for _, data in ipairs(marketItemData) do
+                        if data.Id == itemID then
+                            marketData = data
+                            break
+                        end
+                    end
+
+                    if marketData and not marketData.SkinCrate and marketData.Price then
+                        local name = marketData.Identifier or "Item " .. tostring(itemID)
+                        if itemUtility and itemUtility.GetItemDataFromItemType then
+                            pcall(function()
+                                local detail = itemUtility:GetItemDataFromItemType(marketData.Type, marketData.Identifier)
+                                if detail and detail.Data and detail.Data.Name then
+                                    name = detail.Data.Name
+                                end
+                            end)
+                        end
+
+                        table.insert(itemDetails, {
+                            Name = name,
+                            ID = itemID,
+                            Price = marketData.Price,
+                            Currency = marketData.Currency or "Coins"
+                        })
+                    end
+                end
+            end
+
+            return itemDetails, merchantReplion
+        end
+
+        local function buyMerchantItem(itemID, itemName)
+            local remote = GetServerRemote("RF/PurchaseMarketItem") or GetServerRemote("PurchaseMarketItem") or GetServerRemote("RE/PurchaseMarketItem")
+            if not remote then
+                NotifyWarning("Merchant", "Remote pembelian tidak ditemukan.")
+                return false
+            end
+            local success, res = pcall(function()
+                if remote:IsA("RemoteFunction") then
+                    return remote:InvokeServer(itemID)
+                else
+                    remote:FireServer(itemID)
+                    return true
+                end
+            end)
+            if success then
+                NotifySuccess("Merchant", "Berhasil membeli: " .. (itemName or tostring(itemID)))
+                return true
+            else
+                NotifyError("Merchant", "Gagal membeli: " .. tostring(res or "Error"))
+                return false
+            end
+        end
+
+        local function formatMerchantParagraphText(itemDetails)
+            local lines = {}
+            table.insert(lines, "Reset Stok: " .. getMerchantRefreshTimeString())
+            table.insert(lines, string.format("Jumlah Stok: %d Item Tersedia", #itemDetails))
+            if #itemDetails == 0 then
+                table.insert(lines, "Stok saat ini kosong atau sedang memuat data.")
+            else
+                for _, item in ipairs(itemDetails) do
+                    local priceStr = tostring(item.Price)
+                    if type(item.Price) == "number" then
+                        priceStr = string.format("%d", item.Price)
+                    end
+                    table.insert(lines, string.format("- %s: %s %s", item.Name, priceStr, item.Currency))
+                end
+            end
+            return table.concat(lines, "\n")
+        end
+
+        local initialMerchantStock, _ = getMerchantStockDetails()
+        local merchantStatusParagraph = Section_ShopTab_Merchant:AddParagraph({
+            Title = "Status Stok Merchant",
+            Content = formatMerchantParagraphText(initialMerchantStock)
+        })
+
+        local function updateMerchantParagraphUI()
+            local details, _ = getMerchantStockDetails()
+            local formatted = formatMerchantParagraphText(details)
+            SafeUpdateParagraph(merchantStatusParagraph, formatted)
+            return details
+        end
+
+        task.spawn(function()
+            while true do
+                task.wait(1)
+                pcall(function()
+                    updateMerchantParagraphUI()
+                end)
+            end
+        end)
+
+        Section_ShopTab_Merchant:AddButton({
+            Title = "Refresh Merchant Stock",
+            Description = "Pindai ulang live stok Traveling Merchant",
+            Callback = function()
+                local details = updateMerchantParagraphUI()
+                NotifyInfo("Merchant", string.format("Stok di-refresh! %d item tersedia.", #details))
+            end
+        })
+
+        local selectedMerchantItemName = nil
+        local selectedMerchantItemId = nil
+
+        local function getMerchantDropdownOptions()
+            local options = {}
+            local details = getMerchantStockDetails()
+            for _, item in ipairs(details) do
+                table.insert(options, item.Name)
+            end
+            if #options == 0 then
+                table.insert(options, "Tidak ada stok")
+            end
+            return options, details
+        end
+
+        local initialOptions, initialItems = getMerchantDropdownOptions()
+        local merchantDropdownRef = Section_ShopTab_Merchant:AddDropdown("Dropdown_SelectMerchantStockItem", {
+            Title = "Select Merchant Item",
+            Values = initialOptions,
+            Default = initialOptions[1],
+            Multi = false,
+            Callback = function(val)
+                if val and val ~= "Tidak ada stok" then
+                    selectedMerchantItemName = val
+                    local currentDetails = getMerchantStockDetails()
+                    for _, item in ipairs(currentDetails) do
+                        if item.Name == val then
+                            selectedMerchantItemId = item.ID
+                            break
+                        end
+                    end
+                end
+            end
+        })
+
+        Section_ShopTab_Merchant:AddButton({
+            Title = "Buy Selected Item",
+            Description = "Beli 1x item yang dipilih di dropdown",
+            Callback = function()
+                if not selectedMerchantItemId then
+                    local currentDetails = getMerchantStockDetails()
+                    if #currentDetails > 0 then
+                        selectedMerchantItemId = currentDetails[1].ID
+                        selectedMerchantItemName = currentDetails[1].Name
+                    end
+                end
+                if selectedMerchantItemId then
+                    buyMerchantItem(selectedMerchantItemId, selectedMerchantItemName)
+                else
+                    NotifyWarning("Merchant", "Pilih item yang valid terlebih dahulu.")
+                end
+            end
+        })
+
+        Section_ShopTab_Merchant:AddButton({
+            Title = "Buy All Current Stock",
+            Description = "Beli semua item yang sedang ready di stok pedagang",
+            Callback = function()
+                local currentDetails = getMerchantStockDetails()
+                if #currentDetails == 0 then
+                    NotifyWarning("Merchant", "Tidak ada item di stok saat ini.")
+                    return
+                end
+                for _, item in ipairs(currentDetails) do
+                    buyMerchantItem(item.ID, item.Name)
+                    task.wait(0.5)
+                end
+                NotifySuccess("Merchant", "Selesai memproses pembelian semua stok!")
+            end
+        })
+
+        Section_ShopTab_Merchant:AddButton({
+            Title = "Teleport To Merchant Shop",
+            Description = "Teleport langsung ke lokasi pedagang Traveling Merchant",
+            Callback = function()
+                TeleportTo(MERCHANT_CFRAME)
+                NotifySuccess("Merchant", "Teleport ke Traveling Merchant.")
+            end
+        })
+
+        local autoBuyMerchantStockActive = false
+        local autoBuyMerchantStockThread = nil
+
+        local function runAutoBuyMerchantStockLoop()
+            while autoBuyMerchantStockActive do
+                local details = getMerchantStockDetails()
+                if #details > 0 then
+                    for _, item in ipairs(details) do
+                        if not autoBuyMerchantStockActive then break end
+                        buyMerchantItem(item.ID, item.Name)
+                        task.wait(0.6)
+                    end
+                end
+                task.wait(2)
+            end
+        end
+
+        Section_ShopTab_Merchant:AddToggle("Toggle_AutoBuyCurrentStock", {
+            Title = "Auto Buy Current Stock",
+            Description = "Otomatis beli semua item yang tersedia di stok pedagang secara terus-menerus",
+            Default = false,
+            Callback = function(state)
+                autoBuyMerchantStockActive = state
+                if state then
+                    if autoBuyMerchantStockThread then
+                        pcall(function() task.cancel(autoBuyMerchantStockThread) end)
+                    end
+                    autoBuyMerchantStockThread = task.spawn(runAutoBuyMerchantStockLoop)
+                    NotifySuccess("Merchant", "Auto Buy Current Stock Aktif!")
+                else
+                    if autoBuyMerchantStockThread then
+                        pcall(function() task.cancel(autoBuyMerchantStockThread) end)
+                        autoBuyMerchantStockThread = nil
+                    end
+                    NotifyInfo("Merchant", "Auto Buy Current Stock Dimatikan.")
+                end
+            end
+        })
+    end)
 end
 
 if MiscTab then
