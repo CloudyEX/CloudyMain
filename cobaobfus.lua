@@ -6826,28 +6826,28 @@ if MainTab then
 
         local function formatArtifactStatusText(status, totalOwned)
             local lines = {}
-            table.insert(lines, string.format("📦 Status Inventory: %d/4 Artifact Ditemukan", totalOwned))
+            table.insert(lines, string.format("📦 Status Koleksi: %d/4 Artifact Dimiliki", totalOwned))
             table.insert(lines, "────────────────────────────")
             for _, name in ipairs(ARTIFACT_ORDER) do
                 local data = status[name]
                 if data and data.Owned then
-                    table.insert(lines, string.format("✅ %s (ID: %d) : Ada x%d di Inventory", name, data.Id, data.Count))
+                    table.insert(lines, string.format("✅ %s : Sudah Ada (x%d)", name, data.Count))
                 else
-                    table.insert(lines, string.format("❌ %s (ID: %d) : Belum Ada di Inventory", name, data and data.Id or 0))
+                    table.insert(lines, string.format("❌ %s : Belum Ada di Inventory", name))
                 end
             end
             table.insert(lines, "────────────────────────────")
-            if totalOwned > 0 then
-                table.insert(lines, "💡 Siap diserahkan! Nyalakan 'Auto Complete Artifact' di bawah.")
+            if totalOwned >= 4 then
+                table.insert(lines, "🎉 Selamat! Semua 4 Artifact sudah lengkap di inventory.")
             else
-                table.insert(lines, "⚠️ Tidak ada artifact di inventory. Dapatkan artifact terlebih dahulu.")
+                table.insert(lines, "🎣 Nyalakan 'Auto Complete Artifact' di bawah untuk otomatis memancing di spot artifact yang belum didapatkan.")
             end
             return table.concat(lines, "\n")
         end
 
         local initialStatus, initialTotal = scanArtifactsInventory()
         local artifactStatusParagraph = Section_MainTab_Artifact:AddParagraph({
-            Title = "📜 Status Inventory Artifact",
+            Title = "Status Koleksi Artifact",
             Content = formatArtifactStatusText(initialStatus, initialTotal)
         })
 
@@ -6859,17 +6859,17 @@ if MainTab then
         end
 
         Section_MainTab_Artifact:AddButton({
-            Title = "🔄 Refresh Artifact Status",
+            Title = "Refresh Artifact Status",
             Description = "Pindai ulang isi inventory dan perbarui info status artifact",
             Callback = function()
                 local _, total = updateArtifactParagraphUI()
-                NotifyInfo("Artifact Status", string.format("Inventory di-refresh! Ditemukan %d/4 artifact.", total))
+                NotifyInfo("Artifact Status", string.format("Status di-refresh! %d/4 artifact dimiliki.", total))
             end
         })
 
         local selectedArtifactForTP = "Diamond Artifact"
         Section_MainTab_Artifact:AddDropdown("Dropdown_SelectArtifactLocation", {
-            Title = "Select Artifact Location",
+            Title = "Select Artifact Fishing Spot",
             Values = ARTIFACT_ORDER,
             Default = "Diamond Artifact",
             Multi = false,
@@ -6881,15 +6881,17 @@ if MainTab then
         })
 
         Section_MainTab_Artifact:AddButton({
-            Title = "📍 Teleport to Selected Artifact",
-            Description = "Teleport langsung ke lokasi altar artifact yang dipilih",
+            Title = "Teleport to Selected Spot",
+            Description = "Teleport ke spot pancing artifact terpilih & equip rod",
             Callback = function()
                 local cfg = ARTIFACT_CONFIG[selectedArtifactForTP]
                 if cfg and cfg.CFrame then
                     TeleportTo(cfg.CFrame)
-                    NotifySuccess("Artifact TP", "Teleport ke altar " .. selectedArtifactForTP .. "!")
+                    task.wait(0.5)
+                    ensureRodEquipped(true)
+                    NotifySuccess("Artifact Spot", "Tiba di spot " .. selectedArtifactForTP .. "! Rod ter-equip. Silakan nyalakan fitur Auto Fishing pilihan Anda.")
                 else
-                    NotifyWarning("Artifact TP", "Lokasi artifact tidak ditemukan.")
+                    NotifyWarning("Artifact Spot", "Lokasi spot artifact tidak ditemukan.")
                 end
             end
         })
@@ -6900,53 +6902,53 @@ if MainTab then
         local function runAutoCompleteArtifactLoop()
             while autoCompleteArtifactActive do
                 local status, totalOwned = updateArtifactParagraphUI()
-                if totalOwned == 0 then
-                    NotifyWarning("Auto Artifact", "Tidak ada artifact yang terdeteksi di Inventory!")
+                if totalOwned >= 4 then
+                    NotifySuccess("Auto Artifact", "Semua 4 Artifact sudah lengkap di Inventory!")
                     autoCompleteArtifactActive = false
                     break
                 end
 
-                local completedCount = 0
+                local targetArtifactName = nil
+                local targetArtifactData = nil
+
                 for _, name in ipairs(ARTIFACT_ORDER) do
-                    if not autoCompleteArtifactActive then break end
                     local data = status[name]
-                    if data and data.Owned then
-                        NotifyInfo("Auto Artifact", "Menuju altar " .. name .. "...")
-                        TeleportTo(data.CFrame)
-                        task.wait(1)
-
-                        if unequipAllTools then unequipAllTools() end
-                        task.wait(0.5)
-
-                        local interacted = triggerNearestProximityPrompt and triggerNearestProximityPrompt(35)
-                        if interacted then
-                            NotifySuccess("Auto Artifact", "Berhasil memasang " .. name .. "!")
-                            completedCount = completedCount + 1
-                        else
-                            task.wait(1)
-                            if triggerNearestProximityPrompt then
-                                triggerNearestProximityPrompt(35)
-                            end
-                        end
-                        task.wait(1.5)
-                        updateArtifactParagraphUI()
+                    if data and not data.Owned then
+                        targetArtifactName = name
+                        targetArtifactData = data
+                        break
                     end
                 end
 
-                if completedCount > 0 then
-                    NotifySuccess("Auto Artifact", string.format("Selesai! %d artifact berhasil dipasang.", completedCount))
-                else
-                    NotifyInfo("Auto Artifact", "Semua artifact yang ada telah diproses.")
+                if not targetArtifactName or not targetArtifactData then
+                    NotifySuccess("Auto Artifact", "Semua 4 Artifact telah berhasil didapatkan!")
+                    autoCompleteArtifactActive = false
+                    break
                 end
 
-                autoCompleteArtifactActive = false
-                break
+                NotifyInfo("Auto Artifact", "Menuju spot pancing " .. targetArtifactName .. "...")
+                TeleportTo(targetArtifactData.CFrame)
+                task.wait(0.6)
+                ensureRodEquipped(true)
+                NotifySuccess("Auto Artifact", "Tiba di spot " .. targetArtifactName .. "! Rod ter-equip. Silakan aktifkan fitur Auto Fishing pilihan Anda.")
+
+                -- Wait until the artifact is obtained
+                while autoCompleteArtifactActive do
+                    task.wait(1.5)
+                    local curStatus, curTotal = updateArtifactParagraphUI()
+                    local curData = curStatus[targetArtifactName]
+                    if curData and curData.Owned then
+                        NotifySuccess("Auto Artifact", "Berhasil mendapatkan " .. targetArtifactName .. "! Beralih ke artifact berikutnya...")
+                        task.wait(1)
+                        break
+                    end
+                end
             end
         end
 
         Section_MainTab_Artifact:AddToggle("Toggle_AutoCompleteArtifact", {
             Title = "Auto Complete Artifact",
-            Description = "Otomatis teleport & submit artifact yang ada di inventory ke altarnya",
+            Description = "Otomatis TP ke spot pancing artifact yang belum didapat & equip rod",
             Default = false,
             Callback = function(state)
                 autoCompleteArtifactActive = state
@@ -6955,7 +6957,7 @@ if MainTab then
                         pcall(function() task.cancel(autoCompleteArtifactThread) end)
                     end
                     autoCompleteArtifactThread = task.spawn(runAutoCompleteArtifactLoop)
-                    NotifySuccess("Auto Artifact", "Auto Complete Artifact Aktif! Memulai proses...")
+                    NotifySuccess("Auto Artifact", "Auto Complete Artifact Aktif! Memindai artifact yang dibutuhkan...")
                 else
                     if autoCompleteArtifactThread then
                         pcall(function() task.cancel(autoCompleteArtifactThread) end)
