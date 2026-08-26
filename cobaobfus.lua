@@ -830,7 +830,6 @@ local function interactPirateChest(chest, savedCFrame)
     end
     task.wait(0.35)
 
-    -- Remote claim with RE/ClaimPirateChest
     local claimRemote = Events.pirate_chest or GetServerRemote("RE/ClaimPirateChest") or GetServerRemote("ClaimPirateChest") or GetServerRemote("RF/ClaimPirateChest")
     if claimRemote then
         pcall(function()
@@ -895,7 +894,6 @@ local function ensureRodEquipped(force)
     end
     _lastEquipTime = now
 
-    -- 1. Check Backpack
     local bp = lp:FindFirstChild("Backpack")
     if bp then
         local tool = bp:FindFirstChildOfClass("Tool")
@@ -906,7 +904,6 @@ local function ensureRodEquipped(force)
         end
     end
 
-    -- 2. Call Hotbar equip remote
     local eq = Events.equip or Events.equipToolRemote or Events.equip_tool_remote or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.equip) or GetServerRemote("RF/EquipToolFromHotbar")
     if eq then
         pcall(function() CallRemote(eq, 1) end)
@@ -914,7 +911,6 @@ local function ensureRodEquipped(force)
         if char:FindFirstChildOfClass("Tool") then return true end
     end
 
-    -- 3. If still not holding, equip best rod from Replion Inventory
     pcall(function()
         local replion = GetPlayerDataReplion and GetPlayerDataReplion()
         if replion then
@@ -1205,7 +1201,7 @@ local SkinAnimation = (function()
         local animName = string.lower(track.Name or "")
         if animName:find("fishcaught") or animName:find("caught") or animName:find("reel") then
             if IsEnabled and IsFishCaughtAnimation(track) then InstantReplace(track) end
-        end   -- <-- this was missing
+        end
     end)
 end)
 
@@ -2289,11 +2285,10 @@ local function CreateCloudyPanel()
     gui.ResetOnSpawn = false
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     gui.Enabled = true
-    
+
     local parentGui = (gethui and gethui()) or CoreGui:FindFirstChild("RobloxGui") or CoreGui or LocalPlayer:WaitForChild("PlayerGui")
     gui.Parent = parentGui
 
-    -- Main Landscape Frame (Sleek Cloudy Frosted Glass aesthetic, no neon)
     local main = Instance.new("Frame")
     main.Name = "Main"
     main.Size = UDim2.new(0, 220, 0, 54)
@@ -2324,7 +2319,6 @@ local function CreateCloudyPanel()
     bgGradient.Rotation = 45
     bgGradient.Parent = main
 
-    -- Top Header Bar (Top-left Logo + Cloudy Project Panel Gradient Title)
     local topBar = Instance.new("Frame")
     topBar.Name = "TopBar"
     topBar.Size = UDim2.new(1, -16, 0, 20)
@@ -2366,7 +2360,6 @@ local function CreateCloudyPanel()
     titleGradient.Rotation = 0
     titleGradient.Parent = titleLabel
 
-    -- Subtle Cloudy Divider
     local divider = Instance.new("Frame")
     divider.Name = "Divider"
     divider.Size = UDim2.new(1, -16, 0, 1)
@@ -2376,7 +2369,6 @@ local function CreateCloudyPanel()
     divider.BorderSizePixel = 0
     divider.Parent = main
 
-    -- Bottom Stats Bar (Ping, Notif, FPS)
     local statsBar = Instance.new("Frame")
     statsBar.Name = "StatsBar"
     statsBar.Size = UDim2.new(1, -16, 0, 19)
@@ -2420,7 +2412,6 @@ local function CreateCloudyPanel()
     local notifLabel = makeStatPill("NOTIF", "0", "#CBD5E1")
     local fpsLabel = makeStatPill("FPS", "0", "#F1F5F9")
 
-    -- Smooth Dragging System (Mouse & Touch)
     local dragging = false
     local dragStart, startPos
     main.InputBegan:Connect(function(input)
@@ -2450,7 +2441,6 @@ local function CreateCloudyPanel()
         end)
     end)
 
-    -- FPS Counter
     local frames = 0
     local fps = 0
     local last = tick()
@@ -2506,14 +2496,13 @@ local function CreateCloudyPanel()
                 local ping = getPing()
                 local notifCount = getTotalNotifications()
 
-                -- Soft aesthetic cloudy colors (No harsh neon)
                 local pingColor
                 if ping < 80 then
-                    pingColor = "#67E8F9" -- Soft Sky Cyan
+                    pingColor = "#67E8F9"
                 elseif ping < 150 then
-                    pingColor = "#FDE047" -- Soft Pastel Amber
+                    pingColor = "#FDE047"
                 else
-                    pingColor = "#F87171" -- Soft Pastel Coral
+                    pingColor = "#F87171"
                 end
                 pingLabel.Text = string.format("<font color='#8A99AD'>PING</font> <font color='%s'>%dms</font>", pingColor, ping)
 
@@ -3021,7 +3010,6 @@ function ServerHop(reason, forcePublic)
 
     local isPrivateServer = game.PrivateServerId ~= "" and game.PrivateServerOwnerId ~= 0
 
-    -- Notifikasi (gunakan NotifyInfo, NotifyWarning, dll. yang sudah ada)
     pcall(function()
         Fluent:Notify({
             Title = "Server Hop",
@@ -3097,7 +3085,6 @@ function ServerHop(reason, forcePublic)
             end
         end
 
-        -- Fallback rejoin (tetap di server yang sama)
         print("[ServerHop] Attempting rejoin fallback...")
         local rejoinSuccess = pcall(function()
             if isPrivateServer then
@@ -3154,7 +3141,7 @@ function RejoinServer()
 end
 
         local Section_PlayersTab_Server = PlayersTab:AddSection("Server")
-        
+
         Section_PlayersTab_Server:AddButton({
             Title = "Server Hop",
             Description = "Pindah ke server publik lain",
@@ -3162,7 +3149,7 @@ end
                 ServerHop("Switching to another server...", false)
             end
         })
-        
+
         Section_PlayersTab_Server:AddButton({
             Title = "Rejoin Server",
             Description = "Kembali ke server yang sama (reconnect)",
@@ -3170,7 +3157,7 @@ end
                 RejoinServer()
             end
         })
-        
+
         Section_PlayersTab_Server:AddToggle("Toggle_AutoReconnect", {
             Title = "Auto Reconnect",
             Description = "Otomatis klik tombol reconnect jika terputus",
@@ -3192,7 +3179,6 @@ end
                                     local button = prompt:FindFirstChild("ButtonPrimary")
                                     if button and button.Visible then
                                         pcall(function()
-                                            -- Coba beberapa metode klik
                                             if typeof(firesignal) == "function" then
                                                 firesignal(button.MouseButton1Click)
                                             elseif button.MouseButton1Click and typeof(button.MouseButton1Click.Fire) == "function" then
@@ -3265,20 +3251,17 @@ end
             end
         })
         Section_PlayersTab_2:AddToggle("Toggle_WalkonWater", { Title = "Walk on Water", Default = false, Callback = function(val) SetWalkOnWater(val) end })
-        
+
         local Section_PlayersTab_3 = PlayersTab:AddSection("Custom Name")
 
--- Konfigurasi default (gunakan LocalPlayer yang sudah ada)
 local FakeName = "discord.gg/cloudy"
 local FakeLevel = "MAX"
 local ScriptName = "Cloudy one top"
 local HideStatsEnabled = false
 
--- Storage untuk teks asli dan thread gradien
 local OriginalTexts = {}
 local ActiveGradientThreads = {}
 
--- Fungsi membuat gradien bergerak (shimmer)
 local function createMovingGradient(label)
     if not label or not label:IsA("TextLabel") then return end
     local oldGradient = label:FindFirstChild("ShimmerGradient")
@@ -3288,17 +3271,17 @@ local function createMovingGradient(label)
     gradient.Parent = label
     local colorKeypoints = {}
     local basePattern = {
-        {0.00, Color3.fromRGB(35, 40, 55)},    -- Abu gelap (charcoal)
-        {0.10, Color3.fromRGB(95, 110, 135)},  -- Abu sedang (mid-slate)
-        {0.20, Color3.fromRGB(185, 200, 220)}, -- Abu terang (light-silver)
-        {0.30, Color3.fromRGB(255, 255, 255)}, -- Putih
-        {0.40, Color3.fromRGB(185, 200, 220)}, -- Abu terang
-        {0.50, Color3.fromRGB(95, 110, 135)},  -- Abu sedang
-        {0.60, Color3.fromRGB(35, 40, 55)},    -- Abu gelap
-        {0.70, Color3.fromRGB(95, 110, 135)},  -- Abu sedang
-        {0.80, Color3.fromRGB(185, 200, 220)}, -- Abu terang
-        {0.90, Color3.fromRGB(255, 255, 255)}, -- Putih
-        {1.00, Color3.fromRGB(35, 40, 55)},    -- Abu gelap
+        {0.00, Color3.fromRGB(35, 40, 55)},
+        {0.10, Color3.fromRGB(95, 110, 135)},
+        {0.20, Color3.fromRGB(185, 200, 220)},
+        {0.30, Color3.fromRGB(255, 255, 255)},
+        {0.40, Color3.fromRGB(185, 200, 220)},
+        {0.50, Color3.fromRGB(95, 110, 135)},
+        {0.60, Color3.fromRGB(35, 40, 55)},
+        {0.70, Color3.fromRGB(95, 110, 135)},
+        {0.80, Color3.fromRGB(185, 200, 220)},
+        {0.90, Color3.fromRGB(255, 255, 255)},
+        {1.00, Color3.fromRGB(35, 40, 55)},
     }
     for _, data in ipairs(basePattern) do
         table.insert(colorKeypoints, ColorSequenceKeypoint.new(data[1], data[2]))
@@ -3318,7 +3301,6 @@ local function createMovingGradient(label)
     return gradient
 end
 
--- Fungsi menambahkan label nama script di atas kepala
 local function createScriptNameLabel(nameLabel, billboard)
     if not nameLabel or not billboard then return end
     local existingFrame = billboard:FindFirstChild("NodeXFrame")
@@ -3350,7 +3332,6 @@ local function createScriptNameLabel(nameLabel, billboard)
     return voraFrame
 end
 
--- Hapus label script
 local function removeAllScriptNames()
     local character = LocalPlayer.Character
     if not character then return end
@@ -3380,7 +3361,6 @@ local function removeAllScriptNames()
     end
 end
 
--- Fungsi utama update stats (ganti teks)
 local function updateStats()
     if not HideStatsEnabled then
         removeAllScriptNames()
@@ -3413,7 +3393,6 @@ local function updateStats()
     end
 end
 
--- Loop update
 local updateLoopActive = false
 local function startUpdateLoop()
     if updateLoopActive then return end
@@ -3427,7 +3406,6 @@ local function startUpdateLoop()
     end)
 end
 
--- Handler saat karakter ganti
 local function onCharacterAdded(char)
     task.wait(0.5)
     if HideStatsEnabled then updateStats() end
@@ -3435,7 +3413,6 @@ end
 LocalPlayer.CharacterAdded:Connect(onCharacterAdded)
 if LocalPlayer.Character then onCharacterAdded(LocalPlayer.Character) end
 
--- === UI Elements dengan ID (diperbaiki) ===
 Section_PlayersTab_3:AddInput("HideNameInput", {
     Title = "Hide Name",
     Description = "Nama samaran yang akan muncul di atas kepala.",
@@ -3469,10 +3446,7 @@ Section_PlayersTab_3:AddToggle("HideIdentityToggle", {
         if state then
             startUpdateLoop()
             updateStats()
-           -- HAPUS atau KOMENTAR baris ini:
-            -- loadstring(game:HttpGet("https://raw.githubusercontent.com/CF-Trail/NameHider/main/MainScript.lua"))()
         else
-            -- Restore original texts
             for path, originalText in pairs(OriginalTexts) do
                 local obj = game
                 for part in string.gmatch(path, "[^.]+") do
@@ -3487,7 +3461,6 @@ Section_PlayersTab_3:AddToggle("HideIdentityToggle", {
         end
     end
 })
-    
 
         local Section_PlayersTab_6 = PlayersTab:AddSection("Custom Skin Animation")
         local customSkinNames = {"Eclipse","HolyTrident","SoulScythe","OceanicHarpoon","BinaryEdge","Vanquisher","KrampusScythe","BanHammer","CorruptionEdge","PrincessParasol"}
@@ -5539,7 +5512,6 @@ if MainTab then
             end
         })
 
-
         local Section_MainTab_5 = MainTab:AddSection("Crystal & Cave")
         Section_MainTab_5:AddButton({
             Title = "Consume Cave Crystal",
@@ -5604,7 +5576,6 @@ if MainTab then
 
         local selectedPotions = {}
 
-        -- Strictly get RF/ConsumePotion from sleitnick net
         local function getPotionRemote()
             local r = nil
             if net then
@@ -5644,7 +5615,7 @@ if MainTab then
                 local replion = GetPlayerDataReplion()
                 local inv = replion and replion:GetExpect("Inventory")
                 if not inv then return end
-                
+
                 local function searchIn(list)
                     if list and type(list) == "table" then
                         for _, item in ipairs(list) do
@@ -5667,7 +5638,7 @@ if MainTab then
                         end
                     end
                 end
-                
+
                 searchIn(inv.Items)
                 searchIn(inv.Potions)
                 searchIn(inv.Consumables)
@@ -5694,7 +5665,6 @@ if MainTab then
                     local consumed = false
                     local errMsg = nil
 
-                    -- 1. Try invoking with inventory item UUID if found
                     if uuid then
                         local ok, res = pcall(function()
                             return r:InvokeServer(uuid)
@@ -5706,7 +5676,6 @@ if MainTab then
                         end
                     end
 
-                    -- 2. Try invoking with numeric potion ID
                     if not consumed then
                         local ok, res = pcall(function()
                             return r:InvokeServer(pId)
@@ -5718,7 +5687,6 @@ if MainTab then
                         end
                     end
 
-                    -- 3. Try with string ID
                     if not consumed then
                         local ok, res = pcall(function()
                             return r:InvokeServer(tostring(pId))
@@ -5728,7 +5696,6 @@ if MainTab then
                         end
                     end
 
-                    -- 4. Try with UUID and ID combination if available
                     if not consumed and uuid then
                         local ok, res = pcall(function()
                             return r:InvokeServer(uuid, pId)
@@ -6017,17 +5984,14 @@ if MainTab then
             local q = tostring(query):lower():gsub("^%s*(.-)%s*$", "%1")
             if q == "" then return nil end
 
-            -- Strict Storm match (do NOT match "atmosphere" or generic words)
             if q == "storm" or q == "stormy" or q == "elemental storm" or q == "storm elemental" or q:find("storm elemental event") or q:find("massive storm") or q:find("storm is occurring") or q:find("storm is accurring") or q:find("storm started") or q:find("storm has started") or q:find("stormshell") then
                 return "Storm Elemental Event"
             end
 
-            -- Strict Blizzard match (do NOT match generic "ice" or "device")
             if q == "blizzard" or q == "blizzard elemental" or q:find("blizzard elemental event") or q:find("blizzard is occurring") or q:find("blizzard is accurring") or q:find("blizzard has started") or q:find("blizzard started") or q:find("wintertusk") then
                 return "Blizzard Elemental Event"
             end
 
-            -- Strict Volcano match (do NOT match static island parts)
             if q == "volcano" or q == "volcanic" or q == "volcano eruption" or q == "volcano elemental" or q:find("volcano elemental event") or q:find("volcano has erupted") or q:find("volcano is erupting") or q:find("volcano erupted") or q:find("volcanic event") or q:find("pyrocoil") then
                 return "Volcano Elemental Event"
             end
@@ -6039,7 +6003,6 @@ if MainTab then
             if type(text) ~= "string" or text == "" then return end
             local lower = text:lower()
 
-            -- Check end keywords first
             for eventKey, info in pairs(ElementalEventState) do
                 for _, ekw in ipairs(info.EndKeywords) do
                     if lower:find(ekw, 1, true) then
@@ -6053,7 +6016,6 @@ if MainTab then
                 end
             end
 
-            -- Check start keywords
             for eventKey, info in pairs(ElementalEventState) do
                 for _, kw in ipairs(info.Keywords) do
                     if lower:find(kw, 1, true) then
@@ -6094,7 +6056,6 @@ if MainTab then
             end
         end
 
-        -- Layer 1: Universal Remote Hook (Net Package)
         pcall(function()
             if net then
                 for _, rem in ipairs(net:GetChildren()) do
@@ -6107,7 +6068,6 @@ if MainTab then
             end
         end)
 
-        -- Layer 2: Universal Controllers Hook
         pcall(function()
             local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
             if ctrlFolder then
@@ -6132,7 +6092,6 @@ if MainTab then
             end
         end)
 
-        -- Layer 3: Notification ScreenGuis Listener
         pcall(function()
             local playerGui = LocalPlayer:WaitForChild("PlayerGui", 5)
             if playerGui then
@@ -6156,7 +6115,6 @@ if MainTab then
             end
         end)
 
-        -- Layer 4: TextChatService Hook
         pcall(function()
             local TextChatService = game:GetService("TextChatService")
             if TextChatService then
@@ -6710,29 +6668,32 @@ if MainTab then
             end
         })
 
-        -- ===== AUTO COMPLETE ARTIFACT SECTION =====
         local Section_MainTab_Artifact = MainTab:AddSection("Auto Complete Artifact")
 
         local ARTIFACT_CONFIG = {
             ["Diamond Artifact"] = {
                 Id = 267,
                 Name = "Diamond Artifact",
-                CFrame = CFrame.new(1830.89062, 6.62499952, -318.583954, 0.210125715, 6.01540435e-08, -0.977674365, -7.80481457e-08, 1, 4.47532678e-08, 0.977674365, 6.69018547e-08, 0.210125715)
+                FishingCFrame = CFrame.new(1830.89062, 6.62499952, -318.583954, 0.210125715, 6.01540435e-08, -0.977674365, -7.80481457e-08, 1, 4.47532678e-08, 0.977674365, 6.69018547e-08, 0.210125715),
+                LeverCFrame = CFrame.new(1822.6333, 7.62499857, -287.22287, -0.922478795, -2.37723281e-08, 0.386047751, 6.27265351e-09, 1, 7.65675168e-08, -0.386047751, 7.30534566e-08, -0.922478795)
             },
             ["Crescent Artifact"] = {
                 Id = 266,
                 Name = "Crescent Artifact",
-                CFrame = CFrame.new(1405.80164, 6.5850091, 117.956322, -0.894793928, -7.91023282e-08, 0.446479321, -9.44120657e-08, 1, -1.20431469e-08, -0.446479321, -5.29291704e-08, -0.894793928)
+                FishingCFrame = CFrame.new(1405.80164, 6.5850091, 117.956322, -0.894793928, -7.91023282e-08, 0.446479321, -9.44120657e-08, 1, -1.20431469e-08, -0.446479321, -5.29291704e-08, -0.894793928),
+                LeverCFrame = CFrame.new(1416.04443, 30.3749943, 79.3558807, -0.16176784, 1.06205214e-08, -0.986828864, 5.36473053e-08, 1, 1.96803418e-09, 0.986828864, -5.26223438e-08, -0.16176784)
             },
             ["Arrow Artifact"] = {
                 Id = 265,
                 Name = "Arrow Artifact",
-                CFrame = CFrame.new(885.653564, 6.62499857, -334.422882, -0.281357497, 6.11953732e-09, 0.959603012, 1.1393773e-08, 1, -3.0364784e-09, -0.959603012, 1.00791633e-08, -0.281357497)
+                FishingCFrame = CFrame.new(885.653564, 6.62499857, -334.422882, -0.281357497, 6.11953732e-09, 0.959603012, 1.1393773e-08, 1, -3.0364784e-09, -0.959603012, 1.00791633e-08, -0.281357497),
+                LeverCFrame = CFrame.new(894.176575, 7.62499857, -361.110962, 0.18843244, -5.4785108e-08, -0.982086182, 6.02529866e-08, 1, -4.42237109e-08, 0.982086182, -5.08404412e-08, 0.18843244)
             },
             ["Hourglass Diamond Artifact"] = {
                 Id = 271,
                 Name = "Hourglass Diamond Artifact",
-                CFrame = CFrame.new(1474.5802, 6.59433651, -850.140198, -0.955496132, -4.85804108e-08, 0.295003653, -5.27604911e-08, 1, -6.21021012e-09, -0.295003653, -2.14983693e-08, -0.955496132)
+                FishingCFrame = CFrame.new(1474.5802, 6.59433651, -850.140198, -0.955496132, -4.85804108e-08, 0.295003653, -5.27604911e-08, 1, -6.21021012e-09, -0.295003653, -2.14983693e-08, -0.955496132),
+                LeverCFrame = CFrame.new(1485.67529, 7.58990526, -858.379211, 0.934665918, 3.00795797e-08, 0.355527252, -5.52280746e-08, 1, 6.05866859e-08, -0.355527252, -7.62633974e-08, 0.934665918)
             }
         }
 
@@ -6753,7 +6714,6 @@ if MainTab then
                 local targetId = cfg.Id
                 local targetNameLower = cfg.Name:lower()
 
-                -- Scan Replion PlayerData Inventory
                 pcall(function()
                     local replion = GetPlayerDataReplion and GetPlayerDataReplion()
                     if replion then
@@ -6783,7 +6743,6 @@ if MainTab then
                     end
                 end)
 
-                -- Scan Backpack & Character
                 pcall(function()
                     local lp = Players.LocalPlayer
                     local bp = lp and lp:FindFirstChild("Backpack")
@@ -6814,7 +6773,8 @@ if MainTab then
                     Owned = count > 0,
                     Count = count,
                     Id = cfg.Id,
-                    CFrame = cfg.CFrame
+                    FishingCFrame = cfg.FishingCFrame,
+                    LeverCFrame = cfg.LeverCFrame
                 }
                 if count > 0 then
                     totalOwned = totalOwned + 1
@@ -6826,21 +6786,21 @@ if MainTab then
 
         local function formatArtifactStatusText(status, totalOwned)
             local lines = {}
-            table.insert(lines, string.format("📦 Status Koleksi: %d/4 Artifact Dimiliki", totalOwned))
+            table.insert(lines, string.format("📦 Status Koleksi: %d/4 Artifact di Inventory", totalOwned))
             table.insert(lines, "────────────────────────────")
             for _, name in ipairs(ARTIFACT_ORDER) do
                 local data = status[name]
                 if data and data.Owned then
-                    table.insert(lines, string.format("✅ %s : Sudah Ada (x%d)", name, data.Count))
+                    table.insert(lines, string.format("✅ %s : Ada di Inventory (x%d)", name, data.Count))
                 else
                     table.insert(lines, string.format("❌ %s : Belum Ada di Inventory", name))
                 end
             end
             table.insert(lines, "────────────────────────────")
             if totalOwned >= 4 then
-                table.insert(lines, "🎉 Selamat! Semua 4 Artifact sudah lengkap di inventory.")
+                table.insert(lines, "🎉 Semua 4 Artifact sudah ada di inventory! Siap dipasang ke lever.")
             else
-                table.insert(lines, "🎣 Nyalakan 'Auto Complete Artifact' di bawah untuk otomatis memancing di spot artifact yang belum didapatkan.")
+                table.insert(lines, "🎣 Nyalakan 'Auto Complete Artifact' di bawah untuk otomatis memancing di spot & pasang ke lever.")
             end
             return table.concat(lines, "\n")
         end
@@ -6858,6 +6818,29 @@ if MainTab then
             return status, total
         end
 
+        local function placeLeverItem(targetId, targetName)
+            pcall(function()
+                local rem = GetServerRemote("RE/PlaceLeverItem") or GetServerRemote("RF/PlaceLeverItem") or GetServerRemote("PlaceLeverItem")
+                if rem then
+                    if rem:IsA("RemoteEvent") then
+                        rem:FireServer(targetId)
+                        rem:FireServer(targetName)
+                        rem:FireServer()
+                    elseif rem:IsA("RemoteFunction") then
+                        rem:InvokeServer(targetId)
+                        rem:InvokeServer(targetName)
+                        rem:InvokeServer()
+                    end
+                end
+            end)
+
+            pcall(function()
+                if triggerNearestProximityPrompt then
+                    triggerNearestProximityPrompt(35)
+                end
+            end)
+        end
+
         Section_MainTab_Artifact:AddButton({
             Title = "Refresh Artifact Status",
             Description = "Pindai ulang isi inventory dan perbarui info status artifact",
@@ -6869,7 +6852,7 @@ if MainTab then
 
         local selectedArtifactForTP = "Diamond Artifact"
         Section_MainTab_Artifact:AddDropdown("Dropdown_SelectArtifactLocation", {
-            Title = "Select Artifact Fishing Spot",
+            Title = "Select Artifact",
             Values = ARTIFACT_ORDER,
             Default = "Diamond Artifact",
             Multi = false,
@@ -6881,17 +6864,38 @@ if MainTab then
         })
 
         Section_MainTab_Artifact:AddButton({
-            Title = "Teleport to Selected Spot",
+            Title = "Teleport to Fishing Spot",
             Description = "Teleport ke spot pancing artifact terpilih & equip rod",
             Callback = function()
                 local cfg = ARTIFACT_CONFIG[selectedArtifactForTP]
-                if cfg and cfg.CFrame then
-                    TeleportTo(cfg.CFrame)
+                if cfg and cfg.FishingCFrame then
+                    TeleportTo(cfg.FishingCFrame)
                     task.wait(0.5)
                     ensureRodEquipped(true)
-                    NotifySuccess("Artifact Spot", "Tiba di spot " .. selectedArtifactForTP .. "! Rod ter-equip. Silakan nyalakan fitur Auto Fishing pilihan Anda.")
+                    NotifySuccess("Artifact Spot", "Tiba di spot pancing " .. selectedArtifactForTP .. "! Rod ter-equip. Silakan nyalakan fitur Auto Fishing pilihan Anda.")
                 else
-                    NotifyWarning("Artifact Spot", "Lokasi spot artifact tidak ditemukan.")
+                    NotifyWarning("Artifact Spot", "Lokasi spot pancing artifact tidak ditemukan.")
+                end
+            end
+        })
+
+        Section_MainTab_Artifact:AddButton({
+            Title = "Teleport to Lever Spot & Activate",
+            Description = "Teleport ke lokasi lever artifact terpilih & pasang item",
+            Callback = function()
+                local cfg = ARTIFACT_CONFIG[selectedArtifactForTP]
+                if cfg and cfg.LeverCFrame then
+                    TeleportTo(cfg.LeverCFrame)
+                    task.wait(0.6)
+                    if unequipAllTools then unequipAllTools() end
+                    task.wait(0.4)
+                    placeLeverItem(cfg.Id, cfg.Name)
+                    task.wait(0.8)
+                    placeLeverItem(cfg.Id, cfg.Name)
+                    NotifySuccess("Artifact Lever", "Tiba di lever " .. selectedArtifactForTP .. "! Item telah dipasang via Remote & ProximityPrompt.")
+                    updateArtifactParagraphUI()
+                else
+                    NotifyWarning("Artifact Lever", "Lokasi lever artifact tidak ditemukan.")
                 end
             end
         })
@@ -6902,53 +6906,63 @@ if MainTab then
         local function runAutoCompleteArtifactLoop()
             while autoCompleteArtifactActive do
                 local status, totalOwned = updateArtifactParagraphUI()
-                if totalOwned >= 4 then
-                    NotifySuccess("Auto Artifact", "Semua 4 Artifact sudah lengkap di Inventory!")
-                    autoCompleteArtifactActive = false
-                    break
-                end
-
-                local targetArtifactName = nil
-                local targetArtifactData = nil
 
                 for _, name in ipairs(ARTIFACT_ORDER) do
-                    local data = status[name]
-                    if data and not data.Owned then
-                        targetArtifactName = name
-                        targetArtifactData = data
-                        break
+                    if not autoCompleteArtifactActive then break end
+                    local cfg = ARTIFACT_CONFIG[name]
+                    local curStatus = scanArtifactsInventory()
+                    local data = curStatus[name]
+
+                    if not data or not data.Owned then
+                        NotifyInfo("Auto Artifact", "Menuju spot pancing " .. name .. "...")
+                        TeleportTo(cfg.FishingCFrame)
+                        task.wait(0.6)
+                        ensureRodEquipped(true)
+                        NotifySuccess("Auto Artifact", "Tiba di spot " .. name .. "! Rod ter-equip. Silakan aktifkan fitur Auto Fishing pilihan Anda.")
+
+                        while autoCompleteArtifactActive do
+                            task.wait(1.5)
+                            local checkStatus, _ = updateArtifactParagraphUI()
+                            local checkData = checkStatus[name]
+                            if checkData and checkData.Owned then
+                                NotifySuccess("Auto Artifact", "Berhasil mendapatkan " .. name .. "! Menuju ke lokasi lever...")
+                                task.wait(1)
+                                break
+                            end
+                        end
                     end
-                end
 
-                if not targetArtifactName or not targetArtifactData then
-                    NotifySuccess("Auto Artifact", "Semua 4 Artifact telah berhasil didapatkan!")
-                    autoCompleteArtifactActive = false
-                    break
-                end
+                    if not autoCompleteArtifactActive then break end
 
-                NotifyInfo("Auto Artifact", "Menuju spot pancing " .. targetArtifactName .. "...")
-                TeleportTo(targetArtifactData.CFrame)
-                task.wait(0.6)
-                ensureRodEquipped(true)
-                NotifySuccess("Auto Artifact", "Tiba di spot " .. targetArtifactName .. "! Rod ter-equip. Silakan aktifkan fitur Auto Fishing pilihan Anda.")
+                    local postStatus = scanArtifactsInventory()
+                    if postStatus[name] and postStatus[name].Owned then
+                        NotifyInfo("Auto Artifact", "Teleporting ke lever " .. name .. "...")
+                        TeleportTo(cfg.LeverCFrame)
+                        task.wait(0.7)
 
-                -- Wait until the artifact is obtained
-                while autoCompleteArtifactActive do
-                    task.wait(1.5)
-                    local curStatus, curTotal = updateArtifactParagraphUI()
-                    local curData = curStatus[targetArtifactName]
-                    if curData and curData.Owned then
-                        NotifySuccess("Auto Artifact", "Berhasil mendapatkan " .. targetArtifactName .. "! Beralih ke artifact berikutnya...")
+                        if unequipAllTools then unequipAllTools() end
+                        task.wait(0.4)
+
+                        placeLeverItem(cfg.Id, cfg.Name)
+                        task.wait(0.8)
+                        placeLeverItem(cfg.Id, cfg.Name)
+                        task.wait(1.2)
+
+                        NotifySuccess("Auto Artifact", "Berhasil memasang " .. name .. " ke lever! Melanjutkan...")
+                        updateArtifactParagraphUI()
                         task.wait(1)
-                        break
                     end
                 end
+
+                NotifySuccess("Auto Artifact", "Semua proses Auto Complete Artifact selesai!")
+                autoCompleteArtifactActive = false
+                break
             end
         end
 
         Section_MainTab_Artifact:AddToggle("Toggle_AutoCompleteArtifact", {
             Title = "Auto Complete Artifact",
-            Description = "Otomatis TP ke spot pancing artifact yang belum didapat & equip rod",
+            Description = "Otomatis pancing artifact -> teleport ke lever -> pasang via remote & prompt",
             Default = false,
             Callback = function(state)
                 autoCompleteArtifactActive = state
@@ -6957,13 +6971,492 @@ if MainTab then
                         pcall(function() task.cancel(autoCompleteArtifactThread) end)
                     end
                     autoCompleteArtifactThread = task.spawn(runAutoCompleteArtifactLoop)
-                    NotifySuccess("Auto Artifact", "Auto Complete Artifact Aktif! Memindai artifact yang dibutuhkan...")
+                    NotifySuccess("Auto Artifact", "Auto Complete Artifact Aktif! Memulai proses...")
                 else
                     if autoCompleteArtifactThread then
                         pcall(function() task.cancel(autoCompleteArtifactThread) end)
                         autoCompleteArtifactThread = nil
                     end
                     NotifyInfo("Auto Artifact", "Auto Complete Artifact Dimatikan.")
+                end
+            end
+        })
+
+        local Section_MainTab_RuinDoor = MainTab:AddSection("Auto Unlock Ruin Door")
+
+        local RUIN_FISH_ITEMS = {"Freshwater Piranha", "Goliath Tiger", "Sacred Guardian Squid", "Crocodile"}
+        local SACRED_TEMPLE_CFRAME = CFrame.lookAt(Vector3.new(1461.815, -22.125, -670.234), Vector3.new(1461.815, -22.125, -670.234) + Vector3.new(-0.990, -0.000, 0.143))
+        local RUIN_DOOR_CFRAME = CFrame.lookAt(Vector3.new(6031.981, -585.924, 4713.157), Vector3.new(6031.981, -585.924, 4713.157) + Vector3.new(0.316, -0.000, -0.949))
+
+        local function getRuinDoorStatus()
+            local ruinDoor = (workspace:FindFirstChild("RUIN INTERACTIONS") and workspace["RUIN INTERACTIONS"]:FindFirstChild("Door")) or workspace:FindFirstChild("Door")
+            local status = "LOCKED"
+            pcall(function()
+                if ruinDoor then
+                    local rd = ruinDoor:FindFirstChild("RuinDoor") or ruinDoor
+                    local lDoor = rd:FindFirstChild("LDoor") or rd:FindFirstChild("Door")
+                    if lDoor then
+                        local currentX = nil
+                        if lDoor:IsA("BasePart") then
+                            currentX = lDoor.Position.X
+                        elseif lDoor:IsA("Model") then
+                            local ok, pivot = pcall(function() return lDoor:GetPivot() end)
+                            if ok and pivot then currentX = pivot.Position.X end
+                        end
+                        if currentX and currentX > 6075 then
+                            status = "UNLOCKED"
+                        end
+                    end
+                end
+            end)
+            return status
+        end
+
+        local function scanRuinFishInventory()
+            local status = {}
+            local totalOwned = 0
+            local missingList = {}
+
+            for _, fishName in ipairs(RUIN_FISH_ITEMS) do
+                local count = 0
+                local lowerName = fishName:lower()
+
+                pcall(function()
+                    local replion = GetPlayerDataReplion and GetPlayerDataReplion()
+                    if replion then
+                        local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
+                        if ok and inv then
+                            for _, catItems in pairs(inv) do
+                                if type(catItems) == "table" then
+                                    for _, item in pairs(catItems) do
+                                        if type(item) == "table" then
+                                            local iName = tostring(item.Name or item.Identifier or item.Id or ""):lower()
+                                            if iName:find(lowerName, 1, true) then
+                                                local q = tonumber(item.Quantity or item.Count or 1) or 1
+                                                count = count + q
+                                            end
+                                        elseif type(item) == "string" then
+                                            if item:lower():find(lowerName, 1, true) then
+                                                count = count + 1
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+
+                pcall(function()
+                    local lp = Players.LocalPlayer
+                    local bp = lp and lp:FindFirstChild("Backpack")
+                    if bp then
+                        for _, tool in ipairs(bp:GetChildren()) do
+                            if tool.Name:lower():find(lowerName, 1, true) then
+                                count = count + 1
+                            end
+                        end
+                    end
+                    local char = lp and lp.Character
+                    if char then
+                        for _, tool in ipairs(char:GetChildren()) do
+                            if tool:IsA("Tool") and tool.Name:lower():find(lowerName, 1, true) then
+                                count = count + 1
+                            end
+                        end
+                    end
+                end)
+
+                status[fishName] = {
+                    Owned = count > 0,
+                    Count = count
+                }
+                if count > 0 then
+                    totalOwned = totalOwned + 1
+                else
+                    table.insert(missingList, fishName)
+                end
+            end
+
+            return status, totalOwned, missingList
+        end
+
+        local function formatRuinDoorStatusText(doorStatus, fishStatus, totalOwned, missingList)
+            local lines = {}
+            local doorIcon = (doorStatus == "UNLOCKED") and "🔓 UNLOCKED (Terbuka)" or "🔒 LOCKED (Terkunci)"
+            table.insert(lines, string.format("🚪 Status Pintu Ruin: %s", doorIcon))
+            table.insert(lines, string.format("🐟 Koleksi Ikan: %d/4 Jenis Terkumpul", totalOwned))
+            table.insert(lines, "────────────────────────────")
+            for _, fishName in ipairs(RUIN_FISH_ITEMS) do
+                local data = fishStatus[fishName]
+                if data and data.Owned then
+                    table.insert(lines, string.format("✅ %s : Ada di Inventory (x%d)", fishName, data.Count))
+                else
+                    table.insert(lines, string.format("❌ %s : Kurang / Belum Ada", fishName))
+                end
+            end
+            table.insert(lines, "────────────────────────────")
+            if doorStatus == "UNLOCKED" then
+                table.insert(lines, "🎉 Pintu Ruin sudah terbuka! Kamu bisa masuk ke dalam.")
+            elseif totalOwned >= 4 then
+                table.insert(lines, "💡 Semua 4 ikan sudah lengkap! Aktifkan toggle untuk otomatis unlock pintu.")
+            else
+                table.insert(lines, string.format("🎣 Ikan yang masih dicari: %s", table.concat(missingList, ", ")))
+            end
+            return table.concat(lines, "\n")
+        end
+
+        local initialDoorStatus = getRuinDoorStatus()
+        local initialFishStatus, initialFishTotal, initialMissing = scanRuinFishInventory()
+        local ruinDoorStatusParagraph = Section_MainTab_RuinDoor:AddParagraph({
+            Title = "Status Ruin Door & Ikan",
+            Content = formatRuinDoorStatusText(initialDoorStatus, initialFishStatus, initialFishTotal, initialMissing)
+        })
+
+        local function updateRuinDoorParagraphUI()
+            local doorStatus = getRuinDoorStatus()
+            local fishStatus, fishTotal, missing = scanRuinFishInventory()
+            local formatted = formatRuinDoorStatusText(doorStatus, fishStatus, fishTotal, missing)
+            SafeUpdateParagraph(ruinDoorStatusParagraph, formatted)
+            return doorStatus, fishStatus, fishTotal, missing
+        end
+
+        Section_MainTab_RuinDoor:AddButton({
+            Title = "Refresh Ruin Door Status",
+            Description = "Pindai status pintu dan isi tas untuk ikan Ruin Door",
+            Callback = function()
+                local dStatus, _, fTotal, _ = updateRuinDoorParagraphUI()
+                NotifyInfo("Ruin Door", string.format("Status di-refresh! Pintu: %s | Ikan: %d/4.", dStatus, fTotal))
+            end
+        })
+
+        Section_MainTab_RuinDoor:AddButton({
+            Title = "Teleport to Sacred Temple (Fish Spot)",
+            Description = "Teleport ke spot pancing Sacred Temple & equip rod",
+            Callback = function()
+                TeleportTo(SACRED_TEMPLE_CFRAME)
+                task.wait(0.5)
+                ensureRodEquipped(true)
+                NotifySuccess("Sacred Temple", "Tiba di Sacred Temple! Rod ter-equip. Silakan aktifkan fitur Auto Fishing pilihan Anda.")
+            end
+        })
+
+        Section_MainTab_RuinDoor:AddButton({
+            Title = "Teleport to Ruin Door",
+            Description = "Teleport langsung ke depan pintu Ancient Ruin",
+            Callback = function()
+                TeleportTo(RUIN_DOOR_CFRAME)
+                NotifySuccess("Ruin Door", "Tiba di depan pintu Ancient Ruin.")
+            end
+        })
+
+        local autoUnlockRuinActive = false
+        local autoUnlockRuinThread = nil
+
+        local function runAutoUnlockRuinLoop()
+            local savedPosBeforeRuin = nil
+
+            while autoUnlockRuinActive do
+                local doorStatus, fishStatus, fishTotal, missingList = updateRuinDoorParagraphUI()
+
+                if doorStatus == "UNLOCKED" then
+                    NotifySuccess("Ruin Door", "Pintu Ruin sudah terbuka! Proses selesai.")
+                    if savedPosBeforeRuin then
+                        TeleportTo(savedPosBeforeRuin)
+                        savedPosBeforeRuin = nil
+                    end
+                    autoUnlockRuinActive = false
+                    break
+                end
+
+                if #missingList > 0 then
+                    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp and not savedPosBeforeRuin then
+                        savedPosBeforeRuin = hrp.CFrame
+                    end
+
+                    NotifyInfo("Ruin Door", "Mencari ikan: " .. table.concat(missingList, ", ") .. ". Menuju Sacred Temple...")
+                    TeleportTo(SACRED_TEMPLE_CFRAME)
+                    task.wait(0.6)
+                    ensureRodEquipped(true)
+                    NotifySuccess("Ruin Door", "Tiba di Sacred Temple! Rod ter-equip. Silakan aktifkan fitur Auto Fishing pilihan Anda.")
+
+                    while autoUnlockRuinActive do
+                        task.wait(2)
+                        local curDoor, _, curTotal, curMissing = updateRuinDoorParagraphUI()
+                        if curDoor == "UNLOCKED" then
+                            break
+                        end
+                        if #curMissing == 0 then
+                            NotifySuccess("Ruin Door", "Semua 4 ikan berhasil didapatkan! Menuju ke Ruin Door untuk membuka pintu...")
+                            task.wait(1)
+                            break
+                        end
+                    end
+                end
+
+                if not autoUnlockRuinActive then break end
+
+                local checkDoor, _, finalTotal, _ = updateRuinDoorParagraphUI()
+                if checkDoor == "UNLOCKED" then
+                    NotifySuccess("Ruin Door", "Pintu Ruin berhasil terbuka!")
+                    if savedPosBeforeRuin then
+                        TeleportTo(savedPosBeforeRuin)
+                        savedPosBeforeRuin = nil
+                    end
+                    autoUnlockRuinActive = false
+                    break
+                end
+
+                if finalTotal >= 4 then
+                    NotifyInfo("Ruin Door", "Teleport ke Ruin Door untuk menyerahkan item...")
+                    TeleportTo(RUIN_DOOR_CFRAME)
+                    task.wait(0.8)
+
+                    if unequipAllTools then unequipAllTools() end
+                    task.wait(0.4)
+
+                    local remPressure = GetServerRemote("RE/PlacePressureItem") or GetServerRemote("RF/PlacePressureItem") or GetServerRemote("PlacePressureItem")
+                    for _, name in ipairs(RUIN_FISH_ITEMS) do
+                        if not autoUnlockRuinActive then break end
+                        if remPressure then
+                            pcall(function()
+                                if remPressure:IsA("RemoteEvent") then
+                                    remPressure:FireServer(name)
+                                elseif remPressure:IsA("RemoteFunction") then
+                                    remPressure:InvokeServer(name)
+                                end
+                            end)
+                        end
+                        if triggerNearestProximityPrompt then
+                            triggerNearestProximityPrompt(35)
+                        end
+                        task.wait(1.5)
+                    end
+
+                    task.wait(2)
+                    local postDoor = getRuinDoorStatus()
+                    if postDoor == "UNLOCKED" then
+                        NotifySuccess("Ruin Door", "Pintu Ruin berhasil terbuka!")
+                        updateRuinDoorParagraphUI()
+                        if savedPosBeforeRuin then
+                            TeleportTo(savedPosBeforeRuin)
+                            savedPosBeforeRuin = nil
+                        end
+                        autoUnlockRuinActive = false
+                        break
+                    end
+                end
+
+                task.wait(2)
+            end
+        end
+
+        Section_MainTab_RuinDoor:AddToggle("Toggle_AutoUnlockRuinDoor", {
+            Title = "Auto Unlock Ruin Door",
+            Description = "Otomatis pancing 4 ikan di Sacred Temple -> teleport ke Ruin Door & buka pintu",
+            Default = false,
+            Callback = function(state)
+                autoUnlockRuinActive = state
+                if state then
+                    if autoUnlockRuinThread then
+                        pcall(function() task.cancel(autoUnlockRuinThread) end)
+                    end
+                    autoUnlockRuinThread = task.spawn(runAutoUnlockRuinLoop)
+                    NotifySuccess("Ruin Door", "Auto Unlock Ruin Door Aktif! Memulai proses...")
+                else
+                    if autoUnlockRuinThread then
+                        pcall(function() task.cancel(autoUnlockRuinThread) end)
+                        autoUnlockRuinThread = nil
+                    end
+                    NotifyInfo("Ruin Door", "Auto Unlock Ruin Door Dimatikan.")
+                end
+            end
+        })
+
+        local Section_MainTab_Lochness = MainTab:AddSection("Ancient Lochness Event")
+
+        local LOCHNESS_CFRAME = CFrame.lookAt(Vector3.new(6063.347, -585.925, 4713.696), Vector3.new(6063.347, -585.925, 4713.696) + Vector3.new(-0.376, -0.000, -0.927))
+
+        local function getLochnessTrackerData()
+            local data = {
+                Found = false,
+                Countdown = "N/A",
+                Timer = "N/A",
+                Quantity = "N/A",
+                Odds = "N/A",
+                IsActive = false
+            }
+
+            pcall(function()
+                local menuRings = workspace:FindFirstChild("!!! MENU RINGS") or workspace:FindFirstChild("MENU RINGS")
+                local eventTracker = (menuRings and menuRings:FindFirstChild("Event Tracker")) or workspace:FindFirstChild("Event Tracker", true)
+
+                if eventTracker then
+                    local contentItems = eventTracker:FindFirstChild("Main")
+                        and eventTracker.Main:FindFirstChild("Gui")
+                        and eventTracker.Main.Gui:FindFirstChild("Content")
+                        and eventTracker.Main.Gui.Content:FindFirstChild("Items")
+
+                    if contentItems then
+                        data.Found = true
+                        local cLabel = contentItems:FindFirstChild("Countdown") and contentItems.Countdown:FindFirstChild("Label")
+                        if cLabel then
+                            data.Countdown = cLabel.ContentText or cLabel.Text or "N/A"
+                        end
+
+                        local statsContainer = contentItems:FindFirstChild("Stats")
+                        if statsContainer then
+                            local tLabel = statsContainer:FindFirstChild("Timer") and statsContainer.Timer:FindFirstChild("Label")
+                            if tLabel then
+                                data.Timer = tLabel.ContentText or tLabel.Text or "N/A"
+                            end
+                            local qLabel = statsContainer:FindFirstChild("Quantity")
+                            if qLabel then
+                                data.Quantity = qLabel.ContentText or qLabel.Text or "N/A"
+                            end
+                            local oLabel = statsContainer:FindFirstChild("Odds")
+                            if oLabel then
+                                data.Odds = oLabel.ContentText or oLabel.Text or "N/A"
+                            end
+                        end
+
+                        if data.Timer and data.Timer:find("M") and data.Timer:find("S") and not data.Timer:match("^0M 0S") then
+                            data.IsActive = true
+                        end
+                    end
+                end
+            end)
+
+            return data
+        end
+
+        local function formatLochnessStatusText(trackerData)
+            local lines = {}
+            if not trackerData.Found then
+                table.insert(lines, "📡 Event Tracker: Memindai GUI Tracker di Workspace...")
+                table.insert(lines, "────────────────────────────")
+                table.insert(lines, "⏳ Mulai Dalam: N/A")
+                table.insert(lines, "⏱️ Sisa Durasi: N/A")
+                table.insert(lines, "🐟 Tertangkap: N/A | Chance: N/A")
+                table.insert(lines, "────────────────────────────")
+                table.insert(lines, "⚠️ Pastikan 'Event Tracker' sudah dimuat di server/workspace.")
+            else
+                local statusIcon = trackerData.IsActive and "🟢 SEDANG BERLANGSUNG" or "🔴 BELUM DIMULAI"
+                table.insert(lines, string.format("📡 Status Event: %s", statusIcon))
+                table.insert(lines, "────────────────────────────")
+                table.insert(lines, string.format("⏳ Mulai Dalam: %s", trackerData.Countdown))
+                table.insert(lines, string.format("⏱️ Sisa Durasi Event: %s", trackerData.Timer))
+                table.insert(lines, string.format("🐟 Tertangkap: %s | Peluang: %s", trackerData.Quantity, trackerData.Odds))
+                table.insert(lines, "────────────────────────────")
+                if trackerData.IsActive then
+                    table.insert(lines, "🔥 Event Ancient Lochness sedang aktif! Segera pancing.")
+                else
+                    table.insert(lines, "💡 Aktifkan toggle di bawah untuk otomatis teleport saat event dimulai & kembali saat selesai.")
+                end
+            end
+            return table.concat(lines, "\n")
+        end
+
+        local initialLochnessData = getLochnessTrackerData()
+        local lochnessStatusParagraph = Section_MainTab_Lochness:AddParagraph({
+            Title = "Status Ancient Lochness Event",
+            Content = formatLochnessStatusText(initialLochnessData)
+        })
+
+        local function updateLochnessParagraphUI()
+            local tData = getLochnessTrackerData()
+            local formatted = formatLochnessStatusText(tData)
+            SafeUpdateParagraph(lochnessStatusParagraph, formatted)
+            return tData
+        end
+
+        task.spawn(function()
+            while true do
+                task.wait(1)
+                pcall(function()
+                    updateLochnessParagraphUI()
+                end)
+            end
+        end)
+
+        Section_MainTab_Lochness:AddButton({
+            Title = "Refresh Lochness Status",
+            Description = "Pindai ulang data event tracker Ancient Lochness",
+            Callback = function()
+                local tData = updateLochnessParagraphUI()
+                NotifyInfo("Ancient Lochness", string.format("Data di-refresh! Mulai dalam: %s | Timer: %s", tData.Countdown, tData.Timer))
+            end
+        })
+
+        Section_MainTab_Lochness:AddButton({
+            Title = "Teleport to Ancient Lochness Spot",
+            Description = "Teleport langsung ke lokasi pemancingan Ancient Lochness & equip rod",
+            Callback = function()
+                TeleportTo(LOCHNESS_CFRAME)
+                task.wait(0.5)
+                ensureRodEquipped(true)
+                NotifySuccess("Ancient Lochness", "Tiba di spot Ancient Lochness! Rod ter-equip. Silakan nyalakan fitur Auto Fishing pilihan Anda.")
+            end
+        })
+
+        local autoJoinLochnessActive = false
+        local autoJoinLochnessThread = nil
+
+        local function runAutoJoinLochnessLoop()
+            local isTeleportedToEvent = false
+            local savedPosBeforeLochness = nil
+
+            while autoJoinLochnessActive do
+                local tData = updateLochnessParagraphUI()
+
+                if tData.IsActive and not isTeleportedToEvent then
+                    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if hrp and not savedPosBeforeLochness then
+                        savedPosBeforeLochness = hrp.CFrame
+                    end
+
+                    NotifyInfo("Ancient Lochness", "Event aktif! Teleport ke spot Ancient Lochness...")
+                    TeleportTo(LOCHNESS_CFRAME)
+                    task.wait(0.6)
+                    ensureRodEquipped(true)
+                    isTeleportedToEvent = true
+                    NotifySuccess("Ancient Lochness", "Tiba di Ancient Lochness! Rod ter-equip. Silakan aktifkan fitur Auto Fishing pilihan Anda.")
+
+                elseif isTeleportedToEvent and not tData.IsActive then
+                    NotifyInfo("Ancient Lochness", "Event telah selesai. Menunggu 15 detik sebelum kembali...")
+                    task.wait(15)
+
+                    if savedPosBeforeLochness then
+                        TeleportTo(savedPosBeforeLochness)
+                        savedPosBeforeLochness = nil
+                    end
+                    isTeleportedToEvent = false
+                    NotifySuccess("Ancient Lochness", "Kembali ke posisi awal semula. Standby memantau event berikutnya...")
+                end
+
+                task.wait(1)
+            end
+        end
+
+        Section_MainTab_Lochness:AddToggle("Toggle_AutoJoinLochness", {
+            Title = "Auto Join Ancient Lochness Event",
+            Description = "Otomatis teleport saat event aktif & kembali ke posisi semula setelah 15s selesai",
+            Default = false,
+            Callback = function(state)
+                autoJoinLochnessActive = state
+                if state then
+                    if autoJoinLochnessThread then
+                        pcall(function() task.cancel(autoJoinLochnessThread) end)
+                    end
+                    autoJoinLochnessThread = task.spawn(runAutoJoinLochnessLoop)
+                    NotifySuccess("Ancient Lochness", "Auto Join Ancient Lochness Aktif! Mulai memantau event...")
+                else
+                    if autoJoinLochnessThread then
+                        pcall(function() task.cancel(autoJoinLochnessThread) end)
+                        autoJoinLochnessThread = nil
+                    end
+                    NotifyInfo("Ancient Lochness", "Auto Join Ancient Lochness Dimatikan.")
                 end
             end
         })
@@ -7274,10 +7767,8 @@ local function instantV2_loop()
     end
 end
 
-
 function startInstantV2()
     if Config.InstantV2.Active then return end
-    -- Matikan mode lain ...
     enableNotifDelay()
     enableBlockNotif()
     UB_init()
@@ -7443,7 +7934,7 @@ local function patchInstantBaitOverrideToCastPosition(enabled)
 
     if #foundRemotes == 0 then
         warn("[InstantBobber] No casting remote found. Using fallback polling (less instant).")
-       
+
         local player = game.Players.LocalPlayer
         InstantBobberState.fallbackConn = RunService.Heartbeat:Connect(function()
             if not InstantBobberState.instantOverrideActive then return end
@@ -7452,7 +7943,7 @@ local function patchInstantBaitOverrideToCastPosition(enabled)
             local character = player.Character
             local bobber = character:FindFirstChild("Bobber") or character:FindFirstChild("Bait")
             if not bobber then
-            
+
                 for _, child in ipairs(workspace:GetChildren()) do
                     if child:IsA("Model") and (child.Name == "Bobber" or child.Name == "Bait") then
                         bobber = child
@@ -7461,7 +7952,7 @@ local function patchInstantBaitOverrideToCastPosition(enabled)
                 end
             end
             if bobber and bobber:IsA("BasePart") and bobber.Parent then
-             
+
                 local root = character:FindFirstChild("HumanoidRootPart")
                 if root then
                     local forward = root.CFrame.LookVector * 10
@@ -7478,7 +7969,7 @@ local function patchInstantBaitOverrideToCastPosition(enabled)
         local now = tick()
         local cfolder = InstantBobberState.cosmeticFolder
         if not cfolder then
-         
+
             local ok, folder = pcall(function() return workspace:WaitForChild("CosmeticFolder", 0) end)
             if ok and folder then
                 InstantBobberState.cosmeticFolder = folder
@@ -7528,7 +8019,6 @@ end
 
    local Section_ShopTab_5 = ExclusiveTab:AddSection("Auto Sell Fish")
 
--- Dropdown untuk metode
 local sellMethodValues = {"Sell items using a loop / With Loop", "Sell items when you reach a certain limit / With Limit"}
 Section_ShopTab_5:AddDropdown("Dropdown_MetodeSell", {
     Title = "Metode Sell",
@@ -7538,7 +8028,6 @@ Section_ShopTab_5:AddDropdown("Dropdown_MetodeSell", {
     Multi = false
 })
 
--- Input nilai (detik atau jumlah ikan)
 Section_ShopTab_5:AddInput("Input_SellValue", {
     Title = "Sell Value",
     Placeholder = "50",
@@ -7550,7 +8039,6 @@ Section_ShopTab_5:AddInput("Input_SellValue", {
     Finished = true
 })
 
--- Toggle untuk mengaktifkan
 Section_ShopTab_5:AddToggle("Toggle_EnableAutoSell", {
     Title = "Enable Auto Sell",
     Default = false,
@@ -7832,7 +8320,6 @@ if MainTab then
                     task.wait(0.5)
                     ensurePickaxeEquipped()
 
-                    -- Tunggu 5 detik untuk deteksi crystal
                     NotifyInfo("Mining", "Menunggu 5 detik deteksi crystal...")
                     local waited = 0
                     while waited < 5 and ((isContinuous and _G.AutoMining) or (not isContinuous and _G.isMining)) do
@@ -7856,7 +8343,6 @@ if MainTab then
                         NotifyWarning("Mining", "Tidak ada crystal saat ini. Kembali ke posisi awal...")
                     end
 
-                    -- Balik ke tempat semula
                     TeleportTo(savedCFrame * CFrame.new(0, 20, 0))
                     task.wait(0.2)
                     TeleportTo(savedCFrame)
@@ -7868,7 +8354,6 @@ if MainTab then
                         NotifyInfo("Mining", "Kembali ke posisi semula. Lanjut scan berkala di tempat...")
                     end
                 else
-                    -- Scan berikutnya: Scan di tempat tanpa teleport
                     local crystals = getMineableNormalCrystals()
                     if #crystals > 0 then
                         NotifySuccess("Mining", "Crystal baru terdeteksi (" .. #crystals .. ")! Teleporting ke Crystal Depth...")
@@ -7883,14 +8368,12 @@ if MainTab then
                             task.wait(0.5)
                         end
 
-                        -- Balik ke tempat semula
                         TeleportTo(savedCFrame * CFrame.new(0, 20, 0))
                         task.wait(0.2)
                         TeleportTo(savedCFrame)
                         NotifySuccess("Mining", "Mining selesai! Kembali ke posisi semula & lanjut scan di tempat...")
                     end
 
-                    -- Delay antar scan di tempat
                     local delayCount = 0
                     while delayCount < 5 and _G.AutoMining do
                         task.wait(1)
@@ -7941,7 +8424,6 @@ if MainTab then
                 end
             end
         })
-
 
         local Section_MainTab_10 = MainTab:AddSection("Veilshard Mining (Lava Basin)")
 
@@ -8069,7 +8551,6 @@ if MainTab then
                     task.wait(0.5)
                     ensurePickaxeEquipped()
 
-                    -- Tunggu 5 detik untuk deteksi crystal
                     NotifyInfo("Veilshard", "Menunggu 5 detik deteksi crystal...")
                     local waited = 0
                     while waited < 5 and ((isContinuous and _G.VeilshardMiningActive) or (not isContinuous and _G.isVeilshardMining)) do
@@ -8096,7 +8577,6 @@ if MainTab then
                         NotifyWarning("Veilshard", "Tidak ada crystal saat ini. Kembali ke posisi awal...")
                     end
 
-                    -- Balik ke tempat semula
                     TeleportTo(savedCFrame * CFrame.new(0, 50, 0))
                     task.wait(0.2)
                     TeleportTo(savedCFrame)
@@ -8108,7 +8588,6 @@ if MainTab then
                         NotifyInfo("Veilshard", "Kembali ke posisi semula. Lanjut scan berkala di tempat...")
                     end
                 else
-                    -- Scan berikutnya: Scan di tempat tanpa teleport
                     local crystals = getMineableVeilshardCrystals()
                     if #crystals > 0 then
                         NotifySuccess("Veilshard", "Veilshard crystal terdeteksi (" .. #crystals .. ")! Teleporting ke Lava Basin...")
@@ -8128,14 +8607,12 @@ if MainTab then
                             end
                         end
 
-                        -- Balik ke tempat semula
                         TeleportTo(savedCFrame * CFrame.new(0, 50, 0))
                         task.wait(0.2)
                         TeleportTo(savedCFrame)
                         NotifySuccess("Veilshard", "Mining selesai! Kembali ke posisi semula & lanjut scan di tempat...")
                     end
 
-                    -- Delay antar scan di tempat
                     local delayCount = 0
                     while delayCount < 5 and _G.VeilshardMiningActive do
                         task.wait(1)
@@ -9069,7 +9546,6 @@ if FlyTab then
             refreshPlayerDropdown()
         end)
 
-
         local Section_FlyTab_3 = FlyTab:AddSection("Event Teleport")
         local eventNames = {}; for name in pairs(eventData) do table.insert(eventNames, name) end; table.sort(eventNames)
         local eventValues = eventNames
@@ -9689,7 +10165,6 @@ if MiscTab then
             Callback = function(val)
                 _G.UltraFPSActive = val
                 if val then
-                    -- ... kode FPS booster ...
                     NotifySuccess("Ultra FPS", "BRUTAL MODE AKTIF! FPS maksimal!")
                 else
                     NotifyInfo("Ultra FPS", "Dimatikan. Restart game untuk restore visual.")
@@ -9715,9 +10190,6 @@ if MiscTab then
             return false
         end
 
-        -- =============================================
--- POTATO MODE - DIADAPTASI UNTUK MISCTAB
--- =============================================
 do
     local Terrain = workspace:FindFirstChildOfClass("Terrain")
     local Lighting = game:GetService("Lighting")
@@ -9927,7 +10399,6 @@ do
         _potato.origStates = { lighting = {}, water = {}, camera = {} }
     end
 
-    -- ===== TOGGLE DI MISCTAB =====
     Section_MiscTab_1:AddToggle("Toggle_PotatoMode", {
         Title = "Reduce Map (Potato Mode)",
         Description = "Hapus efek, turunkan kualitas, matikan shadow untuk FPS maksimal",
@@ -9969,7 +10440,6 @@ do
                     end
                 end
             end)
-            -- Hook untuk player baru dan objek baru
             table.insert(_potato.connections, Players.PlayerAdded:Connect(function(plr)
                 table.insert(_potato.connections, plr.CharacterAdded:Connect(function(char)
                     if not _potato.enabled then return end
@@ -10076,7 +10546,6 @@ end
             Callback = function(val)
                 if Controllers.VFX then
                     if val then
-                        -- disable VFX
                         if not _backupVFX then _backupVFX = {} end
                         for k, v in pairs(Controllers.VFX) do
                             if type(v) == "function" then
@@ -10096,7 +10565,6 @@ end
             end
         })
 
-        -- Disable Fish Caught (Small Notification)
         local fishNotifConnection = nil
         local function DisableFishCaught()
             local playerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -10127,7 +10595,6 @@ end
             end
         })
 
-        -- Skip Cutscene
         local skipCutscene = false
         local replicateConn = nil
         local stopConn = nil
@@ -10178,7 +10645,6 @@ end
             end
         })
 
-        -- Disable Fishing Effect
         local delEffects = false
         local effectsConnection = nil
         local effectsLoopThread = nil
@@ -10231,7 +10697,6 @@ end
             Callback = function(val) toggleDisableFishingEffect(val) end
         })
 
-        -- Fullbright
         local _fullbrightBackup = {}
         Section_MiscTab_1:AddToggle("Toggle_Fullbright", {
             Title = "Fullbright", Default = false,
@@ -10264,7 +10729,6 @@ end
             end
         })
 
-                -- Anti-AFK
         local Section_MiscTab_3 = MiscTab:AddSection("Anti-AFK")
         Section_MiscTab_3:AddToggle("Toggle_AntiAFK", {
             Title = "Anti-AFK", Default = false,
@@ -10304,8 +10768,8 @@ end
                 end
             end
         })
-    end) -- tutup pcall
-end -- tutup if MiscTab
+    end)
+end
 
 if QuestTab then
     pcall(function()
@@ -11228,8 +11692,6 @@ if QuestTab then
                     end
                 end
             end
-
-
 
             for inst, info in pairs(activeItems) do
                 local entry = ESP_Cache[inst]
