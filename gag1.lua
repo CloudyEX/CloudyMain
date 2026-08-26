@@ -1,4 +1,5 @@
-local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
+local raw = game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua")
+  
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
@@ -7,10 +8,37 @@ local VirtualUser = game:GetService("VirtualUser")
 local Workspace = game:GetService("Workspace")
 
 local localPlayer = Players.LocalPlayer
-local gameEvents = ReplicatedStorage:WaitForChild("GameEvents")
+
+local function getRemote(name)
+    local folders = {
+        ReplicatedStorage:FindFirstChild("GameEvents"),
+        ReplicatedStorage:FindFirstChild("Events"),
+        ReplicatedStorage:FindFirstChild("Remotes"),
+        ReplicatedStorage:FindFirstChild("GameRemotes"),
+        ReplicatedStorage
+    }
+    for _, folder in ipairs(folders) do
+        if folder then
+            local r = folder:FindFirstChild(name)
+                   or folder:FindFirstChild(name .. "_RE")
+                   or folder:FindFirstChild(name .. "Remote")
+                   or folder:FindFirstChild(string.gsub(name, "_RE", ""))
+            if r and (r:IsA("RemoteEvent") or r:IsA("RemoteFunction")) then
+                return r
+            end
+        end
+    end
+    local ge = ReplicatedStorage:FindFirstChild("GameEvents")
+    return ge and ge:FindFirstChild(name)
+end
 
 local function getCharacter()
     return localPlayer.Character or localPlayer.CharacterAdded:Wait()
+end
+
+local function getHumanoid()
+    local char = getCharacter()
+    return char and char:FindFirstChildOfClass("Humanoid")
 end
 
 local function getRootPart()
@@ -39,22 +67,64 @@ local function setClipboardSafe(text)
     end)
 end
 
-local function equipTool(toolName)
+local function normalizeStr(str)
+    return string.lower(string.gsub(tostring(str or ""), "[%s%_%-%[%]%d%*xX]+", ""))
+end
+
+local function findToolSmart(targetName)
+    local targetKey = normalizeStr(targetName)
     local char = getCharacter()
-    if not char then return end
-    for _, tool in ipairs(char:GetChildren()) do
-        if tool:IsA("Tool") and tool.Name == toolName then
-            return
-        end
-    end
     local backpack = localPlayer:FindFirstChild("Backpack")
-    if backpack then
-        local tool = backpack:FindFirstChild(toolName)
-        if tool and tool:IsA("Tool") then
-            tool.Parent = char
-            task.wait(0.15)
+
+    if char then
+        for _, item in ipairs(char:GetChildren()) do
+            if item:IsA("Tool") then
+                local itemKey = normalizeStr(item.Name)
+                if itemKey == targetKey or string.find(itemKey, targetKey, 1, true) or string.find(targetKey, itemKey, 1, true) then
+                    return item, true
+                end
+            end
         end
     end
+
+    if backpack then
+        for _, item in ipairs(backpack:GetChildren()) do
+            if item:IsA("Tool") then
+                local itemKey = normalizeStr(item.Name)
+                if itemKey == targetKey or string.find(itemKey, targetKey, 1, true) or string.find(targetKey, itemKey, 1, true) then
+                    return item, false
+                end
+            end
+        end
+    end
+
+    return nil, false
+end
+
+local function equipTool(targetName)
+    local char = getCharacter()
+    if not char then return nil end
+    local humanoid = getHumanoid()
+
+    local tool, isEquipped = findToolSmart(targetName)
+    if not tool then
+        return nil
+    end
+
+    if isEquipped then
+        return tool
+    end
+
+    pcall(function()
+        if humanoid then
+            humanoid:EquipTool(tool)
+        else
+            tool.Parent = char
+        end
+    end)
+
+    task.wait(0.15)
+    return tool
 end
 
 local seedList = {
@@ -166,6 +236,59 @@ local fpsSettings = {
     qualityLevel = nil
 }
 
+local function getPlantTargetPositions()
+    if plantMode == "Custom" and plantPosition then
+        local list = {}
+        for x = -2, 2 do
+            for z = -2, 2 do
+                table.insert(list, plantPosition + Vector3.new(x * 3.5, 0, z * 3.5))
+            end
+        end
+        return list
+    elseif plantMode == "Custom" then
+        local root = getRootPart()
+        if root then
+            local list = {}
+            for x = -2, 2 do
+                for z = -2, 2 do
+                    table.insert(list, root.Position + Vector3.new(x * 3.5, 0, z * 3.5))
+                end
+            end
+            return list
+        end
+    end
+
+    local root = getRootPart()
+    if root then
+        local list = {}
+        local cp = root.Position
+        for x = -2, 2 do
+            for z = -2, 2 do
+                table.insert(list, Vector3.new(cp.X + x * 3.5, cp.Y, cp.Z + z * 3.5))
+            end
+        end
+        return list
+    end
+
+    return defaultPlantPositions
+end
+
+local function getSprinklerTargetPositions()
+    if sprinklerMode == "Custom" and sprinklerPosition then
+        return {sprinklerPosition}
+    elseif sprinklerMode == "Custom" then
+        local root = getRootPart()
+        if root then return {root.CFrame} end
+    end
+
+    local root = getRootPart()
+    if root then
+        return {root.CFrame}
+    end
+
+    return defaultSprinklerPositions
+end
+
 local Window = Fluent:CreateWindow({
     Title = "Cloudy Hub",
     TitleIcon = "lucide/cloud",
@@ -193,7 +316,7 @@ GenInfoSection:AddParagraph({
 })
 GenInfoSection:AddParagraph({
     Title = "Tips Penggunaan",
-    Content = "• SCRIPT FREE TIDAK UNTUK DI PERJUAL BELIKAN\n• Tekan Left Control atau klik logo Cloudy untuk minimize UI.\n• Multi-select di tab Shop memungkinkan beli banyak item sekaligus tanpa klik berulang.\n• Auto Sell otomatis mengembalikan player ke posisi kebun setelah transaksi."
+    Content = "• SCRIPT FREE TIDAK UNTUK DI PERJUAL BELIKAN\n• Tekan Left Control atau klik logo Cloudy untuk minimize UI.\n• Multi-select di tab Shop memungkinkan beli banyak item sekaligus tanpa klik berulang.\n• Auto Plant & Sprinkler otomatis mendeteksi tool di inventory dan posisi plot player."
 })
 GenInfoSection:AddButton({
     Title = "Copy Discord Invite Link",
@@ -258,7 +381,7 @@ PlantSection:AddDropdown("PlantModeDropdown", {
 local AutoPlantToggle
 AutoPlantToggle = PlantSection:AddToggle("AutoPlantToggle", {
     Title = "Auto Plant ON/OFF",
-    Description = "Otomatis menanam seed sesuai mode & posisi",
+    Description = "Otomatis equip seed & menanam di plot player",
     Default = false,
     Callback = function(enabled)
         autoPlantEnabled = enabled
@@ -267,33 +390,36 @@ AutoPlantToggle = PlantSection:AddToggle("AutoPlantToggle", {
             autoPlantTask = nil
         end
         if enabled then
-            if plantMode == "Custom" and not plantPosition then
-                Notify("ERROR", "Posisi Custom belum diset! Klik 'Set Plant Position' dulu.", 4, "solar/danger-triangle-bold")
+            local plantRemote = getRemote("Plant_RE") or getRemote("Plant")
+            if not plantRemote then
+                Notify("ERROR", "Remote Plant_RE tidak ditemukan!", 4, "solar/danger-triangle-bold")
                 autoPlantEnabled = false
                 if AutoPlantToggle then AutoPlantToggle:SetValue(false) end
                 return
             end
+
             autoPlantTask = task.spawn(function()
                 while autoPlantEnabled do
-                    equipTool(selectedSeed)
-                    local positions = {}
-                    if plantMode == "Default" then
-                        positions = defaultPlantPositions
-                    elseif plantMode == "Custom" and plantPosition then
-                        positions = {plantPosition}
+                    local equippedTool = equipTool(selectedSeed)
+                    if not equippedTool then
+                        Notify("INFO", "Seed " .. tostring(selectedSeed) .. " tidak ada di Backpack/Karakter!", 3, "solar/info-circle-bold")
+                        task.wait(2)
                     else
-                        autoPlantEnabled = false
-                        if AutoPlantToggle then AutoPlantToggle:SetValue(false) end
-                        break
+                        local seedParam = equippedTool.Name
+                        local positions = getPlantTargetPositions()
+
+                        for _, pos in ipairs(positions) do
+                            if not autoPlantEnabled then break end
+                            pcall(function()
+                                plantRemote:FireServer(pos, seedParam)
+                            end)
+                            pcall(function()
+                                plantRemote:FireServer(pos, selectedSeed)
+                            end)
+                            task.wait(0.1)
+                        end
+                        task.wait(0.8)
                     end
-                    for _, pos in ipairs(positions) do
-                        if not autoPlantEnabled then break end
-                        pcall(function()
-                            gameEvents.Plant_RE:FireServer(pos, selectedSeed)
-                        end)
-                        task.wait(0.12)
-                    end
-                    task.wait(1)
                 end
             end)
         end
@@ -335,7 +461,7 @@ SprinklerSection:AddDropdown("SprinklerModeDropdown", {
 local AutoSprinklerToggle
 AutoSprinklerToggle = SprinklerSection:AddToggle("AutoSprinklerToggle", {
     Title = "Auto Sprinkler ON/OFF",
-    Description = "Otomatis menempatkan sprinkler sesuai mode & posisi",
+    Description = "Otomatis equip sprinkler & menempatkan di plot player",
     Default = false,
     Callback = function(enabled)
         autoSprinklerEnabled = enabled
@@ -344,33 +470,36 @@ AutoSprinklerToggle = SprinklerSection:AddToggle("AutoSprinklerToggle", {
             autoSprinklerTask = nil
         end
         if enabled then
-            if sprinklerMode == "Custom" and not sprinklerPosition then
-                Notify("ERROR", "Posisi Custom belum diset! Klik 'Set Sprinkler Position' dulu.", 4, "solar/danger-triangle-bold")
+            local sprinklerRemote = getRemote("PlaceSprinkler_RE") or getRemote("PlaceSprinkler")
+            if not sprinklerRemote then
+                Notify("ERROR", "Remote PlaceSprinkler_RE tidak ditemukan!", 4, "solar/danger-triangle-bold")
                 autoSprinklerEnabled = false
                 if AutoSprinklerToggle then AutoSprinklerToggle:SetValue(false) end
                 return
             end
+
             autoSprinklerTask = task.spawn(function()
                 while autoSprinklerEnabled do
-                    equipTool(selectedSprinkler)
-                    local positions = {}
-                    if sprinklerMode == "Default" then
-                        positions = defaultSprinklerPositions
-                    elseif sprinklerMode == "Custom" and sprinklerPosition then
-                        positions = {sprinklerPosition}
+                    local equippedTool = equipTool(selectedSprinkler)
+                    if not equippedTool then
+                        Notify("INFO", "Sprinkler " .. tostring(selectedSprinkler) .. " tidak ada di Backpack/Karakter!", 3, "solar/info-circle-bold")
+                        task.wait(2)
                     else
-                        autoSprinklerEnabled = false
-                        if AutoSprinklerToggle then AutoSprinklerToggle:SetValue(false) end
-                        break
+                        local sprinklerParam = equippedTool.Name
+                        local positions = getSprinklerTargetPositions()
+
+                        for _, pos in ipairs(positions) do
+                            if not autoSprinklerEnabled then break end
+                            pcall(function()
+                                sprinklerRemote:FireServer(pos, sprinklerParam)
+                            end)
+                            pcall(function()
+                                sprinklerRemote:FireServer(pos, selectedSprinkler)
+                            end)
+                            task.wait(0.15)
+                        end
+                        task.wait(1.2)
                     end
-                    for _, pos in ipairs(positions) do
-                        if not autoSprinklerEnabled then break end
-                        pcall(function()
-                            gameEvents.PlaceSprinkler_RE:FireServer(pos, selectedSprinkler)
-                        end)
-                        task.wait(0.12)
-                    end
-                    task.wait(1)
                 end
             end)
         end
@@ -400,6 +529,7 @@ SellInvSection:AddToggle("AutoSellInvToggle", {
             autoSellInventoryTask = nil
         end
         if enabled then
+            local sellRemote = getRemote("Sell_Inventory") or getRemote("SellInventory")
             autoSellInventoryTask = task.spawn(function()
                 while autoSellInventoryEnabled do
                     pcall(function()
@@ -408,14 +538,18 @@ SellInvSection:AddToggle("AutoSellInvToggle", {
                             local prevCFrame = root.CFrame
                             root.CFrame = sellPosition
                             task.wait(0.7)
-                            gameEvents.Sell_Inventory:FireServer()
+                            if sellRemote then
+                                sellRemote:FireServer()
+                            end
                             task.wait(0.4)
                             local curRoot = getRootPart()
                             if curRoot and prevCFrame then
                                 curRoot.CFrame = prevCFrame
                             end
                         else
-                            gameEvents.Sell_Inventory:FireServer()
+                            if sellRemote then
+                                sellRemote:FireServer()
+                            end
                         end
                     end)
                     task.wait(sellDelay)
@@ -448,11 +582,14 @@ SellPetSection:AddToggle("AutoSellPetToggle", {
             autoSellPetTask = nil
         end
         if enabled then
+            local sellPetRemote = getRemote("SellAllPets_RE") or getRemote("SellAllPets")
             autoSellPetTask = task.spawn(function()
                 while autoSellPetEnabled do
-                    pcall(function()
-                        gameEvents.SellAllPets_RE:FireServer()
-                    end)
+                    if sellPetRemote then
+                        pcall(function()
+                            sellPetRemote:FireServer()
+                        end)
+                    end
                     task.wait(sellPetDelay)
                 end
             end)
@@ -482,14 +619,18 @@ AutoBuySeedToggle = SeedShopSection:AddToggle("AutoBuySeedToggle", {
             autoBuySeedTask = nil
         end
         if enabled then
+            local buySeedRemote = getRemote("BuySeedStock") or getRemote("BuySeed")
             autoBuySeedTask = task.spawn(function()
                 while autoBuySeedEnabled do
                     local count = 0
                     for seedName, isSelected in pairs(buySeedSelected) do
-                        if isSelected and autoBuySeedEnabled then
+                        if isSelected and autoBuySeedEnabled and buySeedRemote then
                             count = count + 1
                             pcall(function()
-                                gameEvents.BuySeedStock:FireServer("Shop", seedName)
+                                buySeedRemote:FireServer("Shop", seedName)
+                            end)
+                            pcall(function()
+                                buySeedRemote:FireServer(seedName)
                             end)
                             task.wait(0.1)
                         end
@@ -528,14 +669,15 @@ AutoBuyGearToggle = GearShopSection:AddToggle("AutoBuyGearToggle", {
             autoBuyGearTask = nil
         end
         if enabled then
+            local buyGearRemote = getRemote("BuyGearStock") or getRemote("BuyGear")
             autoBuyGearTask = task.spawn(function()
                 while autoBuyGearEnabled do
                     local count = 0
                     for gearName, isSelected in pairs(buyGearSelected) do
-                        if isSelected and autoBuyGearEnabled then
+                        if isSelected and autoBuyGearEnabled and buyGearRemote then
                             count = count + 1
                             pcall(function()
-                                gameEvents.BuyGearStock:FireServer(gearName)
+                                buyGearRemote:FireServer(gearName)
                             end)
                             task.wait(0.1)
                         end
@@ -574,14 +716,15 @@ AutoBuyEggToggle = EggShopSection:AddToggle("AutoBuyEggToggle", {
             autoBuyEggTask = nil
         end
         if enabled then
+            local buyEggRemote = getRemote("BuyPetEgg") or getRemote("BuyEgg")
             autoBuyEggTask = task.spawn(function()
                 while autoBuyEggEnabled do
                     local count = 0
                     for eggName, isSelected in pairs(buyEggSelected) do
-                        if isSelected and autoBuyEggEnabled then
+                        if isSelected and autoBuyEggEnabled and buyEggRemote then
                             count = count + 1
                             pcall(function()
-                                gameEvents.BuyPetEgg:FireServer(eggName)
+                                buyEggRemote:FireServer(eggName)
                             end)
                             task.wait(0.1)
                         end
