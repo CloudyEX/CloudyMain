@@ -3699,7 +3699,245 @@ Section_PlayersTab_3:AddToggle("HideIdentityToggle", {
         end
     end
 })
+
+-- ======================================================================
+-- FAKE AVATAR (FIXED dengan debug dan refresh)
+-- ======================================================================
+local Section_FakeAvatar = PlayersTab:AddSection("Fake Avatar")
+
+Section_FakeAvatar:AddParagraph({
+    Title = "Status",
+    Content = "Pilih avatar, lalu aktifkan toggle."
+})
+
+local FakeAvatarEnabled = false
+local SelectedFakeAva = nil
+
+-- ===== FUNGSI LOAD AVATAR =====
+local function LoadAsetKeKarakter(appearance, character, head)
+    local items = appearance:GetChildren()
     
+    local function ApplyMesh(obj)
+        if obj:IsA("CharacterMesh") or obj:IsA("BodyColors") or obj:IsA("Shirt") or obj:IsA("Pants") then
+            local existing = character:FindFirstChild(obj.Name)
+            if existing and existing.ClassName == obj.ClassName then existing:Destroy() end
+            obj:Clone().Parent = character
+        end
+    end
+
+    for _, item in pairs(items) do
+        if item:IsA("Folder") or item:IsA("Model") then
+            for _, subItem in pairs(item:GetChildren()) do
+                ApplyMesh(subItem)
+            end
+        else
+            ApplyMesh(item)
+        end
+    end
+
+    for _, item in pairs(items) do
+        if item:IsA("SpecialMesh") and head then
+            local targetMesh = head:FindFirstChildOfClass("SpecialMesh") or Instance.new("SpecialMesh", head)
+            targetMesh.MeshType = Enum.MeshType.FileMesh
+            targetMesh.MeshId = item.MeshId
+            targetMesh.TextureId = item.TextureId
+        elseif item:IsA("Decal") and item.Name == "face" and head then
+            if head:FindFirstChild("face") then head.face:Destroy() end
+            item:Clone().Parent = head
+        end
+    end
+
+    for _, item in pairs(items) do
+        if item:IsA("Accessory") then
+            local clone = item:Clone()
+            local handle = clone:FindFirstChild("Handle")
+            if handle then
+                local att = handle:FindFirstChildOfClass("Attachment")
+                if att then
+                    local targetAtt = character:FindFirstChild(att.Name, true)
+                    if targetAtt then
+                        local weld = Instance.new("Weld")
+                        weld.Part0 = handle 
+                        weld.Part1 = targetAtt.Parent
+                        weld.C0 = att.CFrame 
+                        weld.C1 = targetAtt.CFrame
+                        weld.Parent = handle
+                    end
+                end
+                handle.CanCollide = false
+                handle.Massless = true
+                clone.Parent = character
+            end
+        end
+    end
+end
+
+-- ===== FUNGSI UTAMA =====
+local function ApplyFakeAvaAppearance()
+    print("[FakeAvatar] ApplyFakeAvaAppearance called")
+    local character = LocalPlayer.Character
+    if not character then
+        Fluent:Notify({ Title = "Fake Avatar", Content = "Karakter tidak ditemukan!", Duration = 3 })
+        return
+    end
+    if not SelectedFakeAva then
+        Fluent:Notify({ Title = "Fake Avatar", Content = "Pilih avatar dulu dari dropdown!", Duration = 3 })
+        return
+    end
+
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if not humanoid then
+        Fluent:Notify({ Title = "Fake Avatar", Content = "Humanoid tidak ditemukan!", Duration = 3 })
+        return
+    end
+
+    print("[FakeAvatar] Selected UserId:", SelectedFakeAva)
+
+    task.spawn(function()
+        local success, appearance = pcall(function()
+            return game:GetService("Players"):GetCharacterAppearanceAsync(SelectedFakeAva)
+        end)
+        
+        if not success or not appearance then 
+            Fluent:Notify({ Title = "Fake Avatar", Content = "Gagal load avatar (ID: " .. tostring(SelectedFakeAva) .. ")", Duration = 3 })
+            print("[FakeAvatar] Error loading appearance")
+            return 
+        end
+
+        print("[FakeAvatar] Appearance loaded successfully")
+
+        -- Hapus komponen avatar lama
+        for _, obj in pairs(character:GetChildren()) do
+            if obj:IsA("Accessory") or obj:IsA("Shirt") or obj:IsA("Pants") 
+            or obj:IsA("BodyColors") or obj:IsA("CharacterMesh") or obj:IsA("ShirtGraphic") then
+                obj:Destroy()
+            end
+        end
+
+        local head = character:FindFirstChild("Head")
+        if head then
+            for _, hObj in pairs(head:GetChildren()) do
+                if hObj:IsA("SpecialMesh") or hObj:IsA("Decal") then hObj:Destroy() end
+            end
+            local m = Instance.new("SpecialMesh", head)
+            m.MeshType = Enum.MeshType.Head
+            m.Scale = Vector3.new(1, 1, 1)
+        end
+
+        -- Reset skala tubuh
+        local scaleDefaults = {
+            BodyDepthScale = 1, BodyHeightScale = 1, BodyWidthScale = 1,
+            HeadScale = 1, BodyTypeScale = 0, BodyProportionScale = 0,
+        }
+        for scaleName, val in pairs(scaleDefaults) do
+            local s = humanoid:FindFirstChild(scaleName)
+            if s then s.Value = val end
+        end
+
+        task.wait(0.1)
+        LoadAsetKeKarakter(appearance, character, head)
+
+        -- Pasang face
+        pcall(function()
+            local info = game:GetService("Players"):GetCharacterAppearanceInfoAsync(SelectedFakeAva)
+            if head and info.assets then
+                for _, asset in pairs(info.assets) do
+                    if asset.assetType.name == "Face" then
+                        if head:FindFirstChild("face") then head.face:Destroy() end
+                        local f = Instance.new("Decal", head)
+                        f.Name = "face"
+                        f.Texture = "rbxassetid://"..asset.id
+                        break
+                    end
+                end
+            end
+        end)
+
+        -- Refresh karakter agar perubahan terlihat
+        pcall(function()
+            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+            task.wait(0.1)
+            humanoid:ChangeState(Enum.HumanoidStateType.Running)
+        end)
+
+        Fluent:Notify({ Title = "Fake Avatar", Content = "Avatar berhasil diganti!", Duration = 3 })
+        print("[FakeAvatar] Appearance applied successfully")
+    end)
+end
+
+-- ===== DROPDOWN =====
+local avatarOptions = {
+    "Self Avatar", "Random 1", "Random 2", "Random 3", "Random 4", "Random 5", 
+    "Random 6", "Random 7", "WoozyNate", "Nicholas", "yvlyf", "traevp", "J0LLY", 
+    "LucashDev", "CEOofIsaac", "Stealthy", "Wildes", "Talon", "Relukt", 
+    "Sammy", "Diesel", "S4ans03", "Aura", "iJava", "White Guy", 
+    "Purple King", "Kachaaaa Gay", "Mpruyyy"
+}
+local avatarIds = {
+    ["Self Avatar"] = LocalPlayer.UserId, 
+    ["Random 1"] = 2888298851, 
+    ["Random 2"] = 10074747755,
+    ["Random 3"] = 5209567453, 
+    ["Random 4"] = 8991982843, 
+    ["Random 5"] = 5796319029, 
+    ["Random 6"] = 9744452117,
+    ["Random 7"] = 8476755006, 
+    ["WoozyNate"] = 146089324, 
+    ["Nicholas"] = 909635, 
+    ["yvlyf"] = 181751703,
+    ["traevp"] = 471607078, 
+    ["J0LLY"] = 1073847038, 
+    ["LucashDev"] = 2525651744,
+    ["CEOofIsaac"] = 63238912, 
+    ["Stealthy"] = 56602747, 
+    ["Wildes"] = 40397833,
+    ["Talon"] = 75974130, 
+    ["Relukt"] = 65042011, 
+    ["Sammy"] = 2678001507,
+    ["Diesel"] = 9123921576, 
+    ["S4ans03"] = 35439794, 
+    ["Aura"] = 2275806428,
+    ["iJava"] = 276557820, 
+    ["White Guy"] = 8843268357, 
+    ["Purple King"] = 9070758608,
+    ["Kachaaaa Gay"] = 8956318334, 
+    ["Mpruyyy"] = 8340163775
+}
+
+Section_FakeAvatar:AddDropdown("FakeAvatar_Dropdown", {
+    Title = "Pilih Avatar",
+    Values = avatarOptions,
+    Default = "Self Avatar",
+    Callback = function(option)
+        SelectedFakeAva = avatarIds[option]
+        Fluent:Notify({ Title = "Fake Avatar", Content = "Avatar dipilih: " .. option, Duration = 2 })
+        print("[FakeAvatar] Selected:", option, "ID:", SelectedFakeAva)
+        if FakeAvatarEnabled then
+            ApplyFakeAvaAppearance()
+        end
+    end
+})
+
+-- ===== TOGGLE =====
+Section_FakeAvatar:AddToggle("FakeAvatar_Toggle", {
+    Title = "Aktifkan Fake Avatar",
+    Default = false,
+    Callback = function(state)
+        FakeAvatarEnabled = state
+        print("[FakeAvatar] Toggle state:", state)
+        if state then
+            if not SelectedFakeAva then
+                Fluent:Notify({ Title = "Fake Avatar", Content = "Pilih avatar dulu dari dropdown!", Duration = 3 })
+                FakeAvatarEnabled = false
+                -- Kita tidak bisa mengubah toggle kembali, jadi biarkan
+                return
+            end
+            ApplyFakeAvaAppearance()
+        else
+            Fluent:Notify({ Title = "Fake Avatar", Content = "Fake Avatar dinonaktifkan.", Duration = 2 })
+        end
+    end
+})
 
         local Section_PlayersTab_6 = PlayersTab:AddSection("Custom Skin Animation")
         local customSkinNames = {"Eclipse","HolyTrident","SoulScythe","OceanicHarpoon","BinaryEdge","Vanquisher","KrampusScythe","BanHammer","CorruptionEdge","PrincessParasol"}
@@ -7287,9 +7525,6 @@ if MainTab then
             end
         })
 
-        -- =================================================================
-        -- ANCIENT LOCHNESS EVENT (AUTOMATION TAB) - ACCURATE TRACKER
-        -- =================================================================
         local Section_MainTab_Lochness = MainTab:AddSection("Ancient Lochness Event")
 
         local lastPositionBeforeLochness = nil
@@ -7532,10 +7767,6 @@ if MainTab then
             end
         })
 
-
-        -- =================================================================
-        -- AUTO UNLOCK RUIN DOOR (AUTOMATION TAB)
-        -- =================================================================
         local Section_MainTab_RuinDoor = MainTab:AddSection("Auto Unlock Ruin Door")
 
         local AUTO_UNLOCK_RUIN_STATE = false
@@ -8087,26 +8318,19 @@ if ExclusiveTab then
         })
 
 Config.InstantV2 = {
-    Active = false,
+    Active = false,   -- default mati, diatur lewat tombol
     CastMode = "Fast",
     UseCastMode = true,
     ForcePerfect = true,
     PerfectOffset = 0.0,
-
-    ReduceAnimation = true,
-    CompleteDelay = 3.0,
-    CastDelay = 0.3,
-    ReducedCompleteDelay = 0.001,
-    ReducedCastDelay = 0.001,
+    CompleteDelay = 0,
+    CastDelay = 0,
 }
 
-local function getPowerFast()
-    return 1
-end
-
-local function handleCastModeFast()
-    return 1
-end
+local PI = math.pi
+local sin = math.sin
+local Workspace = workspace
+local GetTime = Workspace.GetServerTimeNow
 
 local function instantV2_loop()
     local Charge  = Config.UB.Remotes.ChargeFishingRod
@@ -8157,7 +8381,6 @@ local function instantV2_loop()
         end
     end
 end
-
 
 function startInstantV2()
     if Config.InstantV2.Active then return end
