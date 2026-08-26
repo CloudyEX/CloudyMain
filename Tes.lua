@@ -2377,9 +2377,8 @@ local function CreateCloudyPanel()
 
     local statsLayout = Instance.new("UIListLayout")
     statsLayout.FillDirection = Enum.FillDirection.Horizontal
-    statsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    statsLayout.HorizontalAlignment = Enum.HorizontalAlignment.SpaceAround
     statsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-    statsLayout.Padding = UDim.new(0, 16)
     statsLayout.Parent = bottomStats
 
     local function makeStatItem(tag)
@@ -6164,23 +6163,13 @@ if MainTab then
                                     end
                                 end
                             end
-                for _, ctrlName in ipairs({"WeatherController", "EventController", "EnvironmentController", "WorldController", "NotificationController", "ZoneController"}) do
-                    local ctrl = Controllers[ctrlName]
-                    if not ctrl then
-                        local cFolder = ReplicatedStorage:FindFirstChild("Controllers")
-                        if cFolder and cFolder:FindFirstChild(ctrlName) then
-                            local ok, req = pcall(require, cFolder[ctrlName])
-                            if ok and req then Controllers[ctrlName] = req; ctrl = req end
-                        end
-                    end
-                    if ctrl and type(ctrl) == "table" then
-                        for _, methodName in ipairs({"GetCurrentWeather", "GetWeather", "GetActiveEvents", "GetEvents", "GetCurrentEvent", "GetZone", "GetEnvironment"}) do
-                            if type(ctrl[methodName]) == "function" then
-                                local ok, res = pcall(ctrl[methodName], ctrl)
-                                if ok and res then
-                                    local str = tostring(type(res) == "table" and (res.Name or res.Weather or res.Event or HttpService:JSONEncode(res)) or res):lower()
-                                    local key = resolveCanonicalEventKey(str)
-                                    if key then activeList[key] = true end
+                            for _, propName in ipairs({"ActiveEvents", "Events", "CurrentEvents", "ActiveWeather", "CurrentWeather", "ActiveZones"}) do
+                                if type(ctrl[propName]) == "table" then
+                                    for k, v in pairs(ctrl[propName]) do
+                                        local s = tostring(type(k) == "string" and k or v):lower()
+                                        local key = resolveCanonicalEventKey(s)
+                                        if key then activeList[key] = true end
+                                    end
                                 end
                             end
                         end
@@ -6193,17 +6182,55 @@ if MainTab then
         local function checkDynamicFolders()
             local activeList = {}
             pcall(function()
-                for _, folderName in ipairs({"Events", "ActiveEvents", "Weather", "Environment", "Zones", "ActiveWeather"}) do
-                    local folder = Workspace:FindFirstChild(folderName) or ReplicatedStorage:FindFirstChild(folderName)
-                    if folder then
-                        for _, child in ipairs(folder:GetChildren()) do
-                            local key = resolveCanonicalEventKey(child.Name)
-                            if key then activeList[key] = true end
+                for _, parent in ipairs({ ReplicatedStorage, Workspace }) do
+                    for _, folderName in ipairs({"ActiveEvents", "RunningEvents", "CurrentEvents", "ActiveWeather", "CurrentWeather", "Weather"}) do
+                        local f = parent:FindFirstChild(folderName)
+                        if f then
+                            for _, child in ipairs(f:GetChildren()) do
+                                local key = resolveCanonicalEventKey(child.Name)
+                                if key then activeList[key] = true end
+                            end
                         end
-                        for attrName, attrVal in pairs(folder:GetAttributes()) do
-                            local key = resolveCanonicalEventKey(tostring(attrName) .. " " .. tostring(attrVal))
-                            if key then activeList[key] = true end
+                    end
+                end
+            end)
+            return activeList
+        end
+
+        local function checkReplionForEvents()
+            local activeList = {}
+            pcall(function()
+                local repClient = Replion and Replion.Client
+                if not repClient then return end
+                for _, repName in ipairs({"Events", "ActiveEvents", "Weather", "World", "Environment", "Zone", "Zones"}) do
+                    local ok, r = pcall(function() return repClient:GetReplion(repName) end)
+                    if ok and r then
+                        local data = r:GetValue() or r:GetExpect()
+                        if type(data) == "table" then
+                            for k, v in pairs(data) do
+                                local s = tostring(type(k) == "string" and k or v):lower()
+                                local key = resolveCanonicalEventKey(s)
+                                if key then activeList[key] = true end
+                            end
                         end
+                    end
+                end
+            end)
+            return activeList
+        end
+
+        local function checkLightingAndWorld()
+            local activeList = {}
+            pcall(function()
+                local lighting = game:GetService("Lighting")
+                if lighting then
+                    for _, obj in ipairs(lighting:GetChildren()) do
+                        local key = resolveCanonicalEventKey(obj.Name)
+                        if key then activeList[key] = true end
+                    end
+                    for attrName, attrVal in pairs(lighting:GetAttributes()) do
+                        local key = resolveCanonicalEventKey(tostring(attrName) .. " " .. tostring(attrVal))
+                        if key then activeList[key] = true end
                     end
                 end
             end)
@@ -6232,6 +6259,12 @@ if MainTab then
             if checkDynamicFolders()[eventKey] then
                 info.Active = true; info.StartTime = tick(); return true
             end
+            if checkReplionForEvents()[eventKey] then
+                info.Active = true; info.StartTime = tick(); return true
+            end
+            if checkLightingAndWorld()[eventKey] then
+                info.Active = true; info.StartTime = tick(); return true
+            end
 
             return false
         end
@@ -6240,17 +6273,6 @@ if MainTab then
         local elementalAutoTPThread = nil
         local elementalSavedCFrame = nil
         local elementalCurrentEvent = nil
-
-        local function getSelectedCanonicalEvents()
-            if selectedElementalEventMode == "All Elemental Events" or selectedElementalEventMode == "All" then
-                return {"Storm Elemental Event", "Blizzard Elemental Event", "Volcano Elemental Event"}
-            end
-            local key = resolveCanonicalEventKey(selectedElementalEventMode)
-            if key then
-                return {key}
-            end
-            return {"Storm Elemental Event", "Blizzard Elemental Event", "Volcano Elemental Event"}
-        end
 
         local function runElementalEventLoop()
             while elementalAutoTPState do
@@ -6267,18 +6289,20 @@ if MainTab then
                             elementalSavedCFrame = nil
                         end
                     else
-                        local targetEvents = getSelectedCanonicalEvents()
-                        for _, canonicalKey in ipairs(targetEvents) do
-                            if isElementalEventActive(canonicalKey) then
-                                local targetData = ElementalEventState[canonicalKey]
-                                if targetData and targetData.CFrame then
-                                    local hrp = getHRP()
-                                    if hrp then
-                                        elementalSavedCFrame = hrp.CFrame
-                                        elementalCurrentEvent = canonicalKey
-                                        NotifySuccess("Elemental Event", "Event " .. tostring(canonicalKey) .. " aktif! Teleporting ke lokasi...")
-                                        TeleportTo(targetData.CFrame)
-                                        break
+                        for evName, isSelected in pairs(selectedElementalEvents) do
+                            if isSelected then
+                                local canonicalKey = resolveCanonicalEventKey(evName)
+                                if canonicalKey and isElementalEventActive(canonicalKey) then
+                                    local targetData = ElementalEventState[canonicalKey]
+                                    if targetData and targetData.CFrame then
+                                        local hrp = getHRP()
+                                        if hrp then
+                                            elementalSavedCFrame = hrp.CFrame
+                                            elementalCurrentEvent = canonicalKey
+                                            NotifySuccess("Elemental Event", "Event " .. tostring(canonicalKey) .. " aktif! Teleporting ke lokasi...")
+                                            TeleportTo(targetData.CFrame)
+                                            break
+                                        end
                                     end
                                 end
                             end
@@ -6289,21 +6313,23 @@ if MainTab then
             end
         end
 
-        local elementalDropdownOptions = {
-            "All Elemental Events",
-            "Storm Elemental Event",
-            "Blizzard Elemental Event",
-            "Volcano Elemental Event"
-        }
-
-        Section_MainTab_Elemental:AddDropdown("Dropdown_SelectElementalEvent", {
+        Section_MainTab_Elemental:AddDropdown("MultiDropdown_SelectElementalEvent", {
             Title = "Select Elemental Event",
-            Values = elementalDropdownOptions,
-            Default = elementalDropdownOptions[1],
-            Multi = false,
+            Values = {"Storm Elemental Event", "Blizzard Elemental Event", "Volcano Elemental Event"},
+            Default = {"Storm Elemental Event"},
+            Multi = true,
             Callback = function(val)
-                if val then
-                    selectedElementalEventMode = val
+                selectedElementalEvents = {}
+                if typeof(val) == "table" then
+                    for k, v in pairs(val) do
+                        if v == true then
+                            selectedElementalEvents[k] = true
+                        elseif typeof(v) == "string" then
+                            selectedElementalEvents[v] = true
+                        end
+                    end
+                elseif typeof(val) == "string" then
+                    selectedElementalEvents[val] = true
                 end
             end
         })
@@ -6315,6 +6341,16 @@ if MainTab then
             Callback = function(state)
                 elementalAutoTPState = state
                 if state then
+                    local hasSelected = false
+                    for _, v in pairs(selectedElementalEvents) do
+                        if v then hasSelected = true; break end
+                    end
+                    if not hasSelected then
+                        NotifyWarning("Elemental Event", "Pilih minimal 1 event di dropdown!")
+                        elementalAutoTPState = false
+                        return
+                    end
+
                     if elementalAutoTPThread then
                         pcall(function() task.cancel(elementalAutoTPThread) end)
                     end
@@ -6339,8 +6375,8 @@ if MainTab then
         local Section_MainTab_Regulator = MainTab:AddSection("Auto Repair Regulator (Elemental Island)")
 
         Section_MainTab_Regulator:AddParagraph({
-            Title = "Panduan Auto Repair Regulator",
-            Content = "1. Pilih Regulator yang ingin diperbaiki di dropdown.\n2. Aktifkan toggle Auto Repair Regulator.\n3. Saat Event terkait aktif, script otomatis teleport ke Area Event & equip rod.\n4. Silakan aktifkan fitur Auto Fishing pilihan Anda.\n5. Setelah item didapatkan, script otomatis teleport ke mesin regulator dan memperbaiki mesin."
+            Title = "📖 Panduan Auto Repair Regulator",
+            Content = "1. Pilih Regulator yang ingin diperbaiki di dropdown.\n2. Aktifkan toggle 'Auto Repair Regulator'.\n3. Saat Event terkait aktif, script otomatis teleport ke Area Event & equip rod.\n4. Silakan aktifkan fitur Auto Fishing manual yang ingin kamu gunakan.\n5. Setelah item khusus didapatkan, script otomatis unequip rod, teleport ke mesin regulator, dan berinteraksi dengan ProximityPrompt untuk memperbaiki mesin."
         })
 
         local REGULATOR_CONFIG = {
@@ -6367,22 +6403,13 @@ if MainTab then
             }
         }
 
-        local selectedRegulatorMode = "All Regulators"
+        local selectedRegulators = {
+            ["Atmospheric Regulator"] = true
+        }
+
         local regulatorState = false
         local regulatorThread = nil
         local regulatorSavedPos = nil
-
-        local function getSelectedRegulators()
-            if selectedRegulatorMode == "All Regulators" or selectedRegulatorMode == "All" then
-                return {"Atmospheric Regulator", "Glacial Regulator", "Magma Regulator"}
-            end
-            for name in pairs(REGULATOR_CONFIG) do
-                if name == selectedRegulatorMode or selectedRegulatorMode:find(name, 1, true) then
-                    return {name}
-                end
-            end
-            return {"Atmospheric Regulator", "Glacial Regulator", "Magma Regulator"}
-        end
 
         local function hasRequiredItemInInventory(targetItemName, targetItemId)
             local count = 0
@@ -6417,6 +6444,33 @@ if MainTab then
                     end
                 end
             end)
+
+            pcall(function()
+                local lp = Players.LocalPlayer
+                local bp = lp and lp:FindFirstChild("Backpack")
+                if bp then
+                    for _, tool in ipairs(bp:GetChildren()) do
+                        local tName = tool.Name:lower()
+                        local tId = tonumber(tool:GetAttribute("ItemId"))
+                        if (targetIdNum and tId == targetIdNum) or (targetNameLower and tName:find(targetNameLower, 1, true)) then
+                            count = count + 1
+                        end
+                    end
+                end
+                local char = lp and lp.Character
+                if char then
+                    for _, tool in ipairs(char:GetChildren()) do
+                        if tool:IsA("Tool") then
+                            local tName = tool.Name:lower()
+                            local tId = tonumber(tool:GetAttribute("ItemId"))
+                            if (targetIdNum and tId == targetIdNum) or (targetNameLower and tName:find(targetNameLower, 1, true)) then
+                                count = count + 1
+                            end
+                        end
+                    end
+                end
+            end)
+
             return count > 0, count
         end
 
@@ -6426,24 +6480,71 @@ if MainTab then
                 if char and char:FindFirstChildOfClass("Humanoid") then
                     char.Humanoid:UnequipTools()
                 end
+                local RE_Unequip = GetServerRemote("RE/UnequipToolFromHotbar") or GetServerRemote("RF/UnequipToolFromHotbar")
+                if RE_Unequip then
+                    pcall(function()
+                        if RE_Unequip:IsA("RemoteEvent") then
+                            RE_Unequip:FireServer()
+                        elseif RE_Unequip:IsA("RemoteFunction") then
+                            RE_Unequip:InvokeServer()
+                        end
+                    end)
+                end
+                if Events.unequip then
+                    pcall(function() Events.unequip:FireServer() end)
+                end
             end)
         end
 
         local function triggerNearestProximityPrompt(maxDist)
             maxDist = maxDist or 35
-            local hrp = getHRP()
+            local char = LocalPlayer.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
             if not hrp then return false end
+
+            local targetPrompt = nil
+            local closestDist = maxDist
+
             for _, desc in ipairs(Workspace:GetDescendants()) do
                 if desc:IsA("ProximityPrompt") and desc.Enabled then
                     local pPos = nil
-                    if desc.Parent:IsA("BasePart") then pPos = desc.Parent.Position
-                    elseif desc.Parent:IsA("Model") and desc.Parent.PrimaryPart then pPos = desc.Parent.PrimaryPart.Position
-                    elseif desc.Parent:IsA("Attachment") then pPos = desc.Parent.WorldPosition end
-                    if pPos and (hrp.Position - pPos).Magnitude < maxDist then
-                        fireproximityprompt(desc)
-                        return true
+                    if desc.Parent:IsA("BasePart") then
+                        pPos = desc.Parent.Position
+                    elseif desc.Parent:IsA("Model") and desc.Parent.PrimaryPart then
+                        pPos = desc.Parent.PrimaryPart.Position
+                    elseif desc.Parent:IsA("Attachment") then
+                        pPos = desc.Parent.WorldPosition
+                    end
+
+                    if pPos then
+                        local d = (hrp.Position - pPos).Magnitude
+                        if d < closestDist then
+                            closestDist = d
+                            targetPrompt = desc
+                        end
                     end
                 end
+            end
+
+            if targetPrompt then
+                targetPrompt.RequiresLineOfSight = false
+                targetPrompt.MaxActivationDistance = math.max(targetPrompt.MaxActivationDistance or 10, 35)
+                local holdTime = (targetPrompt.HoldDuration and targetPrompt.HoldDuration > 0) and targetPrompt.HoldDuration or 0.5
+
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(function() fireproximityprompt(targetPrompt, 0) end)
+                    pcall(function() fireproximityprompt(targetPrompt, holdTime) end)
+                    pcall(function() fireproximityprompt(targetPrompt) end)
+                end
+
+                pcall(function() targetPrompt:InputHoldBegin() end)
+                task.wait(holdTime + 0.1)
+                pcall(function() targetPrompt:InputHoldEnd() end)
+
+                if typeof(fireproximityprompt) == "function" then
+                    pcall(function() fireproximityprompt(targetPrompt) end)
+                end
+                return true
             end
             return false
         end
@@ -6454,20 +6555,25 @@ if MainTab then
 
             while regulatorState do
                 pcall(function()
-                    local targets = getSelectedRegulators()
-                    for _, regName in ipairs(targets) do
-                        if REGULATOR_CONFIG[regName] then
+                    for regName, isSelected in pairs(selectedRegulators) do
+                        if isSelected and REGULATOR_CONFIG[regName] then
                             local config = REGULATOR_CONFIG[regName]
                             local hasItem, count = hasRequiredItemInInventory(config.ItemName, config.ItemId)
 
                             if hasItem and config.MachineCFrame and activePhase ~= "REPAIRING" and activePhase ~= "DONE" then
                                 activePhase = "REPAIRING"
-                                NotifySuccess("Auto Regulator", config.ItemName .. " terdeteksi! Mempersiapkan perbaikan " .. regName .. "...")
+                                NotifySuccess("Auto Regulator", config.ItemName .. " terdeteksi di Inventory! Mempersiapkan perbaikan " .. regName .. "...")
                                 unequipAllTools()
                                 task.wait(0.5)
                                 TeleportTo(config.MachineCFrame)
                                 task.wait(1)
-                                triggerNearestProximityPrompt(35)
+                                local interacted = triggerNearestProximityPrompt(35)
+                                if interacted then
+                                    NotifySuccess("Auto Regulator", "Berhasil berinteraksi dengan Mesin " .. regName .. "!")
+                                else
+                                    task.wait(1)
+                                    triggerNearestProximityPrompt(35)
+                                end
                                 activePhase = "DONE"
                                 NotifySuccess("Auto Regulator", "Proses perbaikan " .. regName .. " selesai!")
                                 break
@@ -6476,27 +6582,37 @@ if MainTab then
                                 if isEventActive then
                                     if activePhase ~= "FISHING" or activeRegName ~= regName then
                                         local hrp = getHRP()
-                                        if hrp and not regulatorSavedPos then regulatorSavedPos = hrp.CFrame end
+                                        if hrp and not regulatorSavedPos then
+                                            regulatorSavedPos = hrp.CFrame
+                                        end
                                         activeRegName = regName
                                         activePhase = "FISHING"
                                         NotifySuccess("Auto Regulator", config.EventName .. " aktif! Teleport ke Area " .. regName .. "...")
                                         TeleportTo(config.AreaCFrame)
                                         task.wait(0.5)
                                         ensureRodEquipped(true)
+                                        NotifyInfo("Auto Regulator", "Rod ter-equip! Silakan nyalakan fitur Auto Fishing pilihan Anda untuk mendapatkan " .. config.ItemName .. ".")
                                     else
                                         local gotItem = hasRequiredItemInInventory(config.ItemName, config.ItemId)
                                         if gotItem then
                                             activePhase = "REPAIRING"
-                                            NotifySuccess("Auto Regulator", config.ItemName .. " didapatkan! Memperbaiki " .. regName .. "...")
+                                            NotifySuccess("Auto Regulator", config.ItemName .. " berhasil didapatkan! Memperbaiki mesin " .. regName .. "...")
                                             unequipAllTools()
                                             task.wait(0.5)
                                             if config.MachineCFrame then
                                                 TeleportTo(config.MachineCFrame)
                                                 task.wait(1)
-                                                triggerNearestProximityPrompt(35)
+                                                local interacted = triggerNearestProximityPrompt(35)
+                                                if interacted then
+                                                    NotifySuccess("Auto Regulator", "Berhasil berinteraksi dengan Mesin " .. regName .. "!")
+                                                else
+                                                    task.wait(1)
+                                                    triggerNearestProximityPrompt(35)
+                                                end
                                                 activePhase = "DONE"
+                                                NotifySuccess("Auto Regulator", "Perbaikan " .. regName .. " selesai!")
                                             else
-                                                NotifyInfo("Auto Regulator", "Item " .. config.ItemName .. " berhasil didapatkan!")
+                                                NotifyInfo("Auto Regulator", "Item " .. config.ItemName .. " berhasil didapatkan! Mesin " .. regName .. " belum memiliki CFrame lokasi mesin.")
                                                 activePhase = "DONE"
                                             end
                                         end
@@ -6504,9 +6620,12 @@ if MainTab then
                                     break
                                 else
                                     if activePhase == "FISHING" and activeRegName == regName then
+                                        NotifyWarning("Auto Regulator", config.EventName .. " telah selesai sebelum mendapatkan " .. config.ItemName .. ". Menunggu event berikutnya...")
                                         activePhase = "SCANNING"
                                         activeRegName = nil
-                                        if regulatorSavedPos then TeleportTo(regulatorSavedPos) end
+                                        if regulatorSavedPos then
+                                            TeleportTo(regulatorSavedPos)
+                                        end
                                     end
                                 end
                             end
@@ -6517,21 +6636,23 @@ if MainTab then
             end
         end
 
-        local regulatorOptions = {
-            "All Regulators",
-            "Atmospheric Regulator",
-            "Glacial Regulator",
-            "Magma Regulator"
-        }
-
-        Section_MainTab_Regulator:AddDropdown("Dropdown_SelectRegulator", {
+        Section_MainTab_Regulator:AddDropdown("MultiDropdown_SelectRegulator", {
             Title = "Select Regulator",
-            Values = regulatorOptions,
-            Default = regulatorOptions[1],
-            Multi = false,
+            Values = {"Atmospheric Regulator", "Glacial Regulator", "Magma Regulator"},
+            Default = {"Atmospheric Regulator"},
+            Multi = true,
             Callback = function(val)
-                if val then
-                    selectedRegulatorMode = val
+                selectedRegulators = {}
+                if typeof(val) == "table" then
+                    for k, v in pairs(val) do
+                        if v == true then
+                            selectedRegulators[k] = true
+                        elseif typeof(v) == "string" then
+                            selectedRegulators[v] = true
+                        end
+                    end
+                elseif typeof(val) == "string" then
+                    selectedRegulators[val] = true
                 end
             end
         })
@@ -6543,6 +6664,16 @@ if MainTab then
             Callback = function(state)
                 regulatorState = state
                 if state then
+                    local hasSelected = false
+                    for _, v in pairs(selectedRegulators) do
+                        if v then hasSelected = true; break end
+                    end
+                    if not hasSelected then
+                        NotifyWarning("Auto Regulator", "Pilih minimal 1 regulator di dropdown!")
+                        regulatorState = false
+                        return
+                    end
+
                     if regulatorThread then
                         pcall(function() task.cancel(regulatorThread) end)
                     end
@@ -6553,278 +6684,8 @@ if MainTab then
                         pcall(function() task.cancel(regulatorThread) end)
                         regulatorThread = nil
                     end
-                    if regulatorSavedPos then
-                        TeleportTo(regulatorSavedPos)
-                    end
                     regulatorSavedPos = nil
                     NotifyInfo("Auto Regulator", "Auto Repair Regulator Dimatikan.")
-                end
-            end
-        })
-
-        local Section_MainTab_Artifact = MainTab:AddSection("Auto Complete Artifact")
-
-        local ARTIFACT_DATA = {
-            ["Diamond Artifact"] = {
-                Id = 267,
-                FishCF = CFrame.new(1830.89062, 6.62499952, -318.583954, 0.210125715, 6.01540435e-08, -0.977674365, -7.80481457e-08, 1, 4.47532678e-08, 0.977674365, 6.69018547e-08, 0.210125715),
-                LeverCF = CFrame.new(1822.6333, 7.62499857, -287.22287, -0.922478795, -2.37723281e-08, 0.386047751, 6.27265351e-09, 1, 7.65675168e-08, -0.386047751, 7.30534566e-08, -0.922478795)
-            },
-            ["Crescent Artifact"] = {
-                Id = 266,
-                FishCF = CFrame.new(1405.80164, 6.5850091, 117.956322, -0.894793928, -7.91023282e-08, 0.446479321, -9.44120657e-08, 1, -1.20431469e-08, -0.446479321, -5.29291704e-08, -0.894793928),
-                LeverCF = CFrame.new(1416.04443, 30.3749943, 79.3558807, -0.16176784, 1.06205214e-08, -0.986828864, 5.36473053e-08, 1, 1.96803418e-09, 0.986828864, -5.26223438e-08, -0.16176784)
-            },
-            ["Arrow Artifact"] = {
-                Id = 265,
-                FishCF = CFrame.new(885.653564, 6.62499857, -334.422882, -0.281357497, 6.11953732e-09, 0.959603012, 1.1393773e-08, 1, -3.0364784e-09, -0.959603012, 1.00791633e-08, -0.281357497),
-                LeverCF = CFrame.new(894.176575, 7.62499857, -361.110962, 0.18843244, -5.4785108e-08, -0.982086182, 6.02529866e-08, 1, -4.42237109e-08, 0.982086182, -5.08404412e-08, 0.18843244)
-            },
-            ["Hourglass Artifact"] = {
-                Id = 271,
-                FishCF = CFrame.new(1474.5802, 6.59433651, -850.140198, -0.955496132, -4.85804108e-08, 0.295003653, -5.27604911e-08, 1, -6.21021012e-09, -0.295003653, -2.14983693e-08, -0.955496132),
-                LeverCF = CFrame.new(1485.67529, 7.58990526, -858.379211, 0.934665918, 3.00795797e-08, 0.355527252, -5.52280746e-08, 1, 6.05866859e-08, -0.355527252, -7.62633974e-08, 0.934665918)
-            }
-        }
-
-        local ARTIFACT_ORDER = {
-            "Diamond Artifact",
-            "Crescent Artifact",
-            "Arrow Artifact",
-            "Hourglass Artifact"
-        }
-
-        local function scanArtifactsInInventory()
-            local counts = {
-                ["Diamond Artifact"] = 0,
-                ["Crescent Artifact"] = 0,
-                ["Arrow Artifact"] = 0,
-                ["Hourglass Artifact"] = 0
-            }
-            local uuids = {
-                ["Diamond Artifact"] = {},
-                ["Crescent Artifact"] = {},
-                ["Arrow Artifact"] = {},
-                ["Hourglass Artifact"] = {}
-            }
-            pcall(function()
-                local replion = GetPlayerDataReplion and GetPlayerDataReplion()
-                if replion then
-                    local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
-                    if ok and inv and inv.Items and type(inv.Items) == "table" then
-                        for _, item in ipairs(inv.Items) do
-                            for name, data in pairs(ARTIFACT_DATA) do
-                                if item.Id == data.Id then
-                                    counts[name] = counts[name] + 1
-                                    if item.UUID then
-                                        table.insert(uuids[name], item.UUID)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)
-            return counts, uuids
-        end
-
-        local function getArtifactUUID(artifactName)
-            local _, uuids = scanArtifactsInInventory()
-            if uuids[artifactName] and #uuids[artifactName] > 0 then
-                return uuids[artifactName][1]
-            end
-            return nil
-        end
-
-        local function formatArtifactStatusText(counts)
-            local lines = {}
-            table.insert(lines, "Status Artifact Tas:")
-            local totalHave = 0
-            for _, name in ipairs(ARTIFACT_ORDER) do
-                local c = counts[name] or 0
-                if c > 0 then
-                    totalHave = totalHave + 1
-                    table.insert(lines, string.format("- %s: Ada (x%d)", name, c))
-                else
-                    table.insert(lines, string.format("- %s: Belum ada (x0)", name))
-                end
-            end
-            table.insert(lines, string.format("Total: %d/4 Tersedia", totalHave))
-            return table.concat(lines, "\n")
-        end
-
-        local initialArtifactCounts, _ = scanArtifactsInInventory()
-        local artifactStatusParagraph = Section_MainTab_Artifact:AddParagraph({
-            Title = "Status Artifact",
-            Content = formatArtifactStatusText(initialArtifactCounts)
-        })
-
-        local function updateArtifactParagraphUI()
-            local counts, _ = scanArtifactsInInventory()
-            local formatted = formatArtifactStatusText(counts)
-            SafeUpdateParagraph(artifactStatusParagraph, formatted)
-            return counts
-        end
-
-        Section_MainTab_Artifact:AddButton({
-            Title = "Refresh Artifact Status",
-            Description = "Pindai ulang jumlah 4 jenis artifact di dalam tas",
-            Callback = function()
-                updateArtifactParagraphUI()
-                NotifyInfo("Artifact", "Status artifact tas diperbarui.")
-            end
-        })
-
-        local selectedArtifactName = "Diamond Artifact"
-        Section_MainTab_Artifact:AddDropdown("Dropdown_SelectArtifactSpot", {
-            Title = "Select Artifact Spot",
-            Values = ARTIFACT_ORDER,
-            Default = ARTIFACT_ORDER[1],
-            Multi = false,
-            Callback = function(val)
-                if val then selectedArtifactName = val end
-            end
-        })
-
-        Section_MainTab_Artifact:AddButton({
-            Title = "Teleport To Artifact Fishing Spot",
-            Description = "Teleport ke spot mancing artifact yang dipilih di dropdown",
-            Callback = function()
-                local data = ARTIFACT_DATA[selectedArtifactName]
-                if data then
-                    TeleportTo(data.FishCF)
-                    NotifySuccess("Teleport", "Teleport ke spot mancing: " .. selectedArtifactName)
-                end
-            end
-        })
-
-        Section_MainTab_Artifact:AddButton({
-            Title = "Teleport To Artifact Lever Spot",
-            Description = "Teleport ke posisi tuas lever artifact yang dipilih di dropdown",
-            Callback = function()
-                local data = ARTIFACT_DATA[selectedArtifactName]
-                if data then
-                    TeleportTo(data.LeverCF)
-                    NotifySuccess("Teleport", "Teleport ke tuas: " .. selectedArtifactName)
-                end
-            end
-        })
-
-        local function activateLeverAtLocation(leverCF, artifactName)
-            local hrp = getHRP()
-            if not hrp then return false end
-            TeleportTo(leverCF)
-            task.wait(0.5)
-
-            local itemUUID = getArtifactUUID(artifactName)
-            local placeRemote = GetServerRemote("RE/PlaceLeverItem") or (net and net:FindFirstChild("RE/PlaceLeverItem")) or GetServerRemoteReverse("RE/PlaceLeverItem")
-            if placeRemote and itemUUID then
-                pcall(function()
-                    placeRemote:FireServer(itemUUID)
-                end)
-            end
-
-            for _ = 1, 3 do
-                pcall(function()
-                    for _, desc in ipairs(workspace:GetDescendants()) do
-                        if desc:IsA("ProximityPrompt") and desc.Enabled then
-                            local parentPart = desc.Parent
-                            if parentPart and parentPart:IsA("BasePart") then
-                                if (parentPart.Position - hrp.Position).Magnitude <= 18 then
-                                    fireproximityprompt(desc)
-                                end
-                            end
-                        end
-                    end
-                end)
-                task.wait(0.3)
-            end
-            return true
-        end
-
-        Section_MainTab_Artifact:AddButton({
-            Title = "Activate Lever At Current Spot",
-            Description = "Pasang item artifact & klik tuas lever di lokasi saat ini",
-            Callback = function()
-                local data = ARTIFACT_DATA[selectedArtifactName]
-                if data then
-                    activateLeverAtLocation(data.LeverCF, selectedArtifactName)
-                    NotifySuccess("Artifact", "Mencoba memasang & mengaktifkan tuas: " .. selectedArtifactName)
-                    updateArtifactParagraphUI()
-                end
-            end
-        })
-
-        local autoCompleteArtifactActive = false
-        local autoCompleteArtifactThread = nil
-
-        local function runAutoCompleteArtifactLoop()
-            while autoCompleteArtifactActive do
-                local counts, _ = scanArtifactsInInventory()
-                local allDone = true
-
-                for _, artName in ipairs(ARTIFACT_ORDER) do
-                    if not autoCompleteArtifactActive then break end
-                    local data = ARTIFACT_DATA[artName]
-                    local currentCount = counts[artName] or 0
-
-                    if currentCount == 0 then
-                        allDone = false
-                        NotifyInfo("Auto Artifact", "Mancing untuk: " .. artName)
-                        TeleportTo(data.FishCF)
-                        task.wait(0.6)
-                        equipBestFishingRod()
-                        task.wait(0.4)
-
-                        local maxFishWait = 180
-                        local startWait = tick()
-                        while autoCompleteArtifactActive and (tick() - startWait < maxFishWait) do
-                            local cCheck, _ = scanArtifactsInInventory()
-                            if (cCheck[artName] or 0) > 0 then
-                                NotifySuccess("Auto Artifact", "Mendapatkan " .. artName .. "! Teleport ke tuas...")
-                                break
-                            end
-                            task.wait(1)
-                        end
-                    end
-
-                    local cNow, _ = scanArtifactsInInventory()
-                    if (cNow[artName] or 0) > 0 then
-                        task.wait(0.3)
-                        NotifyInfo("Auto Artifact", "Memasang " .. artName .. " ke tuas...")
-                        activateLeverAtLocation(data.LeverCF, artName)
-                        task.wait(1.5)
-                        updateArtifactParagraphUI()
-                    end
-                end
-
-                if allDone then
-                    NotifySuccess("Auto Artifact", "Semua 4 Artifact telah selesai dipasang!")
-                    autoCompleteArtifactActive = false
-                    break
-                end
-                task.wait(2)
-            end
-        end
-
-        Section_MainTab_Artifact:AddToggle("Toggle_AutoCompleteArtifact", {
-            Title = "Auto Complete Artifact",
-            Description = "Otomatis mancing 4 jenis artifact bergantian lalu teleport & pasang ke tuas",
-            Default = false,
-            Callback = function(state)
-                autoCompleteArtifactActive = state
-                if state then
-                    if autoCompleteArtifactThread then
-                        pcall(function() task.cancel(autoCompleteArtifactThread) end)
-                    end
-                    autoCompleteArtifactThread = task.spawn(runAutoCompleteArtifactLoop)
-                    NotifySuccess("Auto Artifact", "Auto Complete Artifact Aktif!")
-                else
-                    if autoCompleteArtifactThread then
-                        pcall(function() task.cancel(autoCompleteArtifactThread) end)
-                        autoCompleteArtifactThread = nil
-                    end
-                    NotifyInfo("Auto Artifact", "Auto Complete Artifact Dimatikan.")
                 end
             end
         })
