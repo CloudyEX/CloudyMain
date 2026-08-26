@@ -3247,6 +3247,236 @@ end
             end
         })
         Section_PlayersTab_2:AddToggle("Toggle_WalkonWater", { Title = "Walk on Water", Default = false, Callback = function(val) SetWalkOnWater(val) end })
+
+        -- =================================================================
+        -- FLY SYSTEM (PC & MOBILE NATIVE CONTROLS)
+        -- =================================================================
+        local Section_PlayersTab_Fly = PlayersTab:AddSection("Fly Controls (Mobile & PC)")
+
+        local FlyConfig = {
+            Enabled = false,
+            Speed = 50,
+            Noclip = false,
+        }
+
+        local flyBodyVelocity = nil
+        local flyBodyGyro = nil
+        local flyRenderConn = nil
+        local flyNoclipConn = nil
+
+        local function StopFly()
+            if flyRenderConn then
+                pcall(function() flyRenderConn:Disconnect() end)
+                flyRenderConn = nil
+            end
+            if flyNoclipConn then
+                pcall(function() flyNoclipConn:Disconnect() end)
+                flyNoclipConn = nil
+            end
+            if flyBodyVelocity then
+                pcall(function() flyBodyVelocity:Destroy() end)
+                flyBodyVelocity = nil
+            end
+            if flyBodyGyro then
+                pcall(function() flyBodyGyro:Destroy() end)
+                flyBodyGyro = nil
+            end
+
+            local char = LocalPlayer.Character
+            if char then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                local hrp = char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
+                if hum then
+                    hum.PlatformStand = false
+                    pcall(function() hum:ChangeState(Enum.HumanoidStateType.GettingUp) end)
+                end
+                if hrp then
+                    pcall(function()
+                        hrp.AssemblyLinearVelocity = Vector3.zero
+                        hrp.AssemblyAngularVelocity = Vector3.zero
+                    end)
+                end
+                if FlyConfig.Noclip then
+                    RestoreCharacterCollision(char)
+                end
+            end
+        end
+
+        local function StartFly()
+            StopFly()
+
+            local char = LocalPlayer.Character
+            if not char then return end
+            local hrp = char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if not hrp or not hum then return end
+
+            local camera = workspace.CurrentCamera
+
+            -- BodyVelocity for anti-gravity momentum
+            flyBodyVelocity = Instance.new("BodyVelocity")
+            flyBodyVelocity.Name = "CloudyFlyVelocity"
+            flyBodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            flyBodyVelocity.Velocity = Vector3.zero
+            flyBodyVelocity.Parent = hrp
+
+            -- BodyGyro for smooth orientation
+            flyBodyGyro = Instance.new("BodyGyro")
+            flyBodyGyro.Name = "CloudyFlyGyro"
+            flyBodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            flyBodyGyro.P = 9e4
+            flyBodyGyro.CFrame = hrp.CFrame
+            flyBodyGyro.Parent = hrp
+
+            hum.PlatformStand = true
+
+            -- Fly Noclip loop
+            if FlyConfig.Noclip then
+                flyNoclipConn = RunService.Stepped:Connect(function()
+                    if not FlyConfig.Enabled then return end
+                    local c = LocalPlayer.Character
+                    if c then
+                        for _, part in ipairs(c:GetDescendants()) do
+                            if part:IsA("BasePart") and part.CanCollide then
+                                part.CanCollide = false
+                            end
+                        end
+                    end
+                end)
+            end
+
+            -- Fly Physics Loop via RenderStepped (Pure native controls: WASD / Mobile Joystick + Jump / Camera)
+            flyRenderConn = RunService.RenderStepped:Connect(function()
+                if not FlyConfig.Enabled then
+                    StopFly()
+                    return
+                end
+
+                local curChar = LocalPlayer.Character
+                if not curChar then return end
+                local curHRP = curChar:FindFirstChild("HumanoidRootPart") or curChar.PrimaryPart
+                local curHum = curChar:FindFirstChildOfClass("Humanoid")
+                if not curHRP or not curHum then return end
+
+                curHum.PlatformStand = true
+                camera = workspace.CurrentCamera or camera
+                local camCF = camera.CFrame
+
+                -- 1. Read Native MoveDirection (produced by Mobile Virtual Joystick & PC WASD)
+                local moveDir = curHum.MoveDirection
+                local targetVelocity = Vector3.zero
+
+                -- 2. Detect Native Jump / Ascend & Descend
+                local isAscending = false
+                local isDescending = false
+
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) or curHum.Jump then
+                    isAscending = true
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) or UserInputService:IsKeyDown(Enum.KeyCode.Q) then
+                    isDescending = true
+                end
+
+                -- 3. Calculate 3D Flight Direction relative to Camera View
+                if moveDir.Magnitude > 0 then
+                    local camLook = camCF.LookVector
+                    local camRight = camCF.RightVector
+
+                    -- Horizontal basis vectors
+                    local camLookFlat = Vector3.new(camLook.X, 0, camLook.Z).Unit
+                    local camRightFlat = Vector3.new(camRight.X, 0, camRight.Z).Unit
+
+                    -- Project MoveDirection onto camera planes
+                    local forwardInput = moveDir:Dot(camLookFlat)
+                    local strafeInput = moveDir:Dot(camRightFlat)
+
+                    -- 3D Flight vector follows camera pitch (Mobile players simply tilt camera to fly up/down!)
+                    local dir3D = (camLook * forwardInput) + (camRight * strafeInput)
+                    if dir3D.Magnitude > 0 then
+                        targetVelocity = dir3D.Unit * FlyConfig.Speed
+                    else
+                        targetVelocity = moveDir * FlyConfig.Speed
+                    end
+                end
+
+                -- Vertical elevation adjustments
+                if isAscending then
+                    targetVelocity = targetVelocity + Vector3.new(0, FlyConfig.Speed * 0.8, 0)
+                end
+                if isDescending then
+                    targetVelocity = targetVelocity - Vector3.new(0, FlyConfig.Speed * 0.8, 0)
+                end
+
+                if flyBodyVelocity and flyBodyVelocity.Parent then
+                    flyBodyVelocity.Velocity = targetVelocity
+                end
+
+                if flyBodyGyro and flyBodyGyro.Parent then
+                    flyBodyGyro.CFrame = CFrame.new(curHRP.Position, curHRP.Position + camCF.LookVector)
+                end
+            end)
+        end
+
+        LocalPlayer.CharacterAdded:Connect(function()
+            if FlyConfig.Enabled then
+                task.wait(0.5)
+                StartFly()
+            end
+        end)
+
+        Section_PlayersTab_Fly:AddToggle("Toggle_EnableFly", {
+            Title = "Fly (Mobile & PC)",
+            Description = "Terbang bebas dengan kontrol native Roblox (Joystick HP / WASD PC + Arah Kamera). Tanpa tombol tambahan!",
+            Default = false,
+            Callback = function(val)
+                FlyConfig.Enabled = val
+                if val then
+                    StartFly()
+                    NotifySuccess("Fly", "Fly Mode Aktif! (Speed: " .. FlyConfig.Speed .. ")")
+                else
+                    StopFly()
+                    NotifyInfo("Fly", "Fly Mode Dimatikan.")
+                end
+            end
+        })
+
+        Section_PlayersTab_Fly:AddSlider("Slider_FlySpeed", {
+            Title = "Fly Speed",
+            Min = 10,
+            Max = 300,
+            Default = 50,
+            Rounding = 0,
+            Callback = function(val)
+                FlyConfig.Speed = val
+            end
+        })
+
+        Section_PlayersTab_Fly:AddToggle("Toggle_FlyNoclip", {
+            Title = "Fly Noclip",
+            Description = "Menembus objek / dinding saat sedang terbang",
+            Default = false,
+            Callback = function(val)
+                FlyConfig.Noclip = val
+                if FlyConfig.Enabled and val then
+                    if not flyNoclipConn then
+                        flyNoclipConn = RunService.Stepped:Connect(function()
+                            if not FlyConfig.Enabled or not FlyConfig.Noclip then return end
+                            local c = LocalPlayer.Character
+                            if c then
+                                for _, part in ipairs(c:GetDescendants()) do
+                                    if part:IsA("BasePart") and part.CanCollide then
+                                        part.CanCollide = false
+                                    end
+                                end
+                            end
+                        end)
+                    end
+                elseif not val and LocalPlayer.Character then
+                    if flyNoclipConn then pcall(function() flyNoclipConn:Disconnect() end); flyNoclipConn = nil end
+                    RestoreCharacterCollision(LocalPlayer.Character)
+                end
+            end
+        })
         
         local Section_PlayersTab_3 = PlayersTab:AddSection("Custom Name")
 
