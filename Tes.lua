@@ -7056,6 +7056,480 @@ if MainTab then
                 end
             end
         })
+
+        -- =================================================================
+        -- ANCIENT LOCHNESS EVENT (AUTOMATION TAB)
+        -- =================================================================
+        local Section_MainTab_Lochness = MainTab:AddSection("Ancient Lochness Event")
+
+        local lastPositionBeforeLochness = nil
+        local autoJoinLochnessActive = false
+        local LOCHNESS_POS = Vector3.new(6063.347, -585.925, 4713.696)
+        local LOCHNESS_LOOK = Vector3.new(-0.376, -0.000, -0.927)
+        local LochnessSyncThread = nil
+
+        local LochnessMonitorParagraph = Section_MainTab_Lochness:AddParagraph({
+            Title = "Ancient Lochness Live Monitor",
+            Content = "Status: Sinkronisasi GUI event...\nStart In: N/A\nTimer: N/A | Caught: N/A | Chance: N/A\nAuto Join: OFF"
+        })
+
+        local function GetLochnessEventGUI()
+            local success, gui = pcall(function()
+                local menuRings = workspace:WaitForChild("!!! MENU RINGS", 5)
+                if not menuRings then return nil end
+                local eventTracker = menuRings:WaitForChild("Event Tracker", 5)
+                if not eventTracker then return nil end
+                local contentItems = eventTracker.Main.Gui.Content.Items
+
+                local countdown = contentItems.Countdown:WaitForChild("Label", 3)
+                local statsContainer = contentItems:WaitForChild("Stats", 3)
+                local timer = statsContainer and statsContainer.Timer:WaitForChild("Label", 3)
+                local quantity = statsContainer and statsContainer:WaitForChild("Quantity", 3)
+                local odds = statsContainer and statsContainer:WaitForChild("Odds", 3)
+
+                return {
+                    Countdown = countdown,
+                    Timer = timer,
+                    Quantity = quantity,
+                    Odds = odds,
+                }
+            end)
+
+            if success and gui then
+                return gui
+            end
+            return nil
+        end
+
+        local function UpdateLochnessStatsUI()
+            local gui = GetLochnessEventGUI()
+            if not gui then
+                SafeUpdateParagraph(LochnessMonitorParagraph, string.format(
+                    "Status: <font color='#FF5555'>Event Tracker GUI Tidak Ditemukan</font>\n" ..
+                    "Pastikan 'Event Tracker' sudah dimuat di workspace.\n" ..
+                    "Auto Join: %s",
+                    autoJoinLochnessActive and "<font color='#39FF14'>ON</font>" or "<font color='#B4B4B4'>OFF</font>"
+                ))
+                return false
+            end
+
+            local countdownText = gui.Countdown and (gui.Countdown.ContentText or gui.Countdown.Text) or "N/A"
+            local timerText = gui.Timer and (gui.Timer.ContentText or gui.Timer.Text) or "N/A"
+            local quantityText = gui.Quantity and (gui.Quantity.ContentText or gui.Quantity.Text) or "N/A"
+            local oddsText = gui.Odds and (gui.Odds.ContentText or gui.Odds.Text) or "N/A"
+
+            local isEventActive = timerText:find("M") and timerText:find("S") and not timerText:match("^0M 0S")
+            local statusStr = isEventActive and "<font color='#39FF14'>EVENT ACTIVE 🔥</font>" or "<font color='#00BFFF'>WAITING / COUNTDOWN ⏳</font>"
+
+            local content = string.format(
+                "Event Status: %s\n" ..
+                "• Start In: <font color='#FFD700'>%s</font>\n" ..
+                "• Duration: <font color='#00FFFF'>%s</font>\n" ..
+                "• Caught: <font color='#39FF14'>%s</font> | Chance: <font color='#FFA500'>%s</font>\n" ..
+                "• Auto Join: %s",
+                statusStr,
+                countdownText,
+                timerText,
+                quantityText,
+                oddsText,
+                autoJoinLochnessActive and "<font color='#39FF14'>AKTIF (Auto TP & Return)</font>" or "<font color='#B4B4B4'>NONAKTIF</font>"
+            )
+
+            SafeUpdateParagraph(LochnessMonitorParagraph, content)
+            return isEventActive
+        end
+
+        local function RunLochnessSyncLoop()
+            if LochnessSyncThread then
+                pcall(function() task.cancel(LochnessSyncThread) end)
+            end
+
+            LochnessSyncThread = task.spawn(function()
+                local isTeleportedToEvent = false
+
+                while true do
+                    local isEventActive = false
+                    pcall(function()
+                        isEventActive = UpdateLochnessStatsUI()
+                    end)
+
+                    if autoJoinLochnessActive then
+                        if isEventActive and not isTeleportedToEvent then
+                            local hrp = getHRP()
+                            if hrp and lastPositionBeforeLochness == nil then
+                                lastPositionBeforeLochness = { Pos = hrp.Position, Look = hrp.CFrame.LookVector }
+                                NotifyInfo("Lochness Event", "Posisi sebelum event disimpan.")
+                            end
+
+                            local targetCF = CFrame.new(LOCHNESS_POS, LOCHNESS_POS + LOCHNESS_LOOK) * CFrame.new(0, 0.5, 0)
+                            TeleportTo(targetCF)
+                            isTeleportedToEvent = true
+                            NotifySuccess("Lochness Event", "Event aktif! Teleport ke Ancient Lochness.")
+
+                        elseif isTeleportedToEvent and not isEventActive and lastPositionBeforeLochness ~= nil then
+                            NotifyInfo("Lochness Event", "Event selesai! Menunggu 15 detik sebelum kembali...")
+                            task.wait(15)
+
+                            if lastPositionBeforeLochness then
+                                local targetCF = CFrame.new(lastPositionBeforeLochness.Pos, lastPositionBeforeLochness.Pos + lastPositionBeforeLochness.Look) * CFrame.new(0, 0.5, 0)
+                                TeleportTo(targetCF)
+                                lastPositionBeforeLochness = nil
+                            end
+                            isTeleportedToEvent = false
+                            NotifySuccess("Lochness Event", "Kembali ke posisi semula.")
+                        end
+                    end
+
+                    task.wait(0.5)
+                end
+            end)
+        end
+
+        RunLochnessSyncLoop()
+
+        Section_MainTab_Lochness:AddToggle("Toggle_AutoJoinLochness", {
+            Title = "Auto Join Ancient Lochness Event",
+            Description = "Otomatis Teleport ke Lochness saat event aktif, dan kembali ke posisi awal 15 detik setelah event selesai.",
+            Default = false,
+            Callback = function(state)
+                autoJoinLochnessActive = state
+                if state then
+                    NotifySuccess("Lochness Event", "Mulai memantau event Ancient Lochness.")
+                else
+                    NotifyInfo("Lochness Event", "Pemantauan event Lochness dihentikan.")
+                end
+            end
+        })
+
+        Section_MainTab_Lochness:AddButton({
+            Title = "TP to Ancient Lochness Spot",
+            Description = "Teleport manual ke lokasi Ancient Lochness",
+            Callback = function()
+                local targetCF = CFrame.new(LOCHNESS_POS, LOCHNESS_POS + LOCHNESS_LOOK) * CFrame.new(0, 0.5, 0)
+                TeleportTo(targetCF)
+                NotifySuccess("Lochness Event", "Teleport ke spot Ancient Lochness.")
+            end
+        })
+
+
+        -- =================================================================
+        -- AUTO UNLOCK RUIN DOOR (AUTOMATION TAB)
+        -- =================================================================
+        local Section_MainTab_RuinDoor = MainTab:AddSection("Auto Unlock Ruin Door")
+
+        local AUTO_UNLOCK_RUIN_STATE = false
+        local AUTO_UNLOCK_RUIN_THREAD = nil
+        local AUTO_UNLOCK_RUIN_ATTEMPT_THREAD = nil
+        local RUIN_FISHING_DELAY = 1.5
+        local RUIN_ITEM_NAMES = {"Freshwater Piranha", "Goliath Tiger", "Sacred Guardian Squid", "Crocodile"}
+        local SACRED_TEMPLE_POS = Vector3.new(1461.815, -22.125, -670.234)
+        local SACRED_TEMPLE_LOOK = Vector3.new(-0.990, -0.000, 0.143)
+        local RUIN_DOOR_POS = Vector3.new(6031.981, -585.924, 4713.157)
+        local RUIN_DOOR_LOOK = Vector3.new(0.316, -0.000, -0.949)
+
+        local RuinDoorMonitorParagraph = Section_MainTab_RuinDoor:AddParagraph({
+            Title = "Ruin Door Live Monitor",
+            Content = "Status Door: Memeriksa...\nItem Yang Dibutuhkan:\n• Memuat data inventory..."
+        })
+
+        local function GetRuinDoorCurrentStatus()
+            local ruinInteractions = workspace:FindFirstChild("RUIN INTERACTIONS")
+            local ruinDoor = ruinInteractions and ruinInteractions:FindFirstChild("Door")
+            local status = "LOCKED 🔒"
+
+            if ruinDoor and ruinDoor:FindFirstChild("RuinDoor") then
+                local LDoor = ruinDoor.RuinDoor:FindFirstChild("LDoor")
+                if LDoor then
+                    local currentX = nil
+                    if LDoor:IsA("BasePart") then
+                        currentX = LDoor.Position.X
+                    elseif LDoor:IsA("Model") then
+                        local ok, pivot = pcall(function() return LDoor:GetPivot() end)
+                        if ok and pivot then
+                            currentX = pivot.Position.X
+                        end
+                    end
+
+                    if currentX ~= nil and currentX > 6075 then
+                        status = "UNLOCKED ✅"
+                    end
+                end
+            end
+            return status
+        end
+
+        local function IsRuinItemInInventory(itemName)
+            local replion = GetPlayerDataReplion()
+            if not replion then return false end
+            local success, inventoryData = pcall(function()
+                return (replion.GetExpect and replion:GetExpect("Inventory")) or (replion.Get and replion:Get("Inventory"))
+            end)
+            if not success or not inventoryData or not inventoryData.Items then return false end
+
+            for _, item in ipairs(inventoryData.Items) do
+                if item.Identifier == itemName then
+                    return true
+                end
+                local name, _ = GetFishNameAndRarity(item)
+                if name == itemName and (item.Count or 1) >= 1 then
+                    return true
+                end
+            end
+            return false
+        end
+
+        local function ScanRuinFishInventory()
+            local results = {}
+            local missingList = {}
+            local ownedCount = 0
+
+            for _, name in ipairs(RUIN_ITEM_NAMES) do
+                local have = IsRuinItemInInventory(name)
+                results[name] = have
+                if have then
+                    ownedCount = ownedCount + 1
+                else
+                    table.insert(missingList, name)
+                end
+            end
+
+            return results, missingList, ownedCount
+        end
+
+        local function UpdateRuinDoorUI(customAction)
+            local doorStatus = GetRuinDoorCurrentStatus()
+            local itemResults, missingList, ownedCount = ScanRuinFishInventory()
+
+            local lines = {}
+            local doorColor = doorStatus:find("UNLOCKED") and "#39FF14" or "#FF5555"
+            table.insert(lines, string.format("Door Status: <font color='%s'><b>%s</b></font>", doorColor, doorStatus))
+            table.insert(lines, string.format("Progress Item: <font color='#00BFFF'><b>%d/%d Ikan Tersedia</b></font>", ownedCount, #RUIN_ITEM_NAMES))
+            table.insert(lines, "<b>Status Item Ikan:</b>")
+
+            for _, name in ipairs(RUIN_ITEM_NAMES) do
+                if itemResults[name] then
+                    table.insert(lines, string.format("  [<font color='#39FF14'>✅</font>] %s : <font color='#39FF14'>Ada di Tas</font>", name))
+                else
+                    table.insert(lines, string.format("  [<font color='#FF5555'>❌</font>] %s : <font color='#FF5555'>KURANG / BUTUH</font>", name))
+                end
+            end
+
+            local actionText = customAction or (AUTO_UNLOCK_RUIN_STATE and (#missingList > 0 and ("Farming " .. missingList[1] .. "...") or "Semua item ada! Membuka pintu...") or "Idle / Nonaktif")
+            table.insert(lines, string.format("Status Aksi: <font color='#FFD700'>%s</font>", actionText))
+
+            SafeUpdateParagraph(RuinDoorMonitorParagraph, table.concat(lines, "\n"))
+            return doorStatus, missingList
+        end
+
+        -- Periodic live update for Ruin Door UI
+        task.spawn(function()
+            while true do
+                pcall(function()
+                    UpdateRuinDoorUI()
+                end)
+                task.wait(1)
+            end
+        end)
+
+        local function RunRuinInstantFish()
+            local RE_Equip = GetServerRemote("RE/EquipToolFromHotbar") or GetServerRemote("RF/EquipToolFromHotbar") or (net and net:FindFirstChild("RE/EquipToolFromHotbar"))
+            local RF_Charge = GetServerRemote("RF/ChargeFishingRod") or (net and net:FindFirstChild("RF/ChargeFishingRod"))
+            local RF_ReqMinigame = GetServerRemote("RF/RequestFishingMinigameStarted") or (net and net:FindFirstChild("RF/RequestFishingMinigameStarted"))
+            local RE_FishComplete = GetServerRemote("RE/FishingCompleted") or GetServerRemote("RE/CatchFishCompleted") or GetServerRemote("RF/CatchFishCompleted")
+            local RF_Cancel = GetServerRemote("RF/CancelFishingInputs") or (net and net:FindFirstChild("RF/CancelFishingInputs"))
+
+            if not (RE_Equip and RF_Charge and RF_ReqMinigame and RE_FishComplete and RF_Cancel) then
+                return false
+            end
+
+            pcall(function()
+                if RE_Equip:IsA("RemoteFunction") then
+                    RE_Equip:InvokeServer(1)
+                else
+                    RE_Equip:FireServer(1)
+                end
+            end)
+
+            local timestamp = os.time() + os.clock()
+            pcall(function() RF_Charge:InvokeServer(timestamp) end)
+            pcall(function() RF_ReqMinigame:InvokeServer(-139.630452165, 0.99647927980797) end)
+
+            task.wait(RUIN_FISHING_DELAY)
+
+            pcall(function()
+                if RE_FishComplete:IsA("RemoteFunction") then
+                    RE_FishComplete:InvokeServer()
+                else
+                    RE_FishComplete:FireServer()
+                end
+            end)
+
+            task.wait(0.3)
+            pcall(function() RF_Cancel:InvokeServer() end)
+            return true
+        end
+
+        local function RunRuinDoorUnlockAttemptLoop()
+            if AUTO_UNLOCK_RUIN_ATTEMPT_THREAD then
+                pcall(function() task.cancel(AUTO_UNLOCK_RUIN_ATTEMPT_THREAD) end)
+            end
+
+            local RUIN_DOOR_REMOTE = GetServerRemote("RE/PlacePressureItem") or (net and net:FindFirstChild("RE/PlacePressureItem")) or GetServerRemoteReverse("RE/PlacePressureItem")
+            if not RUIN_DOOR_REMOTE then
+                NotifyError("Ruin Door", "Remote Ruin Door (RE/PlacePressureItem) tidak ditemukan.")
+                return
+            end
+
+            AUTO_UNLOCK_RUIN_ATTEMPT_THREAD = task.spawn(function()
+                local targetCF = CFrame.new(RUIN_DOOR_POS, RUIN_DOOR_POS + RUIN_DOOR_LOOK) * CFrame.new(0, 0.5, 0)
+                TeleportTo(targetCF)
+                task.wait(1.5)
+
+                NotifySuccess("Ruin Door", "Mulai agresif kirim remote PlacePressureItem...")
+
+                while AUTO_UNLOCK_RUIN_STATE and GetRuinDoorCurrentStatus() == "LOCKED 🔒" do
+                    for _, name in ipairs(RUIN_ITEM_NAMES) do
+                        task.wait(2.1)
+                        pcall(function()
+                            if RUIN_DOOR_REMOTE:IsA("RemoteFunction") then
+                                RUIN_DOOR_REMOTE:InvokeServer(name)
+                            else
+                                RUIN_DOOR_REMOTE:FireServer(name)
+                            end
+                        end)
+                    end
+                    task.wait(5)
+                end
+            end)
+        end
+
+        local RuinAutoUnlockToggle = nil
+
+        local function RunRuinAutoUnlockMainLoop()
+            if AUTO_UNLOCK_RUIN_THREAD then pcall(function() task.cancel(AUTO_UNLOCK_RUIN_THREAD) end) end
+            if AUTO_UNLOCK_RUIN_ATTEMPT_THREAD then pcall(function() task.cancel(AUTO_UNLOCK_RUIN_ATTEMPT_THREAD) end) end
+
+            local RF_UpdateAutoFishing = GetServerRemote("RF/UpdateAutoFishingState") or (net and net:FindFirstChild("RF/UpdateAutoFishingState"))
+            if RF_UpdateAutoFishing then pcall(function() RF_UpdateAutoFishing:InvokeServer(false) end) end
+
+            AUTO_UNLOCK_RUIN_THREAD = task.spawn(function()
+                local isFarming = false
+                local lastPositionBeforeRuin = nil
+
+                RunRuinDoorUnlockAttemptLoop()
+
+                while AUTO_UNLOCK_RUIN_STATE do
+                    local doorStatus, missingList = UpdateRuinDoorUI()
+
+                    if doorStatus == "LOCKED 🔒" then
+                        local missingItem = missingList and missingList[1] or nil
+
+                        if missingItem then
+                            if not isFarming then
+                                local hrp = getHRP()
+                                if hrp and lastPositionBeforeRuin == nil then
+                                    lastPositionBeforeRuin = { Pos = hrp.Position, Look = hrp.CFrame.LookVector }
+                                    NotifyInfo("Ruin Door", "Posisi sebelum Ruin Door farm disimpan.")
+                                end
+                                local templeCF = CFrame.new(SACRED_TEMPLE_POS, SACRED_TEMPLE_POS + SACRED_TEMPLE_LOOK) * CFrame.new(0, 0.5, 0)
+                                TeleportTo(templeCF)
+                                task.wait(1.5)
+                                isFarming = true
+                                NotifyInfo("Ruin Door", "Mencari " .. missingItem .. ". Fishing ON...")
+                            end
+
+                            UpdateRuinDoorUI("Mencari item: " .. missingItem .. ". Fishing...")
+                            RunRuinInstantFish()
+                            task.wait(RUIN_FISHING_DELAY + 0.5)
+                        else
+                            UpdateRuinDoorUI("Semua item ada! Loop Unlock Agresif berjalan...")
+                            isFarming = false
+                            task.wait(1)
+                        end
+
+                    elseif doorStatus == "UNLOCKED ✅" then
+                        UpdateRuinDoorUI("Pintu sudah TERBUKA (UNLOCKED ✅). Selesai!")
+                        NotifySuccess("Ruin Door", "Pintu Ruin sudah TERBUKA!")
+
+                        if lastPositionBeforeRuin then
+                            local returnCF = CFrame.new(lastPositionBeforeRuin.Pos, lastPositionBeforeRuin.Pos + lastPositionBeforeRuin.Look) * CFrame.new(0, 0.5, 0)
+                            TeleportTo(returnCF)
+                            lastPositionBeforeRuin = nil
+                            NotifySuccess("Ruin Door", "Kembali ke posisi semula.")
+                        end
+                        break
+                    else
+                        UpdateRuinDoorUI("Status Pintu tidak terdeteksi. Memeriksa ulang...")
+                        task.wait(5)
+                    end
+                end
+
+                local RE_Equip = GetServerRemote("RE/EquipToolFromHotbar") or GetServerRemote("RF/EquipToolFromHotbar") or (net and net:FindFirstChild("RE/EquipToolFromHotbar"))
+                if RE_Equip then
+                    pcall(function()
+                        if RE_Equip:IsA("RemoteFunction") then RE_Equip:InvokeServer(0) else RE_Equip:FireServer(0) end
+                    end)
+                end
+
+                AUTO_UNLOCK_RUIN_STATE = false
+                if AUTO_UNLOCK_RUIN_ATTEMPT_THREAD then
+                    pcall(function() task.cancel(AUTO_UNLOCK_RUIN_ATTEMPT_THREAD) end)
+                    AUTO_UNLOCK_RUIN_ATTEMPT_THREAD = nil
+                end
+                if RuinAutoUnlockToggle and RuinAutoUnlockToggle.SetValue then
+                    RuinAutoUnlockToggle:SetValue(false)
+                end
+                UpdateRuinDoorUI("Auto Unlock Ruin Door Selesai / OFF")
+                NotifyInfo("Ruin Door", "Proses Auto Unlock Ruin Door selesai.")
+            end)
+        end
+
+        RuinAutoUnlockToggle = Section_MainTab_RuinDoor:AddToggle("Toggle_AutoUnlockRuinDoor", {
+            Title = "Auto Unlock Ruin Door",
+            Description = "Otomatis mancing 4 jenis ikan yang kurang di Sacred Temple lalu unlock pintu Ruin",
+            Default = false,
+            Callback = function(state)
+                AUTO_UNLOCK_RUIN_STATE = state
+                if state then
+                    RunRuinAutoUnlockMainLoop()
+                    NotifySuccess("Ruin Door", "Auto Unlock Ruin Door Aktif!")
+                else
+                    if AUTO_UNLOCK_RUIN_THREAD then pcall(function() task.cancel(AUTO_UNLOCK_RUIN_THREAD) end) AUTO_UNLOCK_RUIN_THREAD = nil end
+                    if AUTO_UNLOCK_RUIN_ATTEMPT_THREAD then pcall(function() task.cancel(AUTO_UNLOCK_RUIN_ATTEMPT_THREAD) end) AUTO_UNLOCK_RUIN_ATTEMPT_THREAD = nil end
+                    UpdateRuinDoorUI("Auto Unlock Dimatikan")
+                    NotifyInfo("Ruin Door", "Auto Unlock Ruin Door Dimatikan.")
+                end
+            end
+        })
+
+        Section_MainTab_RuinDoor:AddButton({
+            Title = "Teleport To Ruin Door",
+            Description = "Teleport langsung ke depan pintu Ruin Door",
+            Callback = function()
+                local targetCF = CFrame.new(RUIN_DOOR_POS, RUIN_DOOR_POS + RUIN_DOOR_LOOK) * CFrame.new(0, 0.5, 0)
+                TeleportTo(targetCF)
+                NotifySuccess("Ruin Door", "Teleport ke Ruin Door.")
+            end
+        })
+
+        Section_MainTab_RuinDoor:AddButton({
+            Title = "Teleport To Sacred Temple",
+            Description = "Teleport ke Sacred Temple (spot mancing item Ruin Door)",
+            Callback = function()
+                local targetCF = CFrame.new(SACRED_TEMPLE_POS, SACRED_TEMPLE_POS + SACRED_TEMPLE_LOOK) * CFrame.new(0, 0.5, 0)
+                TeleportTo(targetCF)
+                NotifySuccess("Ruin Door", "Teleport ke Sacred Temple.")
+            end
+        })
+
+        Section_MainTab_RuinDoor:AddButton({
+            Title = "Refresh Door & Fish Status",
+            Description = "Pindai ulang status pintu dan ketersediaan ikan di tas",
+            Callback = function()
+                UpdateRuinDoorUI()
+                NotifyInfo("Ruin Door", "Status Door dan Ikan diperbarui.")
+            end
+        })
     end)
 end
 
