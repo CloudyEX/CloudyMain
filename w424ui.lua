@@ -45,10 +45,12 @@ do
 	local afkConnection
 	function Custom:EnabledAFK()
 		if afkConnection then return end
-		afkConnection = Player.Idled:Connect(function()
-			VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-			task.wait(1)
-			VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+		pcall(function()
+			afkConnection = Player.Idled:Connect(function()
+				VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+				task.wait(1)
+				VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+			end)
 		end)
 	end
 
@@ -67,7 +69,7 @@ do
 	end
 end
 
-Custom:EnabledAFK()
+pcall(function() Custom:EnabledAFK() end)
 
 local function OpenClose()
 	local ScreenGui = Custom:Create("ScreenGui", {
@@ -216,8 +218,15 @@ end
 function w424_Library:SetNotification(Config)
 	EnsureNotifGui()
 
-	local Text = Config.Text or Config[1] or ""
-	local Delay = tonumber(Config.Delay or Config[6]) or 3
+	if type(Config) == "string" then Config = {Text = Config} end
+	local Title = Config.Title or ""
+	local Text = Config.Text or Config.Content or Config[1] or ""
+	if Title ~= "" and Text ~= "" then
+		Text = Title .. " | " .. Text
+	elseif Title ~= "" and Text == "" then
+		Text = Title
+	end
+	local Delay = tonumber(Config.Delay or Config.Duration or Config[6]) or 3
 	local AnimT = tonumber(Config.Time or Config[5]) or 0.25
 
 	NotifCounter += 1
@@ -323,10 +332,13 @@ function w424_Library:SetNotification(Config)
 	return NotifFuncs
 end
 
+w424_Library.Notify = w424_Library.SetNotification
+
 function w424_Library:CreateWindow(Config)
+	if type(Config) == "string" then Config = {Title = Config} end
 	local Title = Config[1] or Config.Title or "w424"
 	local Description = Config[2] or Config.Description or "v1.0"
-	local TabWidth = Config[3] or Config["Tab Width"] or 110
+	local TabWidth = Config[3] or Config["Tab Width"] or Config.TabWidth or 110
 	local SizeUi = Config[4] or Config.SizeUi or UDim2.fromOffset(500, 290)
 	local Keybind = Config[5] or Config.Keybind or Enum.KeyCode.RightControl
 	local Icon = Config[6] or Config.Icon or "rbxassetid://135368942844516"
@@ -788,7 +800,7 @@ function w424_Library:CreateWindow(Config)
 
 	Custom:Create("TextLabel", {
 		Font = Enum.Font.GothamBold,
-		Text = CensorName(Player.Name),
+		Text = CensorName(Player and Player.Name or "Player"),
 		TextColor3 = Custom.TextBright,
 		TextSize = 11,
 		TextWrapped = true,
@@ -802,10 +814,12 @@ function w424_Library:CreateWindow(Config)
 	}, AvatarFooter)
 
 	task.spawn(function()
-		local ok, url = pcall(function()
-			return Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-		end)
-		if ok and url then AvatarImage.Image = url end
+		if Player then
+			local ok, url = pcall(function()
+				return Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+			end)
+			if ok and url then AvatarImage.Image = url end
+		end
 	end)
 
 	local SearchPopup = Custom:Create("Frame", {
@@ -1166,8 +1180,16 @@ function w424_Library:CreateWindow(Config)
 	local CountTab = 0
 	local CountDropdown = 0
 
-	function Tabs:CreateTab(Config)
-		local _Name = Config[1] or Config.Name or ""
+	function Tabs:CreateTab(Config, Config2)
+		if type(Config) == "string" and type(Config2) == "string" then
+			Config = {Name = Config, Icon = Config2}
+		elseif type(Config) == "string" and type(Config2) == "table" then
+			Config = Config2
+		elseif type(Config) == "string" then
+			Config = {Name = Config}
+		end
+
+		local _Name = Config[1] or Config.Name or Config.Title or ""
 		local Icon = Custom:ResolveIcon(Config[2] or Config.Icon)
 
 		local ScrolLayers = Custom:Create("ScrollingFrame", {
@@ -1261,7 +1283,8 @@ function w424_Library:CreateWindow(Config)
 		local Sections, CountSection = {}, 0
 
 		function Sections:AddSection(Title, OpenSection)
-			Title = Title or ""; OpenSection = OpenSection or false
+			Title = Title or ""
+			if OpenSection == nil then OpenSection = true end
 			local SectionTitleText = Title
 			local SearchSubtitle = _Name .. " · " .. SectionTitleText
 
@@ -1296,7 +1319,7 @@ function w424_Library:CreateWindow(Config)
 				ImageColor3 = Custom.ColorRGB,
 				AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1,
 				BorderSizePixel = 0, Position = UDim2.new(0.5, 0, 0.5, 0),
-				Rotation = -90, Size = UDim2.new(1, 4, 1, 4), Name = "FeatureImg"
+				Rotation = OpenSection and 90 or -90, Size = UDim2.new(1, 4, 1, 4), Name = "FeatureImg"
 			}, FeatureFrame)
 
 			Custom:Create("TextLabel", {
@@ -1383,9 +1406,10 @@ function w424_Library:CreateWindow(Config)
 
 			local Item, ItemCount = {}, 0
 
-			function Item:AddParagraph(Config)
+			function Item:AddParagraph(Config, Config2)
+				if type(Config) == "string" and type(Config2) == "table" then Config = Config2 end
 				local Title = Config[1] or Config.Title or ""
-				local Content = Config[2] or Config.Content or ""
+				local Content = Config[2] or Config.Content or Config.Description or ""
 				local SF = {}
 				local P = Custom:Create("Frame", {
 					BackgroundColor3 = Custom.BgCard, BackgroundTransparency = 0.35,
@@ -1417,16 +1441,26 @@ function w424_Library:CreateWindow(Config)
 				UpdateP()
 				PC:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateP)
 				RegisterSearch(Title, P, SearchSubtitle, SelectTab, EnsureSectionOpen, ScrolLayers)
-				function SF:Set(Config)
-					PT.Text = Config[1] or Config.Title or ""
-					PC.Text = Config[2] or Config.Content or ""
+				function SF:Set(cfg)
+					if type(cfg) == "table" then
+						if cfg.Title or cfg[1] then PT.Text = cfg.Title or cfg[1] or "" end
+						if cfg.Content or cfg.Description or cfg[2] then PC.Text = cfg.Content or cfg.Description or cfg[2] or "" end
+					elseif type(cfg) == "string" then
+						PC.Text = cfg
+					end
 					UpdateP()
 				end
+				function SF:SetTitle(t) PT.Text = tostring(t or ""); UpdateP() end
+				function SF:SetDesc(d) PC.Text = tostring(d or ""); UpdateP() end
+				function SF:SetContent(c) PC.Text = tostring(c or ""); UpdateP() end
+				function SF:Update(c) PC.Text = tostring(c or ""); UpdateP() end
+
 				ItemCount += 1; return SF
 			end
 
-			function Item:AddSeperator(Config)
-				local Title = Config[1] or Config.Title or ""
+			function Item:AddSeperator(Config, Config2)
+				if type(Config) == "string" and type(Config2) == "table" then Config = Config2 end
+				local Title = (type(Config) == "string" and Config) or Config[1] or Config.Title or ""
 				local SF = {}
 				local S = Custom:Create("Frame", {
 					BackgroundColor3 = Custom.BgCard, BackgroundTransparency = 0.2,
@@ -1442,8 +1476,8 @@ function w424_Library:CreateWindow(Config)
 					BackgroundTransparency = 1, BorderSizePixel = 0,
 					Position = UDim2.new(0, 10, 0, 0), Size = UDim2.new(1, -16, 1, 0), Name = "SeperatorTitle"
 				}, S)
-				function SF:Set(Config)
-					SL.Text = Config[1] or Config.Title or ""
+				function SF:Set(cfg)
+					SL.Text = (type(cfg) == "string" and cfg) or cfg[1] or cfg.Title or ""
 				end
 				ItemCount += 1; return SF
 			end
@@ -1457,9 +1491,10 @@ function w424_Library:CreateWindow(Config)
 				ItemCount += 1; return {}
 			end
 
-			function Item:AddButton(Config)
+			function Item:AddButton(Config, Config2)
+				if type(Config) == "string" and type(Config2) == "table" then Config = Config2 end
 				local Title = Config[1] or Config.Title or ""
-				local Content = Config[2] or Config.Content or ""
+				local Content = Config[2] or Config.Content or Config.Description or ""
 				local Icon = Custom:ResolveIcon(Config[3] or Config.Icon)
 				if Icon == Custom.DefaultIcon and not (Config[3] or Config.Icon) then
 					Icon = "rbxassetid://7734010488"
@@ -1521,9 +1556,10 @@ function w424_Library:CreateWindow(Config)
 				ItemCount += 1; return SF
 			end
 
-			function Item:AddToggle(Config)
+			function Item:AddToggle(Config, Config2)
+				if type(Config) == "string" and type(Config2) == "table" then Config = Config2 end
 				local Title = Config[1] or Config.Title or ""
-				local Content = Config[2] or Config.Content or ""
+				local Content = Config[2] or Config.Content or Config.Description or ""
 				local Default = Config[3] or Config.Default or false
 				local Callback = Config[4] or Config.Callback or function() end
 				local FT = {Value = Default}
@@ -1598,18 +1634,29 @@ function w424_Library:CreateWindow(Config)
 				end)
 
 				function FT:Set(Value)
-					Callback(Value); ToggleAnim(Value)
+					FT.Value = Value
+					ToggleAnim(Value)
+					pcall(function() Callback(Value) end)
 				end
 
-				FT:Set(FT.Value)
+				function FT:SetValue(Value)
+					FT:Set(Value)
+				end
+
+				function FT:OnChanged(cb)
+					Callback = cb
+				end
+
+				ToggleAnim(Default)
 				RegisterSearch(Title, T, SearchSubtitle, SelectTab, EnsureSectionOpen, ScrolLayers)
 				ItemCount += 1; return FT
 			end
 
-			function Item:AddSlider(Config)
+			function Item:AddSlider(Config, Config2)
+				if type(Config) == "string" and type(Config2) == "table" then Config = Config2 end
 				local Title = Config[1] or Config.Title or ""
-				local Content = Config[2] or Config.Content or ""
-				local Increment = Config[3] or Config.Increment or 1
+				local Content = Config[2] or Config.Content or Config.Description or ""
+				local Increment = Config[3] or Config.Increment or Config.Rounding or 1
 				local Min = Config[4] or Config.Min or 0
 				local Max = Config[5] or Config.Max or 100
 				local Default = Config[6] or Config.Default or 50
@@ -1699,6 +1746,15 @@ function w424_Library:CreateWindow(Config)
 					end
 				end
 
+				function FS:SetValue(Value, Animate)
+					FS:Set(Value, Animate)
+					pcall(function() Callback(FS.Value) end)
+				end
+
+				function FS:OnChanged(cb)
+					Callback = cb
+				end
+
 				SF2.InputBegan:Connect(function(i)
 					if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
 						Dragging = true
@@ -1707,7 +1763,7 @@ function w424_Library:CreateWindow(Config)
 
 				SF2.InputEnded:Connect(function(i)
 					if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
-						Dragging = false; Callback(FS.Value)
+						Dragging = false; pcall(function() Callback(FS.Value) end)
 					end
 				end)
 
@@ -1732,17 +1788,18 @@ function w424_Library:CreateWindow(Config)
 				end)
 
 				TB.FocusLost:Connect(function()
-					FS:Set(tonumber(TB.Text) or 0, true); Callback(FS.Value)
+					FS:Set(tonumber(TB.Text) or 0, true); pcall(function() Callback(FS.Value) end)
 				end)
 
-				FS:Set(tonumber(Default), true); Callback(FS.Value)
+				FS:Set(tonumber(Default), true)
 				RegisterSearch(Title, S, SearchSubtitle, SelectTab, EnsureSectionOpen, ScrolLayers)
 				ItemCount += 1; return FS
 			end
 
-			function Item:AddInput(Config)
+			function Item:AddInput(Config, Config2)
+				if type(Config) == "string" and type(Config2) == "table" then Config = Config2 end
 				local Title = Config[1] or Config.Title or ""
-				local Content = Config[2] or Config.Content or ""
+				local Content = Config[2] or Config.Content or Config.Description or ""
 				local Default = Config[3] or Config.Default or ""
 				local Callback = Config[4] or Config.Callback or function() end
 				local FI = {Value = Default}
@@ -1799,20 +1856,32 @@ function w424_Library:CreateWindow(Config)
 				}, IF2)
 
 				function FI:Set(Value)
-					ITB.Text = Value; FI.Value = Value; Callback(Value)
+					ITB.Text = Value; FI.Value = Value
+					pcall(function() Callback(Value) end)
 				end
+
+				function FI:SetValue(Value)
+					FI:Set(Value)
+				end
+
+				function FI:OnChanged(cb)
+					Callback = cb
+				end
+
 				ITB.FocusLost:Connect(function() FI:Set(ITB.Text) end)
 
-				FI:Set(Default)
+				ITB.Text = Default
+				FI.Value = Default
 				RegisterSearch(Title, I, SearchSubtitle, SelectTab, EnsureSectionOpen, ScrolLayers)
 				ItemCount += 1; return FI
 			end
 
-			function Item:AddDropdown(Config)
+			function Item:AddDropdown(Config, Config2)
+				if type(Config) == "string" and type(Config2) == "table" then Config = Config2 end
 				local Title = Config[1] or Config.Title or ""
-				local Content = Config[2] or Config.Content or ""
+				local Content = Config[2] or Config.Content or Config.Description or ""
 				local Multi = Config[3] or Config.Multi or false
-				local Options = Config[4] or Config.Options or Config.List or {}
+				local Options = Config[4] or Config.Options or Config.Values or Config.List or {}
 				local Default = Config[5] or Config.Default or {}
 				local Callback = Config[6] or Config.Callback or function() end
 
@@ -1943,7 +2012,25 @@ function w424_Library:CreateWindow(Config)
 					end
 					local dv = table.concat(FD.Value, ", ")
 					OS.Text = dv ~= "" and dv or "Select Options"
-					Callback(FD.Value)
+					pcall(function()
+						if Multi then
+							Callback(FD.Value)
+						else
+							Callback(FD.Value[1] or "")
+						end
+					end)
+				end
+
+				function FD:SetValue(Value)
+					FD:Set(Value)
+				end
+
+				function FD:SetValues(List, Sel)
+					FD:Refresh(List, Sel)
+				end
+
+				function FD:OnChanged(cb)
+					Callback = cb
 				end
 
 				function FD:AddOption(OptionName)
@@ -2007,10 +2094,25 @@ function w424_Library:CreateWindow(Config)
 
 				function FD:Refresh(List, Sel)
 					List = type(List) == "table" and List or {}
-					Sel = Sel or {}
+					Sel = Sel or FD.Value
 					FD:Clear()
 					for _, v in ipairs(List) do FD:AddOption(v) end
-					FD.Options = List; FD:Set(Sel)
+					FD.Options = List
+					if type(Sel) == "string" then Sel = {Sel}
+					elseif type(Sel) ~= "table" then Sel = {} end
+					FD.Value = Sel
+					for _, Drop in pairs(SS:GetChildren()) do
+						if Drop.Name ~= "UIListLayout" and Drop.Name ~= "SearchBar" then
+							local found = table.find(FD.Value, Drop.OptionText.Text) ~= nil
+							local ChooseFrame = Drop.ChooseFrame
+							ChooseFrame.Size = found and UDim2.new(0, 2, 0, 12) or UDim2.new(0, 0, 0, 0)
+							ChooseFrame.UIStroke.Transparency = found and 0 or 1
+							Drop.BackgroundColor3 = found and Custom.ColorRGB or Color3.fromRGB(255, 255, 255)
+							Drop.BackgroundTransparency = found and 0.85 or 1
+						end
+					end
+					local dv = table.concat(FD.Value, ", ")
+					OS.Text = dv ~= "" and dv or "Select Options"
 				end
 
 				FD:Refresh(FD.Options, FD.Value)
@@ -2018,9 +2120,10 @@ function w424_Library:CreateWindow(Config)
 				ItemCount += 1; CountDropdown += 1; return FD
 			end
 
-			function Item:AddKeybind(Config)
+			function Item:AddKeybind(Config, Config2)
+				if type(Config) == "string" and type(Config2) == "table" then Config = Config2 end
 				local Title = Config[1] or Config.Title or ""
-				local Content = Config[2] or Config.Content or ""
+				local Content = Config[2] or Config.Content or Config.Description or ""
 				local Default = Config[3] or Config.Default or Enum.KeyCode.Unknown
 				local Callback = Config[4] or Config.Callback or function() end
 				local FK = {Value = Default}
@@ -2063,6 +2166,14 @@ function w424_Library:CreateWindow(Config)
 					KB.Text = (NewKey and NewKey ~= Enum.KeyCode.Unknown) and NewKey.Name or "None"
 				end
 
+				function FK:SetValue(NewKey)
+					FK:Set(NewKey)
+				end
+
+				function FK:OnChanged(cb)
+					Callback = cb
+				end
+
 				KB.Activated:Connect(function()
 					CircleClick(KB, Player:GetMouse().X, Player:GetMouse().Y)
 					Listening = true; KB.Text = "..."
@@ -2074,7 +2185,7 @@ function w424_Library:CreateWindow(Config)
 							Listening = false; FK:Set(Input.KeyCode)
 						end
 					elseif not GP and Input.UserInputType == Enum.UserInputType.Keyboard then
-						if FK.Value and Input.KeyCode == FK.Value then Callback(FK.Value) end
+						if FK.Value and Input.KeyCode == FK.Value then pcall(function() Callback(FK.Value) end) end
 					end
 				end)
 				table.insert(ActiveConnections, bindConn)
@@ -2084,7 +2195,8 @@ function w424_Library:CreateWindow(Config)
 				ItemCount += 1; return FK
 			end
 
-			function Item:AddSocial(Config)
+			function Item:AddSocial(Config, Config2)
+				if type(Config) == "string" and type(Config2) == "table" then Config = Config2 end
 				local PlatformIcon = Config[1] or Config.Icon or ""
 				local Title = Config[2] or Config.Title or ""
 				local Code = Config[3] or Config.Code or ""
@@ -2137,9 +2249,10 @@ function w424_Library:CreateWindow(Config)
 				ItemCount += 1; return FS
 			end
 
-			function Item:AddReadMe(Config)
+			function Item:AddReadMe(Config, Config2)
+				if type(Config) == "string" and type(Config2) == "table" then Config = Config2 end
 				local Title = Config[1] or Config.Title or "README"
-				local Content = Config[2] or Config.Content or ""
+				local Content = Config[2] or Config.Content or Config.Description or ""
 				local Style = Config[3] or Config.Style or "Accordion"
 				local RF = {}
 
@@ -2250,6 +2363,20 @@ function w424_Library:CreateWindow(Config)
 	end
 
 	Funcs.CreateTab = Tabs.CreateTab
+	Funcs.AddTab = Tabs.CreateTab
+	Funcs.Notify = w424_Library.SetNotification
+	Funcs.SetNotification = w424_Library.SetNotification
+
+	function Funcs:Dialog(Config)
+		return {}
+	end
+
+	function Funcs:SelectTab(Index)
+		pcall(function()
+			LayersPageLayout:JumpToIndex(Index)
+		end)
+	end
+
 	return Funcs
 end
 
