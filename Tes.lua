@@ -200,6 +200,21 @@ pcall(function()
     TierUtility = require(ReplicatedStorage:WaitForChild("Shared", 5):WaitForChild("TierUtility", 5))
 end)
 
+local function GetPlayerDataReplion()
+    local result = nil
+    pcall(function()
+        if PlayerData then
+            result = PlayerData
+        else
+            local replionModule = FindReplionModule()
+            if replionModule then
+                result = require(replionModule).Client:WaitReplion("Data", 5)
+            end
+        end
+    end)
+    return result or PlayerData or nil
+end
+
 if isMobile then
     pcall(function()
         local ctrl = ReplicatedStorage:WaitForChild("Controllers", 5)
@@ -282,11 +297,11 @@ local function loadRemotes()
         if remote then loaded = loaded + 1
         else failed = failed + 1; warn("[QH] Remote gagal: " .. remoteName) end
     end
-    Events.UpdateAutoFishing = Events.update_auto_fishing or GetServerRemote("RF/UpdateAutoFishingState")
-    Events.equip = Events.equip_tool_remote or GetServerRemote("RF/EquipToolFromHotbar")
-    Events.equipToolRemote = Events.equip_tool_remote or GetServerRemote("RF/EquipToolFromHotbar")
-    Events.equipItemRemote = Events.equip_item or GetServerRemote("RF/EquipItem")
-    Events.cancel_fishing_input = Events.cancel_fishing_input or GetServerRemote("RF/CancelFishingInputs")
+    Events.UpdateAutoFishing = Events.update_auto_fishing or GetServerRemote("RF/UpdateAutoFishingState") or (net and net:FindFirstChild("RF/UpdateAutoFishingState"))
+    Events.equip = Events.equip_tool_remote or GetServerRemote("RE/EquipToolFromHotbar") or GetServerRemote("RF/EquipToolFromHotbar") or (net and net:FindFirstChild("RE/EquipToolFromHotbar"))
+    Events.equipToolRemote = Events.equip_tool_remote or GetServerRemote("RE/EquipToolFromHotbar") or GetServerRemote("RF/EquipToolFromHotbar") or (net and net:FindFirstChild("RE/EquipToolFromHotbar"))
+    Events.equipItemRemote = Events.equip_item or GetServerRemote("RE/EquipItem") or GetServerRemote("RF/EquipItem") or (net and net:FindFirstChild("RE/EquipItem"))
+    Events.cancel_fishing_input = Events.cancel_fishing_input or GetServerRemote("RF/CancelFishingInputs") or (net and net:FindFirstChild("RF/CancelFishingInputs"))
     print("[QH] Loaded: " .. loaded .. " | Failed: " .. failed)
     return loaded, failed
 end
@@ -337,34 +352,6 @@ local skip = false
 local isCaught = false
 local lastTimeFishCaught = nil
 local blatantFishCycleCount = 1
-
-local _sessionCatchCount = 0
-local _hookedRemotes = {}
-local _lastCatchTimestamps = {}
-local _prevInventoryUUIDs = {}
-local _fishNotifHistory = {}
-local _maxFishHistory = 20
-local _lastRealFishNotifTime = 0
-local lastValidFishCaught = {}
-local lastValidCaughtVisual = {}
-local lastValidFishNotif = {}
-local saveCount = 0
-local _lastRecordedCatchTime = 0
-local _lastSellNotifyTime = 0
-
-local function OnFishCaughtRecorded(source, data)
-    local now = tick()
-    if (now - _lastRecordedCatchTime) < 0.35 then return end
-    _lastRecordedCatchTime = now
-    _sessionCatchCount = (_sessionCatchCount or 0) + 1
-    saveCount = (saveCount or 0) + 1
-    lastTimeFishCaught = os.clock()
-    isCaught = true
-    table.insert(_lastCatchTimestamps, now)
-    if #_lastCatchTimestamps > 60 then
-        table.remove(_lastCatchTimestamps, 1)
-    end
-end
 
 local function GetCatchQuality(castMode)
     if castMode == "Perfect" then
@@ -457,7 +444,6 @@ end
 
 if FishCaughtRemote and FishCaughtRemote:IsA("RemoteEvent") then
     _G.FishCaughtConn = FishCaughtRemote.OnClientEvent:Connect(function(fishId, _, _, fishData)
-        OnFishCaughtRecorded("FishCaughtRemote", {fishId = fishId, fishData = fishData})
         task.spawn(function()
             task.wait(0.1)
 
@@ -484,18 +470,7 @@ else
     warn("[QH] Remote RE/FishCaught tidak ditemukan untuk hook notifikasi!")
 end
 
-    pcall(function()
-        local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
-        if not ctrlFolder then return end
-        local m = ctrlFolder:FindFirstChild("TextNotificationController")
-        if not m then return end
-        local ctrl = require(m)
-        if ctrl and ctrl.DeliverNotification then
-            local id = notifArgs[1]
-            local meta = type(notifArgs[2]) == "table" and notifArgs[2] or {}
-            ctrl:DeliverNotification({Type = "Item", Id = id, Metadata = meta})
-        end
-    end)
+
 
 _G.QHInstances = _G.QHInstances or {}
 _G.QHInstances[_instanceId] = _G.QHInstances[_instanceId] or {
@@ -909,68 +884,118 @@ local function interactPirateChest(chest, savedCFrame)
     return true
 end
 
+local function isHoldingFishingRod(char)
+    if not char then
+        local lp = Players.LocalPlayer
+        char = lp and lp.Character
+    end
+    if not char then return false end
+
+    local tool = char:FindFirstChildOfClass("Tool")
+    if not tool then return false end
+
+    local itemType = tool:GetAttribute("ItemType")
+    if itemType == "Fishing Rods" or itemType == "FishingRod" then
+        return true
+    end
+
+    local name = tool.Name:lower()
+    if name:find("rod") then
+        return true
+    end
+
+    local replion = GetPlayerDataReplion()
+    if replion then
+        local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
+        if ok and inv and inv["Fishing Rods"] then
+            for _, r in ipairs(inv["Fishing Rods"]) do
+                local id = tonumber(r.Id)
+                local rName = (r.Name or r.ItemName or ""):lower()
+                if tool:GetAttribute("ItemId") == id or tool:GetAttribute("UUID") == r.UUID or (rName ~= "" and name:find(rName, 1, true)) then
+                    return true
+                end
+            end
+        end
+    end
+
+    if not tool:GetAttribute("Weight") and not name:find("fish") and not name:find("potion") and not name:find("totem") and not name:find("axe") and not name:find("pickaxe") and not name:find("crystal") and not name:find("relic") then
+        return true
+    end
+
+    return false
+end
+
 local _lastEquipTime = 0
-local _lastReplionEquipTime = 0
 local function ensureRodEquipped(force)
     local lp = Players.LocalPlayer
     local char = lp and lp.Character
     if not char then return false end
 
-    local held = char:FindFirstChildOfClass("Tool")
-    if held then return true end
+    if not force and isHoldingFishingRod(char) then
+        return true
+    end
 
     local now = os.clock()
-    if not force and (now - _lastEquipTime < 1.0) then
-        return false
+    if not force and (now - _lastEquipTime < 0.4) then
+        return isHoldingFishingRod(char)
     end
     _lastEquipTime = now
 
-    -- 1. Check Backpack first (fast, client-side Humanoid:EquipTool)
-    local bp = lp:FindFirstChild("Backpack")
-    if bp then
-        local tool = bp:FindFirstChildOfClass("Tool")
-        if tool and char:FindFirstChildOfClass("Humanoid") then
-            pcall(function() char.Humanoid:EquipTool(tool) end)
-            if char:FindFirstChildOfClass("Tool") then return true end
-        end
-    end
+    local RE_EquipItem = Events.equipItemRemote or Events.equip_item or GetServerRemote("RE/EquipItem") or (net and net:FindFirstChild("RE/EquipItem"))
+    local RE_EquipTool = Events.equipToolRemote or Events.equip_tool_remote or Events.equip or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.equip) or GetServerRemote("RE/EquipToolFromHotbar") or (net and net:FindFirstChild("RE/EquipToolFromHotbar"))
 
-    -- 2. Call Hotbar equip remote ONLY if still not holding
-    local eq = Events.equip or Events.equipToolRemote or Events.equip_tool_remote or (Config.UB and Config.UB.Remotes and Config.UB.Remotes.equip) or GetServerRemote("RF/EquipToolFromHotbar") or (net and net:FindFirstChild("RE/EquipToolFromHotbar"))
-    if eq then
-        pcall(function() CallRemote(eq, 1) end)
-        if char:FindFirstChildOfClass("Tool") then return true end
-    end
-
-    -- 3. Only if completely empty and with cooldown (5s), equip best rod from Replion Inventory
-    if (now - _lastReplionEquipTime) > 5.0 then
-        _lastReplionEquipTime = now
-        pcall(function()
-            local replion = GetPlayerDataReplion and GetPlayerDataReplion()
-            if replion then
-                local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
-                if ok and inv and inv["Fishing Rods"] and #inv["Fishing Rods"] > 0 then
-                    local priority = {257, 169, 126, 5, 7, 6, 80, 4, 78, 77, 85, 76, 79, 1}
-                    local bestRod = nil
-                    for _, id in ipairs(priority) do
-                        for _, r in ipairs(inv["Fishing Rods"]) do
-                            if tonumber(r.Id) == id then bestRod = r; break end
-                        end
-                        if bestRod then break end
+    -- 1. Bind best rod to slot 1 in Replion inventory
+    pcall(function()
+        local replion = GetPlayerDataReplion()
+        if replion then
+            local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
+            if ok and inv and inv["Fishing Rods"] and #inv["Fishing Rods"] > 0 then
+                local priority = {257, 169, 126, 5, 7, 6, 80, 4, 78, 77, 85, 76, 79, 1}
+                local bestRod = nil
+                for _, id in ipairs(priority) do
+                    for _, r in ipairs(inv["Fishing Rods"]) do
+                        if tonumber(r.Id) == id then bestRod = r; break end
                     end
-                    if not bestRod then bestRod = inv["Fishing Rods"][1] end
+                    if bestRod then break end
+                end
+                if not bestRod then bestRod = inv["Fishing Rods"][1] end
 
-                    local equipItem = Events.equipItemRemote or Events.equip_item or GetServerRemote("RF/EquipItem")
-                    if bestRod and bestRod.UUID and equipItem then
-                        CallRemote(equipItem, bestRod.UUID, "Fishing Rods")
-                        if eq then CallRemote(eq, 1) end
+                if bestRod and bestRod.UUID and RE_EquipItem then
+                    if RE_EquipItem:IsA("RemoteEvent") then
+                        RE_EquipItem:FireServer(bestRod.UUID, "Fishing Rods")
+                    elseif RE_EquipItem:IsA("RemoteFunction") then
+                        RE_EquipItem:InvokeServer(bestRod.UUID, "Fishing Rods")
                     end
                 end
             end
+        end
+    end)
+
+    -- 2. Equip Hotbar slot 1 (Holds rod on server & client)
+    if RE_EquipTool then
+        pcall(function()
+            if RE_EquipTool:IsA("RemoteEvent") then
+                RE_EquipTool:FireServer(1)
+            elseif RE_EquipTool:IsA("RemoteFunction") then
+                RE_EquipTool:InvokeServer(1)
+            end
         end)
+    else
+        local bp = lp:FindFirstChild("Backpack")
+        if bp and char:FindFirstChild("Humanoid") then
+            for _, t in ipairs(bp:GetChildren()) do
+                if t:IsA("Tool") then
+                    local tName = t.Name:lower()
+                    if t:GetAttribute("ItemType") == "Fishing Rods" or tName:find("rod") then
+                        pcall(function() char.Humanoid:EquipTool(t) end)
+                        break
+                    end
+                end
+            end
+        end
     end
 
-    return char:FindFirstChildOfClass("Tool") ~= nil
+    return isHoldingFishingRod(char)
 end
 
 local function equipRod()
@@ -1072,7 +1097,7 @@ end
 
 local function HookRemote(humanName, storageKey)
     if _hookedRemotes[humanName] then return true end
-    local remote = GetServerRemote(humanName) or (net and net:FindFirstChild(humanName))
+    local remote = GetServerRemote(humanName)
     if remote then
         _hookedRemotes[humanName] = true
         pcall(function()
@@ -1082,23 +1107,20 @@ local function HookRemote(humanName, storageKey)
                 if storageKey == "FishCaught" then
                     lastValidFishCaught = deepCopyArr(args)
                     if IsLocalPlayerCatch(args[1]) then
-                        OnFishCaughtRecorded("HookRemote_FishCaught", args)
+                        saveCount = saveCount + 1
+                        _sessionCatchCount = _sessionCatchCount + 1
+                        table.insert(_lastCatchTimestamps, tick())
+                        if #_lastCatchTimestamps > 60 then table.remove(_lastCatchTimestamps, 1) end
                     end
                 elseif storageKey == "CaughtVisual" then
                     lastValidCaughtVisual = deepCopyArr(args)
-                    if IsLocalPlayerCatch(args[1]) then
-                        OnFishCaughtRecorded("HookRemote_CaughtVisual", args)
-                    end
-                elseif storageKey == "PetsCaughtVisual" then
-                    if IsLocalPlayerCatch(args[1]) then
-                        OnFishCaughtRecorded("HookRemote_PetsCaughtVisual", args)
-                    end
                 elseif storageKey == "FishNotif" then
                     lastValidFishNotif = deepCopyArr(args)
                     _lastRealFishNotifTime = tick()
+                    isCaught = true
+                    lastTimeFishCaught = os.clock()
                     table.insert(_fishNotifHistory, deepCopyArr(args))
                     if #_fishNotifHistory > _maxFishHistory then table.remove(_fishNotifHistory, 1) end
-                    OnFishCaughtRecorded("HookRemote_FishNotif", args)
                 end
             end)
         end)
@@ -1119,33 +1141,14 @@ task.spawn(function()
                     _prevInventoryUUIDs[key] = true
                 end
             end
-            if PlayerData.OnChange then
-                pcall(function()
-                    PlayerData:OnChange("Inventory", function(newInv)
-                        if newInv and newInv.Items then
-                            local hasNew = false
-                            for _, item in ipairs(newInv.Items) do
-                                local key = tostring(item.UUID or item.Id or "")
-                                if key ~= "" and not _prevInventoryUUIDs[key] then
-                                    _prevInventoryUUIDs[key] = true
-                                    hasNew = true
-                                end
-                            end
-                            if hasNew then
-                                OnFishCaughtRecorded("ReplionInventoryOnChange")
-                            end
-                        end
-                    end)
-                end)
-            end
         end
     end)
     pcall(function()
         HookRemote("RE/FishCaught", "FishCaught")
         HookRemote("RE/CaughtFishVisual", "CaughtVisual")
-        HookRemote("RE/Pets/CaughtFishVisual", "PetsCaughtVisual")
-        HookRemote("RE/ObtainedNewFishNotification", "FishNotif")
     end)
+    task.wait(0.5)
+    pcall(SetupFishCaughtNotifListener)
 end)
 
 local function CalculateCPM()
@@ -1454,19 +1457,19 @@ local function teleportTo(locationName)
 end
 
 local function UB_init()
-    Config.UB.Remotes.ChargeFishingRod = GetServerRemote("RF/ChargeFishingRod")
-    Config.UB.Remotes.RequestMinigame = GetServerRemote("RF/RequestFishingMinigameStarted")
-    Config.UB.Remotes.CancelFishingInputs = GetServerRemote("RF/CancelFishingInputs")
-    Config.UB.Remotes.UpdateAutoFishing = GetServerRemote("RF/UpdateAutoFishingState")
-    Config.UB.Remotes.FishingCompleted = GetServerRemote("RF/CatchFishCompleted")
-    Config.UB.Remotes.FishingCompletedRE = GetServerRemote("RE/CatchFishCompleted")
-    Config.UB.Remotes.equip = GetServerRemote("RF/EquipToolFromHotbar")
+    Config.UB.Remotes.ChargeFishingRod = GetServerRemote("RF/ChargeFishingRod") or (net and net:FindFirstChild("RF/ChargeFishingRod"))
+    Config.UB.Remotes.RequestMinigame = GetServerRemote("RF/RequestFishingMinigameStarted") or (net and net:FindFirstChild("RF/RequestFishingMinigameStarted"))
+    Config.UB.Remotes.CancelFishingInputs = GetServerRemote("RF/CancelFishingInputs") or (net and net:FindFirstChild("RF/CancelFishingInputs"))
+    Config.UB.Remotes.UpdateAutoFishing = GetServerRemote("RF/UpdateAutoFishingState") or (net and net:FindFirstChild("RF/UpdateAutoFishingState"))
+    Config.UB.Remotes.FishingCompleted = GetServerRemote("RF/CatchFishCompleted") or (net and net:FindFirstChild("RF/CatchFishCompleted"))
+    Config.UB.Remotes.FishingCompletedRE = GetServerRemote("RE/CatchFishCompleted") or (net and net:FindFirstChild("RE/CatchFishCompleted"))
+    Config.UB.Remotes.equip = GetServerRemote("RE/EquipToolFromHotbar") or GetServerRemote("RF/EquipToolFromHotbar") or (net and net:FindFirstChild("RE/EquipToolFromHotbar"))
     return true
 end
 
-local NOTIF_DELAY_DURATION = 18
-local NOTIF_DELAY_DURATION_V1 = 6.2
-local _currentNotifDelayDuration = 18
+local NOTIF_DELAY_DURATION = 3.5
+local NOTIF_DELAY_DURATION_V1 = 3.5
+local _currentNotifDelayDuration = 3.5
 local _notifDelayActive = false
 local _notifHooksApplied = false
 
@@ -1570,14 +1573,91 @@ local function triggerRainbowGoldenUpdate(notifData)
     end
 end
 
+local function PlayCatchMotion()
+    pcall(function()
+        local char = LocalPlayer and LocalPlayer.Character
+        if not char then return end
+        local animCtrl = AnimationController
+        if not animCtrl then
+            local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
+            if ctrlFolder and ctrlFolder:FindFirstChild("AnimationController") then
+                animCtrl = require(ctrlFolder.AnimationController)
+            end
+        end
+        if animCtrl and animCtrl.PlayAnimation then
+            animCtrl:PlayAnimation("FishCaught")
+        else
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            local animator = hum and (hum:FindFirstChildOfClass("Animator") or hum:FindFirstChild("Animator"))
+            if animator then
+                for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+                    local name = string.lower(track.Name or "")
+                    if name:find("fishcaught") or name:find("caught") then
+                        track:Play()
+                        return
+                    end
+                end
+            end
+        end
+    end)
+end
+
+local function PlayCatchSound()
+    pcall(function()
+        local played = false
+        local ctrlFolder = ReplicatedStorage:FindFirstChild("Controllers")
+        if ctrlFolder then
+            local soundCtrlMod = ctrlFolder:FindFirstChild("SoundController") or ctrlFolder:FindFirstChild("AudioController")
+            if soundCtrlMod then
+                local sc = require(soundCtrlMod)
+                if sc then
+                    if sc.PlaySound then
+                        pcall(function() sc:PlaySound("FishCaught") end)
+                        pcall(function() sc:PlaySound("Caught") end)
+                        pcall(function() sc:PlaySound("Catch") end)
+                        played = true
+                    elseif sc.Play then
+                        pcall(function() sc:Play("FishCaught") end)
+                        played = true
+                    end
+                end
+            end
+        end
+        if not played then
+            local soundNames = {"FishCaught", "Caught", "Catch", "Success", "Obtain", "Splash"}
+            for _, name in ipairs(soundNames) do
+                local snd = game:GetService("SoundService"):FindFirstChild(name, true) or ReplicatedStorage:FindFirstChild(name, true)
+                if snd and snd:IsA("Sound") then
+                    local clone = snd:Clone()
+                    clone.Parent = game:GetService("SoundService")
+                    clone.Volume = math.clamp(snd.Volume, 0.5, 1)
+                    clone:Play()
+                    game:GetService("Debris"):AddItem(clone, clone.TimeLength + 0.5)
+                    played = true
+                    break
+                end
+            end
+        end
+        if not played then
+            local s = Instance.new("Sound")
+            s.SoundId = "rbxassetid://9069609200"
+            s.Volume = 0.8
+            s.Parent = game:GetService("SoundService")
+            s:Play()
+            game:GetService("Debris"):AddItem(s, 2)
+        end
+    end)
+end
+
 local function replayAmblatantNotif()
     if _G.QH_EnableFishNotif == false then return end
-    local isCloudySpecial = (Config.amblatant == true) or (Config.Cloudy1N and Config.Cloudy1N.Active == true)
-    if not isCloudySpecial then return end
+    local isCloudy1N = (Config.Cloudy1N and Config.Cloudy1N.Active == true)
+    local isYTTA = (Config.amblatant == true)
+    if not isCloudy1N and not isYTTA then return end
 
     task.spawn(function()
         if _G.QH_EnableFishNotif == false then return end
-        if not ((Config.amblatant == true) or (Config.Cloudy1N and Config.Cloudy1N.Active == true)) then return end
+        if not isCloudy1N and not isYTTA then return end
 
         local xr_visual = GetServerRemote("RE/CaughtFishVisual")
 
@@ -1598,24 +1678,53 @@ local function replayAmblatantNotif()
 
         if notifData then
             pcall(function() triggerRainbowGoldenUpdate(notifData) end)
-            local repeatCount = math.max(1, Config.YTTA.NotifCount or 3)
+
+            local repeatCount = 3
+            local repeatDelay = 0.05
+            local notifDur = 1
+
+            if isCloudy1N then
+                repeatCount = 3
+                repeatDelay = 0.05
+                notifDur = 1
+            elseif isYTTA then
+                repeatCount = math.clamp(tonumber(Config.YTTA.NotifCount) or 3, 1, 100)
+                repeatDelay = math.clamp(tonumber(Config.YTTA.NotifDelay) or 0.1, 0, 10)
+                notifDur = _currentNotifDelayDuration or 3.5
+            end
+
             for i = 1, repeatCount do
-                if not ((Config.amblatant == true) or (Config.Cloudy1N and Config.Cloudy1N.Active == true)) then break end
+                if not isCloudy1N and not isYTTA then break end
                 local nd = notifData
                 if #_fishNotifHistory > 0 then
                     nd = _fishNotifHistory[((i - 1) % #_fishNotifHistory) + 1]
                 end
 
-                PlayCatchAnimationMotion()
+                PlayCatchMotion()
+                PlayCatchSound()
 
                 if xr_visual and #lastValidCaughtVisual > 0 then
                     pcall(function() FireLocalEvent(xr_visual, unpack(lastValidCaughtVisual)) end)
                 end
 
-                TriggerFishNotif(nd, true)
+                pcall(function()
+                    if TextNotificationController and TextNotificationController.DeliverNotification then
+                        local id = nd[1]
+                        local meta = type(nd[2]) == "table" and nd[2] or {}
+                        TextNotificationController:DeliverNotification({
+                            Type = "Item",
+                            ItemType = "Fish",
+                            ItemId = id,
+                            Metadata = meta,
+                            Duration = notifDur,
+                            CustomDuration = notifDur
+                        })
+                    end
+                end)
+
                 updateReplionInventory(nd)
-                if i < repeatCount and (Config.YTTA.NotifDelay or 0.1) > 0 then
-                    task.wait(Config.YTTA.NotifDelay or 0.1)
+                if i < repeatCount and repeatDelay > 0 then
+                    task.wait(repeatDelay)
                 end
             end
         end
@@ -1629,7 +1738,6 @@ local function CompleteFishing(quality)
     elseif Config.UB.Remotes.FishingCompleted and Config.UB.Remotes.FishingCompleted.Parent then
         pcall(function() Config.UB.Remotes.FishingCompleted:InvokeServer(q) end)
     end
-    OnFishCaughtRecorded("CompleteFishing", q)
 end
 
 local function legit_fishing_loop()
@@ -1662,7 +1770,6 @@ local function legit_fishing_loop()
             elseif completedRF and completedRF.Parent then
                 pcall(completedRF.InvokeServer, completedRF, q)
             end
-            OnFishCaughtRecorded("LegitFishing", q)
 
             task.wait(0.35)
         end)
@@ -1696,17 +1803,6 @@ local function onToggleLegitFishing(val)
                 end
             end
         end)
-        pcall(function()
-            if Controllers.Fishing then
-                if Controllers.Fishing.ToggleAutoFishing then
-                    Controllers.Fishing:ToggleAutoFishing(true)
-                elseif Controllers.Fishing.StartAutoFishing then
-                    Controllers.Fishing:StartAutoFishing()
-                elseif Controllers.Fishing.SetAutoFishing then
-                    Controllers.Fishing:SetAutoFishing(true)
-                end
-            end
-        end)
         if Tasks.legitFishingTask then
             pcall(task.cancel, Tasks.legitFishingTask)
             Tasks.legitFishingTask = nil
@@ -1727,17 +1823,6 @@ local function onToggleLegitFishing(val)
                     task.spawn(function() pcall(r.InvokeServer, r, false) end)
                 elseif r:IsA("RemoteEvent") then
                     r:FireServer({ Active = false })
-                end
-            end
-        end)
-        pcall(function()
-            if Controllers.Fishing then
-                if Controllers.Fishing.ToggleAutoFishing then
-                    Controllers.Fishing:ToggleAutoFishing(false)
-                elseif Controllers.Fishing.StopAutoFishing then
-                    Controllers.Fishing:StopAutoFishing()
-                elseif Controllers.Fishing.SetAutoFishing then
-                    Controllers.Fishing:SetAutoFishing(false)
                 end
             end
         end)
@@ -1767,8 +1852,10 @@ local function ub_loop()
                 replayAmblatantNotif()
             end
             blatantFishCycleCount = blatantFishCycleCount + 1
+            local postDelay = Config.amblatant and math.max(0.15, (tonumber(Config.YTTA.NotifDelay) or 0.1) * (tonumber(Config.YTTA.NotifCount) or 3)) or 0.2
+            task.wait(postDelay)
         end)
-        if not ok then warn("[QH] UB error: " .. tostring(err)); task.wait(0.02) end
+        if not ok then warn("[QH] UB error: " .. tostring(err)); task.wait(0.05) end
     end
 end
 
@@ -1786,8 +1873,9 @@ local function cloudy_v1_loop()
             Config.CatchQuality = GetCatchQuality(Config.CloudyV1.CastMode or Config.CastMode)
             CompleteFishing(Config.CatchQuality)
             blatantFishCycleCount = blatantFishCycleCount + 1
+            task.wait(0.2)
         end)
-        if not ok then warn("[QH] Cloudy V1 error: " .. tostring(err)); task.wait(0.02) end
+        if not ok then warn("[QH] Cloudy V1 error: " .. tostring(err)); task.wait(0.05) end
     end
 end
 
@@ -1805,8 +1893,9 @@ local function cloudy_1n_loop()
             Config.CatchQuality = GetCatchQuality(Config.Cloudy1N.CastMode or Config.CastMode)
             CompleteFishing(Config.CatchQuality)
             replayAmblatantNotif()
+            task.wait(0.2)
         end)
-        if not ok then warn("[QH] Cloudy 1N error: " .. tostring(err)); task.wait(0.02) end
+        if not ok then warn("[QH] Cloudy 1N error: " .. tostring(err)); task.wait(0.05) end
     end
 end
 
@@ -1956,17 +2045,64 @@ UB_init()
 task.spawn(function()
     while true do
         task.wait(5)
-        local anyActive = (Config.UB and Config.UB.Active) or (Config.CloudyV1 and Config.CloudyV1.Active) or (Config.Cloudy1N and Config.Cloudy1N.Active) or Config.AutoCatch
-        if anyActive then
-            local lp = Players.LocalPlayer
-            local char = lp and lp.Character
-            local isHolding = char and char:FindFirstChildOfClass("Tool")
-            if not isHolding then
-                ensureRodEquipped(false)
-            end
+        local anyActive = Config.UB.Active or Config.CloudyV1.Active
+        if anyActive and lastTimeFishCaught ~= nil and os.clock() - lastTimeFishCaught >= 20 and blatantFishCycleCount > 1 then
+            needCast = true; saveCount = 0; blatantFishCycleCount = 1; lastTimeFishCaught = os.clock()
+            safeFire(function() if Config.UB.Remotes.CancelFishingInputs then CallRemote(Config.UB.Remotes.CancelFishingInputs) end end)
+            task.wait(0.3)
+            equipRod()
         end
     end
 end)
+
+local function RunAutoSellLoop()
+    if Tasks.AutoSellThread then pcall(function() task.cancel(Tasks.AutoSellThread) end); Tasks.AutoSellThread = nil end
+    Tasks.AutoSellThread = task.spawn(function()
+        while Config.AutoSellState do
+            if not Events.sell or not Events.sell.Parent then
+                Events.sell = GetServerRemote("RF/SellAllItems")
+                if not Events.sell then NotifyError("Auto Sell", "Remote tidak ditemukan!"); task.wait(3); continue end
+            end
+            if Config.AutoSellMethod == "Delay" then
+                local delaySeconds = math.clamp(Config.AutoSellValue, 1, 9999)
+                local startTime = tick()
+                while Config.AutoSellState and (tick() - startTime) < delaySeconds do
+                    task.wait(0.1)
+                end
+                if Config.AutoSellState then
+                    local ok = pcall(function()
+                        if Events.sell:IsA("RemoteFunction") then Events.sell:InvokeServer()
+                        elseif Events.sell:IsA("RemoteEvent") then Events.sell:FireServer() end
+                    end)
+
+                    if ok then pcall(function() if Window and Window.Notify then Fluent:Notify({ Title = "[OK] Auto Sell", Content = "Executed", Duration = 1, Icon = "lucide:circle-check" }) end end) end
+                end
+            elseif Config.AutoSellMethod == "Count" then
+                local targetCount = math.clamp(Config.AutoSellValue, 1, 9999)
+                local startCount = _sessionCatchCount or 0
+                local lastCount = startCount
+                local timeout = 0
+                while Config.AutoSellState and (_sessionCatchCount - startCount) < targetCount and timeout < 3600 do
+                    task.wait(0.3)
+                    timeout = timeout + 0.3
+                    local currentCount = _sessionCatchCount - startCount
+                    if currentCount ~= lastCount then
+                        lastCount = currentCount
+                        timeout = 0
+                    end
+                end
+                if Config.AutoSellState and (_sessionCatchCount - startCount) >= targetCount then
+                    local ok = pcall(function()
+                        if Events.sell:IsA("RemoteFunction") then Events.sell:InvokeServer()
+                        elseif Events.sell:IsA("RemoteEvent") then Events.sell:FireServer() end
+                    end)
+
+                    if ok then pcall(function() if Window and Window.Notify then Fluent:Notify({ Title = "[OK] Auto Sell", Content = "Sold " .. targetCount .. " fish", Duration = 1, Icon = "lucide:circle-check" }) end end) end
+                end
+            else task.wait(1) end
+        end
+    end)
+end
 
 local function GetPlayerDataReplion()
     local result = nil
@@ -1982,7 +2118,9 @@ end
 local function IsFishItem(item)
     local isFish = false
     pcall(function()
+
         if item.Metadata and item.Metadata.Weight then isFish = true end
+
         if ItemUtility then
             local data = ItemUtility:GetItemData(item.Id)
             if data and data.Probability then isFish = true end
@@ -1990,136 +2128,6 @@ local function IsFishItem(item)
         end
     end)
     return isFish
-end
-
-local function GetInventoryFishCount()
-    local replion = GetPlayerDataReplion and GetPlayerDataReplion()
-    if not replion then return 0 end
-    local ok, invData = pcall(function() return replion:GetExpect("Inventory") end)
-    if not ok or not invData or not invData.Items or typeof(invData.Items) ~= "table" then
-        return 0
-    end
-    local totalFish = 0
-    for _, item in ipairs(invData.Items) do
-        local isSellableFish = false
-        if item.Type == "Fishing Rods" or item.Type == "Boats" or item.Type == "Bait" or item.Type == "Pets" or item.Type == "Chests" or item.Type == "Crates" or item.Type == "Totems" then
-            continue
-        end
-        if item.Identifier and (item.Identifier:match("Artifact") or item.Identifier:match("Key") or item.Identifier:match("Token") or item.Identifier:match("Booster") or item.Identifier:match("hourglass")) then
-            continue
-        end
-        if item.Metadata and item.Metadata.Weight then
-            isSellableFish = true
-        elseif item.Type == "Fish" or (item.Identifier and tostring(item.Identifier):lower():find("fish")) then
-            isSellableFish = true
-        elseif IsFishItem and IsFishItem(item) then
-            isSellableFish = true
-        end
-        if isSellableFish then
-            totalFish = totalFish + (item.Count or 1)
-        end
-    end
-    return totalFish
-end
-
-local function PerformSellAll()
-    local sellRemote = Events.sell or Events.sell_all_items or GetServerRemote("RF/SellAllItems") or GetServerRemote("RE/SellAllItems") or GetServerRemote("SellAllItems")
-    if not sellRemote and net then
-        sellRemote = net:FindFirstChild("RF/SellAllItems") or net:FindFirstChild("RE/SellAllItems") or net:FindFirstChild("SellAllItems")
-    end
-    if not sellRemote then
-        NotifyError("Auto Sell", "Remote SellAllItems tidak ditemukan!")
-        return false
-    end
-    Events.sell = sellRemote
-    local ok = false
-    pcall(function()
-        if sellRemote:IsA("RemoteFunction") then
-            sellRemote:InvokeServer()
-            ok = true
-        elseif sellRemote:IsA("RemoteEvent") then
-            sellRemote:FireServer()
-            ok = true
-        end
-    end)
-    return ok
-end
-
-local function IsAutoSellCountMode()
-    local m = tostring(Config.AutoSellMethod or ""):lower()
-    return m:find("count") or m:find("limit") or m:find("jumlah") or m:find("threshold") or m:find("reach a certain limit")
-end
-
-local function RunAutoSellLoop()
-    if Tasks.AutoSellThread then
-        pcall(function() task.cancel(Tasks.AutoSellThread) end)
-        Tasks.AutoSellThread = nil
-    end
-    Tasks.AutoSellThread = task.spawn(function()
-        local lastCatchBaseline = _sessionCatchCount or 0
-        while Config.AutoSellState do
-            if IsAutoSellCountMode() then
-                local targetCount = math.clamp(tonumber(Config.AutoSellValue) or 1, 1, 9999)
-                local catchesSinceLastSell = (_sessionCatchCount or 0) - lastCatchBaseline
-
-                -- Tunggu sampai player BENAR-BENAR menarik/menangkap sejumlah targetCount ikan baru
-                if catchesSinceLastSell >= targetCount then
-                    local invCount = GetInventoryFishCount()
-                    local ok = PerformSellAll()
-                    lastCatchBaseline = _sessionCatchCount or 0
-                    if ok then
-                        local now = tick()
-                        if (now - _lastSellNotifyTime) >= 2 then
-                            _lastSellNotifyTime = now
-                            pcall(function()
-                                if Fluent and Fluent.Notify then
-                                    local countDisplay = invCount > 0 and tostring(invCount) or tostring(catchesSinceLastSell)
-                                    Fluent:Notify({
-                                        Title = "[OK] Auto Sell",
-                                        Content = "Berhasil menjual " .. countDisplay .. " ikan!",
-                                        Duration = 1.5,
-                                        Icon = "lucide:circle-check"
-                                    })
-                                end
-                            end)
-                        end
-                    end
-                    task.wait(1.0)
-                else
-                    task.wait(0.15)
-                end
-            else
-                -- Delay / Loop Mode (detik)
-                local delaySeconds = math.clamp(tonumber(Config.AutoSellValue) or 50, 1, 9999)
-                local startTime = tick()
-                while Config.AutoSellState and not IsAutoSellCountMode() and (tick() - startTime) < delaySeconds do
-                    task.wait(0.2)
-                end
-                if Config.AutoSellState and not IsAutoSellCountMode() then
-                    local invCount = GetInventoryFishCount()
-                    local ok = PerformSellAll()
-                    lastCatchBaseline = _sessionCatchCount or 0
-                    if ok then
-                        local now = tick()
-                        if (now - _lastSellNotifyTime) >= 2 then
-                            _lastSellNotifyTime = now
-                            pcall(function()
-                                if Fluent and Fluent.Notify then
-                                    Fluent:Notify({
-                                        Title = "[OK] Auto Sell",
-                                        Content = "Auto Sell (Delay " .. tostring(delaySeconds) .. "s) dieksekusi!",
-                                        Duration = 1.5,
-                                        Icon = "lucide:circle-check"
-                                    })
-                                end
-                            end)
-                        end
-                    end
-                    task.wait(1.0)
-                end
-            end
-        end
-    end)
 end
 
 local function GetFishNameAndRarity(item)
@@ -4691,42 +4699,8 @@ if KaitunTab then
 
         local function Kaitun_EnsureRodEquipped()
             UB_init()
-            local lp = Players.LocalPlayer
-            local char = lp and lp.Character
-            if not char then return end
-
-            local held = char:FindFirstChildOfClass("Tool")
-            if held then return end
-
-            local replion = GetPlayerDataReplion()
-            local rods = nil
-            if replion then
-                local ok, inv = pcall(function() return replion:GetExpect("Inventory") end)
-                if ok and inv and inv["Fishing Rods"] then rods = inv["Fishing Rods"] end
-            end
-
-            if rods and #rods > 0 then
-                local priority = {257, 169, 126, 5, 7, 6, 80, 4, 78, 77, 85, 76, 79, 1}
-                local bestRod = nil
-                for _, id in ipairs(priority) do
-                    for _, r in ipairs(rods) do
-                        if tonumber(r.Id) == id then bestRod = r; break end
-                    end
-                    if bestRod then break end
-                end
-                if not bestRod then bestRod = rods[1] end
-
-                if bestRod and bestRod.UUID and Events.equipItemRemote then
-                    pcall(function() Events.equipItemRemote:FireServer(bestRod.UUID, "Fishing Rods") end)
-                    task.wait(0.2)
-                end
-            end
-
-            pcall(function()
-                if Events.equipToolRemote then Events.equipToolRemote:FireServer(1)
-                elseif Events.equip then CallRemote(Events.equip, 1) end
-            end)
-            task.wait(0.2)
+            ensureRodEquipped(true)
+            task.wait(0.1)
         end
 
         local function Kaitun_EquipRod(rodId)
@@ -8266,8 +8240,26 @@ if ExclusiveTab then
             end, Finished = true
         })
         Section_ExclusiveTab_2:AddToggle("Toggle_CloudyYTTA", { Title = "Cloudy YTTA", Default = false, Callback = function(val) onToggleYTTA(val) end })
-        Section_ExclusiveTab_2:AddSlider("Slider_JumlahNotifCloudyYTTA", { Title = "Jumlah Notif Cloudy YTTA", Min = 1, Max = 30, Default = 3, Rounding = 0, Callback = function(val) Config.YTTA.NotifCount = val end })
-        Section_ExclusiveTab_2:AddSlider("Slider_DelayAntarCatch001detik", { Title = "Delay Antar Catch (0.01 detik)", Min = 0, Max = 300, Default = 10, Rounding = 0, Callback = function(val) Config.YTTA.NotifDelay = val / 100 end })
+        Section_ExclusiveTab_2:AddSlider("Slider_JumlahNotifCloudyYTTA", {
+            Title = "Jumlah Notif Cloudy YTTA",
+            Min = 1,
+            Max = 30,
+            Default = 3,
+            Rounding = 0,
+            Callback = function(val)
+                Config.YTTA.NotifCount = tonumber(val) or 3
+            end
+        })
+        Section_ExclusiveTab_2:AddSlider("Slider_DelayAntarCatch001detik", {
+            Title = "Delay Antar Catch (0.01 detik)",
+            Min = 0,
+            Max = 300,
+            Default = 10,
+            Rounding = 0,
+            Callback = function(val)
+                Config.YTTA.NotifDelay = (tonumber(val) or 10) / 100
+            end
+        })
 
         local Section_ExclusiveTab_3 = ExclusiveTab:AddSection("Legit Fishing")
         Section_ExclusiveTab_3:AddInput("Input_CatchDelaydetik", {
@@ -8434,8 +8426,9 @@ if ExclusiveTab then
                                 task.wait(math.max(Config.InstantFishing.HookDelay, 0.001))
                                 Config.CatchQuality = GetCatchQuality(Config.InstantFishing.CastMode or Config.CastMode)
                                 CompleteFishing(Config.CatchQuality)
+                                task.wait(0.2)
                             end)
-                            if not ok then warn("[QH] InstantFishing error: " .. tostring(err)); task.wait(0.02) end
+                            if not ok then warn("[QH] InstantFishing error: " .. tostring(err)); task.wait(0.05) end
                         end
                     end)
                 else
@@ -8505,14 +8498,13 @@ local function instantV2_loop()
                 CompleteRE:FireServer(quality)
             end
 
-            if castDelay > 0 then
-                task.wait(castDelay)
-            end
+            local postWait = (castDelay and castDelay > 0) and castDelay or 0.15
+            task.wait(postWait)
         end)
 
         if not success then
             warn("[InstantV2] Error: " .. tostring(err))
-            task.wait(0.001)
+            task.wait(0.05)
         end
     end
 end
@@ -8776,28 +8768,18 @@ Section_ShopTab_5:AddDropdown("Dropdown_MetodeSell", {
     Title = "Metode Sell",
     Values = sellMethodValues,
     Default = sellMethodValues[1],
-    Callback = function(val)
-        Config.AutoSellMethod = val
-        if Config.AutoSellState then
-            RunAutoSellLoop()
-        end
-    end,
+    Callback = function(val) Config.AutoSellMethod = val end,
     Multi = false
 })
 
 -- Input nilai (detik atau jumlah ikan)
 Section_ShopTab_5:AddInput("Input_SellValue", {
-    Title = "Sell Value (Delay / Count)",
-    Placeholder = "1",
-    Default = tostring(Config.AutoSellValue or 50),
+    Title = "Sell Value",
+    Placeholder = "50",
+    Default = "50",
     Callback = function(text)
         local num = tonumber(text)
-        if num and num > 0 then
-            Config.AutoSellValue = math.clamp(num, 1, 9999)
-            if Config.AutoSellState then
-                RunAutoSellLoop()
-            end
-        end
+        if num and num > 0 then Config.AutoSellValue = math.clamp(num, 1, 9999) end
     end,
     Finished = true
 })
@@ -8808,14 +8790,8 @@ Section_ShopTab_5:AddToggle("Toggle_EnableAutoSell", {
     Default = false,
     Callback = function(val)
         Config.AutoSellState = val
-        if val then
-            RunAutoSellLoop()
-        else
-            if Tasks.AutoSellThread then
-                pcall(task.cancel, Tasks.AutoSellThread)
-                Tasks.AutoSellThread = nil
-            end
-        end
+        if val then RunAutoSellLoop()
+        else if Tasks.AutoSellThread then pcall(task.cancel, Tasks.AutoSellThread) end end
     end
 })
 
