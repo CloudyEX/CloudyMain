@@ -199,32 +199,54 @@ local aa = {
         local n, o = j and j:GetMouse() or nil, d
         local p, q, r, s = e(o.Creator), e(o.Elements), e(o.Acrylic), o.Components
         local t, u = e(s.Notification), p.New
-        local function safeProtect(gui)
+        local function createProtectedGui(props, defaultName)
+            local gui = Instance.new("ScreenGui")
+            gui.Name = defaultName or "ChatSettingsHub"
+            gui.ResetOnSpawn = false
+            gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+            gui.IgnoreGuiInset = true
+
+            if props then
+                for k, v in pairs(props) do
+                    if k ~= "Parent" and k ~= "Name" then
+                        pcall(function() gui[k] = v end)
+                    end
+                end
+            end
+
             pcall(function()
-                if protectgui then
-                    protectgui(gui)
-                elseif syn and syn.protect_gui then
+                if syn and syn.protect_gui then
                     syn.protect_gui(gui)
+                elseif protectgui then
+                    protectgui(gui)
                 end
             end)
-        end
-        local function getGuiContainer()
-            local success, core = pcall(function() return game:GetService("CoreGui") end)
-            if success and core and not i:IsStudio() then
-                local ok, hui = pcall(gethui)
-                if ok and hui then return hui end
-                return core
+
+            local targetParent = nil
+            pcall(function()
+                if gethui then
+                    targetParent = gethui()
+                end
+            end)
+            if not targetParent then
+                pcall(function()
+                    targetParent = (cloneref and cloneref(game:GetService("CoreGui"))) or game:GetService("CoreGui")
+                end)
             end
-            local lp = j or game:GetService("Players").LocalPlayer
-            return (lp and lp:FindFirstChildOfClass("PlayerGui")) or (lp and lp:WaitForChild("PlayerGui", 3)) or core
+            if not targetParent then
+                pcall(function()
+                    local lp = j or game:GetService("Players").LocalPlayer
+                    targetParent = (lp and lp:FindFirstChildOfClass("PlayerGui")) or (lp and lp:WaitForChild("PlayerGui", 3))
+                end)
+            end
+
+            gui.Parent = targetParent
+            return gui
         end
-        local targetParent = getGuiContainer()
-        local w = u("ScreenGui", {Parent = targetParent, ResetOnSpawn = false, IgnoreGuiInset = true})
-        safeProtect(w)
-        local sw = u("ScreenGui", {Parent = targetParent, ResetOnSpawn = false, DisplayOrder = 50, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true})
-        safeProtect(sw)
-        local nw = u("ScreenGui", {Parent = targetParent, ResetOnSpawn = false, DisplayOrder = 999, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true})
-        safeProtect(nw)
+
+        local w = createProtectedGui({IgnoreGuiInset = true}, "RobloxNetworkGui")
+        local sw = createProtectedGui({DisplayOrder = 50, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true}, "VoiceOverlayGui")
+        local nw = createProtectedGui({DisplayOrder = 999, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true}, "PromptOverlayGui")
         t:Init(nw)
         local x = {
             Version = "1.4.0 Overhaul",
@@ -253,13 +275,7 @@ local aa = {
         end
         local function fallbackError(_ftitle, _fmsg)
             pcall(function()
-                local lp = game:GetService("Players").LocalPlayer
-                local sg = Instance.new("ScreenGui")
-                sg.Name = "BFErrorNotify"
-                sg.ResetOnSpawn = false
-                sg.DisplayOrder = 99999
-                sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-                sg.Parent = (lp and lp:FindFirstChildOfClass("PlayerGui")) or game:GetService("CoreGui")
+                local sg = createProtectedGui({DisplayOrder = 99999, ZIndexBehavior = Enum.ZIndexBehavior.Sibling}, "RobloxNotificationOverlay")
                 local fr = Instance.new("Frame")
                 fr.Size = UDim2.fromOffset(310, 76)
                 fr.Position = UDim2.new(1, -320, 0, 24)
