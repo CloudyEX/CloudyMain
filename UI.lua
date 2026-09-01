@@ -6082,8 +6082,22 @@ local aa = {
                 local acrylicBorder = c.GetThemeProperty("AcrylicBorder")
                 if acrylicBorder then ddStroke.Color = acrylicBorder end
             end
-            local winRoot = h.Root or (h.Library.GUI and h.Library.GUI:FindFirstChildWhichIsA("Frame", true))
-            local popupParent = winRoot or h.Library.PopupGUI or h.Library.GUI
+            local function _winFrame()
+                if h.Library and h.Library.Window and h.Library.Window.Root then
+                    return h.Library.Window.Root
+                end
+                if h.Window and h.Window.Root then
+                    return h.Window.Root
+                end
+                if h.Root then
+                    return h.Root
+                end
+                local winGui = h.Library and (h.Library.GUI or h.Library.PopupGUI)
+                return winGui and winGui:FindFirstChildWhichIsA("Frame", true)
+            end
+
+            local winRoot = _winFrame()
+            local popupParent = winRoot
 
             local dimOverlay = e("TextButton", {
                 Size = UDim2.fromScale(1, 1),
@@ -6119,10 +6133,6 @@ local aa = {
                 end
             end)
             table.insert(k.OpenFrames, v)
-            local function _winFrame()
-                local winGui = h.Library.GUI or h.Library.PopupGUI
-                return h.Root or (winGui and winGui:FindFirstChildWhichIsA("Frame", true))
-            end
             local w, x = function()
                     local winFrame = _winFrame()
                     if not winFrame then return end
