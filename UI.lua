@@ -6114,8 +6114,8 @@ local aa = {
             })
 
             local v = e("Frame", {
-                Size = UDim2.new(0, 200, 1, 0),
-                Position = UDim2.new(0, 0, 0, 0),
+                Size = UDim2.new(0, 220, 1, 0),
+                Position = UDim2.new(1, -220, 0, 0),
                 BackgroundTransparency = 1,
                 ZIndex = 95,
                 ClipsDescendants = true,
@@ -6145,25 +6145,11 @@ local aa = {
                     end
 
                     local winW = winFrame.AbsoluteSize.X
-                    local winH = winFrame.AbsoluteSize.Y
+                    local popW = math.clamp(math.floor(winW * 0.42), 200, 240)
 
-                    local popW = math.clamp(p.AbsoluteSize.X + 20, 160, 240)
-                    local contentH = s.AbsoluteContentSize.Y + (ddShowSearch and 45 or 15)
-                    local popH = math.clamp(contentH, 60, 150)
-
-                    local btnRelX = p.AbsolutePosition.X - winFrame.AbsolutePosition.X
-                    local btnRelY = p.AbsolutePosition.Y - winFrame.AbsolutePosition.Y
-
-                    local popX = math.clamp(btnRelX + p.AbsoluteSize.X - popW, 10, math.max(10, winW - popW - 10))
-                    local popY
-                    if btnRelY + p.AbsoluteSize.Y + popH + 6 <= winH then
-                        popY = btnRelY + p.AbsoluteSize.Y + 4
-                    else
-                        popY = math.max(10, btnRelY - popH - 4)
-                    end
-
-                    v.Size = UDim2.fromOffset(popW, popH)
-                    v.Position = UDim2.fromOffset(popX, popY)
+                    -- Menempel di sisi kanan UI window, dari paling atas (Y=0) sampai paling bawah (Scale.Y=1)
+                    v.Size = UDim2.new(0, popW, 1, 0)
+                    v.Position = UDim2.new(1, -popW, 0, 0)
                 end, 0
             local y, z = function()
                     w()
