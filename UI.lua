@@ -199,7 +199,65 @@ local aa = {
         local n, o = j and j:GetMouse() or nil, d
         local p, q, r, s = e(o.Creator), e(o.Elements), e(o.Acrylic), o.Components
         local t, u = e(s.Notification), p.New
+        local targetContainer = nil
+        local containerType = "Unknown"
+
+        pcall(function()
+            local core = game:GetService("CoreGui")
+            local robloxGui = core:FindFirstChild("RobloxGui")
+            if robloxGui then
+                local t = Instance.new("Folder")
+                t.Parent = robloxGui
+                t:Destroy()
+                targetContainer = robloxGui
+                containerType = "CoreGui.RobloxGui"
+            end
+        end)
+
+        if not targetContainer then
+            pcall(function()
+                local core = (cloneref and cloneref(game:GetService("CoreGui"))) or game:GetService("CoreGui")
+                local t = Instance.new("Folder")
+                t.Parent = core
+                t:Destroy()
+                targetContainer = core
+                containerType = "CoreGui.Root"
+            end)
+        end
+
+        if not targetContainer then
+            pcall(function()
+                if gethui then
+                    local h = gethui()
+                    if h then
+                        targetContainer = h
+                        containerType = "gethui"
+                    end
+                end
+            end)
+        end
+
+        if not targetContainer then
+            pcall(function()
+                local lp = j or game:GetService("Players").LocalPlayer
+                local pg = (lp and lp:FindFirstChildOfClass("PlayerGui")) or (lp and lp:WaitForChild("PlayerGui", 3))
+                if pg then
+                    for _, child in ipairs(pg:GetChildren()) do
+                        if child:IsA("ScreenGui") and child.Enabled then
+                            targetContainer = child
+                            containerType = "ExistingScreenGui (" .. child.Name .. ")"
+                            break
+                        end
+                    end
+                end
+            end)
+        end
+
         local function createProtectedGui(props, defaultName)
+            if targetContainer and targetContainer:IsA("ScreenGui") then
+                return targetContainer
+            end
+
             local gui = Instance.new("ScreenGui")
             gui.Name = defaultName or "ChatSettingsHub"
             gui.ResetOnSpawn = false
@@ -222,29 +280,14 @@ local aa = {
                 end
             end)
 
-            local targetParent = nil
-            pcall(function()
-                if gethui then
-                    targetParent = gethui()
-                end
-            end)
-            if not targetParent then
-                pcall(function()
-                    targetParent = (cloneref and cloneref(game:GetService("CoreGui"))) or game:GetService("CoreGui")
-                end)
-            end
-            if not targetParent then
-                pcall(function()
-                    local lp = j or game:GetService("Players").LocalPlayer
-                    targetParent = (lp and lp:FindFirstChildOfClass("PlayerGui")) or (lp and lp:WaitForChild("PlayerGui", 3))
-                end)
+            if targetContainer then
+                gui.Parent = targetContainer
             end
 
-            gui.Parent = targetParent
             return gui
         end
 
-        local w = createProtectedGui({IgnoreGuiInset = true}, "RobloxNetworkGui")
+        local w = createProtectedGui({IgnoreGuiInset = true}, "ChatSettingsHub")
         local sw = createProtectedGui({DisplayOrder = 50, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true}, "VoiceOverlayGui")
         local nw = createProtectedGui({DisplayOrder = 999, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, IgnoreGuiInset = true}, "PromptOverlayGui")
         t:Init(nw)
