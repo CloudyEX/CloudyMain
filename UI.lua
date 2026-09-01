@@ -6238,6 +6238,12 @@ local aa = {
                 v.Visible = true
                 _openDropdowns[l] = true
                 l._refreshShine()
+
+                af:Create(
+                    dimOverlay,
+                    TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
+                    { BackgroundTransparency = 0.45 }
+                ):Play()
             end
 
             function l.Close(B)
@@ -6246,8 +6252,19 @@ local aa = {
                 _openDropdowns[l] = nil
                 _clearDropShine(l)
 
-                v.Visible = false
-                dimOverlay.Visible = false
+                local tDim = af:Create(
+                    dimOverlay,
+                    TweenInfo.new(0.15, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
+                    { BackgroundTransparency = 1 }
+                )
+                tDim:Play()
+
+                tDim.Completed:Connect(function()
+                    if not l.Opened then
+                        v.Visible = false
+                        dimOverlay.Visible = false
+                    end
+                end)
             end
             function l.Display(B)
                 local C, D = l.Values, ""
