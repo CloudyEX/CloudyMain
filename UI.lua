@@ -6145,21 +6145,28 @@ local aa = {
                     end
 
                     local winW = winFrame.AbsoluteSize.X
-                    local popW = math.clamp(p.AbsoluteSize.X + 20, 220, math.max(220, winW - 10))
+                    local winH = winFrame.AbsoluteSize.Y
 
-                    v.Size = UDim2.new(0, popW, 1, 0)
+                    local popW = math.clamp(p.AbsoluteSize.X + 20, 160, 240)
+                    local contentH = s.AbsoluteContentSize.Y + (ddShowSearch and 45 or 15)
+                    local popH = math.clamp(contentH, 60, 150)
 
                     local btnRelX = p.AbsolutePosition.X - winFrame.AbsolutePosition.X
-                    local maxPopX = math.max(0, winW - popW)
-                    local popX = math.clamp(btnRelX, 0, maxPopX)
+                    local btnRelY = p.AbsolutePosition.Y - winFrame.AbsolutePosition.Y
 
-                    v.Position = UDim2.new(0, popX, 0, 0)
+                    local popX = math.clamp(btnRelX + p.AbsoluteSize.X - popW, 10, math.max(10, winW - popW - 10))
+                    local popY
+                    if btnRelY + p.AbsoluteSize.Y + popH + 6 <= winH then
+                        popY = btnRelY + p.AbsoluteSize.Y + 4
+                    else
+                        popY = math.max(10, btnRelY - popH - 4)
+                    end
+
+                    v.Size = UDim2.fromOffset(popW, popH)
+                    v.Position = UDim2.fromOffset(popX, popY)
                 end, 0
             local y, z = function()
-                    local winFrame = _winFrame()
-                    if winFrame then
-                        v.Size = UDim2.new(v.Size.X.Scale, v.Size.X.Offset, 1, 0)
-                    end
+                    w()
                 end, function()
                     t.CanvasSize = UDim2.fromOffset(0, s.AbsoluteContentSize.Y + 10)
                 end
@@ -6231,12 +6238,6 @@ local aa = {
                 v.Visible = true
                 _openDropdowns[l] = true
                 l._refreshShine()
-
-                af:Create(
-                    dimOverlay,
-                    TweenInfo.new(0.2, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-                    { BackgroundTransparency = 0.5 }
-                ):Play()
             end
 
             function l.Close(B)
@@ -6245,15 +6246,8 @@ local aa = {
                 _openDropdowns[l] = nil
                 _clearDropShine(l)
 
-                local tDim = af:Create(dimOverlay, TweenInfo.new(0.15, Enum.EasingStyle.Quart, Enum.EasingDirection.In), { BackgroundTransparency = 1 })
-                tDim:Play()
-
-                tDim.Completed:Connect(function()
-                    if not l.Opened then
-                        v.Visible = false
-                        dimOverlay.Visible = false
-                    end
-                end)
+                v.Visible = false
+                dimOverlay.Visible = false
             end
             function l.Display(B)
                 local C, D = l.Values, ""
