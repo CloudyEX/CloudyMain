@@ -885,7 +885,7 @@ local function fn30(character)
 end
 
 localPlayer.CharacterAdded:Connect(fn30)
-local senaV4Config = {AutoSteal = false, HelpFriend = false, LowSpeedBoost = false, StarAlert = true, ScrambleTradeInTrade = false, ScrambleTradeInReroll = false, ScrambleTradeInBanners = {}, ScrambleBossAuto = false, StealMode = "Fly", FlyAerial = false, FlyZigzag = false, StealHoldSeconds = 5, StealAreas = {"None"}, StealRarities = {"None"}, StealNamesFilter = {"None"}, StealMinValue = 0, StealMutations = {"None"}, StealMinWeight = 0, StealPriority = "Rarity", TaskOrder = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}, AutoFavorite = false, FavMode = "Rarity", FavRarities = {"None"}, FavSpecies = {"None"}, AutoEquipBest = false, AutoClaimOffline = false, AutoBaseUpgrade = false, AutoClaimAlmanac = false, AutoFusePets = false, ScrambleAutoBuy = false, ScrambleBuyList = {}, ButterflyAutoNet = false, ButterflyAutoCatch = false, ButterflyEsp = false, ButterflyTiers = {}, ButterflyAutoTrade = false, ButterflyTradeRecipe = "All", ButterflyCatchMode = "Tween", ButterflyAutoCraft = false, WispAutoQuest = false, BanjoAuto = false, Noclip = false, BottingMode = false, AntiCutscene = false, FuseSelectedOnly = false, FuseRarities = {"None"}, FuseSpecies = {"None"}, EspDetails = {"Name", "Rarity", "Value"}, BackpackRateEsp = false, AntiAFK = true, AutoReconnect = true, AutoExecute = false, AutoPlace = false, PlaceRarities = {"None"}, AutoHatch = false, SellAll = false, AutoSell = false, SellNames = {"None"}, SellRarities = {"None"}, AutoSellEgg = false, SellEggRarities = {"None"}, WebhookEnabled = false, WebhookURL = "", WebhookDisconnect = false, TweenSpeedMultiplier = 60, AutoTreadmillIdle = false, AutoTreadmillUpgrade = false, AntiTreadmill = false, HopNoMatch = false, PrivateServerMax = "2", PrivateServerAuto = false, HopCooldown = 5, AutoIndex = false, AntiHitGuard = false, FlyForCapture = false, AutoStealCapture = false, InstantGrab = false, InfiniteJump = false, WalkSpeedMultiplier = 1, AntiGuardKnockback = true, GodMode = true, EggPredictUI = false, EggESP = false, StealPlayers = false, StealPlayerRarities = {"None"}, StealPlayerMinValue = 0, StealPlayerTarget = "Any Player", WebhookRarities = {"None"}, WebhookMinValue = 0}
+local senaV4Config = {AutoSteal = false, HelpFriend = false, LowSpeedBoost = false, StarAlert = true, ScrambleTradeInTrade = false, ScrambleTradeInReroll = false, ScrambleTradeInBanners = {}, ScrambleBossAuto = false, StealMode = "Instant", FlyAerial = false, FlyZigzag = false, StealHoldSeconds = 5, StealAreas = {"None"}, StealRarities = {"None"}, StealNamesFilter = {"None"}, StealMinValue = 0, StealMutations = {"None"}, StealMinWeight = 0, StealPriority = "Rarity", TaskOrder = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}, AutoFavorite = false, FavMode = "Rarity", FavRarities = {"None"}, FavSpecies = {"None"}, AutoEquipBest = false, AutoClaimOffline = false, AutoBaseUpgrade = false, AutoClaimAlmanac = false, AutoFusePets = false, ScrambleAutoBuy = false, ScrambleBuyList = {}, ButterflyAutoNet = false, ButterflyAutoCatch = false, ButterflyEsp = false, ButterflyTiers = {}, ButterflyAutoTrade = false, ButterflyTradeRecipe = "All", ButterflyCatchMode = "Tween", ButterflyAutoCraft = false, WispAutoQuest = false, BanjoAuto = false, Noclip = false, BottingMode = false, AntiCutscene = false, FuseSelectedOnly = false, FuseRarities = {"None"}, FuseSpecies = {"None"}, EspDetails = {"Name", "Rarity", "Value"}, BackpackRateEsp = false, AntiAFK = true, AutoReconnect = true, AutoExecute = false, AutoPlace = false, PlaceRarities = {"None"}, AutoHatch = false, SellAll = false, AutoSell = false, SellNames = {"None"}, SellRarities = {"None"}, AutoSellEgg = false, SellEggRarities = {"None"}, WebhookEnabled = false, WebhookURL = "", WebhookDisconnect = false, TweenSpeedMultiplier = 60, AutoTreadmillIdle = false, AutoTreadmillUpgrade = false, AntiTreadmill = false, HopNoMatch = false, PrivateServerMax = "2", PrivateServerAuto = false, HopCooldown = 5, AutoIndex = false, AntiHitGuard = false, FlyForCapture = false, AutoStealCapture = false, InstantGrab = false, InfiniteJump = false, WalkSpeedMultiplier = 1, AntiGuardKnockback = true, GodMode = true, EggPredictUI = false, EggESP = false, StealPlayers = false, StealPlayerRarities = {"None"}, StealPlayerMinValue = 0, StealPlayerTarget = "Any Player", WebhookRarities = {"None"}, WebhookMinValue = 0}
 local EggState = require(game:GetService("ReplicatedStorage").Client.EggState)
 EggState.GetAreaEggSnapshot = EggState.ReadFieldEggs
 EggState.GetAreaEggRecord = EggState.ReadFieldEgg
@@ -4347,7 +4347,7 @@ local v8 = (function()
 		obj.hitTimer = nil
 		obj.guardHitBoostInstalled = false
 		obj.stats = {status = obj.resetBlocked and "Reset wall closed" or "Ready", available = 0, matching = 0, lastTarget = "None", lastResult = "Idle"}
-		obj.config = {stealMode = "Fly", flyAerial = false, flyZigzag = false, speed = n15, antiTrap = true, heaviestFirst = false, highestValueFirst = false, minWeightKg = 0, espEnabled = false, espRarity = true, espName = true, espKg = true, espMutation = true, espValue = true, espPlaced = false, espIcon = true, espMinRank = 0, espMinValue = 0, minValuePerSec = 0, rarityEnabled = false, rarities = {}, nameEnabled = false, names = {}, areaEnabled = false, areas = {}, mutationEnabled = false, mutations = {}}
+		obj.config = {stealMode = "Instant", flyAerial = false, flyZigzag = false, speed = n15, antiTrap = true, heaviestFirst = false, highestValueFirst = false, minWeightKg = 0, espEnabled = false, espRarity = true, espName = true, espKg = true, espMutation = true, espValue = true, espPlaced = false, espIcon = true, espMinRank = 0, espMinValue = 0, minValuePerSec = 0, rarityEnabled = false, rarities = {}, nameEnabled = false, names = {}, areaEnabled = false, areas = {}, mutationEnabled = false, mutations = {}}
 		obj.gameAntiAfkDisabled = fn72()
 
 		if localPlayer2.Character then
@@ -6033,18 +6033,22 @@ local v8 = (function()
 				return arg.destroyed or not arg.enabled or arg.instantPhase ~= "hunting" or not arg.activeTarget or arg.activeTarget.Uid ~= uid
 			end
 
-			local n58 = v9 + Vector3.new(0, n25, 0)
-			arg:_setStatus("Heading to target egg")
+			arg:_setStatus("Teleporting to target egg")
 
-			if not arg:_glideRoot(n58, fn88) then
+			if not arg:_instantTeleport(v9, 0.35, fn88) then
 				if not fn88() then
 					arg:_finish("Could not reach the egg — retrying")
 				end
-
 				return
 			end
 
-			task.spawn(arg._hoverSettleCarry, arg, v8, v9, n58, fn88)
+			if fn88() then
+				return
+			end
+
+			arg:_setArrivalHold(v9, uid)
+			arg:_setStatus("Securing target egg")
+			arg:_requestCarry(v8, true)
 			return
 		end
 
@@ -6669,6 +6673,109 @@ local v8 = (function()
 		return arg3
 	end
 
+	index._instantTeleport = function(arg, targetCFrame, holdSeconds, abortFn, withDecoy)
+		if typeof(targetCFrame) == "Vector3" then
+			targetCFrame = CFrame.new(targetCFrame)
+		end
+		if typeof(targetCFrame) ~= "CFrame" then
+			return false
+		end
+
+		local character = localPlayer2.Character
+		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if not humanoidRootPart or not humanoid then
+			return false
+		end
+
+		pcall(fn67, character)
+		pcall(function()
+			humanoid.AutoRotate = false
+		end)
+
+		arg:_startHoverPad()
+		local holdTime = holdSeconds or 0.35
+		local startTime = os.clock()
+
+		local fakeChar = nil
+		local currentCamera = workspace.CurrentCamera
+		if withDecoy then
+			pcall(function()
+				local originalCFrame = humanoidRootPart.CFrame
+				character.Archivable = true
+				fakeChar = character:Clone()
+				character.Archivable = false
+				fakeChar.Name = "FakeVisualPlayer"
+				for _, part in ipairs(fakeChar:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.CanCollide = false
+						part.Anchored = true
+					elseif part:IsA("Script") or part:IsA("LocalScript") then
+						part:Destroy()
+					end
+				end
+				fakeChar.Parent = workspace
+				fakeChar:PivotTo(originalCFrame)
+				local fakeHumanoid = fakeChar:FindFirstChildOfClass("Humanoid")
+				if fakeHumanoid and currentCamera then
+					currentCamera.CameraSubject = fakeHumanoid
+				end
+			end)
+		end
+
+		local function syncPos(cf)
+			pcall(function()
+				humanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				humanoidRootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+				humanoidRootPart.CFrame = cf
+				character:PivotTo(cf)
+				humanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				humanoidRootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+		end)
+			arg:_syncHoverPad(cf.Position)
+			local n65 = math.clamp(arg.config.speed or n15, n13, fn61())
+			pcall(function()
+				fn74(character, n65 * n44)
+				fn83(humanoid, humanoidRootPart, n65, Vector3.new(0, 0, 0))
+			end)
+		end
+
+		syncPos(targetCFrame)
+
+		while os.clock() - startTime < holdTime do
+			if abortFn and abortFn() then
+				if fakeChar then pcall(fakeChar.Destroy, fakeChar) end
+				if humanoid and currentCamera then currentCamera.CameraSubject = humanoid end
+				return false
+			end
+			if arg.destroyed or (not arg.enabled and not arg._externalDeliver) then
+				if fakeChar then pcall(fakeChar.Destroy, fakeChar) end
+				if humanoid and currentCamera then currentCamera.CameraSubject = humanoid end
+				return false
+			end
+			character = localPlayer2.Character
+			humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+			humanoid = character and character:FindFirstChildOfClass("Humanoid")
+			if not humanoidRootPart or not humanoid then
+				if fakeChar then pcall(fakeChar.Destroy, fakeChar) end
+				return false
+			end
+			syncPos(targetCFrame)
+			RunService2.Heartbeat:Wait()
+		end
+
+		if fakeChar then
+			task.delay(0.2, function()
+				pcall(fakeChar.Destroy, fakeChar)
+				if humanoid and currentCamera then
+					currentCamera.CameraSubject = humanoid
+				end
+			end)
+		end
+
+		return true
+	end
+
 	index._teleportRoot = function(arg, arg2, arg3, cFrame)
 		if not arg2 or not arg3 then
 			return false
@@ -6676,18 +6783,20 @@ local v8 = (function()
 			return false
 		end
 
-		if not pcall(function()
-			arg2.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-			arg2.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-			arg2.CFrame = cFrame
-			arg2.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-			arg2.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-		end) then
-			return false
+		local character = localPlayer2.Character
+		if character then
+			pcall(function()
+				arg2.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				arg2.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+				arg2.CFrame = cFrame
+				character:PivotTo(cFrame)
+				arg2.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				arg2.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+		end)
 		end
 
 		local n65 = math.clamp(arg.config.speed or n15, n13, fn61())
-		fn74(localPlayer2.Character, n65 * n44)
+		fn74(character, n65 * n44)
 
 		if not fn83(arg3, arg2, n65, (Vector3.new(0, 0, 0))) then
 			fn82(arg3, arg2, n65)
@@ -6722,6 +6831,9 @@ local v8 = (function()
 	index._glideRoot = function(arg, cFrame, arg2, arg3)
 		if typeof(cFrame) ~= "CFrame" then
 			return false
+		end
+		if arg.config.stealMode == "Instant" and not arg3 then
+			return arg:_instantTeleport(cFrame, 0.25, arg2)
 		end
 		local v8 = arg3 or arg:_activeGlideSpeed()
 		local character = localPlayer2.Character
@@ -6854,6 +6966,9 @@ local v8 = (function()
 	index._hopRoot = function(arg, arg2, arg3)
 		if typeof(arg2) ~= "CFrame" then
 			return false
+		end
+		if arg.config.stealMode == "Instant" then
+			return arg:_instantTeleport(arg2, 0.35, arg3)
 		end
 		local hop = index.HOP
 		local character = localPlayer2.Character
@@ -10229,6 +10344,49 @@ local v8 = (function()
 			if v8 then
 				arg._forestDropInProgress = forestDropInProgress
 
+				if arg.config.stealMode == "Instant" then
+					arg:_setStatus("Teleporting home with egg")
+					local homeTarget = fn99() or cframe
+					arg:_instantTeleport(homeTarget, 0.5, function()
+						return not fn94() or not fn97()
+					end, true)
+
+					if not fn94() then
+						return
+					end
+
+					if senaV4Config.HelpFriend then
+						arg.skippedEggs[forestDropInProgress] = os.clock() + 1800
+						arg._forestDropInProgress = nil
+						arg.carry.active = false
+						arg.carry.uid = nil
+						arg.stats.lastResult = "Dropped for a friend"
+						arg:_setStatus("Egg dropped for a friend, heading back")
+						pcall(EggState2.DropFieldEgg, "PlayerRequest")
+						local v9 = fn99()
+						if v9 then
+							arg:_instantTeleport(v9, 0.3)
+						end
+						if not fn94() then
+							return
+						end
+						arg._instantReturnToken = nil
+						arg._externalDeliver = nil
+						if arg.enabled then
+							arg:_finish("Dropped for a friend")
+						end
+						return
+					end
+
+					local depositWait = os.clock() + 3
+					while fn94() and not fn98() and os.clock() < depositWait do
+						RunService2.Heartbeat:Wait()
+					end
+
+					fn101(fn98() and "Safe return complete" or "Safe return complete")
+					return
+				end
+
 				for i = 1, index.RELAY_ROUNDS, 1 do
 					arg._forestDropInProgress = forestDropInProgress
 					arg:_setStatus("Bringing egg home")
@@ -10829,6 +10987,15 @@ local v8 = (function()
 		if not v10 then
 			arg:_releaseCarryWorker(v8)
 			arg:_finish("Safe destination unavailable")
+			return
+		end
+
+		if arg.config.stealMode == "Instant" then
+			arg:_setStatus("Teleporting to safe area")
+			arg:_instantTeleport(v10, 0.45, nil, true)
+			if arg:_isCarryWorkerCurrent(v8) then
+				arg:_finalizeReturn(v8)
+			end
 			return
 		end
 
@@ -11564,6 +11731,19 @@ local v8 = (function()
 				arg.lastSafeRepositionAt = os.clock()
 				arg:_setStatus("Repositioning to safe area")
 
+				if arg.config.stealMode == "Instant" then
+					arg:_instantTeleport(v12, 0.3)
+					arg:_groundSnap()
+					arg.safeStarting = false
+					arg.running = false
+					task.delay(0.1, function()
+						if not arg.destroyed and (arg.enabled and arg.planGeneration == planGeneration) then
+							arg:_schedule()
+						end
+					end)
+					return
+				end
+
 				arg:_tweenRoot(v12, function()
 					arg:_groundSnap()
 					arg.safeStarting = false
@@ -11681,9 +11861,21 @@ local v8 = (function()
 		end
 
 		arg:_setStatus("Preparing steal")
-		if not arg:_teleportRoot(humanoidRootPart, humanoid, v13) then
-			arg:_finish("Steal unavailable — retrying")
-			return
+		if arg.config.stealMode == "Instant" then
+			local function fn94()
+				return arg.destroyed or not arg.enabled or arg.instantPhase ~= "priming" or arg.primerUid ~= v12.Uid
+			end
+			if not arg:_instantTeleport(v13, 0.3, fn94) then
+				if arg.instantPhase == "priming" and arg.primerUid == v12.Uid then
+					arg:_finish("Steal unavailable — retrying")
+				end
+				return
+			end
+		else
+			if not arg:_teleportRoot(humanoidRootPart, humanoid, v13) then
+				arg:_finish("Steal unavailable — retrying")
+				return
+			end
 		end
 		arg:_setArrivalHold(v13, v12.Uid)
 		arg:_requestCarry(v12, true)
@@ -32182,7 +32374,14 @@ local function fn66()
 		local str4 = type(arg) == "string" and arg or ""
 		local str5 = str4:lower()
 		local flag11 = str5:find("zig") ~= nil
-		local stealMode = (str4:find("Fly") or str4:find("High") or flag11) and "Fly" or "Instant"
+		local stealMode
+		if str4:find("Instant") or str4:find("Teleport") or str4:find("Low") then
+			stealMode = "Instant"
+		elseif str4:find("Fly") or str4:find("High") or flag11 then
+			stealMode = "Fly"
+		else
+			stealMode = "Instant"
+		end
 		local flyAerial = stealMode == "Fly" and not flag11 and (str4:find("%(Fly%)") ~= nil or str5:find("aerial") ~= nil)
 		local flyZigzag = flag11 and stealMode == "Fly"
 		senaV4Config.StealMode = stealMode
@@ -32970,7 +33169,7 @@ local function fn66()
 
 	tbl24.godMode = v40:AddToggle("Toggle_AuraBat", {Title = "Aura Bat", Description = "", Default = false, Callback = fn144(fn80)})
 
-	tbl24.stealMode = v40:AddDropdown("Dropdown_StealMode", {Title = "Steal Mode", Description = "If you have good speed better use High Speed User, but if you are newbie, use Low Speed User", Values = {"Low Speed User", "High Speed User Normal", "High Speed User (Fly)", "Zig-Zag High Speed User"}, MaxVisible = 4, Default = "High Speed User Normal", Multi = false, Callback = fn144(function(arg)
+	tbl24.stealMode = v40:AddDropdown("Dropdown_StealMode", {Title = "Steal Mode", Description = "Metode Auto Steal (Instant Teleport direkomendasikan)", Values = {"Instant Teleport", "High Speed User Normal", "High Speed User (Fly)", "Zig-Zag High Speed User", "Low Speed User"}, MaxVisible = 5, Default = "Instant Teleport", Multi = false, Callback = fn144(function(arg)
 		fn89(arg)
 
 		if type(senaPanels.syncStealMode) == "function" then
