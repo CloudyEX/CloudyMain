@@ -14,15 +14,15 @@ end
 
 local genv = getgenv and getgenv() or _G
 
-if type(genv.__SenaV4HubShutdown) == "function" then
-	pcall(genv.__SenaV4HubShutdown)
+if type(genv.__QuantumV4HubShutdown) == "function" then
+	pcall(genv.__QuantumV4HubShutdown)
 end
 
-local senaV4HubSession = {}
-genv.__SenaV4HubSession = senaV4HubSession
+local quantumV4HubSession = {}
+genv.__QuantumV4HubSession = quantumV4HubSession
 
 local function fn2()
-	return genv.__SenaV4HubSession == senaV4HubSession
+	return genv.__QuantumV4HubSession == quantumV4HubSession
 end
 
 do
@@ -91,10 +91,10 @@ do
 	end
 
 	local function fn5(arg)
-		if genv.__SenaV4TamperRejoining then
+		if genv.__QuantumV4TamperRejoining then
 			return
 		end
-		genv.__SenaV4TamperRejoining = true
+		genv.__QuantumV4TamperRejoining = true
 		warn("[Quantum] tamper detected (" .. tostring(arg) .. ") - rejoining")
 
 		pcall(function()
@@ -126,20 +126,20 @@ do
 	end)
 end
 
-genv.__SenaV4IdentityGetter = genv.getthreadidentity or genv.get_thread_identity or genv.getidentity or genv.getthreadcontext or genv.get_thread_context
-genv.__SenaV4IdentitySetter = genv.setthreadidentity or genv.set_thread_identity or genv.setidentity or genv.setthreadcontext or genv.set_thread_context
-local senaV4IdentitySetter = genv.__SenaV4IdentitySetter
+genv.__QuantumV4IdentityGetter = genv.getthreadidentity or genv.get_thread_identity or genv.getidentity or genv.getthreadcontext or genv.get_thread_context
+genv.__QuantumV4IdentitySetter = genv.setthreadidentity or genv.set_thread_identity or genv.setidentity or genv.setthreadcontext or genv.set_thread_context
+local quantumV4IdentitySetter = genv.__QuantumV4IdentitySetter
 
-if type(senaV4IdentitySetter) == "function" then
-	pcall(senaV4IdentitySetter, 8)
-	genv.__SenaV4UICapabilityIdentity = 8
+if type(quantumV4IdentitySetter) == "function" then
+	pcall(quantumV4IdentitySetter, 8)
+	genv.__QuantumV4UICapabilityIdentity = 8
 end
 
 if not rawget(_G, "setfpscap") and not rawget(_G, "set_fps_cap") then
-	senaV4IdentitySetter = type(setfpscap) == "function"
+	quantumV4IdentitySetter = type(setfpscap) == "function"
 end
 
-genv.__SenaV4SetCapFps = function(arg)
+genv.__QuantumV4SetCapFps = function(arg)
 	local n = tonumber(arg) or 240
 	local n2 = math.clamp(math.floor(n), 1, 1000)
 	local flag = rawget(_G, "setfpscap") or rawget(_G, "set_fps_cap") or type(setfpscap) == "function" and setfpscap
@@ -149,20 +149,20 @@ genv.__SenaV4SetCapFps = function(arg)
 	return false
 end
 
-if type(genv.__SenaV4TweenRuntimeCleanup) == "function" then
-	pcall(genv.__SenaV4TweenRuntimeCleanup)
+if type(genv.__QuantumV4TweenRuntimeCleanup) == "function" then
+	pcall(genv.__QuantumV4TweenRuntimeCleanup)
 end
 
-if type(genv.__SenaV4EggRuntimeCleanup) == "function" then
-	pcall(genv.__SenaV4EggRuntimeCleanup)
+if type(genv.__QuantumV4EggRuntimeCleanup) == "function" then
+	pcall(genv.__QuantumV4EggRuntimeCleanup)
 end
 
-if type(genv.__SenaV4AntiGuardCleanup) == "function" then
-	pcall(genv.__SenaV4AntiGuardCleanup)
+if type(genv.__QuantumV4AntiGuardCleanup) == "function" then
+	pcall(genv.__QuantumV4AntiGuardCleanup)
 end
 
-genv.__SenaV4TweenRuntimeGeneration = (genv.__SenaV4TweenRuntimeGeneration or 0) + 1
-local tbl2 = {genv.__SenaV4TweenRuntimeGeneration, {KEY = "__SenaV4StealAnEggMovementSpoof", VERSION = 436, INTEGRITY_KEY = "__SenaV4StealAnEggIntegritySpoof", SIGNAL = "ClientCharacter: GetDebugSnapshot", HEADROOM = 1.35, CLAMP = 0.15, PADDING = 24, MULTIPLIER = 10, MIN_INPUT = 20, MAX_INPUT = 100, DEF_INPUT = 60, MIN_SPEED = 200, MAX_SPEED = 1000, DEF_SPEED = 600, FIELDS = {"LastObservedSample", "LastSample", "LastGoodSample", "LastGameplayTrustedSample", "LastValidatedSample", "LastValidatedGroundedSample", "LastConfirmedGroundSample", "CandidateGroundedSample"}}}
+genv.__QuantumV4TweenRuntimeGeneration = (genv.__QuantumV4TweenRuntimeGeneration or 0) + 1
+local tbl2 = {genv.__QuantumV4TweenRuntimeGeneration, {KEY = "__QuantumV4StealAnEggMovementSpoof", VERSION = 436, INTEGRITY_KEY = "__QuantumV4StealAnEggIntegritySpoof", SIGNAL = "ClientCharacter: GetDebugSnapshot", HEADROOM = 1.35, CLAMP = 0.15, PADDING = 24, MULTIPLIER = 10, MIN_INPUT = 20, MAX_INPUT = 100, DEF_INPUT = 60, MIN_SPEED = 200, MAX_SPEED = 1000, DEF_SPEED = 600, FIELDS = {"LastObservedSample", "LastSample", "LastGoodSample", "LastGameplayTrustedSample", "LastValidatedSample", "LastValidatedGroundedSample", "LastConfirmedGroundSample", "CandidateGroundedSample"}}}
 tbl2.n = 2
 local v2
 v, v2 = tbl2[1], tbl2[2]
@@ -193,7 +193,7 @@ local function fn3()
 	return n
 end
 
-genv.__SenaV4NetPing = function()
+genv.__QuantumV4NetPing = function()
 	local n2 = 0
 
 	pcall(function()
@@ -203,7 +203,7 @@ genv.__SenaV4NetPing = function()
 	return tonumber(n2) or 0
 end
 
-local n2, n3, name, str, v3 = 8, 1, "__SenaV4HoverPad", "SenaV4RuntimeOwner"
+local n2, n3, name, str, v3 = 8, 1, "__QuantumV4HoverPad", "QuantumV4RuntimeOwner"
 local str2 = tostring(math.random(100000, 999999))
 local connection, connection2
 local tbl3, v4, fn4 = {}
@@ -374,7 +374,7 @@ local function fn12()
 	fn8()
 end
 
-genv.__SenaV4TweenRuntimeCleanup = function()
+genv.__QuantumV4TweenRuntimeCleanup = function()
 	for k, v5 in pairs(tbl3) do
 		if type(v5) == "table" then
 			v5.cancelled = true
@@ -718,7 +718,7 @@ local function fn26()
 	end
 
 	connection3 = RunService.PreSimulation:Connect(function()
-		if genv.__SenaV4TweenRuntimeGeneration ~= v then
+		if genv.__QuantumV4TweenRuntimeGeneration ~= v then
 			local v5 = connection3
 			connection3 = nil
 
@@ -766,7 +766,7 @@ local function fn27()
 	fn25()
 end
 
-genv.__SenaV4TweenRuntimeCleanup = function()
+genv.__QuantumV4TweenRuntimeCleanup = function()
 	fn12()
 	fn27()
 end
@@ -885,7 +885,7 @@ local function fn30(character)
 end
 
 localPlayer.CharacterAdded:Connect(fn30)
-local senaV4Config = {AutoSteal = false, HelpFriend = false, LowSpeedBoost = false, StarAlert = true, ScrambleTradeInTrade = false, ScrambleTradeInReroll = false, ScrambleTradeInBanners = {}, ScrambleBossAuto = false, StealMode = "Instant", FlyAerial = false, FlyZigzag = false, StealHoldSeconds = 5, StealAreas = {"None"}, StealRarities = {"None"}, StealNamesFilter = {"None"}, StealMinValue = 0, StealMutations = {"None"}, StealMinWeight = 0, StealPriority = "Rarity", TaskOrder = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}, AutoFavorite = false, FavMode = "Rarity", FavRarities = {"None"}, FavSpecies = {"None"}, AutoEquipBest = false, AutoClaimOffline = false, AutoBaseUpgrade = false, AutoClaimAlmanac = false, AutoFusePets = false, ScrambleAutoBuy = false, ScrambleBuyList = {}, ButterflyAutoNet = false, ButterflyAutoCatch = false, ButterflyEsp = false, ButterflyTiers = {}, ButterflyAutoTrade = false, ButterflyTradeRecipe = "All", ButterflyCatchMode = "Tween", ButterflyAutoCraft = false, WispAutoQuest = false, BanjoAuto = false, Noclip = false, BottingMode = false, AntiCutscene = false, FuseSelectedOnly = false, FuseRarities = {"None"}, FuseSpecies = {"None"}, EspDetails = {"Name", "Rarity", "Value"}, BackpackRateEsp = false, AntiAFK = true, AutoReconnect = true, AutoExecute = false, AutoPlace = false, PlaceRarities = {"None"}, AutoHatch = false, SellAll = false, AutoSell = false, SellNames = {"None"}, SellRarities = {"None"}, AutoSellEgg = false, SellEggRarities = {"None"}, WebhookEnabled = false, WebhookURL = "", WebhookDisconnect = false, TweenSpeedMultiplier = 60, AutoTreadmillIdle = false, AutoTreadmillUpgrade = false, AntiTreadmill = false, HopNoMatch = false, PrivateServerMax = "2", PrivateServerAuto = false, HopCooldown = 5, AutoIndex = false, AntiHitGuard = false, FlyForCapture = false, AutoStealCapture = false, InstantGrab = false, InfiniteJump = false, WalkSpeedMultiplier = 1, AntiGuardKnockback = true, GodMode = true, EggPredictUI = false, EggESP = false, StealPlayers = false, StealPlayerRarities = {"None"}, StealPlayerMinValue = 0, StealPlayerTarget = "Any Player", WebhookRarities = {"None"}, WebhookMinValue = 0}
+local quantumV4Config = {AutoSteal = false, HelpFriend = false, LowSpeedBoost = false, StarAlert = true, ScrambleTradeInTrade = false, ScrambleTradeInReroll = false, ScrambleTradeInBanners = {}, ScrambleBossAuto = false, StealMode = "Instant", FlyAerial = false, FlyZigzag = false, StealHoldSeconds = 5, StealAreas = {"None"}, StealRarities = {"None"}, StealNamesFilter = {"None"}, StealMinValue = 0, StealMutations = {"None"}, StealMinWeight = 0, StealPriority = "Rarity", TaskOrder = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}, AutoFavorite = false, FavMode = "Rarity", FavRarities = {"None"}, FavSpecies = {"None"}, AutoEquipBest = false, AutoClaimOffline = false, AutoBaseUpgrade = false, AutoClaimAlmanac = false, AutoFusePets = false, ScrambleAutoBuy = false, ScrambleBuyList = {}, ButterflyAutoNet = false, ButterflyAutoCatch = false, ButterflyEsp = false, ButterflyTiers = {}, ButterflyAutoTrade = false, ButterflyTradeRecipe = "All", ButterflyCatchMode = "Tween", ButterflyAutoCraft = false, WispAutoQuest = false, BanjoAuto = false, Noclip = false, BottingMode = false, AntiCutscene = false, FuseSelectedOnly = false, FuseRarities = {"None"}, FuseSpecies = {"None"}, EspDetails = {"Name", "Rarity", "Value"}, BackpackRateEsp = false, AntiAFK = true, AutoReconnect = true, AutoExecute = false, AutoPlace = false, PlaceRarities = {"None"}, AutoHatch = false, SellAll = false, AutoSell = false, SellNames = {"None"}, SellRarities = {"None"}, AutoSellEgg = false, SellEggRarities = {"None"}, WebhookEnabled = false, WebhookURL = "", WebhookDisconnect = false, TweenSpeedMultiplier = 60, AutoTreadmillIdle = false, AutoTreadmillUpgrade = false, AntiTreadmill = false, HopNoMatch = false, PrivateServerMax = "2", PrivateServerAuto = false, HopCooldown = 5, AutoIndex = false, AntiHitGuard = false, FlyForCapture = false, AutoStealCapture = false, InstantGrab = false, InfiniteJump = false, WalkSpeedMultiplier = 1, AntiGuardKnockback = true, GodMode = true, EggPredictUI = false, EggESP = false, StealPlayers = false, StealPlayerRarities = {"None"}, StealPlayerMinValue = 0, StealPlayerTarget = "Any Player", WebhookRarities = {"None"}, WebhookMinValue = 0}
 local EggState = require(game:GetService("ReplicatedStorage").Client.EggState)
 EggState.GetAreaEggSnapshot = EggState.ReadFieldEggs
 EggState.GetAreaEggRecord = EggState.ReadFieldEgg
@@ -913,13 +913,13 @@ local AreaEggResetWall = require(game:GetService("ReplicatedStorage").Client.Are
 AreaEggResetWall.IsClosed = AreaEggResetWall.IsSealed
 
 fn4 = function()
-	if genv.__SenaV4AdminBoost == true then
+	if genv.__QuantumV4AdminBoost == true then
 		return 4000
 	end
-	return math.clamp(math.floor((tonumber(senaV4Config.TweenSpeedMultiplier) or v2.DEF_INPUT) + 0.5), v2.MIN_INPUT, v2.MAX_INPUT) * v2.MULTIPLIER
+	return math.clamp(math.floor((tonumber(quantumV4Config.TweenSpeedMultiplier) or v2.DEF_INPUT) + 0.5), v2.MIN_INPUT, v2.MAX_INPUT) * v2.MULTIPLIER
 end
 
-senaV4Config.applyStealValueInput = function(arg, arg2)
+quantumV4Config.applyStealValueInput = function(arg, arg2)
 	local str3 = string.lower(tostring(arg2 or "")):gsub("[%s,]", "")
 	if str3 == "" then
 		arg.StealMinValue = 0
@@ -934,7 +934,7 @@ senaV4Config.applyStealValueInput = function(arg, arg2)
 	return true
 end
 
-senaV4Config.getAreaEggValue = function(arg, arg2)
+quantumV4Config.getAreaEggValue = function(arg, arg2)
 	if not arg._assetGenerationUtil then
 		arg._assetGenerationUtil = require(game:GetService("ReplicatedStorage").Shared.Util.AssetEarnings)
 	end
@@ -976,26 +976,26 @@ local function fn31()
 	return false
 end
 
-local senaV4TaskLadder = {}
+local quantumV4TaskLadder = {}
 
 do
-	senaV4TaskLadder.DEFAULT = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}
-	senaV4TaskLadder.TITLES = {auto_steal = "Auto Steal", race = "Race Rally", star = "Shooting Star", mech_boss = "Mech Boss", butterfly = "Butterfly Bloom", auto_place = "Auto Place", use_scrambled = "Use Scrambled", auto_sell = "Auto Sell", treadmill = "Treadmill"}
-	senaV4TaskLadder.PINNED = {treadmill = true}
+	quantumV4TaskLadder.DEFAULT = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}
+	quantumV4TaskLadder.TITLES = {auto_steal = "Auto Steal", race = "Race Rally", star = "Shooting Star", mech_boss = "Mech Boss", butterfly = "Butterfly Bloom", auto_place = "Auto Place", use_scrambled = "Use Scrambled", auto_sell = "Auto Sell", treadmill = "Treadmill"}
+	quantumV4TaskLadder.PINNED = {treadmill = true}
 	local tbl5 = {}
 
-	senaV4TaskLadder.register = function(arg, arg2)
+	quantumV4TaskLadder.register = function(arg, arg2)
 		tbl5[arg] = arg2
 	end
 
-	senaV4TaskLadder.sanitize = function(arg)
+	quantumV4TaskLadder.sanitize = function(arg)
 		local tbl6 = {}
 		local tbl7 = {}
 
 		local function fn32(arg2)
 			local str3 = tostring(arg2)
 
-			if senaV4TaskLadder.TITLES[str3] and (not tbl7[str3] and not senaV4TaskLadder.PINNED[str3]) then
+			if quantumV4TaskLadder.TITLES[str3] and (not tbl7[str3] and not quantumV4TaskLadder.PINNED[str3]) then
 				tbl7[str3] = true
 				tbl6[#tbl6 + 1] = str3
 			end
@@ -1005,12 +1005,12 @@ do
 			fn32(v5)
 		end
 
-		for i, v5 in ipairs(senaV4TaskLadder.DEFAULT) do
+		for i, v5 in ipairs(quantumV4TaskLadder.DEFAULT) do
 			fn32(v5)
 		end
 
-		for i, v5 in ipairs(senaV4TaskLadder.DEFAULT) do
-			if senaV4TaskLadder.PINNED[v5] and not tbl7[v5] then
+		for i, v5 in ipairs(quantumV4TaskLadder.DEFAULT) do
+			if quantumV4TaskLadder.PINNED[v5] and not tbl7[v5] then
 				tbl7[v5] = true
 				tbl6[#tbl6 + 1] = v5
 			end
@@ -1021,19 +1021,19 @@ do
 
 	local v5, v6
 
-	senaV4TaskLadder.order = function()
-		local taskOrder = senaV4Config and senaV4Config.TaskOrder
+	quantumV4TaskLadder.order = function()
+		local taskOrder = quantumV4Config and quantumV4Config.TaskOrder
 
 		if taskOrder ~= v6 or not v5 then
 			v6 = taskOrder
-			v5 = senaV4TaskLadder.sanitize(taskOrder)
+			v5 = quantumV4TaskLadder.sanitize(taskOrder)
 		end
 
 		return v5
 	end
 
-	senaV4TaskLadder.rank = function(arg)
-		for i, v7 in ipairs(senaV4TaskLadder.order()) do
+	quantumV4TaskLadder.rank = function(arg)
+		for i, v7 in ipairs(quantumV4TaskLadder.order()) do
 			if v7 == arg then
 				return i
 			end
@@ -1055,19 +1055,19 @@ do
 		return nil
 	end
 
-	senaV4TaskLadder.wants = function(arg)
+	quantumV4TaskLadder.wants = function(arg)
 		return fn32(arg, "wants") == true
 	end
 
-	senaV4TaskLadder.active = function(arg)
+	quantumV4TaskLadder.active = function(arg)
 		return fn32(arg, "active") == true
 	end
 
-	senaV4TaskLadder.enabled = function(arg)
+	quantumV4TaskLadder.enabled = function(arg)
 		return fn32(arg, "enabled") == true
 	end
 
-	senaV4TaskLadder.bossFighting = function()
+	quantumV4TaskLadder.bossFighting = function()
 		if localPlayer:GetAttribute("InScrambleArena") == true then
 			return true
 		end
@@ -1075,48 +1075,48 @@ do
 		if type(localPlayer:GetAttribute("RaceId")) == "string" then
 			return true
 		end
-		local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
-		return senaV4ScrambleBoss ~= nil and not senaV4ScrambleBoss.destroyed and senaV4ScrambleBoss.enabled == true and senaV4ScrambleBoss:_inArena() == true
+		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
+		return quantumV4ScrambleBoss ~= nil and not quantumV4ScrambleBoss.destroyed and quantumV4ScrambleBoss.enabled == true and quantumV4ScrambleBoss:_inArena() == true
 	end
 
-	senaV4TaskLadder.stealCarrying = function()
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
+	quantumV4TaskLadder.stealCarrying = function()
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
 
-		if senaV4EggRuntime then
-			if senaV4EggRuntime.destroyed then
+		if quantumV4EggRuntime then
+			if quantumV4EggRuntime.destroyed then
 				return false
 			end
 		else
 			return false
 		end
 
-		if senaV4EggRuntime._instantReturnToken ~= nil then
+		if quantumV4EggRuntime._instantReturnToken ~= nil then
 			return true
-		elseif senaV4EggRuntime._forestDropInProgress ~= nil then
+		elseif quantumV4EggRuntime._forestDropInProgress ~= nil then
 			return true
 		end
 
-		local carry = senaV4EggRuntime.carry
-		return carry ~= nil and carry.active == true and carry.uid ~= nil and carry.uid ~= senaV4EggRuntime.primerUid
+		local carry = quantumV4EggRuntime.carry
+		return carry ~= nil and carry.active == true and carry.uid ~= nil and carry.uid ~= quantumV4EggRuntime.primerUid
 	end
 
 	local tbl6 = {}
 
 	local function fn33(arg)
-		if arg ~= "mech_boss" and senaV4TaskLadder.bossFighting() then
+		if arg ~= "mech_boss" and quantumV4TaskLadder.bossFighting() then
 			return "mech_boss"
 		end
 
-		if arg ~= "auto_steal" and senaV4TaskLadder.stealCarrying() then
+		if arg ~= "auto_steal" and quantumV4TaskLadder.stealCarrying() then
 			return "auto_steal"
 		end
 
-		for i, v7 in ipairs(senaV4TaskLadder.order()) do
+		for i, v7 in ipairs(quantumV4TaskLadder.order()) do
 			if v7 == arg then
 				return nil
 			end
 
-			if senaV4TaskLadder.wants(v7) then
+			if quantumV4TaskLadder.wants(v7) then
 				return v7
 			end
 		end
@@ -1124,7 +1124,7 @@ do
 		return nil
 	end
 
-	senaV4TaskLadder.blocker = function(arg)
+	quantumV4TaskLadder.blocker = function(arg)
 		local now = os.clock()
 		local v7 = tbl6[arg]
 		if v7 and now - v7.at < 0.1 then
@@ -1142,9 +1142,9 @@ do
 		return v8
 	end
 
-	senaV4TaskLadder.holder = function(arg)
-		for i, v7 in ipairs(senaV4TaskLadder.order()) do
-			if v7 ~= arg and (not senaV4TaskLadder.PINNED[v7] and senaV4TaskLadder.active(v7)) then
+	quantumV4TaskLadder.holder = function(arg)
+		for i, v7 in ipairs(quantumV4TaskLadder.order()) do
+			if v7 ~= arg and (not quantumV4TaskLadder.PINNED[v7] and quantumV4TaskLadder.active(v7)) then
 				return v7
 			end
 		end
@@ -1152,22 +1152,22 @@ do
 		return nil
 	end
 
-	senaV4TaskLadder.yieldLabel = function(arg)
-		local v7 = senaV4TaskLadder.blocker(arg)
-		return v7 and "Yielding to " .. senaV4TaskLadder.TITLES[v7] or nil
+	quantumV4TaskLadder.yieldLabel = function(arg)
+		local v7 = quantumV4TaskLadder.blocker(arg)
+		return v7 and "Yielding to " .. quantumV4TaskLadder.TITLES[v7] or nil
 	end
 
-	senaV4TaskLadder.current = function()
-		if senaV4TaskLadder.bossFighting() then
+	quantumV4TaskLadder.current = function()
+		if quantumV4TaskLadder.bossFighting() then
 			return "mech_boss"
 		end
 
-		if senaV4TaskLadder.stealCarrying() then
+		if quantumV4TaskLadder.stealCarrying() then
 			return "auto_steal"
 		end
 
-		for i, v7 in ipairs(senaV4TaskLadder.order()) do
-			if senaV4TaskLadder.active(v7) then
+		for i, v7 in ipairs(quantumV4TaskLadder.order()) do
+			if quantumV4TaskLadder.active(v7) then
 				return v7
 			end
 		end
@@ -1175,31 +1175,31 @@ do
 		return nil
 	end
 
-	senaV4TaskLadder.describe = function(arg)
-		if not senaV4TaskLadder.enabled(arg) then
+	quantumV4TaskLadder.describe = function(arg)
+		if not quantumV4TaskLadder.enabled(arg) then
 			return "Off", "off"
 		end
 		local v7 = fn32(arg, "status")
 		local flag2 = type(v7) == "string" and v7 ~= "" and v7 or nil
 
-		if senaV4TaskLadder.active(arg) then
+		if quantumV4TaskLadder.active(arg) then
 			return flag2 or "Running", "run"
-		elseif senaV4TaskLadder.current() == arg then
+		elseif quantumV4TaskLadder.current() == arg then
 			return flag2 or "Running", "run"
 		end
 
-		local v8 = senaV4TaskLadder.blocker(arg)
-		if v8 and senaV4TaskLadder.wants(arg) then
-			return "Yielding to " .. senaV4TaskLadder.TITLES[v8], "wait"
+		local v8 = quantumV4TaskLadder.blocker(arg)
+		if v8 and quantumV4TaskLadder.wants(arg) then
+			return "Yielding to " .. quantumV4TaskLadder.TITLES[v8], "wait"
 		end
 		return flag2 or "Idle", "off"
 	end
 end
 
-genv.__SenaV4TaskLadder = senaV4TaskLadder
+genv.__QuantumV4TaskLadder = quantumV4TaskLadder
 
 local function fn32()
-	return senaV4TaskLadder.blocker("auto_sell") == nil
+	return quantumV4TaskLadder.blocker("auto_sell") == nil
 end
 
 local function fn33(arg)
@@ -1238,7 +1238,7 @@ local function fn33(arg)
 end
 
 local function fn34(arg, arg2, arg3, arg4)
-	if senaV4Config.SellAll then
+	if quantumV4Config.SellAll then
 		return true
 	end
 
@@ -1284,10 +1284,10 @@ local tbl5 = {CarryRetry = 0.25, CarryTimeout = 2, EarlyCarryDistance = 8, SafeS
 
 local function fn37(arg)
 	local tweenSpeedMultiplier = math.clamp(math.floor((tonumber(arg) or v2.DEF_INPUT) + 0.5), v2.MIN_INPUT, v2.MAX_INPUT)
-	if math.abs((senaV4Config.TweenSpeedMultiplier or 0) - tweenSpeedMultiplier) <= 0.001 then
+	if math.abs((quantumV4Config.TweenSpeedMultiplier or 0) - tweenSpeedMultiplier) <= 0.001 then
 		return
 	end
-	senaV4Config.TweenSpeedMultiplier = tweenSpeedMultiplier
+	quantumV4Config.TweenSpeedMultiplier = tweenSpeedMultiplier
 end
 
 local n7 = 0.08
@@ -1333,7 +1333,7 @@ local function fn38(arg, cameraSubject, arg2, arg3, arg4, arg5, arg6)
 	cameraSubject.AutoRotate = false
 	local n8 = arg6 and math.max(arg.Position.Y, arg2.Position.Y + n6, vector.Y + n6) or nil
 	local n9 = n8 and CFrame.new(arg2.Position.X, n8, arg2.Position.Z) * arg2.Rotation or arg2
-	local n10 = math.clamp(fn4(), v2.MIN_SPEED, genv.__SenaV4AdminBoost == true and 3000 or v2.MAX_SPEED)
+	local n10 = math.clamp(fn4(), v2.MIN_SPEED, genv.__QuantumV4AdminBoost == true and 3000 or v2.MAX_SPEED)
 	fn15(parent, n10 * v2.HEADROOM)
 	local tbl7 = {cancelled = false}
 	tbl6[arg] = tbl7
@@ -1360,7 +1360,7 @@ local function fn38(arg, cameraSubject, arg2, arg3, arg4, arg5, arg6)
 		end
 		local result = RunService.Heartbeat:Wait()
 		local n13 = math.max(math.min(result, n4), 0.004166666666666667)
-		local n14 = math.clamp(fn4(), v2.MIN_SPEED, genv.__SenaV4AdminBoost == true and 3000 or v2.MAX_SPEED)
+		local n14 = math.clamp(fn4(), v2.MIN_SPEED, genv.__QuantumV4AdminBoost == true and 3000 or v2.MAX_SPEED)
 		fn15(parent, n14 * v2.HEADROOM)
 		local v7 = fn13()[v2.INTEGRITY_KEY]
 		local state = type(v7) == "table" and v7.State or nil
@@ -1487,7 +1487,7 @@ do
 		local humanoid = parent and parent:FindFirstChildOfClass("Humanoid")
 
 		if humanoid then
-			local n8 = math.clamp(fn4(), v2.MIN_SPEED, genv.__SenaV4AdminBoost == true and 3000 or v2.MAX_SPEED)
+			local n8 = math.clamp(fn4(), v2.MIN_SPEED, genv.__QuantumV4AdminBoost == true and 3000 or v2.MAX_SPEED)
 			fn15(parent, n8 * v2.HEADROOM)
 
 			if not fn24(humanoid, arg, n8, (Vector3.new(0, 0, 0))) then
@@ -1499,7 +1499,7 @@ do
 		return true
 	end
 
-	getgenv().SenaV4Config = senaV4Config
+	getgenv().QuantumV4Config = quantumV4Config
 
 	local function fn40(arg)
 		if arg and arg.Name == "PlayerTrap" then
@@ -1572,7 +1572,7 @@ do
 	task.spawn(fn41)
 	local v5
 	local flag2 = false
-	local tbl7 = {HoldSeconds = 0.3, ConfirmStableSeconds = 0.3, ConfirmTimeout = 2.5, PollSeconds = 0.05, ArrivalSettle = 0.5, DecoyName = "__SenaV4TweenTreadmillDecoy"}
+	local tbl7 = {HoldSeconds = 0.3, ConfirmStableSeconds = 0.3, ConfirmTimeout = 2.5, PollSeconds = 0.05, ArrivalSettle = 0.5, DecoyName = "__QuantumV4TweenTreadmillDecoy"}
 
 	local function fn42()
 		local ok, result = pcall(function()
@@ -1647,7 +1647,7 @@ do
 	end
 
 	tbl7.destroyStealPopup = function(arg)
-		if senaV4TaskLadder.current() == "auto_steal" and typeof(arg) == "Instance" then
+		if quantumV4TaskLadder.current() == "auto_steal" and typeof(arg) == "Instance" then
 			if arg.Name == "SpeedGainPopup" then
 				pcall(arg.Destroy, arg)
 			elseif arg.Name == "PlusOne" then
@@ -1974,9 +1974,9 @@ do
 		return humanoidRootPart and not fn45()
 	end
 
-	tbl7.previousCleanup = genv.__SenaV4TweenRuntimeCleanup
+	tbl7.previousCleanup = genv.__QuantumV4TweenRuntimeCleanup
 
-	genv.__SenaV4TweenRuntimeCleanup = function()
+	genv.__QuantumV4TweenRuntimeCleanup = function()
 		flag2 = false
 		fn43()
 		tbl7.removeDecoy()
@@ -1998,8 +1998,8 @@ do
 end
 
 do
-	if type(genv.__SenaV4CosmeticSuppressCleanup) == "function" then
-		pcall(genv.__SenaV4CosmeticSuppressCleanup)
+	if type(genv.__QuantumV4CosmeticSuppressCleanup) == "function" then
+		pcall(genv.__QuantumV4CosmeticSuppressCleanup)
 	end
 
 	local tbl7 = {}
@@ -2049,7 +2049,7 @@ do
 		local GuardPresentationComponent = require(ReplicatedStorage.Shared.Modules.GuardAreas.GuardPresentationComponent)
 
 		if type(GuardPresentationComponent) == "table" then
-			genv.__SenaV4GuardPresentOrig = genv.__SenaV4GuardPresentOrig or {PlayWake = GuardPresentationComponent.PlayWake, PlayHit = GuardPresentationComponent.PlayHit, PlayAfterWake = GuardPresentationComponent.PlayAfterWake, ScheduleAfterWake = GuardPresentationComponent.ScheduleAfterWake}
+			genv.__QuantumV4GuardPresentOrig = genv.__QuantumV4GuardPresentOrig or {PlayWake = GuardPresentationComponent.PlayWake, PlayHit = GuardPresentationComponent.PlayHit, PlayAfterWake = GuardPresentationComponent.PlayAfterWake, ScheduleAfterWake = GuardPresentationComponent.ScheduleAfterWake}
 
 			local function playWake()
 			end
@@ -2065,7 +2065,7 @@ do
 		end
 	end)
 
-	genv.__SenaV4CosmeticSuppressCleanup = function()
+	genv.__QuantumV4CosmeticSuppressCleanup = function()
 		for i, v5 in ipairs(tbl7) do
 			pcall(function()
 				v5:Disconnect()
@@ -2073,13 +2073,13 @@ do
 		end
 
 		table.clear(tbl7)
-		local senaV4GuardPresentOrig = genv.__SenaV4GuardPresentOrig
+		local quantumV4GuardPresentOrig = genv.__QuantumV4GuardPresentOrig
 
-		if type(senaV4GuardPresentOrig) == "table" then
+		if type(quantumV4GuardPresentOrig) == "table" then
 			pcall(function()
 				local GuardPresentationComponent = require(ReplicatedStorage.Shared.Modules.GuardAreas.GuardPresentationComponent)
 
-				for k, v5 in pairs(senaV4GuardPresentOrig) do
+				for k, v5 in pairs(quantumV4GuardPresentOrig) do
 					GuardPresentationComponent[k] = v5
 				end
 			end)
@@ -2088,8 +2088,8 @@ do
 end
 
 do
-	if type(genv.__SenaV4StealDeclutterCleanup) == "function" then
-		pcall(genv.__SenaV4StealDeclutterCleanup)
+	if type(genv.__QuantumV4StealDeclutterCleanup) == "function" then
+		pcall(genv.__QuantumV4StealDeclutterCleanup)
 	end
 
 	local tbl7 = {{name = "ProximityPrompts", restore = true}, {name = "AreaGui", restore = false}}
@@ -2211,7 +2211,7 @@ do
 		end)
 	end
 
-	genv.__SenaV4SetStealDeclutter = function(arg)
+	genv.__QuantumV4SetStealDeclutter = function(arg)
 		local flag3 = arg == true
 		if flag3 == flag2 then
 			return
@@ -2225,20 +2225,20 @@ do
 		end
 	end
 
-	genv.__SenaV4StealDeclutterCleanup = function()
+	genv.__QuantumV4StealDeclutterCleanup = function()
 		flag2 = false
 		fn44()
 	end
 end
 
-if type(genv.__SenaV4DecomBoostCleanup) == "function" then
-	pcall(genv.__SenaV4DecomBoostCleanup)
+if type(genv.__QuantumV4DecomBoostCleanup) == "function" then
+	pcall(genv.__QuantumV4DecomBoostCleanup)
 end
 
 local tbl7 = {}
 local flag2 = false
 
-genv.__SenaV4DecomBoostCleanup = function()
+genv.__QuantumV4DecomBoostCleanup = function()
 	for i, v5 in ipairs(tbl7) do
 		pcall(function()
 			v5:Disconnect()
@@ -2297,17 +2297,17 @@ local function fn42()
 end
 
 local function fn43(arg)
-	if arg:FindFirstAncestor("SenaVisualBack") then
+	if arg:FindFirstAncestor("QuantumVisualBack") then
 		return true
-	elseif arg:FindFirstAncestor("SenaVisualRemote") then
+	elseif arg:FindFirstAncestor("QuantumVisualRemote") then
 		return true
 	end
 
 	local tool = arg:FindFirstAncestorWhichIsA("Tool")
-	return tool ~= nil and tool:GetAttribute("SenaVisual") ~= nil
+	return tool ~= nil and tool:GetAttribute("QuantumVisual") ~= nil
 end
 
-local senaV4DecomBoostUndo = {effects = {}, parts = {}, decals = {}, snapshot = nil}
+local quantumV4DecomBoostUndo = {effects = {}, parts = {}, decals = {}, snapshot = nil}
 local tbl8 = {PlusOne = true, SpeedGainPopup = true, SellPayout = true, SyncedIncomeCash = true}
 local tbl9 = {PlayerPlotSign = true, CanUpgrade = true, AlertGui = true, OfflineMoneyClaimBillboard = true}
 
@@ -2324,7 +2324,7 @@ local function fn44(descendant)
 
 		if descendant:IsA("BillboardGui") and tbl9[descendant.Name] then
 			if descendant.Enabled then
-				senaV4DecomBoostUndo.effects[descendant] = true
+				quantumV4DecomBoostUndo.effects[descendant] = true
 			end
 
 			descendant.Enabled = false
@@ -2333,7 +2333,7 @@ local function fn44(descendant)
 
 		if descendant:IsA("ParticleEmitter") or descendant:IsA("Trail") or descendant:IsA("Beam") or descendant:IsA("Sparkles") or descendant:IsA("Fire") or descendant:IsA("Smoke") or descendant:IsA("PostEffect") then
 			if descendant.Enabled then
-				senaV4DecomBoostUndo.effects[descendant] = true
+				quantumV4DecomBoostUndo.effects[descendant] = true
 			end
 
 			descendant.Enabled = false
@@ -2410,7 +2410,7 @@ local function fn46()
 	flag3 = true
 	local Lighting = game:GetService("Lighting")
 
-	if not senaV4DecomBoostUndo.snapshot then
+	if not quantumV4DecomBoostUndo.snapshot then
 		local tbl10 = {}
 
 		pcall(function()
@@ -2453,8 +2453,8 @@ local function fn46()
 			tbl10.quality = Enum.QualityLevel.Automatic
 		end
 
-		senaV4DecomBoostUndo.snapshot = genv.__SenaV4DecomSnapshot or tbl10
-		genv.__SenaV4DecomSnapshot = senaV4DecomBoostUndo.snapshot
+		quantumV4DecomBoostUndo.snapshot = genv.__QuantumV4DecomSnapshot or tbl10
+		genv.__QuantumV4DecomSnapshot = quantumV4DecomBoostUndo.snapshot
 	end
 
 	pcall(function()
@@ -2477,8 +2477,8 @@ local function fn46()
 				continue
 			elseif descendant:IsA("BasePart") then
 				pcall(function()
-					if not senaV4DecomBoostUndo.parts[descendant] then
-						senaV4DecomBoostUndo.parts[descendant] = {descendant.Material, descendant.CastShadow, descendant:IsA("MeshPart") and descendant.RenderFidelity or nil}
+					if not quantumV4DecomBoostUndo.parts[descendant] then
+						quantumV4DecomBoostUndo.parts[descendant] = {descendant.Material, descendant.CastShadow, descendant:IsA("MeshPart") and descendant.RenderFidelity or nil}
 					end
 
 					descendant.Material = Enum.Material.SmoothPlastic
@@ -2490,8 +2490,8 @@ local function fn46()
 				end)
 			elseif descendant:IsA("Decal") or descendant:IsA("Texture") then
 				pcall(function()
-					if descendant.Texture ~= "" and not senaV4DecomBoostUndo.decals[descendant] then
-						senaV4DecomBoostUndo.decals[descendant] = descendant.Texture
+					if descendant.Texture ~= "" and not quantumV4DecomBoostUndo.decals[descendant] then
+						quantumV4DecomBoostUndo.decals[descendant] = descendant.Texture
 					end
 
 					descendant.Texture = ""
@@ -2546,7 +2546,7 @@ local function fn46()
 	flag3 = false
 end
 
-senaV4DecomBoostUndo.revert = function()
+quantumV4DecomBoostUndo.revert = function()
 	for i, v5 in ipairs(tbl7) do
 		pcall(function()
 			v5:Disconnect()
@@ -2555,7 +2555,7 @@ senaV4DecomBoostUndo.revert = function()
 
 	table.clear(tbl7)
 	flag2 = false
-	local snapshot = senaV4DecomBoostUndo.snapshot
+	local snapshot = quantumV4DecomBoostUndo.snapshot
 	local Lighting = game:GetService("Lighting")
 
 	if snapshot then
@@ -2609,7 +2609,7 @@ senaV4DecomBoostUndo.revert = function()
 
 	local n8 = 0
 
-	for k, part in pairs(senaV4DecomBoostUndo.parts) do
+	for k, part in pairs(quantumV4DecomBoostUndo.parts) do
 		if k.Parent then
 			pcall(function()
 				k.Material = part[1]
@@ -2628,7 +2628,7 @@ senaV4DecomBoostUndo.revert = function()
 		end
 	end
 
-	for k, decal in pairs(senaV4DecomBoostUndo.decals) do
+	for k, decal in pairs(quantumV4DecomBoostUndo.decals) do
 		if k.Parent then
 			pcall(function()
 				k.Texture = decal
@@ -2636,7 +2636,7 @@ senaV4DecomBoostUndo.revert = function()
 		end
 	end
 
-	for k in pairs(senaV4DecomBoostUndo.effects) do
+	for k in pairs(quantumV4DecomBoostUndo.effects) do
 		if k.Parent then
 			pcall(function()
 				k.Enabled = true
@@ -2644,13 +2644,13 @@ senaV4DecomBoostUndo.revert = function()
 		end
 	end
 
-	senaV4DecomBoostUndo.parts = {}
-	senaV4DecomBoostUndo.decals = {}
-	senaV4DecomBoostUndo.effects = {}
-	senaV4DecomBoostUndo.snapshot = nil
+	quantumV4DecomBoostUndo.parts = {}
+	quantumV4DecomBoostUndo.decals = {}
+	quantumV4DecomBoostUndo.effects = {}
+	quantumV4DecomBoostUndo.snapshot = nil
 end
 
-genv.__SenaV4DecomBoostUndo = senaV4DecomBoostUndo
+genv.__QuantumV4DecomBoostUndo = quantumV4DecomBoostUndo
 local flag4 = false
 
 local function fn47(arg)
@@ -2696,7 +2696,7 @@ local function fn47(arg)
 end
 
 local function fn48()
-	if senaV4Config._fpsEggsReady then
+	if quantumV4Config._fpsEggsReady then
 		return true
 	end
 	local flag5 = false
@@ -2737,7 +2737,7 @@ local function fn49(arg)
 end
 
 local function fn50()
-	if senaV4Config._fpsPetsReady then
+	if quantumV4Config._fpsPetsReady then
 		return true
 	end
 	local isOn
@@ -2796,8 +2796,8 @@ local function fn50()
 end
 
 local function fn51()
-	if type(genv.__SenaV4SetCapFps) == "function" then
-		pcall(genv.__SenaV4SetCapFps, 1000)
+	if type(genv.__QuantumV4SetCapFps) == "function" then
+		pcall(genv.__QuantumV4SetCapFps, 1000)
 	end
 
 	pcall(function()
@@ -2918,7 +2918,7 @@ local function fn53(arg)
 end
 
 local function fn54()
-	if senaV4Config._fpsWorldReady then
+	if quantumV4Config._fpsWorldReady then
 		return true
 	end
 	local flag5 = false
@@ -2983,7 +2983,7 @@ local function fn54()
 end
 
 local function fn55()
-	if senaV4Config._fpsAreasReady then
+	if quantumV4Config._fpsAreasReady then
 		return true
 	end
 	local n8 = fn()
@@ -3093,14 +3093,14 @@ local function fn55()
 		end
 	end
 
-	senaV4Config._fpsAreaListener = connection6
-	senaV4Config._fpsAreaDeleted = areas
-	senaV4Config._fpsAreasReady = true
+	quantumV4Config._fpsAreaListener = connection6
+	quantumV4Config._fpsAreaDeleted = areas
+	quantumV4Config._fpsAreasReady = true
 	return true
 end
 
 local function fn56()
-	if senaV4Config._fpsPlotsReady then
+	if quantumV4Config._fpsPlotsReady then
 		return true
 	end
 	local flag5 = false
@@ -3152,7 +3152,7 @@ local function fn56()
 end
 
 local function fn57()
-	if senaV4Config._fpsTreadmillsReady then
+	if quantumV4Config._fpsTreadmillsReady then
 		return true
 	end
 	local flag5 = false
@@ -3245,24 +3245,24 @@ end
 local function fn58()
 	if flag4 then
 		return
-	elseif senaV4Config._fpsBoostApplying then
+	elseif quantumV4Config._fpsBoostApplying then
 		return
 	end
 
-	senaV4Config._fpsBoostApplying = true
+	quantumV4Config._fpsBoostApplying = true
 
 	local ok, result = pcall(function()
 		fn51()
-		senaV4Config._fpsPlotsReady = fn56() == true
-		senaV4Config._fpsTreadmillsReady = fn57() == true
-		senaV4Config._fpsAreasReady = fn55() == true
-		senaV4Config._fpsWorldReady = fn54() == true
-		senaV4Config._fpsPetsReady = fn50() == true
-		senaV4Config._fpsEggsReady = fn48() == true
-		flag4 = senaV4Config._fpsEggsReady and senaV4Config._fpsPetsReady and senaV4Config._fpsWorldReady and senaV4Config._fpsPlotsReady and senaV4Config._fpsTreadmillsReady and senaV4Config._fpsAreasReady
+		quantumV4Config._fpsPlotsReady = fn56() == true
+		quantumV4Config._fpsTreadmillsReady = fn57() == true
+		quantumV4Config._fpsAreasReady = fn55() == true
+		quantumV4Config._fpsWorldReady = fn54() == true
+		quantumV4Config._fpsPetsReady = fn50() == true
+		quantumV4Config._fpsEggsReady = fn48() == true
+		flag4 = quantumV4Config._fpsEggsReady and quantumV4Config._fpsPetsReady and quantumV4Config._fpsWorldReady and quantumV4Config._fpsPlotsReady and quantumV4Config._fpsTreadmillsReady and quantumV4Config._fpsAreasReady
 	end)
 
-	senaV4Config._fpsBoostApplying = nil
+	quantumV4Config._fpsBoostApplying = nil
 
 	if not ok then
 		warn("[FPSBoost] Gagal menerapkan FPS Boost:", result)
@@ -3701,20 +3701,20 @@ local v8 = (function()
 	local speed = 3000
 
 	local function fn61()
-		return genv.__SenaV4AdminBoost == true and speed or n14
+		return genv.__QuantumV4AdminBoost == true and speed or n14
 	end
 
-	local str3 = "__SenaV4StealAnEggMovementSpoof"
+	local str3 = "__QuantumV4StealAnEggMovementSpoof"
 	local n16 = 436
-	local str4 = "__SenaV4StealAnEggIntegritySpoof"
+	local str4 = "__QuantumV4StealAnEggIntegritySpoof"
 	local tbl11 = {Divine = true, Eternal = true}
 	local str5 = "ClientCharacter: GetDebugSnapshot"
 	local tbl12 = {"LastObservedSample", "LastSample", "LastGoodSample", "LastGameplayTrustedSample", "LastValidatedSample", "LastValidatedGroundedSample", "LastConfirmedGroundSample", "CandidateGroundedSample"}
 	local n17 = 0.15
 	local n18 = 8
 	local n19 = 1
-	local name2 = "__SenaV4HoverPad"
-	local str6 = "SenaV4RuntimeOwner"
+	local name2 = "__QuantumV4HoverPad"
+	local str6 = "QuantumV4RuntimeOwner"
 	local vector2 = Vector3.new(542.93, 71.5, -405.58)
 	local n20 = 612
 	local tbl13 = {-364.3, -367.21, -371.12, -375.65}
@@ -3735,7 +3735,7 @@ local v8 = (function()
 	local n32 = 0.35
 	local n33 = 2
 	local n34 = 0.1
-	local name3 = "__SenaV4TreadmillDecoy"
+	local name3 = "__QuantumV4TreadmillDecoy"
 	local tbl14 = {Script = true, LocalScript = true, BillboardGui = true, Sound = true}
 	local n35 = 0.25
 	local n36 = 5
@@ -4594,8 +4594,8 @@ local v8 = (function()
 
 					task.defer(function()
 						if not obj.destroyed and (obj.enabled and (obj.carry.uid == arg.Uid and obj:_hasConfirmedCarry(arg.Uid))) then
-							if genv.__SenaV4GodMode then
-								genv.__SenaV4GodMode:stopDefend()
+							if genv.__QuantumV4GodMode then
+								genv.__QuantumV4GodMode:stopDefend()
 							end
 
 							obj:_returnToSafe()
@@ -4622,8 +4622,8 @@ local v8 = (function()
 			obj.carry.active = false
 			obj.carry.uid = nil
 
-			if genv.__SenaV4GodMode then
-				genv.__SenaV4GodMode:startDefend(uid)
+			if genv.__QuantumV4GodMode then
+				genv.__QuantumV4GodMode:startDefend(uid)
 			end
 
 			if obj._captureHoldUid ~= nil and uid == obj._captureHoldUid then
@@ -5895,12 +5895,12 @@ local v8 = (function()
 	end
 
 	index._resolveSettleSeconds = function(arg, arg2)
-		local n58 = math.clamp(tonumber(senaV4Config.StealHoldSeconds) or 5, 1, 10)
+		local n58 = math.clamp(tonumber(quantumV4Config.StealHoldSeconds) or 5, 1, 10)
 		local flag5 = arg.settleBonus and type(arg2) == "table" and arg.settleBonus[arg2.Uid]
 		local seconds = flag5 and flag5.untilAt > os.clock() and flag5.seconds or 0
 		local v8 = fn3()
 		seconds = if v8 > 0 then if v8 < 12 then seconds + 2 else seconds else seconds
-		local v9 = if genv.__SenaV4NetPing() > 300 then seconds + 1 else seconds
+		local v9 = if genv.__QuantumV4NetPing() > 300 then seconds + 1 else seconds
 		return fn87(type(arg2) == "table" and arg2.AreaId, n58) + v9
 	end
 
@@ -6595,23 +6595,50 @@ local v8 = (function()
 	index._resolveEggDestination = function(arg, arg2, arg3, arg4)
 		if type(arg2) ~= "table" then
 			return nil
-		elseif typeof(arg2.BottomCFrame) ~= "CFrame" then
+		end
+
+		local baseCFrame = nil
+		if typeof(arg2.BottomCFrame) == "CFrame" then
+			baseCFrame = arg2.BottomCFrame
+		elseif typeof(arg2.BoundsCFrame) == "CFrame" then
+			baseCFrame = arg2.BoundsCFrame
+		elseif typeof(arg2.CFrame) == "CFrame" then
+			baseCFrame = arg2.CFrame
+		elseif typeof(arg2.Position) == "Vector3" then
+			baseCFrame = CFrame.new(arg2.Position)
+		end
+
+		if not baseCFrame and arg2.Uid then
+			local areaEggSlotsClient = workspace:FindFirstChild("AreaEggSlotsClient")
+			local slot = areaEggSlotsClient and areaEggSlotsClient:FindFirstChild(tostring(arg2.Uid))
+			if not slot then
+				local fieldEggsClient = workspace:FindFirstChild("FieldEggsClient")
+				slot = fieldEggsClient and fieldEggsClient:FindFirstChild(tostring(arg2.Uid))
+			end
+			if slot then
+				local part = slot.PrimaryPart or slot:FindFirstChildWhichIsA("BasePart")
+				if part then
+					baseCFrame = part.CFrame
+				end
+			end
+		end
+
+		if not baseCFrame then
 			return nil
 		end
 
 		local character = localPlayer2.Character
-		arg3, arg4 = arg3 or character and character:FindFirstChild("HumanoidRootPart"), arg4 or character and character:FindFirstChildOfClass("Humanoid")
+		arg3 = arg3 or (character and character:FindFirstChild("HumanoidRootPart"))
+		arg4 = arg4 or (character and character:FindFirstChildOfClass("Humanoid"))
 
-		if arg3 then
-			if not arg4 then
-				return nil
-			end
-		else
-			return nil
+		local offset = 3
+		if arg3 and arg4 and type(arg._feetOffset) == "function" then
+			pcall(function()
+				offset = arg:_feetOffset(arg3, arg4) + (n17 or 0)
+			end)
 		end
 
-		local n58 = arg:_feetOffset(arg3, arg4) + n17
-		return CFrame.new(arg2.BottomCFrame.Position + Vector3.new(0, n58, 0))
+		return CFrame.new(baseCFrame.Position + Vector3.new(0, offset, 0))
 	end
 
 	local n58 = 110
@@ -7061,11 +7088,11 @@ local v8 = (function()
 		if arg._brakeDecel then
 			return arg._brakeDecel
 		end
-		local senaV4BrakeDecel = genv.__SenaV4BrakeDecel
+		local quantumV4BrakeDecel = genv.__QuantumV4BrakeDecel
 		local humanoid = localPlayer2.Character and localPlayer2.Character:FindFirstChildOfClass("Humanoid")
-		if type(senaV4BrakeDecel) == "table" and (humanoid and math.abs((senaV4BrakeDecel.ws or 0) - humanoid.WalkSpeed) < 15) then
-			arg._brakeDecel = senaV4BrakeDecel.decel
-			return senaV4BrakeDecel.decel
+		if type(quantumV4BrakeDecel) == "table" and (humanoid and math.abs((quantumV4BrakeDecel.ws or 0) - humanoid.WalkSpeed) < 15) then
+			arg._brakeDecel = quantumV4BrakeDecel.decel
+			return quantumV4BrakeDecel.decel
 		end
 		return n65
 	end
@@ -7144,7 +7171,7 @@ local v8 = (function()
 
 					if n69 > 20 and n69 < 5000 then
 						arg._brakeDecel = arg:_walkBrakeDecel() * 0.8 + n69 * 0.93 * 0.2
-						genv.__SenaV4BrakeDecel = {ws = humanoid.WalkSpeed, decel = arg._brakeDecel}
+						genv.__QuantumV4BrakeDecel = {ws = humanoid.WalkSpeed, decel = arg._brakeDecel}
 					end
 				end
 
@@ -8175,8 +8202,8 @@ local v8 = (function()
 
 				if state ~= AreaEggs.States.Slot and (state ~= AreaEggs.States.Dropped and (state ~= "GuardCarried" and (not (v10 and v10.CarrierUserId == localPlayer2.UserId) and not arg:_hasConfirmedCarry(uid)))) then
 					fn91(false)
-					local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-					arg:_finish(state == "Carried" and senaV4PlayerSteal ~= nil and senaV4PlayerSteal:intercept(uid) and "Target taken - chasing the carrier" or "Target taken by someone else")
+					local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+					arg:_finish(state == "Carried" and quantumV4PlayerSteal ~= nil and quantumV4PlayerSteal:intercept(uid) and "Target taken - chasing the carrier" or "Target taken by someone else")
 					return
 				end
 			end
@@ -8398,8 +8425,8 @@ local v8 = (function()
 			return
 		end
 
-		if genv.__SenaV4GodMode then
-			genv.__SenaV4GodMode:startDefend(arg2)
+		if genv.__QuantumV4GodMode then
+			genv.__QuantumV4GodMode:startDefend(arg2)
 		end
 
 		local n68 = os.clock() + 5
@@ -8939,7 +8966,7 @@ local v8 = (function()
 	local n69 = 5000
 
 	index._usesPortalBoost = function(arg, arg2)
-		return senaV4Config.LowSpeedBoost == true and arg.config.stealMode == "Instant" and type(arg2) == "table" and tbl16[arg2.AreaId] ~= nil and not (arg.portalBoostFailed and (arg.portalBoostFailed[arg2.Uid] or 0) > os.clock())
+		return quantumV4Config.LowSpeedBoost == true and arg.config.stealMode == "Instant" and type(arg2) == "table" and tbl16[arg2.AreaId] ~= nil and not (arg.portalBoostFailed and (arg.portalBoostFailed[arg2.Uid] or 0) > os.clock())
 	end
 
 	local function fn91(arg, arg2)
@@ -9914,7 +9941,7 @@ local v8 = (function()
 
 		arg.boostedUid = nil
 		local v9 = EggState2.ReadFieldEgg(arg2)
-		local flag6 = v9 == nil or v9.State == AreaEggs.States.Claimed or senaV4Config.HelpFriend and v9.State == AreaEggs.States.Dropped
+		local flag6 = v9 == nil or v9.State == AreaEggs.States.Claimed or quantumV4Config.HelpFriend and v9.State == AreaEggs.States.Dropped
 		local character2 = localPlayer2.Character
 		local humanoidRootPart2 = character2 and character2:FindFirstChild("HumanoidRootPart")
 		return flag6 and humanoidRootPart2 ~= nil and arg:_isInSafeArea(humanoidRootPart2)
@@ -10201,6 +10228,146 @@ local v8 = (function()
 		return flag5 and flag6
 	end
 
+	index._instantStealTarget = function(arg, targetEgg)
+		if not targetEgg or type(targetEgg) ~= "table" then
+			arg:_finish("Target unavailable")
+			return
+		end
+
+		local uid = targetEgg.Uid
+		if not uid then
+			arg:_finish("Target UID unavailable")
+			return
+		end
+
+		local character = localPlayer2.Character
+		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+		if not humanoidRootPart or not humanoid then
+			arg:_finish("Character unavailable")
+			return
+		end
+
+		local destCFrame = arg:_resolveEggDestination(targetEgg, humanoidRootPart, humanoid)
+		if not destCFrame then
+			local pos = targetEgg.BottomCFrame or targetEgg.BoundsCFrame or targetEgg.CFrame
+			if typeof(pos) == "CFrame" then
+				destCFrame = CFrame.new(pos.Position + Vector3.new(0, 3, 0))
+			elseif typeof(pos) == "Vector3" then
+				destCFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+			else
+				local slot = (workspace:FindFirstChild("AreaEggSlotsClient") and workspace.AreaEggSlotsClient:FindFirstChild(tostring(uid)))
+					or (workspace:FindFirstChild("FieldEggsClient") and workspace.FieldEggsClient:FindFirstChild(tostring(uid)))
+				if slot then
+					local p = slot.PrimaryPart or slot:FindFirstChildWhichIsA("BasePart")
+					if p then
+						destCFrame = CFrame.new(p.Position + Vector3.new(0, 3, 0))
+					end
+				end
+			end
+		end
+
+		if not destCFrame then
+			arg.skippedEggs[uid] = os.clock() + 5
+			arg:_finish("Destination unavailable")
+			return
+		end
+
+		pcall(function()
+			local RagdollJoints = require(ReplicatedStorage2.Shared.Modules.RagdollJoints)
+			if RagdollJoints and RagdollJoints.Release then
+				RagdollJoints.Release(character)
+			end
+		end)
+		pcall(function()
+			humanoid.PlatformStand = false
+			humanoid.Sit = false
+			if humanoid:GetState() ~= Enum.HumanoidStateType.Running then
+				humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+			end
+			humanoid:UnequipTools()
+		end)
+
+		arg:_startMovementProtection()
+		arg:_setStatus("Teleporting to egg")
+		arg.stats.lastResult = "Instant teleporting"
+
+		local teleportOk = arg:_instantTeleport(destCFrame, 0.35, function()
+			return arg.destroyed or not arg.enabled
+		end, false)
+
+		if not teleportOk or arg.destroyed or not arg.enabled then
+			arg:_finish("Teleport aborted")
+			return
+		end
+
+		arg:_setStatus("Securing egg")
+		local carryDeadline = os.clock() + 1.8
+		local carried = false
+
+		local function checkCarried()
+			local rec = EggState2.ReadFieldEgg(uid) or (arg.records and arg.records[uid])
+			if rec and rec.State == AreaEggs.States.Carried and rec.CarrierUserId == localPlayer2.UserId then
+				arg:_adoptCarryFromRecord(uid)
+				return true
+			end
+			if arg.carry.active and arg.carry.uid == uid then
+				return true
+			end
+			return false
+		end
+
+		while os.clock() < carryDeadline and not arg.destroyed and arg.enabled do
+			if checkCarried() then
+				carried = true
+				break
+			end
+
+			character = localPlayer2.Character
+			humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+			if humanoidRootPart then
+				humanoidRootPart.CFrame = destCFrame
+				humanoidRootPart.AssemblyLinearVelocity = Vector3.zero
+				humanoidRootPart.AssemblyAngularVelocity = Vector3.zero
+			end
+
+			pcall(function()
+				eggWorld.AskFieldEggCarry:InvokeServer({ Uid = uid })
+			end)
+			pcall(function()
+				EggState2.CarryFieldEgg(uid)
+			end)
+			pcall(function()
+				local slots = workspace:FindFirstChild("AreaEggSlotsClient")
+				local slotObj = slots and slots:FindFirstChild(tostring(uid))
+				local prompt = slotObj and (slotObj:FindFirstChild("CarryAreaEgg", true) or slotObj:FindFirstChildWhichIsA("ProximityPrompt", true))
+				if prompt and prompt.Enabled and type(fireproximityprompt) == "function" then
+					prompt.HoldDuration = 0
+					prompt.RequiresLineOfSight = false
+					fireproximityprompt(prompt, 0)
+				end
+			end)
+
+			RunService2.Heartbeat:Wait()
+		end
+
+		if not carried then
+			carried = checkCarried()
+		end
+
+		if not carried then
+			arg.skippedEggs[uid] = os.clock() + 5
+			arg:_finish("Egg grab missed")
+			return
+		end
+
+		arg.carry.active = true
+		arg.carry.uid = uid
+		arg.stats.lastResult = "Carry confirmed"
+		arg:_setStatus("Egg secured, teleporting home")
+		arg:_instantReturn(uid)
+	end
+
 	index._instantReturn = function(arg, forestDropInProgress)
 		if arg._instantReturnToken ~= nil then
 			return
@@ -10314,8 +10481,8 @@ local v8 = (function()
 				return arg:_glideRoot(arg2, arg3)
 			end
 
-			local flag5 = arg.config.stealMode == "Fly" or arg.boostedUid == forestDropInProgress and not senaV4Config.HelpFriend
-			local n70 = arg.boostedUid == forestDropInProgress and not senaV4Config.HelpFriend and 0.3 or flag5 and 0.15 or 0.4
+			local flag5 = arg.config.stealMode == "Fly" or arg.boostedUid == forestDropInProgress and not quantumV4Config.HelpFriend
+			local n70 = arg.boostedUid == forestDropInProgress and not quantumV4Config.HelpFriend and 0.3 or flag5 and 0.15 or 0.4
 			local n71 = flag5 and 0.45 or n22
 			local v8 = fn97()
 
@@ -10355,7 +10522,7 @@ local v8 = (function()
 						return
 					end
 
-					if senaV4Config.HelpFriend then
+					if quantumV4Config.HelpFriend then
 						arg.skippedEggs[forestDropInProgress] = os.clock() + 1800
 						arg._forestDropInProgress = nil
 						arg.carry.active = false
@@ -10466,7 +10633,7 @@ local v8 = (function()
 						return
 					end
 
-					if senaV4Config.HelpFriend then
+					if quantumV4Config.HelpFriend then
 						arg.skippedEggs[forestDropInProgress] = os.clock() + 1800
 						arg._forestDropInProgress = nil
 						arg.carry.active = false
@@ -10749,7 +10916,7 @@ local v8 = (function()
 
 		local function fn95()
 			local destroyed = arg.destroyed
-			return (if destroyed then not destroyed else arg.enabled) and genv.__SenaV4AdminBoost == true and arg._adminBusyUid == uid
+			return (if destroyed then not destroyed else arg.enabled) and genv.__QuantumV4AdminBoost == true and arg._adminBusyUid == uid
 		end
 
 		local ok, result = pcall(function()
@@ -10913,7 +11080,7 @@ local v8 = (function()
 			return
 		end
 
-		if genv.__SenaV4AdminBoost == true then
+		if genv.__QuantumV4AdminBoost == true then
 			uid = arg.carry.uid or arg.activeTarget and arg.activeTarget.Uid
 
 			if uid and arg._adminBusyUid ~= uid then
@@ -10968,7 +11135,7 @@ local v8 = (function()
 			return
 		end
 
-		if senaV4Config.HelpFriend then
+		if quantumV4Config.HelpFriend then
 			arg.handoffLane = (arg.handoffLane or 0) % #tbl13 + 1
 			local n70 = CFrame.new(n20, vector2.Y, tbl13[arg.handoffLane]) * humanoidRootPart.CFrame.Rotation
 			arg:_setStatus("Taking the egg to the friend drop")
@@ -11137,12 +11304,12 @@ local v8 = (function()
 			end
 
 			arg.stats.delivered = (arg.stats.delivered or 0) + 1
-			local senaV4Webhook = genv.__SenaV4Webhook
-			if not senaV4Webhook then
+			local quantumV4Webhook = genv.__QuantumV4Webhook
+			if not quantumV4Webhook then
 				return
 			end
 			local ok, result = pcall(arg.catalog.resolve, activeTarget)
-			pcall(senaV4Webhook.stolen, activeTarget, ok and result or nil, nil)
+			pcall(quantumV4Webhook.stolen, activeTarget, ok and result or nil, nil)
 		end)
 	end
 
@@ -11443,10 +11610,10 @@ local v8 = (function()
 
 		if v8 >= eggFullCount then
 			arg._eggFullHold = true
-			local senaV4IsAutoSellEggBusy = genv.__SenaV4IsAutoSellEggBusy and genv.__SenaV4IsAutoSellEggBusy()
+			local quantumV4IsAutoSellEggBusy = genv.__QuantumV4IsAutoSellEggBusy and genv.__QuantumV4IsAutoSellEggBusy()
 			arg._eggFullAt = arg._eggFullAt or os.clock()
 
-			if not senaV4IsAutoSellEggBusy and os.clock() - arg._eggFullAt > 60 then
+			if not quantumV4IsAutoSellEggBusy and os.clock() - arg._eggFullAt > 60 then
 				arg.eggFullCount = nil
 				arg._eggFullHold = false
 				arg._eggFullAt = nil
@@ -11459,7 +11626,7 @@ local v8 = (function()
 		arg._eggFullAt = nil
 
 		if arg._eggFullHold then
-			if genv.__SenaV4IsAutoSellEggBusy and (genv.__SenaV4IsAutoSellEggBusy() and v8 > eggFullCount - index.EGG_FREE_SLOTS) then
+			if genv.__QuantumV4IsAutoSellEggBusy and (genv.__QuantumV4IsAutoSellEggBusy() and v8 > eggFullCount - index.EGG_FREE_SLOTS) then
 				return true
 			end
 			arg._eggFullHold = false
@@ -11563,13 +11730,13 @@ local v8 = (function()
 			return
 		end
 
-		local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-		local autoSteal = senaV4TaskLadder.blocker("auto_steal")
-		local v8 = (if autoSteal then not autoSteal else senaV4TaskLadder.holder("auto_steal")) or nil
+		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+		local autoSteal = quantumV4TaskLadder.blocker("auto_steal")
+		local v8 = (if autoSteal then not autoSteal else quantumV4TaskLadder.holder("auto_steal")) or nil
 
-		if autoSteal or v8 or senaV4PlayerSteal and senaV4PlayerSteal.running then
+		if autoSteal or v8 or quantumV4PlayerSteal and quantumV4PlayerSteal.running then
 			arg:_releaseOperation()
-			arg:_setStatus(autoSteal and "Yielding to " .. senaV4TaskLadder.TITLES[autoSteal] or v8 and "Waiting for " .. senaV4TaskLadder.TITLES[v8] .. " to hand over" or "Yielding to Steal Players")
+			arg:_setStatus(autoSteal and "Yielding to " .. quantumV4TaskLadder.TITLES[autoSteal] or v8 and "Waiting for " .. quantumV4TaskLadder.TITLES[v8] .. " to hand over" or "Yielding to Steal Players")
 			if arg._yieldRetryPending then
 				return
 			end
@@ -11645,9 +11812,9 @@ local v8 = (function()
 		end
 
 		local planGeneration = arg.planGeneration
-		senaV4PlayerSteal, autoSteal = arg:_acquireOperation()
+		quantumV4PlayerSteal, autoSteal = arg:_acquireOperation()
 
-		if not senaV4PlayerSteal then
+		if not quantumV4PlayerSteal then
 			arg:_setStatus("Waiting · " .. tostring(autoSteal or "another operation"))
 
 			task.delay(0.5, function()
@@ -11703,7 +11870,7 @@ local v8 = (function()
 			return
 		end
 
-		if genv.__SenaV4AdminBoost == true and not (arg.captureObjectiveEnabled and arg:_isCaptureEgg(v10.Uid)) then
+		if genv.__QuantumV4AdminBoost == true and not (arg.captureObjectiveEnabled and arg:_isCaptureEgg(v10.Uid)) then
 			arg.safeStarting = false
 			task.spawn(arg._adminSteal, arg, v10)
 			return
@@ -11761,6 +11928,17 @@ local v8 = (function()
 		end
 
 		arg.safeStarting = false
+
+		if arg.config.stealMode == "Instant" then
+			arg.instantPhase = "stealing"
+			arg.primerUid = nil
+			arg.targetUid = v10.Uid
+			arg.activeTarget = v10
+			arg._flyDeparting = false
+			arg:_startMovementProtection()
+			task.spawn(arg._instantStealTarget, arg, v10)
+			return
+		end
 
 		if arg:_usesPortalBoost(v10) then
 			arg.instantPhase = "hunting"
@@ -12056,13 +12234,13 @@ local v8 = (function()
 		for i, descendant in ipairs(arg2:GetDescendants()) do
 			if descendant:IsA("BasePart") then
 				if arg.scramblePortalOriginals[descendant] == nil then
-					local attribute = descendant:GetAttribute("SenaV4PortalOrig")
+					local attribute = descendant:GetAttribute("QuantumV4PortalOrig")
 
 					if type(attribute) == "string" then
 						arg.scramblePortalOriginals[descendant] = {CanCollide = attribute:sub(1, 1) == "1", CanTouch = attribute:sub(2, 2) == "1"}
 					else
 						arg.scramblePortalOriginals[descendant] = {CanCollide = descendant.CanCollide, CanTouch = descendant.CanTouch}
-						pcall(descendant.SetAttribute, descendant, "SenaV4PortalOrig", (descendant.CanCollide and "1" or "0") .. (descendant.CanTouch and "1" or "0"))
+						pcall(descendant.SetAttribute, descendant, "QuantumV4PortalOrig", (descendant.CanCollide and "1" or "0") .. (descendant.CanTouch and "1" or "0"))
 					end
 				end
 
@@ -12120,7 +12298,7 @@ local v8 = (function()
 					pcall(function()
 						k.CanCollide = scramblePortalOriginal.CanCollide
 						k.CanTouch = scramblePortalOriginal.CanTouch
-						k:SetAttribute("SenaV4PortalOrig", nil)
+						k:SetAttribute("QuantumV4PortalOrig", nil)
 					end)
 				end
 			end
@@ -12196,8 +12374,8 @@ local v8 = (function()
 		arg:_schedule()
 	end
 
-	local name4 = "__SenaV4EggEsp"
-	local name5 = "__SenaV4EggHighlight"
+	local name4 = "__QuantumV4EggEsp"
+	local name5 = "__QuantumV4EggHighlight"
 	local tbl18 = {rarity = true, name = true, kg = true, mutation = true, value = true, placed = true, icon = true}
 
 	fn66 = function(arg)
@@ -12304,7 +12482,7 @@ local v8 = (function()
 		arg2 = 10
 
 		for i, v11 in ipairs(tbl21) do
-			if senaV4Config.LowSpeedBoost == true and tbl16[v11] ~= nil then
+			if quantumV4Config.LowSpeedBoost == true and tbl16[v11] ~= nil then
 			else
 				local v12 = arg:settleNeed(v11, v9)
 				local n77 = 1
@@ -12361,7 +12539,7 @@ local v8 = (function()
 		if not failed and arg2 ~= "Safe return complete" then
 			return
 		end
-		local n76 = math.clamp(tonumber(senaV4Config.StealHoldSeconds) or 5, 1, 10)
+		local n76 = math.clamp(tonumber(quantumV4Config.StealHoldSeconds) or 5, 1, 10)
 		arg.lowSpeedOutcomes = arg.lowSpeedOutcomes or {}
 		flag5 = arg.lowSpeedOutcomes[n76] or {}
 		arg.lowSpeedOutcomes[n76] = flag5
@@ -12401,7 +12579,7 @@ local v8 = (function()
 		end)
 
 		local v10, v11, v12 = arg:recommendLowSpeedLevel()
-		local n76 = math.clamp(tonumber(senaV4Config.StealHoldSeconds) or 5, 1, 10)
+		local n76 = math.clamp(tonumber(quantumV4Config.StealHoldSeconds) or 5, 1, 10)
 		local lowSpeedAdvice = arg.lowSpeedAdvice
 		local v13 = lowSpeedAdvice and (if n76 <= lowSpeedAdvice.to then nil else lowSpeedAdvice)
 		return {speedText = type(v9) == "number" and fn94(v9) or "?", walkSpeed = math.floor((v12 or 0) + 0.5), safe = v10, fast = v11, level = n76, advice = v13}
@@ -12611,23 +12789,23 @@ local v8 = (function()
 			local v9 = (Save.Peek or Save.Get)()
 			local eggInventory = type(v9) == "table" and v9.EggInventory or nil
 			local centerPoint = PlotState2.ResolveLocalSlot()
-			local senaV4PlacedEggAnchors = PlotState2.ResolveFolder()
-			local v10 = senaV4PlacedEggAnchors and centerPoint and senaV4PlacedEggAnchors:FindFirstChild(tostring(centerPoint))
+			local quantumV4PlacedEggAnchors = PlotState2.ResolveFolder()
+			local v10 = quantumV4PlacedEggAnchors and centerPoint and quantumV4PlacedEggAnchors:FindFirstChild(tostring(centerPoint))
 			centerPoint = v10 and v10:FindFirstChild("CenterPoint")
 			local v11 = centerPoint and (if centerPoint:IsA("BasePart") then centerPoint else nil)
 			local tbl21 = {}
 
 			if type(eggInventory) == "table" and v11 then
-				senaV4PlacedEggAnchors = workspace:FindFirstChild("SenaV4PlacedEggAnchors")
+				quantumV4PlacedEggAnchors = workspace:FindFirstChild("QuantumV4PlacedEggAnchors")
 
-				if senaV4PlacedEggAnchors then
+				if quantumV4PlacedEggAnchors then
 				else
-					senaV4PlacedEggAnchors = Instance.new("Folder")
-					senaV4PlacedEggAnchors.Name = "SenaV4PlacedEggAnchors"
-					senaV4PlacedEggAnchors.Parent = workspace
+					quantumV4PlacedEggAnchors = Instance.new("Folder")
+					quantumV4PlacedEggAnchors.Name = "QuantumV4PlacedEggAnchors"
+					quantumV4PlacedEggAnchors.Parent = workspace
 				end
 
-				for i, child in ipairs(senaV4PlacedEggAnchors:GetChildren()) do
+				for i, child in ipairs(quantumV4PlacedEggAnchors:GetChildren()) do
 					if child:IsA("Highlight") then
 						child:Destroy()
 					elseif child:IsA("BillboardGui") then
@@ -12656,14 +12834,14 @@ local v8 = (function()
 
 							if typeof(v13.anchor) ~= "Instance" then
 								local part = Instance.new("Part")
-								part.Name = "SenaV4PE_" .. k
+								part.Name = "QuantumV4PE_" .. k
 								part.Size = Vector3.new(1.5, 1.5, 1.5)
 								part.Transparency = 1
 								part.Anchored = true
 								part.CanCollide = false
 								part.CanQuery = false
 								part.CanTouch = false
-								part.Parent = senaV4PlacedEggAnchors
+								part.Parent = quantumV4PlacedEggAnchors
 								v13.anchor = part
 							end
 
@@ -12804,7 +12982,7 @@ local v8 = (function()
 		local n76 = math.clamp(math.floor((tonumber(arg2) or n11) + 0.5), n9, n10)
 		arg.config.speed = n76 * n8
 
-		if genv.__SenaV4AdminBoost == true then
+		if genv.__QuantumV4AdminBoost == true then
 			arg.config.speed = speed
 		end
 
@@ -12904,10 +13082,10 @@ local v8 = (function()
 				end
 			end
 
-			local senaV4PlacedEggAnchors = workspace:FindFirstChild("SenaV4PlacedEggAnchors")
+			local quantumV4PlacedEggAnchors = workspace:FindFirstChild("QuantumV4PlacedEggAnchors")
 
-			if senaV4PlacedEggAnchors then
-				senaV4PlacedEggAnchors:Destroy()
+			if quantumV4PlacedEggAnchors then
+				quantumV4PlacedEggAnchors:Destroy()
 			end
 		end)
 
@@ -13095,11 +13273,11 @@ local v9 = (function()
 
 		task.spawn(function()
 			task.wait()
-			local senaV4ForestGate = genv.__SenaV4ForestGate
+			local quantumV4ForestGate = genv.__QuantumV4ForestGate
 
-			if type(senaV4ForestGate) == "table" and (senaV4ForestGate.comp and senaV4ForestGate.orig) then
-				pcall(rawset, senaV4ForestGate.comp, "_attackHandler", senaV4ForestGate.orig)
-				genv.__SenaV4ForestGate = nil
+			if type(quantumV4ForestGate) == "table" and (quantumV4ForestGate.comp and quantumV4ForestGate.orig) then
+				pcall(rawset, quantumV4ForestGate.comp, "_attackHandler", quantumV4ForestGate.orig)
+				genv.__QuantumV4ForestGate = nil
 			end
 
 			if type(getgc) ~= "function" then
@@ -13127,15 +13305,15 @@ local v9 = (function()
 				if type(v9) == "table" and rawget(v9, "_areaId") == "Forest" and type(rawget(v9, "_attackHandler")) == "function" then
 					local value = rawget(v9, "_attackHandler")
 					arg._forestGate = {comp = v9, orig = value}
-					genv.__SenaV4ForestGate = arg._forestGate
+					genv.__QuantumV4ForestGate = arg._forestGate
 
 					rawset(v9, "_attackHandler", function(...)
-						if arg.enabled and (not arg.destroyed and (not (arg.eggRuntime and arg.eggRuntime.instantPhase == "priming") and not (genv.__SenaV4PlayerSteal and genv.__SenaV4PlayerSteal.running))) then
+						if arg.enabled and (not arg.destroyed and (not (arg.eggRuntime and arg.eggRuntime.instantPhase == "priming") and not (genv.__QuantumV4PlayerSteal and genv.__QuantumV4PlayerSteal.running))) then
 							arg.stats.blockedHits = arg.stats.blockedHits + 1
 							arg:_recoverBody(true)
 
-							if genv.__SenaV4GodMode then
-								genv.__SenaV4GodMode:startDefend()
+							if genv.__QuantumV4GodMode then
+								genv.__QuantumV4GodMode:startDefend()
 							end
 
 							return
@@ -13270,8 +13448,8 @@ local v9 = (function()
 				return
 			end
 
-			local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-			if senaV4PlayerSteal and senaV4PlayerSteal.running then
+			local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+			if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
 				return
 			end
 			local uid = arg2.Uid or arg.lastHeldEggUid
@@ -13284,8 +13462,8 @@ local v9 = (function()
 				arg.stats.blockedDrops = arg.stats.blockedDrops + 1
 				arg:_startSticky(uid, lastHeldSlotKey)
 
-				if genv.__SenaV4GodMode then
-					genv.__SenaV4GodMode:startDefend(uid)
+				if genv.__QuantumV4GodMode then
+					genv.__QuantumV4GodMode:startDefend(uid)
 				end
 			end
 		end))
@@ -13322,14 +13500,14 @@ local v9 = (function()
 		end
 	end
 
-	index.install = function(senaV4AntiGuard)
-		if senaV4AntiGuard.destroyed then
+	index.install = function(quantumV4AntiGuard)
+		if quantumV4AntiGuard.destroyed then
 			return false
 		end
-		getgenv().__SenaV4AntiGuard = senaV4AntiGuard
-		senaV4AntiGuard:_installRagdollHooks()
-		senaV4AntiGuard:_bindSignals()
-		senaV4AntiGuard:_recoverBody()
+		getgenv().__QuantumV4AntiGuard = quantumV4AntiGuard
+		quantumV4AntiGuard:_installRagdollHooks()
+		quantumV4AntiGuard:_bindSignals()
+		quantumV4AntiGuard:_recoverBody()
 		return true
 	end
 
@@ -13357,8 +13535,8 @@ local v9 = (function()
 		if arg._forestGate then
 			pcall(rawset, arg._forestGate.comp, "_attackHandler", arg._forestGate.orig)
 
-			if genv.__SenaV4ForestGate == arg._forestGate then
-				genv.__SenaV4ForestGate = nil
+			if genv.__QuantumV4ForestGate == arg._forestGate then
+				genv.__QuantumV4ForestGate = nil
 			end
 
 			arg._forestGate = nil
@@ -13366,8 +13544,8 @@ local v9 = (function()
 
 		arg.eggRuntime = nil
 
-		if getgenv().__SenaV4AntiGuard == arg then
-			getgenv().__SenaV4AntiGuard = nil
+		if getgenv().__QuantumV4AntiGuard == arg then
+			getgenv().__QuantumV4AntiGuard = nil
 		end
 	end
 
@@ -13389,7 +13567,7 @@ local v10 = (function()
 	index.new = function(eggRuntime)
 		local obj = setmetatable({}, index)
 		obj.eggRuntime = eggRuntime
-		obj.enabled = senaV4Config.GodMode == nil and true or senaV4Config.GodMode == true
+		obj.enabled = quantumV4Config.GodMode == nil and true or quantumV4Config.GodMode == true
 		obj.active = false
 		obj.activeDroppedUid = nil
 		obj.swingSequence = 0
@@ -13410,12 +13588,12 @@ local v10 = (function()
 			return false
 		end
 
-		local senaV4IsBatTool = genv.__SenaV4IsBatTool
-		if senaV4IsBatTool and senaV4IsBatTool(arg2) then
+		local quantumV4IsBatTool = genv.__QuantumV4IsBatTool
+		if quantumV4IsBatTool and quantumV4IsBatTool(arg2) then
 			return true
 		end
 
-		if not senaV4IsBatTool then
+		if not quantumV4IsBatTool then
 			if arg2:GetAttribute("IsBat") == true then
 				return true
 			elseif arg2:GetAttribute("GearName") == "Bat" then
@@ -13575,8 +13753,8 @@ local v10 = (function()
 		if activeDroppedUid and (arg.eggRuntime and arg.eggRuntime:isSkippedEgg(activeDroppedUid)) then
 			return
 		end
-		local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-		if senaV4PlayerSteal and senaV4PlayerSteal.running then
+		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+		if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
 			return
 		end
 		arg.active = true
@@ -13592,8 +13770,8 @@ local v10 = (function()
 				if arg.eggRuntime and (arg.eggRuntime.carry and arg.eggRuntime.carry.active) then
 					break
 				end
-				local senaV4PlayerSteal2 = genv.__SenaV4PlayerSteal
-				if senaV4PlayerSteal2 and senaV4PlayerSteal2.running then
+				local quantumV4PlayerSteal2 = genv.__QuantumV4PlayerSteal
+				if quantumV4PlayerSteal2 and quantumV4PlayerSteal2.running then
 					flag5 = true
 					break
 				end
@@ -13696,13 +13874,13 @@ local v11 = (function()
 	local n8 = 8
 
 	local function fn62()
-		local treadmill = senaV4TaskLadder.blocker("treadmill")
+		local treadmill = quantumV4TaskLadder.blocker("treadmill")
 		if treadmill then
-			return "Yielding to " .. senaV4TaskLadder.TITLES[treadmill]
+			return "Yielding to " .. quantumV4TaskLadder.TITLES[treadmill]
 		end
-		local treadmill2 = senaV4TaskLadder.holder("treadmill")
+		local treadmill2 = quantumV4TaskLadder.holder("treadmill")
 		if treadmill2 then
-			return "Waiting for " .. senaV4TaskLadder.TITLES[treadmill2]
+			return "Waiting for " .. quantumV4TaskLadder.TITLES[treadmill2]
 		end
 		return nil
 	end
@@ -13712,7 +13890,7 @@ local v11 = (function()
 	end
 
 	local function fn64()
-		return senaV4TaskLadder.blocker("treadmill") == "auto_steal"
+		return quantumV4TaskLadder.blocker("treadmill") == "auto_steal"
 	end
 
 	local function fn65()
@@ -13829,11 +14007,11 @@ local v11 = (function()
 		if arg.busy and arg.config.disableDuringAutomation then
 			return true
 		end
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
-		if senaV4EggRuntime and senaV4EggRuntime._treadmillResetting then
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+		if quantumV4EggRuntime and quantumV4EggRuntime._treadmillResetting then
 			return false
 		end
-		local ok, result = pcall(senaV4TaskLadder.holder, "treadmill")
+		local ok, result = pcall(quantumV4TaskLadder.holder, "treadmill")
 		return ok and result ~= nil
 	end
 
@@ -14334,7 +14512,7 @@ local v11 = (function()
 						continue
 					end
 
-					if genv.__SenaV4IsAutoSellEggBusy and genv.__SenaV4IsAutoSellEggBusy() then
+					if genv.__QuantumV4IsAutoSellEggBusy and genv.__QuantumV4IsAutoSellEggBusy() then
 						now = os.clock()
 						arg:_setStatus("Idle", "Waiting for Auto Sell Egg")
 						task.wait(0.25)
@@ -14378,7 +14556,7 @@ local v11 = (function()
 					end
 
 					local travel2 = flag5 or arg.travel and arg.travel:travelAndWait(v11, {abort = function()
-						return arg.destroyed or arg.busy or not arg.config.idleFarm or idleGeneration ~= arg.idleGeneration or arg.coordinator and arg.coordinator:isBackgroundBusy() or genv.__SenaV4IsAutoSellEggBusy and genv.__SenaV4IsAutoSellEggBusy() or fn63()
+						return arg.destroyed or arg.busy or not arg.config.idleFarm or idleGeneration ~= arg.idleGeneration or arg.coordinator and arg.coordinator:isBackgroundBusy() or genv.__QuantumV4IsAutoSellEggBusy and genv.__QuantumV4IsAutoSellEggBusy() or fn63()
 					end})
 
 					arg.travelingToTreadmill = false
@@ -14394,8 +14572,8 @@ local v11 = (function()
 
 					if arg.busy or not arg.config.idleFarm or idleGeneration ~= arg.idleGeneration or arg.coordinator and arg.coordinator:isBackgroundBusy() then
 						continue
-					elseif genv.__SenaV4IsAutoSellEggBusy then
-						if genv.__SenaV4IsAutoSellEggBusy() then
+					elseif genv.__QuantumV4IsAutoSellEggBusy then
+						if genv.__QuantumV4IsAutoSellEggBusy() then
 							continue
 						elseif fn63() then
 							continue
@@ -14408,8 +14586,8 @@ local v11 = (function()
 
 					if arg.busy or not arg.config.idleFarm or idleGeneration ~= arg.idleGeneration or arg.coordinator and arg.coordinator:isBackgroundBusy() then
 						continue
-					elseif genv.__SenaV4IsAutoSellEggBusy then
-						if genv.__SenaV4IsAutoSellEggBusy() then
+					elseif genv.__QuantumV4IsAutoSellEggBusy then
+						if genv.__QuantumV4IsAutoSellEggBusy() then
 							continue
 						elseif fn63() then
 							continue
@@ -14447,7 +14625,7 @@ local v11 = (function()
 							break
 						end
 
-						if genv.__SenaV4IsAutoSellEggBusy and genv.__SenaV4IsAutoSellEggBusy() then
+						if genv.__QuantumV4IsAutoSellEggBusy and genv.__QuantumV4IsAutoSellEggBusy() then
 							arg:_cancelIdle(true)
 							arg:_setStatus("Idle", "Yielding to Auto Sell Egg")
 							break
@@ -14627,11 +14805,11 @@ end)()
 
 local v12 = v5.new()
 local v13 = v8.new(v6, v7, v12)
-genv.__SenaV4EggRuntime = v13
+genv.__QuantumV4EggRuntime = v13
 local v14 = v11.new(v12, v13)
-genv.__SenaV4TreadmillManager = v14
+genv.__QuantumV4TreadmillManager = v14
 
-senaV4TaskLadder.register("treadmill", {wants = function()
+quantumV4TaskLadder.register("treadmill", {wants = function()
 	return v14.config.idleFarm == true and not v14.destroyed
 end, active = function()
 	local destroyed = v14.destroyed
@@ -14651,19 +14829,19 @@ end})
 v13:setTreadmillManager(v14)
 v14:setDisableDuringAutomation(true)
 
-if senaV4Config.AutoTreadmillIdle then
+if quantumV4Config.AutoTreadmillIdle then
 	v14:setIdleFarm(true)
 end
 
-if senaV4Config.AutoIndex then
+if quantumV4Config.AutoIndex then
 	v13:setIndexObjective(true)
 end
 
-if senaV4Config.AutoTreadmillUpgrade then
+if quantumV4Config.AutoTreadmillUpgrade then
 	v14:setAutoUpgrade(true)
 end
 
-genv.__SenaV4Webhook = (function()
+genv.__QuantumV4Webhook = (function()
 	local HttpService = game:GetService("HttpService")
 	local ReplicatedStorage2 = game:GetService("ReplicatedStorage")
 	local localPlayer2 = game:GetService("Players").LocalPlayer
@@ -14976,7 +15154,7 @@ genv.__SenaV4Webhook = (function()
 		local tbl15 = {}
 		local flag7 = false
 
-		for i, v15 in ipairs(senaV4Config.WebhookRarities or {}) do
+		for i, v15 in ipairs(quantumV4Config.WebhookRarities or {}) do
 			if v15 ~= "None" and v15 ~= "" then
 				tbl15[v15] = true
 				flag7 = true
@@ -14986,7 +15164,7 @@ genv.__SenaV4Webhook = (function()
 		if flag7 and not tbl15[arg2.rarity] then
 			return false
 		end
-		local n8 = tonumber(senaV4Config.WebhookMinValue) or 0
+		local n8 = tonumber(quantumV4Config.WebhookMinValue) or 0
 		if n8 > 0 and arg3 < n8 then
 			return false
 		end
@@ -15023,10 +15201,10 @@ genv.__SenaV4Webhook = (function()
 	end
 
 	tbl12.stolen = function(arg, arg2, arg3)
-		if senaV4Config.WebhookEnabled ~= true then
+		if quantumV4Config.WebhookEnabled ~= true then
 			return
 		end
-		local webhookURL = senaV4Config.WebhookURL
+		local webhookURL = quantumV4Config.WebhookURL
 
 		if type(webhookURL) ~= "string" then
 			return
@@ -15089,7 +15267,7 @@ genv.__SenaV4Webhook = (function()
 	end
 
 	tbl12.test = function()
-		local webhookURL = senaV4Config.WebhookURL
+		local webhookURL = quantumV4Config.WebhookURL
 
 		if type(webhookURL) ~= "string" then
 			return false
@@ -15124,10 +15302,10 @@ genv.__SenaV4Webhook = (function()
 	end
 
 	tbl12.disconnected = function(arg)
-		if senaV4Config.WebhookDisconnect ~= true then
+		if quantumV4Config.WebhookDisconnect ~= true then
 			return
 		end
-		local webhookURL = senaV4Config.WebhookURL
+		local webhookURL = quantumV4Config.WebhookURL
 
 		if type(webhookURL) ~= "string" then
 			return
@@ -15165,13 +15343,13 @@ genv.__SenaV4Webhook = (function()
 	end
 
 	pcall(function()
-		local senaV4DisconnectConn = genv.__SenaV4DisconnectConn
+		local quantumV4DisconnectConn = genv.__QuantumV4DisconnectConn
 
-		if typeof(senaV4DisconnectConn) == "RBXScriptConnection" then
-			senaV4DisconnectConn:Disconnect()
+		if typeof(quantumV4DisconnectConn) == "RBXScriptConnection" then
+			quantumV4DisconnectConn:Disconnect()
 		end
 
-		genv.__SenaV4DisconnectConn = game:GetService("GuiService").ErrorMessageChanged:Connect(function(arg)
+		genv.__QuantumV4DisconnectConn = game:GetService("GuiService").ErrorMessageChanged:Connect(function(arg)
 			pcall(tbl12.disconnected, arg)
 		end)
 	end)
@@ -15269,7 +15447,7 @@ local walkSpeedMultiplier = (function()
 		local tbl13 = {}
 		local flag5 = false
 
-		for i, v16 in ipairs(senaV4Config.StealPlayerRarities or {}) do
+		for i, v16 in ipairs(quantumV4Config.StealPlayerRarities or {}) do
 			if v16 ~= "None" and v16 ~= "" then
 				tbl13[v16] = true
 				flag5 = true
@@ -15281,7 +15459,7 @@ local walkSpeedMultiplier = (function()
 				return false
 			end
 		else
-			for i, v16 in ipairs(senaV4Config.StealRarities or {}) do
+			for i, v16 in ipairs(quantumV4Config.StealRarities or {}) do
 				if v16 ~= "None" and v16 ~= "" then
 					tbl13[v16] = true
 					flag5 = true
@@ -15293,8 +15471,8 @@ local walkSpeedMultiplier = (function()
 			end
 		end
 
-		local n16 = tonumber(senaV4Config.StealPlayerMinValue) or 0
-		if n16 > 0 and (genv.__SenaV4Webhook and genv.__SenaV4Webhook.rateOf(arg2) or 0) < n16 then
+		local n16 = tonumber(quantumV4Config.StealPlayerMinValue) or 0
+		if n16 > 0 and (genv.__QuantumV4Webhook and genv.__QuantumV4Webhook.rateOf(arg2) or 0) < n16 then
 			return false
 		end
 		return true
@@ -15406,7 +15584,7 @@ local walkSpeedMultiplier = (function()
 	end
 
 	index._pick = function(arg)
-		local stealPlayerTarget, v15, v16 = senaV4Config.StealPlayerTarget
+		local stealPlayerTarget, v15, v16 = quantumV4Config.StealPlayerTarget
 
 		for i, v17 in ipairs(arg:carriers()) do
 			local flag5 = stealPlayerTarget == nil or stealPlayerTarget == "" or stealPlayerTarget == "Any Player" or v17.player.Name == stealPlayerTarget
@@ -16390,7 +16568,7 @@ local walkSpeedMultiplier = (function()
 		end
 
 		local function fn66()
-			if genv.ChloeX_Running == nil and genv.__SenaV4PlayerSteal ~= arg then
+			if genv.ChloeX_Running == nil and genv.__QuantumV4PlayerSteal ~= arg then
 				for i, v15 in ipairs(arg.dropConns or {}) do
 					pcall(function()
 						v15:Disconnect()
@@ -16454,7 +16632,7 @@ local walkSpeedMultiplier = (function()
 			end
 
 			local eggRuntime = arg.eggRuntime
-			local senaV4ButterflyRuntime = genv.__SenaV4ButterflyRuntime
+			local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
 
 			if eggRuntime then
 				if eggRuntime.running then
@@ -16466,7 +16644,7 @@ local walkSpeedMultiplier = (function()
 				end
 			end
 
-			if senaV4ButterflyRuntime ~= nil and senaV4ButterflyRuntime.active == true then
+			if quantumV4ButterflyRuntime ~= nil and quantumV4ButterflyRuntime.active == true then
 				return
 			end
 			local position = arg2.BottomCFrame and arg2.BottomCFrame.Position
@@ -16644,9 +16822,9 @@ local walkSpeedMultiplier = (function()
 					return false
 				end
 
-				if genv.__SenaV4Webhook then
+				if genv.__QuantumV4Webhook then
 					local ok, result = pcall(arg.catalog.resolve, v16)
-					pcall(genv.__SenaV4Webhook.stolen, v16, ok and result or nil, "player carry")
+					pcall(genv.__QuantumV4Webhook.stolen, v16, ok and result or nil, "player carry")
 				end
 
 				return true
@@ -16731,7 +16909,7 @@ local walkSpeedMultiplier = (function()
 		arg.loop = task.spawn(function()
 			while true do
 				task.wait(0.4)
-				if genv.ChloeX_Running == nil and genv.__SenaV4PlayerSteal ~= arg then
+				if genv.ChloeX_Running == nil and genv.__QuantumV4PlayerSteal ~= arg then
 					break
 				end
 
@@ -16742,9 +16920,9 @@ local walkSpeedMultiplier = (function()
 				end
 
 				local eggRuntime = arg.eggRuntime
-				local senaV4ButterflyRuntime = genv.__SenaV4ButterflyRuntime
+				local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
 				local running = eggRuntime and (eggRuntime.running or eggRuntime.carry and eggRuntime.carry.active)
-				local flag5 = senaV4ButterflyRuntime ~= nil and senaV4ButterflyRuntime.active == true
+				local flag5 = quantumV4ButterflyRuntime ~= nil and quantumV4ButterflyRuntime.active == true
 				local v15 = if arg.enabled then if arg.running then nil else if running then nil else arg:_pick() else nil
 				arg.wantsTarget = v15 ~= nil
 
@@ -16762,11 +16940,11 @@ end)()
 
 local v15 = v9.new(v13)
 v15:install()
-v15:setEnabled(senaV4Config.AntiGuardKnockback == true)
-genv.__SenaV4AntiGuard = v15
+v15:setEnabled(quantumV4Config.AntiGuardKnockback == true)
+genv.__QuantumV4AntiGuard = v15
 local v16 = v10.new(v13)
-v16:setEnabled(senaV4Config.GodMode == nil and true or senaV4Config.GodMode == true)
-genv.__SenaV4GodMode = v16
+v16:setEnabled(quantumV4Config.GodMode == nil and true or quantumV4Config.GodMode == true)
+genv.__QuantumV4GodMode = v16
 local v17 = walkSpeedMultiplier.new(v13, v16, v6)
 
 local v18 = (function()
@@ -16822,7 +17000,7 @@ local v18 = (function()
 		end
 
 		local bodyVelocity = Instance.new("BodyVelocity")
-		bodyVelocity.Name = "SenaFlyCaptureHover"
+		bodyVelocity.Name = "QuantumFlyCaptureHover"
 		bodyVelocity.MaxForce = Vector3.new(0, 9000000000, 0)
 		bodyVelocity.Velocity = Vector3.new(0, 0, 0)
 		bodyVelocity.Parent = parent
@@ -16830,8 +17008,8 @@ local v18 = (function()
 	end
 
 	local function fn62()
-		local senaV4TreadmillManager = genv.__SenaV4TreadmillManager
-		return senaV4TreadmillManager ~= nil and not senaV4TreadmillManager.destroyed and senaV4TreadmillManager.config ~= nil and senaV4TreadmillManager.config.idleFarm == true
+		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
+		return quantumV4TreadmillManager ~= nil and not quantumV4TreadmillManager.destroyed and quantumV4TreadmillManager.config ~= nil and quantumV4TreadmillManager.config.idleFarm == true
 	end
 
 	local tbl12 = {at = 0, value = false}
@@ -16871,11 +17049,11 @@ local v18 = (function()
 			arg.flyMover = nil
 		end
 
-		local senaFlyCaptureHover = arg2 and arg2:FindFirstChild("SenaFlyCaptureHover")
+		local quantumFlyCaptureHover = arg2 and arg2:FindFirstChild("QuantumFlyCaptureHover")
 
-		if senaFlyCaptureHover then
+		if quantumFlyCaptureHover then
 			pcall(function()
-				senaFlyCaptureHover:Destroy()
+				quantumFlyCaptureHover:Destroy()
 			end)
 		end
 	end
@@ -16903,11 +17081,11 @@ local v18 = (function()
 			local v18 = arg:_root()
 
 			if v18 then
-				local senaFlyCaptureHover = v18:FindFirstChild("SenaFlyCaptureHover")
+				local quantumFlyCaptureHover = v18:FindFirstChild("QuantumFlyCaptureHover")
 
-				if senaFlyCaptureHover then
+				if quantumFlyCaptureHover then
 					pcall(function()
-						senaFlyCaptureHover:Destroy()
+						quantumFlyCaptureHover:Destroy()
 					end)
 				end
 
@@ -16940,8 +17118,8 @@ local v18 = (function()
 
 			if running then
 			else
-				local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-				running = if senaV4PlayerSteal then if senaV4PlayerSteal.running then true else running else running
+				local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+				running = if quantumV4PlayerSteal then if quantumV4PlayerSteal.running then true else running else running
 			end
 
 			if running then
@@ -17279,8 +17457,8 @@ local v18 = (function()
 	end
 
 	index._applySpeedMultiplier = function(arg)
-		local senaV4TreadmillManager = genv.__SenaV4TreadmillManager
-		if senaV4TreadmillManager and senaV4TreadmillManager.activeTreadmill ~= nil then
+		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
+		if quantumV4TreadmillManager and quantumV4TreadmillManager.activeTreadmill ~= nil then
 			return
 		end
 		local v18 = arg:_humanoid()
@@ -17331,24 +17509,24 @@ local v18 = (function()
 	return index
 end)().new()
 
-genv.__SenaV4MovementExtras = v18
+genv.__QuantumV4MovementExtras = v18
 
-if senaV4Config.FlyForCapture then
+if quantumV4Config.FlyForCapture then
 	v18:setFlyForCapture(true)
 end
 
-if senaV4Config.InstantGrab then
+if quantumV4Config.InstantGrab then
 	v18:setInstantGrab(true)
 end
 
-if senaV4Config.InfiniteJump then
+if quantumV4Config.InfiniteJump then
 	v18:setInfiniteJump(true)
 end
 
-walkSpeedMultiplier = senaV4Config.WalkSpeedMultiplier
+walkSpeedMultiplier = quantumV4Config.WalkSpeedMultiplier
 
 if walkSpeedMultiplier and walkSpeedMultiplier > 1 then
-	v18:setSpeedMultiplier(senaV4Config.WalkSpeedMultiplier)
+	v18:setSpeedMultiplier(quantumV4Config.WalkSpeedMultiplier)
 end
 
 v10 = (function()
@@ -17440,22 +17618,22 @@ v10 = (function()
 	end
 
 	index._skips = function(arg, arg2)
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
 
-		if senaV4EggRuntime then
-			if senaV4EggRuntime.instantPhase == "priming" then
+		if quantumV4EggRuntime then
+			if quantumV4EggRuntime.instantPhase == "priming" then
 				return true
 			end
 
-			if senaV4EggRuntime.enabled then
+			if quantumV4EggRuntime.enabled then
 				return true
-			elseif senaV4EggRuntime.running then
+			elseif quantumV4EggRuntime.running then
 				return true
 			end
 		end
 
-		local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-		if senaV4PlayerSteal and senaV4PlayerSteal.running then
+		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+		if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
 			return true
 		end
 
@@ -17483,7 +17661,7 @@ v10 = (function()
 				end)
 			end
 
-			clone.Name = "SenaAntiHitGhost"
+			clone.Name = "QuantumAntiHitGhost"
 
 			for i, descendant in ipairs(clone:GetDescendants()) do
 				if descendant:IsA("LuaSourceContainer") then
@@ -17730,51 +17908,51 @@ v10 = (function()
 	return index
 end)().new()
 
-genv.__SenaV4AntiHitGuard = v10
+genv.__QuantumV4AntiHitGuard = v10
 
-if senaV4Config.AntiHitGuard then
+if quantumV4Config.AntiHitGuard then
 	v10:setEnabled(true)
 end
 
-genv.__SenaV4PlayerSteal = v17
+genv.__QuantumV4PlayerSteal = v17
 
 do
 	local tbl12 = {at = 0, value = false}
 
-	genv.__SenaV4StealWantsCharacter = function()
-		local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
+	genv.__QuantumV4StealWantsCharacter = function()
+		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
 
-		if senaV4PlayerSteal then
-			if senaV4PlayerSteal.running then
+		if quantumV4PlayerSteal then
+			if quantumV4PlayerSteal.running then
 				return true
-			elseif senaV4PlayerSteal.wantsTarget then
+			elseif quantumV4PlayerSteal.wantsTarget then
 				return true
 			end
 		end
 
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
 
-		if senaV4EggRuntime and senaV4EggRuntime.enabled then
-			if senaV4EggRuntime.destroyed then
+		if quantumV4EggRuntime and quantumV4EggRuntime.enabled then
+			if quantumV4EggRuntime.destroyed then
 				return false
 			end
 		else
 			return false
 		end
 
-		local flag5 = senaV4EggRuntime.activeTween and not senaV4EggRuntime.activeTween.sharedTravel
+		local flag5 = quantumV4EggRuntime.activeTween and not quantumV4EggRuntime.activeTween.sharedTravel
 
-		if senaV4EggRuntime.running then
+		if quantumV4EggRuntime.running then
 			return true
 		elseif flag5 then
 			return true
-		elseif senaV4EggRuntime.carry then
-			if senaV4EggRuntime.carry.active then
+		elseif quantumV4EggRuntime.carry then
+			if quantumV4EggRuntime.carry.active then
 				return true
 			end
 		end
 
-		if type(senaV4EggRuntime._eggInventoryFull) == "function" and senaV4EggRuntime:_eggInventoryFull() then
+		if type(quantumV4EggRuntime._eggInventoryFull) == "function" and quantumV4EggRuntime:_eggInventoryFull() then
 			return false
 		end
 		local now = os.clock()
@@ -17784,65 +17962,65 @@ do
 		tbl12.at = now
 
 		local ok, result = pcall(function()
-			return senaV4EggRuntime:_wallOpen() and senaV4EggRuntime:_chooseTarget() or nil
+			return quantumV4EggRuntime:_wallOpen() and quantumV4EggRuntime:_chooseTarget() or nil
 		end)
 
 		tbl12.value = ok and result ~= nil
 		return tbl12.value
 	end
 
-	register = senaV4TaskLadder.register
+	register = quantumV4TaskLadder.register
 	tbl = {}
-	tbl.wants = genv.__SenaV4StealWantsCharacter
+	tbl.wants = genv.__QuantumV4StealWantsCharacter
 
 	tbl.active = function()
-		local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-		if senaV4PlayerSteal and senaV4PlayerSteal.running then
+		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+		if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
 			return true
 		end
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
 
-		if senaV4EggRuntime then
-			if senaV4EggRuntime.destroyed then
+		if quantumV4EggRuntime then
+			if quantumV4EggRuntime.destroyed then
 				return false
 			end
 		else
 			return false
 		end
 
-		local flag5 = senaV4EggRuntime.activeTween and not senaV4EggRuntime.activeTween.sharedTravel
-		return senaV4EggRuntime.running == true or flag5 == true or senaV4EggRuntime.carry ~= nil and senaV4EggRuntime.carry.active == true
+		local flag5 = quantumV4EggRuntime.activeTween and not quantumV4EggRuntime.activeTween.sharedTravel
+		return quantumV4EggRuntime.running == true or flag5 == true or quantumV4EggRuntime.carry ~= nil and quantumV4EggRuntime.carry.active == true
 	end
 
 	tbl.enabled = function()
-		local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
-		return senaV4EggRuntime ~= nil and senaV4EggRuntime.enabled == true or senaV4PlayerSteal ~= nil and senaV4PlayerSteal.enabled == true
+		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+		return quantumV4EggRuntime ~= nil and quantumV4EggRuntime.enabled == true or quantumV4PlayerSteal ~= nil and quantumV4PlayerSteal.enabled == true
 	end
 
 	tbl.status = function()
-		local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-		if senaV4PlayerSteal and senaV4PlayerSteal.running then
-			return tostring(senaV4PlayerSteal.status or "Stealing from a player")
+		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+		if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
+			return tostring(quantumV4PlayerSteal.status or "Stealing from a player")
 		end
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
-		return senaV4EggRuntime and senaV4EggRuntime.stats and tostring(senaV4EggRuntime.stats.status or "") or ""
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+		return quantumV4EggRuntime and quantumV4EggRuntime.stats and tostring(quantumV4EggRuntime.stats.status or "") or ""
 	end
 
 	register("auto_steal", tbl)
 end
 
-v13:setStealMode(senaV4Config.StealMode == "Semi Teleport" and "Instant" or senaV4Config.StealMode)
-v13:setSpeed(senaV4Config.TweenSpeedMultiplier or 60)
+v13:setStealMode(quantumV4Config.StealMode == "Semi Teleport" and "Instant" or quantumV4Config.StealMode)
+v13:setSpeed(quantumV4Config.TweenSpeedMultiplier or 60)
 
-if senaV4Config.StealMinValue and senaV4Config.StealMinValue > 0 then
-	v13:setMinValuePerSec(senaV4Config.StealMinValue)
+if quantumV4Config.StealMinValue and quantumV4Config.StealMinValue > 0 then
+	v13:setMinValuePerSec(quantumV4Config.StealMinValue)
 end
 
-if senaV4Config.StealAreas and not table.find(senaV4Config.StealAreas, "None") and #senaV4Config.StealAreas > 0 then
+if quantumV4Config.StealAreas and not table.find(quantumV4Config.StealAreas, "None") and #quantumV4Config.StealAreas > 0 then
 	local tbl12 = {}
 
-	for i, stealArea in ipairs(senaV4Config.StealAreas) do
+	for i, stealArea in ipairs(quantumV4Config.StealAreas) do
 		if stealArea ~= "None" then
 			table.insert(tbl12, stealArea)
 		end
@@ -17852,10 +18030,10 @@ if senaV4Config.StealAreas and not table.find(senaV4Config.StealAreas, "None") a
 	v13:setFilterEnabled("area", #tbl12 > 0)
 end
 
-if senaV4Config.StealRarities and not table.find(senaV4Config.StealRarities, "None") and #senaV4Config.StealRarities > 0 then
+if quantumV4Config.StealRarities and not table.find(quantumV4Config.StealRarities, "None") and #quantumV4Config.StealRarities > 0 then
 	local tbl12 = {}
 
-	for i, stealRarity in ipairs(senaV4Config.StealRarities) do
+	for i, stealRarity in ipairs(quantumV4Config.StealRarities) do
 		if stealRarity ~= "None" then
 			table.insert(tbl12, stealRarity)
 		end
@@ -17865,10 +18043,10 @@ if senaV4Config.StealRarities and not table.find(senaV4Config.StealRarities, "No
 	v13:setFilterEnabled("rarity", #tbl12 > 0)
 end
 
-if senaV4Config.StealNamesFilter and not table.find(senaV4Config.StealNamesFilter, "None") and #senaV4Config.StealNamesFilter > 0 then
+if quantumV4Config.StealNamesFilter and not table.find(quantumV4Config.StealNamesFilter, "None") and #quantumV4Config.StealNamesFilter > 0 then
 	local tbl12 = {}
 
-	for i, v19 in ipairs(senaV4Config.StealNamesFilter) do
+	for i, v19 in ipairs(quantumV4Config.StealNamesFilter) do
 		if v19 ~= "None" then
 			table.insert(tbl12, v19)
 		end
@@ -17878,7 +18056,7 @@ if senaV4Config.StealNamesFilter and not table.find(senaV4Config.StealNamesFilte
 	v13:setFilterEnabled("name", #tbl12 > 0)
 end
 
-genv.__SenaV4EggRuntimeCleanup = function()
+genv.__QuantumV4EggRuntimeCleanup = function()
 	if v13 then
 		pcall(v13.destroy, v13)
 	end
@@ -17887,16 +18065,16 @@ genv.__SenaV4EggRuntimeCleanup = function()
 		pcall(v14.destroy, v14)
 	end
 
-	if genv.__SenaV4EggRuntime == v13 then
-		genv.__SenaV4EggRuntime = nil
+	if genv.__QuantumV4EggRuntime == v13 then
+		genv.__QuantumV4EggRuntime = nil
 	end
 
-	if genv.__SenaV4TreadmillManager == v14 then
-		genv.__SenaV4TreadmillManager = nil
+	if genv.__QuantumV4TreadmillManager == v14 then
+		genv.__QuantumV4TreadmillManager = nil
 	end
 end
 
-genv.__SenaV4AntiGuardCleanup = function()
+genv.__QuantumV4AntiGuardCleanup = function()
 	if v15 then
 		pcall(v15.destroy, v15)
 	end
@@ -17905,19 +18083,19 @@ genv.__SenaV4AntiGuardCleanup = function()
 		pcall(v16.destroy, v16)
 	end
 
-	if genv.__SenaV4AntiGuard == v15 then
-		genv.__SenaV4AntiGuard = nil
+	if genv.__QuantumV4AntiGuard == v15 then
+		genv.__QuantumV4AntiGuard = nil
 	end
 
-	if genv.__SenaV4GodMode == v16 then
-		genv.__SenaV4GodMode = nil
+	if genv.__QuantumV4GodMode == v16 then
+		genv.__QuantumV4GodMode = nil
 	end
 end
 
 do
 	local str3 = "__FyyStealAnEggStartupProtectionLiteV2"
 	local n8 = 60
-	local senaV4StartupProtection = {}
+	local quantumV4StartupProtection = {}
 
 	local function fn62()
 		return getgenv and getgenv() or _G
@@ -17971,7 +18149,7 @@ do
 		return true
 	end
 
-	senaV4StartupProtection.install = function()
+	quantumV4StartupProtection.install = function()
 		local v19 = fn62()
 		local value = rawget(v19, str3)
 
@@ -18025,7 +18203,7 @@ do
 		return tbl12
 	end
 
-	senaV4StartupProtection.uninstall = function()
+	quantumV4StartupProtection.uninstall = function()
 		local value = rawget(fn62(), str3)
 
 		if type(value) == "table" then
@@ -18045,27 +18223,27 @@ do
 
 	(function()
 		local genv2 = getgenv and getgenv() or _G
-		genv2.__SenaV4AntiAfkGeneration = (genv2.__SenaV4AntiAfkGeneration or 0) + 1
-		genv2.__SenaV4AntiAfkEnabled = senaV4Config.AntiAFK
-		genv2.__SenaV4StartupProtection = senaV4StartupProtection
+		genv2.__QuantumV4AntiAfkGeneration = (genv2.__QuantumV4AntiAfkGeneration or 0) + 1
+		genv2.__QuantumV4AntiAfkEnabled = quantumV4Config.AntiAFK
+		genv2.__QuantumV4StartupProtection = quantumV4StartupProtection
 
-		genv2.__SenaV4SetAntiAfkEnabled = function(arg)
-			genv2.__SenaV4AntiAfkEnabled = arg == true
+		genv2.__QuantumV4SetAntiAfkEnabled = function(arg)
+			genv2.__QuantumV4AntiAfkEnabled = arg == true
 
 			if arg then
-				senaV4StartupProtection.install()
+				quantumV4StartupProtection.install()
 			else
-				senaV4StartupProtection.uninstall()
+				quantumV4StartupProtection.uninstall()
 			end
 		end
 
-		if senaV4Config.AntiAFK then
-			genv2.__SenaV4SetAntiAfkEnabled(true)
+		if quantumV4Config.AntiAFK then
+			genv2.__QuantumV4SetAntiAfkEnabled(true)
 		end
 	end)()
 end
 
-local v19 = senaV4Config
+local v19 = quantumV4Config
 local tbl12 = {}
 tbl12.TeleportService = TeleportService or game:GetService("TeleportService")
 tbl12.LP = localPlayer or Players.LocalPlayer
@@ -18073,7 +18251,7 @@ tbl12.Players = Players
 local v20 = tbl12
 
 local function fn62()
-	local str3 = "if game:GetAttribute(\"SenaBootQueued\") then return end\ngame:SetAttribute(\"SenaBootQueued\", true)\nrepeat task.wait(0.5) until game:IsLoaded()\ntask.wait(1.5)\nif getgenv then getgenv().SNE_AutoExecute = true end\nloadstring(game:HttpGet(\"https://raw.githubusercontent.com/QuantumPH2/UI/refs/heads/main/NewEraUI.lua\"))()\n"
+	local str3 = "if game:GetAttribute(\"QuantumBootQueued\") then return end\ngame:SetAttribute(\"QuantumBootQueued\", true)\nrepeat task.wait(0.5) until game:IsLoaded()\ntask.wait(1.5)\nif getgenv then getgenv().SNE_AutoExecute = true end\nloadstring(game:HttpGet(\"https://raw.githubusercontent.com/QuantumPH2/UI/refs/heads/main/NewEraUI.lua\"))()\n"
 
 	pcall(function()
 		if writefile then
@@ -18082,7 +18260,7 @@ local function fn62()
 			end)
 
 			pcall(function()
-				writefile("autoexecute/Sena_StealAnEgg.lua", str3)
+				writefile("autoexecute/Quantum_StealAnEgg.lua", str3)
 			end)
 		end
 	end)
@@ -18100,19 +18278,19 @@ local function fn63()
 	pcall(function()
 		if delfile then
 			pcall(function()
-				delfile("autoexec/Sena_StealAnEgg.lua")
+				delfile("autoexec/Quantum_StealAnEgg.lua")
 			end)
 
 			pcall(function()
-				delfile("autoexecute/Sena_StealAnEgg.lua")
+				delfile("autoexecute/Quantum_StealAnEgg.lua")
 			end)
 		elseif writefile then
 			pcall(function()
-				writefile("autoexec/Sena_StealAnEgg.lua", "")
+				writefile("autoexec/Quantum_StealAnEgg.lua", "")
 			end)
 
 			pcall(function()
-				writefile("autoexecute/Sena_StealAnEgg.lua", "")
+				writefile("autoexecute/Quantum_StealAnEgg.lua", "")
 			end)
 		end
 	end)
@@ -18198,7 +18376,7 @@ task.spawn(function()
 	end
 end)
 
-genv.__SenaV4PetBarn = (function()
+genv.__QuantumV4PetBarn = (function()
 	local Remotes = require(ReplicatedStorage.Shared.Remotes)
 
 	local tbl13 = {equipBest = function()
@@ -18255,11 +18433,11 @@ genv.__SenaV4PetBarn = (function()
 						local displayName = v25 and v25.Rarity and (v25.Rarity.DisplayName or v25.Rarity._id)
 						local flag6 = false
 
-						if senaV4Config.FavMode == "Species" then
-							local favSpecies = senaV4Config.FavSpecies or {}
+						if quantumV4Config.FavMode == "Species" then
+							local favSpecies = quantumV4Config.FavSpecies or {}
 							flag6 = if table.find(favSpecies, "All") then true else if table.find(favSpecies, v24.Category) then true else if v25 then if table.find(favSpecies, v25.DisplayName) then true else flag6 else flag6
 						else
-							local favRarities = senaV4Config.FavRarities or {}
+							local favRarities = quantumV4Config.FavRarities or {}
 							flag6 = if table.find(favRarities, "All") then true else if displayName then if table.find(favRarities, displayName) then true else flag6 else flag6
 						end
 
@@ -18379,7 +18557,7 @@ genv.__SenaV4PetBarn = (function()
 		if v21.FusionLocked then
 			return false, "Fusion locked"
 		end
-		local v22 = fn65(senaV4Config.FuseSelectedOnly, senaV4Config.FuseSpecies, senaV4Config.FuseRarities)
+		local v22 = fn65(quantumV4Config.FuseSelectedOnly, quantumV4Config.FuseSpecies, quantumV4Config.FuseRarities)
 		if not v22 then
 			return false, "No eligible group of 3"
 		end
@@ -18431,20 +18609,20 @@ genv.__SenaV4PetBarn = (function()
 		while fn2() do
 			local now = os.clock()
 
-			if senaV4Config.AutoEquipBest and now - n8 > 6 then
+			if quantumV4Config.AutoEquipBest and now - n8 > 6 then
 				pcall(tbl13.equipBest)
 				n8 = now
 			end
 
-			if senaV4Config.AutoClaimOffline then
+			if quantumV4Config.AutoClaimOffline then
 				pcall(tbl13.claimOffline)
 			end
 
-			if senaV4Config.AutoFavorite then
+			if quantumV4Config.AutoFavorite then
 				pcall(tbl13.favoriteSelected)
 			end
 
-			if senaV4Config.AutoFusePets then
+			if quantumV4Config.AutoFusePets then
 				pcall(tbl13.fuseOnePair)
 			end
 
@@ -18455,7 +18633,7 @@ genv.__SenaV4PetBarn = (function()
 	return tbl13
 end)()
 
-genv.__SenaV4Upgrades = (function()
+genv.__QuantumV4Upgrades = (function()
 	local Remotes = require(ReplicatedStorage.Shared.Remotes)
 
 	local tbl13 = {upgradeBase = function()
@@ -18489,11 +18667,11 @@ genv.__SenaV4Upgrades = (function()
 
 	task.spawn(function()
 		while fn2() do
-			if senaV4Config.AutoBaseUpgrade then
+			if quantumV4Config.AutoBaseUpgrade then
 				pcall(tbl13.upgradeBase)
 			end
 
-			if senaV4Config.AutoClaimAlmanac then
+			if quantumV4Config.AutoClaimAlmanac then
 				pcall(tbl13.claimAlmanac)
 			end
 
@@ -18504,11 +18682,11 @@ genv.__SenaV4Upgrades = (function()
 	return tbl13
 end)()
 
-genv.__SenaV4Roaming = (function()
+genv.__QuantumV4Roaming = (function()
 	local tbl13
 
 	tbl13 = {noclipConn = nil, setNoclip = function(arg)
-		senaV4Config.Noclip = arg == true
+		quantumV4Config.Noclip = arg == true
 
 		if tbl13.noclipConn then
 			pcall(function()
@@ -18518,14 +18696,14 @@ genv.__SenaV4Roaming = (function()
 			tbl13.noclipConn = nil
 		end
 
-		if not senaV4Config.Noclip then
+		if not quantumV4Config.Noclip then
 			local character = localPlayer.Character
 
 			if character then
 				for i, descendant in ipairs(character:GetDescendants()) do
-					if descendant:IsA("BasePart") and descendant:GetAttribute("SenaNoclip") then
+					if descendant:IsA("BasePart") and descendant:GetAttribute("QuantumNoclip") then
 						descendant.CanCollide = true
-						descendant:SetAttribute("SenaNoclip", nil)
+						descendant:SetAttribute("QuantumNoclip", nil)
 					end
 				end
 			end
@@ -18534,7 +18712,7 @@ genv.__SenaV4Roaming = (function()
 		end
 
 		tbl13.noclipConn = RunService.Stepped:Connect(function()
-			if not senaV4Config.Noclip then
+			if not quantumV4Config.Noclip then
 				return
 			end
 			local character = localPlayer.Character
@@ -18544,7 +18722,7 @@ genv.__SenaV4Roaming = (function()
 
 			for i, descendant in ipairs(character:GetDescendants()) do
 				if descendant:IsA("BasePart") and descendant.CanCollide then
-					descendant:SetAttribute("SenaNoclip", true)
+					descendant:SetAttribute("QuantumNoclip", true)
 					descendant.CanCollide = false
 				end
 			end
@@ -18630,18 +18808,18 @@ genv.__SenaV4Roaming = (function()
 		humanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 		return true
 	end, setBottingMode = function(arg)
-		senaV4Config.BottingMode = arg == true
-		local senaV4BottingOverlay = genv.__SenaV4BottingOverlay
+		quantumV4Config.BottingMode = arg == true
+		local quantumV4BottingOverlay = genv.__QuantumV4BottingOverlay
 
-		if senaV4BottingOverlay and senaV4BottingOverlay.Parent then
+		if quantumV4BottingOverlay and quantumV4BottingOverlay.Parent then
 			pcall(function()
-				senaV4BottingOverlay:Destroy()
+				quantumV4BottingOverlay:Destroy()
 			end)
 		end
 
-		genv.__SenaV4BottingOverlay = nil
+		genv.__QuantumV4BottingOverlay = nil
 
-		if not senaV4Config.BottingMode then
+		if not quantumV4Config.BottingMode then
 			pcall(function()
 				RunService:Set3dRenderingEnabled(true)
 			end)
@@ -18664,7 +18842,7 @@ genv.__SenaV4Roaming = (function()
 			return
 		end
 		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "SenaBottingOverlay"
+		screenGui.Name = "QuantumBottingOverlay"
 		screenGui.ResetOnSpawn = false
 		screenGui.IgnoreGuiInset = true
 		screenGui.DisplayOrder = -1
@@ -18676,12 +18854,12 @@ genv.__SenaV4Roaming = (function()
 		frame.BorderSizePixel = 0
 		frame.Active = false
 		frame.Parent = screenGui
-		genv.__SenaV4BottingOverlay = screenGui
+		genv.__QuantumV4BottingOverlay = screenGui
 	end}
 
 	task.spawn(function()
 		while fn2() do
-			if senaV4Config.AntiCutscene then
+			if quantumV4Config.AntiCutscene then
 				pcall(function()
 					local playerGui = localPlayer:FindFirstChild("PlayerGui")
 
@@ -18710,7 +18888,7 @@ genv.__SenaV4Roaming = (function()
 	return tbl13
 end)()
 
-genv.__SenaV4ScrambleRuntime = (function()
+genv.__QuantumV4ScrambleRuntime = (function()
 	local tbl13 = {snapAt = 0, snap = nil, status = "Idle", lastBuy = 0, active = false, wantsCharacter = false}
 
 	local function fn65()
@@ -18749,7 +18927,7 @@ genv.__SenaV4ScrambleRuntime = (function()
 	end
 
 	tbl13.buyTick = function()
-		local scrambleBuyList = senaV4Config.ScrambleBuyList
+		local scrambleBuyList = quantumV4Config.ScrambleBuyList
 
 		if scrambleBuyList then
 			if #scrambleBuyList == 0 then
@@ -18775,7 +18953,7 @@ genv.__SenaV4ScrambleRuntime = (function()
 		local samples = v21.State.Samples or 0
 
 		for k, v22 in pairs(v21.Shop) do
-			if not senaV4Config.ScrambleAutoBuy then
+			if not quantumV4Config.ScrambleAutoBuy then
 				return
 			end
 			local str3 = tostring(v22.Label)
@@ -18814,7 +18992,7 @@ genv.__SenaV4ScrambleRuntime = (function()
 
 	task.spawn(function()
 		while fn2() do
-			if senaV4Config.ScrambleAutoBuy and not pcall(function()
+			if quantumV4Config.ScrambleAutoBuy and not pcall(function()
 				if not tbl13.live() then
 					tbl13.status = "Event not active"
 					return
@@ -18832,7 +19010,7 @@ genv.__SenaV4ScrambleRuntime = (function()
 end)()
 
 do
-	local senaV4RaceRuntime = {status = "Idle", lastResult = "No race yet", active = false, dist = nil, speed = 0, stuns = 0, corrections = 0, mount = nil, path = nil, leftFor = nil, lastJoinTry = 0, lastClaim = 0, lastBuy = 0, startedAt = nil, JOIN_LATE_SECONDS = 10, FIELD_SETTLE_SECONDS = 10, DODGE_STUDS = 10, CATCHUP_SPEED = 200, FINISH_RELEASE_STUDS = 150, RIDE_SPEED = 140, INPUT_PULSE_SECONDS = 1.5, RELEASE_AT_FINISH = false, LEGIT = true, LEAD_START = 200, LEAD_RETAKE = 100, BOOST_MAX_SECONDS = 18}
+	local quantumV4RaceRuntime = {status = "Idle", lastResult = "No race yet", active = false, dist = nil, speed = 0, stuns = 0, corrections = 0, mount = nil, path = nil, leftFor = nil, lastJoinTry = 0, lastClaim = 0, lastBuy = 0, startedAt = nil, JOIN_LATE_SECONDS = 10, FIELD_SETTLE_SECONDS = 10, DODGE_STUDS = 10, CATCHUP_SPEED = 200, FINISH_RELEASE_STUDS = 150, RIDE_SPEED = 140, INPUT_PULSE_SECONDS = 1.5, RELEASE_AT_FINISH = false, LEGIT = true, LEAD_START = 200, LEAD_RETAKE = 100, BOOST_MAX_SECONDS = 18}
 
 	local function fn65(...)
 		local tbl13 = {...}
@@ -18850,8 +19028,8 @@ do
 	end
 
 	local function fn66()
-		if senaV4RaceRuntime.m then
-			return senaV4RaceRuntime.m
+		if quantumV4RaceRuntime.m then
+			return quantumV4RaceRuntime.m
 		end
 		local m = {Remotes = fn65("Shared", "Remotes"), Save = fn65("Shared", "Save"), RR = fn65("Data", "RaceRally"), MR = fn65("Data", "MountRace"), Path = fn65("Shared", "Modules", "RaceTrackPath"), Flags = fn65("Shared", "Flags", "MountRaceFlags"), Elig = fn65("Shared", "Util", "RaceRallyEligibility"), Power = fn65("Data", "RacePowerUps")}
 
@@ -18871,7 +19049,7 @@ do
 			return nil
 		end
 
-		senaV4RaceRuntime.m = m
+		quantumV4RaceRuntime.m = m
 		return m
 	end
 
@@ -18884,12 +19062,12 @@ do
 		return ok and type(result) == "table" and result or nil
 	end
 
-	senaV4RaceRuntime.inRace = function()
+	quantumV4RaceRuntime.inRace = function()
 		local v21 = fn66()
 		return v21 ~= nil and type(fn67(v21, "RaceId", "RaceId")) == "string"
 	end
 
-	senaV4RaceRuntime.joinLeft = function()
+	quantumV4RaceRuntime.joinLeft = function()
 		local v21 = fn66()
 		if not v21 then
 			return 0
@@ -18901,25 +19079,25 @@ do
 		return math.max(0, attribute - Workspace:GetServerTimeNow())
 	end
 
-	senaV4RaceRuntime.fieldSettling = function()
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
+	quantumV4RaceRuntime.fieldSettling = function()
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
 
-		if senaV4EggRuntime then
-			if senaV4EggRuntime.destroyed then
+		if quantumV4EggRuntime then
+			if quantumV4EggRuntime.destroyed then
 				return nil
 			end
 		else
 			return nil
 		end
 
-		if senaV4EggRuntime.resetBlocked then
+		if quantumV4EggRuntime.resetBlocked then
 			return 1 / 0
 		end
-		local n8 = os.clock() - (tonumber(senaV4EggRuntime.gateOpenAt) or 0)
-		return n8 < senaV4RaceRuntime.FIELD_SETTLE_SECONDS and senaV4RaceRuntime.FIELD_SETTLE_SECONDS - n8 or nil
+		local n8 = os.clock() - (tonumber(quantumV4EggRuntime.gateOpenAt) or 0)
+		return n8 < quantumV4RaceRuntime.FIELD_SETTLE_SECONDS and quantumV4RaceRuntime.FIELD_SETTLE_SECONDS - n8 or nil
 	end
 
-	senaV4RaceRuntime.roundId = function()
+	quantumV4RaceRuntime.roundId = function()
 		local ok, result = pcall(function()
 			return fn65("Shared", "Util", "RaceRallySchedule").Window(Workspace:GetServerTimeNow())
 		end)
@@ -18927,22 +19105,22 @@ do
 		return ok and result or nil
 	end
 
-	senaV4RaceRuntime.racedThisRound = function()
-		local v21 = senaV4RaceRuntime.roundId()
-		return v21 ~= nil and senaV4RaceRuntime.racedRound == v21
+	quantumV4RaceRuntime.racedThisRound = function()
+		local v21 = quantumV4RaceRuntime.roundId()
+		return v21 ~= nil and quantumV4RaceRuntime.racedRound == v21
 	end
 
-	senaV4RaceRuntime.wantsJoin = function()
-		local v21 = senaV4RaceRuntime.joinLeft()
+	quantumV4RaceRuntime.wantsJoin = function()
+		local v21 = quantumV4RaceRuntime.joinLeft()
 		if v21 <= 0 then
 			return false
 		end
 
-		if senaV4RaceRuntime.racedThisRound() then
+		if quantumV4RaceRuntime.racedThisRound() then
 			return false
 		end
 
-		if v21 > senaV4RaceRuntime.JOIN_LATE_SECONDS and senaV4RaceRuntime.fieldSettling() then
+		if v21 > quantumV4RaceRuntime.JOIN_LATE_SECONDS and quantumV4RaceRuntime.fieldSettling() then
 			return false
 		end
 		local v22 = fn66()
@@ -18950,8 +19128,8 @@ do
 			return false
 		end
 
-		if senaV4RaceRuntime.eligibleAt and os.clock() - senaV4RaceRuntime.eligibleAt < 10 then
-			return senaV4RaceRuntime.eligible
+		if quantumV4RaceRuntime.eligibleAt and os.clock() - quantumV4RaceRuntime.eligibleAt < 10 then
+			return quantumV4RaceRuntime.eligible
 		end
 		local v23 = fn68(v22)
 
@@ -18959,31 +19137,31 @@ do
 			return v22.Elig == nil or v22.Elig.IsEligible(tonumber(v23 and v23.SpeedPower) or 0)
 		end)
 
-		senaV4RaceRuntime.eligible, senaV4RaceRuntime.eligibleAt = ok and result == true, os.clock()
-		return senaV4RaceRuntime.eligible
+		quantumV4RaceRuntime.eligible, quantumV4RaceRuntime.eligibleAt = ok and result == true, os.clock()
+		return quantumV4RaceRuntime.eligible
 	end
 
-	senaV4RaceRuntime.join = function(arg)
-		if os.clock() - senaV4RaceRuntime.lastJoinTry < 2 then
+	quantumV4RaceRuntime.join = function(arg)
+		if os.clock() - quantumV4RaceRuntime.lastJoinTry < 2 then
 			return
 		end
-		local senaV4TreadmillManager = genv.__SenaV4TreadmillManager
+		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
 
 		local ok, result = pcall(function()
-			return senaV4TreadmillManager and not senaV4TreadmillManager.destroyed and senaV4TreadmillManager:isEngaged() == true
+			return quantumV4TreadmillManager and not quantumV4TreadmillManager.destroyed and quantumV4TreadmillManager:isEngaged() == true
 		end)
 
 		if ok and result then
-			senaV4RaceRuntime.status = "Leaving treadmill for the race"
+			quantumV4RaceRuntime.status = "Leaving treadmill for the race"
 			return
 		end
-		senaV4RaceRuntime.lastJoinTry = os.clock()
+		quantumV4RaceRuntime.lastJoinTry = os.clock()
 		local v21 = fn68(arg)
 
 		if arg.Elig and v21 then
 			local ok2, result2 = pcall(arg.Elig.IsEligible, tonumber(v21.SpeedPower) or 0)
 			if ok2 and result2 ~= true then
-				senaV4RaceRuntime.status = "Not eligible yet (need more speed)"
+				quantumV4RaceRuntime.status = "Not eligible yet (need more speed)"
 				return
 			end
 		end
@@ -19014,10 +19192,10 @@ do
 		end
 
 		ok = Workspace:GetAttribute(arg.RR.Attributes.JoinEndsAt)
-		senaV4RaceRuntime.joinTries = (senaV4RaceRuntime.joinWindow == ok and senaV4RaceRuntime.joinTries or 0) + 1
-		senaV4RaceRuntime.joinWindow = ok
+		quantumV4RaceRuntime.joinTries = (quantumV4RaceRuntime.joinWindow == ok and quantumV4RaceRuntime.joinTries or 0) + 1
+		quantumV4RaceRuntime.joinWindow = ok
 
-		if senaV4RaceRuntime.joinTries > 2 and humanoid then
+		if quantumV4RaceRuntime.joinTries > 2 and humanoid then
 			local hitbox = raceRallyPortal:FindFirstChild("Hitbox")
 
 			arg, ok = pcall(function()
@@ -19025,33 +19203,33 @@ do
 			end)
 
 			if arg and (ok and (humanoidRootPart.Position - ok).Magnitude > 12) then
-				senaV4RaceRuntime.status = "Going to the race portal"
+				quantumV4RaceRuntime.status = "Going to the race portal"
 
 				local function fn70()
 					local v22 = fn2()
-					return (if v22 then not senaV4Config.RaceAuto else not v22) or senaV4RaceRuntime.inRace() or senaV4RaceRuntime.joinLeft() <= 0
+					return (if v22 then not quantumV4Config.RaceAuto else not v22) or quantumV4RaceRuntime.inRace() or quantumV4RaceRuntime.joinLeft() <= 0
 				end
 
 				pcall(fn38, humanoidRootPart, humanoid, CFrame.new(ok + Vector3.new(0, 3, 0)), fn70, false, nil, false)
-				if senaV4RaceRuntime.inRace() then
+				if quantumV4RaceRuntime.inRace() then
 					return
 				end
 			end
 		end
 
 		fn69()
-		senaV4RaceRuntime.status = "Joining race"
+		quantumV4RaceRuntime.status = "Joining race"
 	end
 
-	senaV4RaceRuntime.findControls = function()
-		if senaV4RaceRuntime.controls then
-			return senaV4RaceRuntime.controls
+	quantumV4RaceRuntime.findControls = function()
+		if quantumV4RaceRuntime.controls then
+			return quantumV4RaceRuntime.controls
 		end
 
-		if os.clock() - (senaV4RaceRuntime.lastControlsSearch or 0) < 1 then
+		if os.clock() - (quantumV4RaceRuntime.lastControlsSearch or 0) < 1 then
 			return nil
 		end
-		senaV4RaceRuntime.lastControlsSearch = os.clock()
+		quantumV4RaceRuntime.lastControlsSearch = os.clock()
 
 		if type(getgc) ~= "function" then
 			return nil
@@ -19073,7 +19251,7 @@ do
 							for i2 = 1, 6, 1 do
 								local ok3, controls_ = pcall(debug.getupvalue, v21, i2)
 								if ok3 and (type(controls_) == "table" and (rawget(controls_, "activeController") ~= nil and controls_.GetMoveVector ~= nil)) then
-									senaV4RaceRuntime.controls = controls_
+									quantumV4RaceRuntime.controls = controls_
 									return
 								end
 							end
@@ -19081,28 +19259,28 @@ do
 					end
 				end
 			end
-		end) and senaV4RaceRuntime.controls or nil
+		end) and quantumV4RaceRuntime.controls or nil
 	end
 
-	senaV4RaceRuntime.releaseControls = function()
-		local controls_ = senaV4RaceRuntime.controls
+	quantumV4RaceRuntime.releaseControls = function()
+		local controls_ = quantumV4RaceRuntime.controls
 
-		if controls_ and rawget(controls_, "GetMoveVector") == senaV4RaceRuntime.finishMove then
+		if controls_ and rawget(controls_, "GetMoveVector") == quantumV4RaceRuntime.finishMove then
 			controls_.GetMoveVector = nil
 		end
 
 		local value = controls_ and rawget(controls_, "activeController")
 
-		if type(value) == "table" and value.moveVector == senaV4RaceRuntime.finishInput then
+		if type(value) == "table" and value.moveVector == quantumV4RaceRuntime.finishInput then
 			value.moveVector = Vector3.new(0, 0, 0)
 		end
 
-		senaV4RaceRuntime.finishMove = nil
-		senaV4RaceRuntime.finishInput = nil
+		quantumV4RaceRuntime.finishMove = nil
+		quantumV4RaceRuntime.finishInput = nil
 	end
 
-	senaV4RaceRuntime.rivalGap = function(arg)
-		local path = senaV4RaceRuntime.path
+	quantumV4RaceRuntime.rivalGap = function(arg)
+		local path = quantumV4RaceRuntime.path
 
 		if arg then
 			if not path then
@@ -19114,9 +19292,9 @@ do
 
 		local length = path.Length
 		local now = os.clock()
-		local rivals = senaV4RaceRuntime.rivals
+		local rivals = quantumV4RaceRuntime.rivals
 
-		if if rivals then now - (senaV4RaceRuntime.rivalsAt or 0) > 2.5 else not rivals then
+		if if rivals then now - (quantumV4RaceRuntime.rivalsAt or 0) > 2.5 else not rivals then
 			local rivals2 = {}
 			local character = localPlayer.Character
 
@@ -19136,13 +19314,13 @@ do
 				end
 			end)
 
-			senaV4RaceRuntime.rivals = rivals2
-			senaV4RaceRuntime.rivalsAt = now
+			quantumV4RaceRuntime.rivals = rivals2
+			quantumV4RaceRuntime.rivalsAt = now
 		end
 
 		now, rivals = false
 
-		for i, rival in ipairs(senaV4RaceRuntime.rivals) do
+		for i, rival in ipairs(quantumV4RaceRuntime.rivals) do
 			if rival.Parent then
 				local ok, result = pcall(path.Project, path, rival.Position, arg, 150, 150)
 
@@ -19167,31 +19345,31 @@ do
 		return rivals
 	end
 
-	senaV4RaceRuntime.decideSpeed = function()
+	quantumV4RaceRuntime.decideSpeed = function()
 		local n8 = tonumber(localPlayer:GetAttribute("RacePlace")) or 1
-		local v21 = senaV4RaceRuntime.rivalGap(senaV4RaceRuntime.legitProg)
+		local v21 = quantumV4RaceRuntime.rivalGap(quantumV4RaceRuntime.legitProg)
 		local now = os.clock()
 
-		if senaV4RaceRuntime.boosting then
-			senaV4RaceRuntime.boostStartedAt = senaV4RaceRuntime.boostStartedAt or now
+		if quantumV4RaceRuntime.boosting then
+			quantumV4RaceRuntime.boostStartedAt = quantumV4RaceRuntime.boostStartedAt or now
 
-			if n8 == 1 and v21 ~= nil and v21 >= (senaV4RaceRuntime.leadTarget or senaV4RaceRuntime.LEAD_START) or now - senaV4RaceRuntime.boostStartedAt > senaV4RaceRuntime.BOOST_MAX_SECONDS then
-				senaV4RaceRuntime.boosting = false
-				senaV4RaceRuntime.leadDone = true
-				senaV4RaceRuntime.leadTarget = senaV4RaceRuntime.LEAD_RETAKE
-				senaV4RaceRuntime.boostStartedAt = nil
+			if n8 == 1 and v21 ~= nil and v21 >= (quantumV4RaceRuntime.leadTarget or quantumV4RaceRuntime.LEAD_START) or now - quantumV4RaceRuntime.boostStartedAt > quantumV4RaceRuntime.BOOST_MAX_SECONDS then
+				quantumV4RaceRuntime.boosting = false
+				quantumV4RaceRuntime.leadDone = true
+				quantumV4RaceRuntime.leadTarget = quantumV4RaceRuntime.LEAD_RETAKE
+				quantumV4RaceRuntime.boostStartedAt = nil
 			end
 		elseif n8 > 1 then
-			senaV4RaceRuntime.boosting = true
-			senaV4RaceRuntime.boostStartedAt = now
+			quantumV4RaceRuntime.boosting = true
+			quantumV4RaceRuntime.boostStartedAt = now
 		end
 
-		return senaV4RaceRuntime.boosting and senaV4RaceRuntime.CATCHUP_SPEED or senaV4RaceRuntime.RIDE_SPEED
+		return quantumV4RaceRuntime.boosting and quantumV4RaceRuntime.CATCHUP_SPEED or quantumV4RaceRuntime.RIDE_SPEED
 	end
 
-	senaV4RaceRuntime.legitStep = function(arg)
-		local v21 = senaV4RaceRuntime.findControls()
-		local path = senaV4RaceRuntime.path
+	quantumV4RaceRuntime.legitStep = function(arg)
+		local v21 = quantumV4RaceRuntime.findControls()
+		local path = quantumV4RaceRuntime.path
 		local character = localPlayer.Character
 		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
 
@@ -19211,10 +19389,10 @@ do
 			arg.Touch = true
 		end
 
-		local v22 = senaV4RaceRuntime.decideSpeed()
+		local v22 = quantumV4RaceRuntime.decideSpeed()
 
-		if senaV4RaceRuntime.flagsSet ~= v22 then
-			senaV4RaceRuntime.flagsSet = v22
+		if quantumV4RaceRuntime.flagsSet ~= v22 then
+			quantumV4RaceRuntime.flagsSet = v22
 
 			pcall(function()
 				local MountRaceFlags = require(ReplicatedStorage.Shared.Flags.MountRaceFlags)
@@ -19231,25 +19409,25 @@ do
 
 		local position = humanoidRootPart.Position
 		local now = os.clock()
-		local legitProg = senaV4RaceRuntime.legitProg
+		local legitProg = quantumV4RaceRuntime.legitProg
 
-		if if legitProg then now - (senaV4RaceRuntime.legitFull or 0) > 0.5 else not legitProg then
+		if if legitProg then now - (quantumV4RaceRuntime.legitFull or 0) > 0.5 else not legitProg then
 			local ok, result = pcall(path.Project, path, position, 0, path.Length, path.Length)
 
 			if ok and type(result) == "number" then
-				senaV4RaceRuntime.legitProg = result % path.Length
+				quantumV4RaceRuntime.legitProg = result % path.Length
 			end
 
-			senaV4RaceRuntime.legitFull = now
+			quantumV4RaceRuntime.legitFull = now
 		else
-			local ok, result = pcall(path.Project, path, position, senaV4RaceRuntime.legitProg, 40, 120)
+			local ok, result = pcall(path.Project, path, position, quantumV4RaceRuntime.legitProg, 40, 120)
 
 			if ok and type(result) == "number" then
-				senaV4RaceRuntime.legitProg = result % path.Length
+				quantumV4RaceRuntime.legitProg = result % path.Length
 			end
 		end
 
-		local legitProg2 = senaV4RaceRuntime.legitProg
+		local legitProg2 = quantumV4RaceRuntime.legitProg
 		if not legitProg2 then
 			return
 		end
@@ -19263,7 +19441,7 @@ do
 		humanoidRootPart = false
 		raceMount = 0
 
-		for i, v24 in ipairs(senaV4RaceRuntime.hazards()) do
+		for i, v24 in ipairs(quantumV4RaceRuntime.hazards()) do
 			local ok, result = pcall(path.Project, path, v24.pos, legitProg2, 10, 110)
 
 			if ok and type(result) == "number" then
@@ -19303,40 +19481,40 @@ do
 			end
 		end
 
-		senaV4RaceRuntime.legitSteer = (senaV4RaceRuntime.legitSteer or 0) + (lookVector - (senaV4RaceRuntime.legitSteer or 0)) * 0.35
-		local legitSteer = senaV4RaceRuntime.legitSteer
-		senaV4RaceRuntime.finishInput = Vector3.new(legitSteer, 0, raceMount)
+		quantumV4RaceRuntime.legitSteer = (quantumV4RaceRuntime.legitSteer or 0) + (lookVector - (quantumV4RaceRuntime.legitSteer or 0)) * 0.35
+		local legitSteer = quantumV4RaceRuntime.legitSteer
+		quantumV4RaceRuntime.finishInput = Vector3.new(legitSteer, 0, raceMount)
 
-		if rawget(v21, "GetMoveVector") ~= senaV4RaceRuntime.finishMove then
-			function senaV4RaceRuntime.finishMove()
-				return senaV4RaceRuntime.finishInput or Vector3.new(0, 0, -1)
+		if rawget(v21, "GetMoveVector") ~= quantumV4RaceRuntime.finishMove then
+			function quantumV4RaceRuntime.finishMove()
+				return quantumV4RaceRuntime.finishInput or Vector3.new(0, 0, -1)
 			end
 
-			v21.GetMoveVector = senaV4RaceRuntime.finishMove
+			v21.GetMoveVector = quantumV4RaceRuntime.finishMove
 		end
 
 		local value = rawget(v21, "activeController")
 
 		if type(value) == "table" then
-			value.moveVector = senaV4RaceRuntime.finishInput
+			value.moveVector = quantumV4RaceRuntime.finishInput
 		end
 
 		if arg and type(arg.Jump) == "function" then
-			for i, v24 in ipairs(senaV4RaceRuntime.jumpProgs or {}) do
-				if (v24 - legitProg2) % length <= 10 and (magnitude > 40 and (senaV4RaceRuntime.jumpedAt[v24] or 0) < now - 3) then
-					senaV4RaceRuntime.jumpedAt[v24] = now
+			for i, v24 in ipairs(quantumV4RaceRuntime.jumpProgs or {}) do
+				if (v24 - legitProg2) % length <= 10 and (magnitude > 40 and (quantumV4RaceRuntime.jumpedAt[v24] or 0) < now - 3) then
+					quantumV4RaceRuntime.jumpedAt[v24] = now
 					pcall(arg.Jump, arg)
 				end
 			end
 		end
 
-		senaV4RaceRuntime.status = string.format("Racing (legit)  ·  Lap %s  ·  Place %s", tostring(localPlayer:GetAttribute("RaceLap") or "?"), tostring(localPlayer:GetAttribute("RacePlace") or "?"))
+		quantumV4RaceRuntime.status = string.format("Racing (legit)  ·  Lap %s  ·  Place %s", tostring(localPlayer:GetAttribute("RaceLap") or "?"), tostring(localPlayer:GetAttribute("RacePlace") or "?"))
 	end
 
-	senaV4RaceRuntime.findJumps = function()
-		senaV4RaceRuntime.jumpProgs = {}
-		senaV4RaceRuntime.jumpedAt = {}
-		local path = senaV4RaceRuntime.path
+	quantumV4RaceRuntime.findJumps = function()
+		quantumV4RaceRuntime.jumpProgs = {}
+		quantumV4RaceRuntime.jumpedAt = {}
+		local path = quantumV4RaceRuntime.path
 		local raceTrack = Workspace:FindFirstChild("RaceTrack")
 
 		if path then
@@ -19371,22 +19549,22 @@ do
 						end
 					end
 
-					senaV4RaceRuntime.jumpProgs[#senaV4RaceRuntime.jumpProgs + 1] = ((v21 or n8) - 8) % path.Length
+					quantumV4RaceRuntime.jumpProgs[#quantumV4RaceRuntime.jumpProgs + 1] = ((v21 or n8) - 8) % path.Length
 				end
 			end
 		end
 	end
 
-	senaV4RaceRuntime.findMount = function()
-		local mount = senaV4RaceRuntime.mount
+	quantumV4RaceRuntime.findMount = function()
+		local mount = quantumV4RaceRuntime.mount
 		if mount and (typeof(mount.Drive) == "Instance" and mount.Drive.Parent) then
 			return mount
 		end
-		senaV4RaceRuntime.mount = nil
-		if os.clock() - (senaV4RaceRuntime.lastMountSearch or 0) < 0.5 then
+		quantumV4RaceRuntime.mount = nil
+		if os.clock() - (quantumV4RaceRuntime.lastMountSearch or 0) < 0.5 then
 			return nil
 		end
-		senaV4RaceRuntime.lastMountSearch = os.clock()
+		quantumV4RaceRuntime.lastMountSearch = os.clock()
 		mount = nil
 
 		if type(filtergc) == "function" then
@@ -19414,24 +19592,24 @@ do
 		end
 
 		if type(mount) ~= "table" then
-			senaV4RaceRuntime.status = "Your executor can't ride the race (no filtergc/getgc)"
+			quantumV4RaceRuntime.status = "Your executor can't ride the race (no filtergc/getgc)"
 			return nil
 		end
 
 		for i, v21 in ipairs(mount) do
 			if typeof(v21.Drive) == "Instance" and v21.Drive.Parent then
-				senaV4RaceRuntime.mount = v21
+				quantumV4RaceRuntime.mount = v21
 				break
 			end
 		end
 
-		return senaV4RaceRuntime.mount
+		return quantumV4RaceRuntime.mount
 	end
 
-	senaV4RaceRuntime.hazards = function()
+	quantumV4RaceRuntime.hazards = function()
 		local now = os.clock()
-		if senaV4RaceRuntime.hazardCache and now - senaV4RaceRuntime.hazardAt < 0.2 then
-			return senaV4RaceRuntime.hazardCache
+		if quantumV4RaceRuntime.hazardCache and now - quantumV4RaceRuntime.hazardAt < 0.2 then
+			return quantumV4RaceRuntime.hazardCache
 		end
 		local hazardCache = {}
 		local racePowerUpFX = Workspace:FindFirstChild("RacePowerUpFX")
@@ -19463,17 +19641,17 @@ do
 			end
 		end
 
-		senaV4RaceRuntime.hazardCache = hazardCache
-		senaV4RaceRuntime.hazardAt = now
+		quantumV4RaceRuntime.hazardCache = hazardCache
+		quantumV4RaceRuntime.hazardAt = now
 		return hazardCache
 	end
 
-	senaV4RaceRuntime.step = function(arg, arg2)
+	quantumV4RaceRuntime.step = function(arg, arg2)
 		local v21 = fn66()
 		local root = arg.Rig and arg.Rig.Root
 
 		if v21 then
-			if senaV4RaceRuntime.path then
+			if quantumV4RaceRuntime.path then
 				if not root then
 					return
 				end
@@ -19485,71 +19663,71 @@ do
 		end
 
 		if arg:IsHeld() then
-			senaV4RaceRuntime.dist = nil
+			quantumV4RaceRuntime.dist = nil
 			return
 		end
-		local path = senaV4RaceRuntime.path
+		local path = quantumV4RaceRuntime.path
 		local topSpeed = v21.Flags and v21.Flags.TopSpeed and v21.Flags.TopSpeed:Get() or 135
 
-		if not senaV4RaceRuntime.dist then
+		if not quantumV4RaceRuntime.dist then
 			local ok, result = pcall(path.Project, path, root.Position, 0, path.Length, path.Length)
-			senaV4RaceRuntime.dist = ok and type(result) == "number" and result or 0
-			senaV4RaceRuntime.speed = math.max(tonumber(arg.Speed) or 0, topSpeed * 0.5)
+			quantumV4RaceRuntime.dist = ok and type(result) == "number" and result or 0
+			quantumV4RaceRuntime.speed = math.max(tonumber(arg.Speed) or 0, topSpeed * 0.5)
 		end
 
-		if (path:FrameAt(senaV4RaceRuntime.dist).Position - root.Position).Magnitude > 45 then
-			local ok, dist = pcall(path.Project, path, root.Position, senaV4RaceRuntime.dist, 80, 220)
+		if (path:FrameAt(quantumV4RaceRuntime.dist).Position - root.Position).Magnitude > 45 then
+			local ok, dist = pcall(path.Project, path, root.Position, quantumV4RaceRuntime.dist, 80, 220)
 
 			if ok and type(dist) == "number" then
-				senaV4RaceRuntime.dist = dist
+				quantumV4RaceRuntime.dist = dist
 			end
 		end
 
-		local scale = senaV4RaceRuntime.scale or 1
-		senaV4RaceRuntime.speed = senaV4RaceRuntime.speed + (topSpeed * scale - senaV4RaceRuntime.speed) * math.min(1, arg2 * 1.5)
-		senaV4RaceRuntime.dist = senaV4RaceRuntime.dist + senaV4RaceRuntime.speed * arg2
-		local v22 = path:FrameAt(senaV4RaceRuntime.dist)
-		local v23 = path:FrameAt(senaV4RaceRuntime.dist + 20)
+		local scale = quantumV4RaceRuntime.scale or 1
+		quantumV4RaceRuntime.speed = quantumV4RaceRuntime.speed + (topSpeed * scale - quantumV4RaceRuntime.speed) * math.min(1, arg2 * 1.5)
+		quantumV4RaceRuntime.dist = quantumV4RaceRuntime.dist + quantumV4RaceRuntime.speed * arg2
+		local v22 = path:FrameAt(quantumV4RaceRuntime.dist)
+		local v23 = path:FrameAt(quantumV4RaceRuntime.dist + 20)
 		local upVector = v22.UpVector
 		local rightVector = v22.RightVector
 		local v24 = if rightVector.Magnitude < 0.001 then v22.LookVector:Cross(upVector) else rightVector
-		local n8, v25 = path:FrameAt(senaV4RaceRuntime.dist + math.clamp(senaV4RaceRuntime.speed * 0.6, 60, 200)).Position + upVector * 2.5
+		local n8, v25 = path:FrameAt(quantumV4RaceRuntime.dist + math.clamp(quantumV4RaceRuntime.speed * 0.6, 60, 200)).Position + upVector * 2.5
 
-		for i, v26 in ipairs(senaV4RaceRuntime.hazards()) do
+		for i, v26 in ipairs(quantumV4RaceRuntime.hazards()) do
 			path = v26.pos - n8
 			local n9 = math.abs(path:Dot((v23.Position - v22.Position).Unit))
 			local v27 = path:Dot(v24)
 			v25 = if n9 < v26.radius + 30 then if math.abs(v27) < v26.radius + 10 then if v25 then if math.abs(v27) < math.abs(v25) then v27 else v25 else v27 else v25 else v25
 		end
 
-		local v26 = if v25 then v25 > 0 and -senaV4RaceRuntime.DODGE_STUDS or senaV4RaceRuntime.DODGE_STUDS else 0
-		senaV4RaceRuntime.lateral = (senaV4RaceRuntime.lateral or 0) + (v26 - (senaV4RaceRuntime.lateral or 0)) * math.min(1, arg2 * 3)
+		local v26 = if v25 then v25 > 0 and -quantumV4RaceRuntime.DODGE_STUDS or quantumV4RaceRuntime.DODGE_STUDS else 0
+		quantumV4RaceRuntime.lateral = (quantumV4RaceRuntime.lateral or 0) + (v26 - (quantumV4RaceRuntime.lateral or 0)) * math.min(1, arg2 * 3)
 		local n9 = 2.5
 		local character = localPlayer.Character
 		local raceMount = character and character:FindFirstChild("RaceMount")
 		local hitbox = raceMount and raceMount:FindFirstChild("Hitbox") or arg.Rig and arg.Rig.Mount and arg.Rig.Mount:FindFirstChild("Hitbox")
 
 		local function fn69(arg3)
-			if not senaV4RaceRuntime.roadParams then
+			if not quantumV4RaceRuntime.roadParams then
 				local raceTrack = Workspace:FindFirstChild("RaceTrack")
 				local raycastParams = RaycastParams.new()
 				raycastParams.FilterType = Enum.RaycastFilterType.Include
 				raycastParams.FilterDescendantsInstances = {raceTrack and raceTrack:FindFirstChild("Track")}
-				senaV4RaceRuntime.roadParams = raycastParams
+				quantumV4RaceRuntime.roadParams = raycastParams
 			end
 
-			local hit = Workspace:Raycast(arg3 + upVector * 60, -upVector * 120, senaV4RaceRuntime.roadParams)
+			local hit = Workspace:Raycast(arg3 + upVector * 60, -upVector * 120, quantumV4RaceRuntime.roadParams)
 			return hit and hit.Position or nil
 		end
 
-		local v27 = fn69(v22.Position + v24 * senaV4RaceRuntime.lateral)
+		local v27 = fn69(v22.Position + v24 * quantumV4RaceRuntime.lateral)
 		local n10 = hitbox and (hitbox.Position - root.Position):Dot(upVector) or 0
 		local n11 = (hitbox and hitbox.Size.Y / 2 or 2) + 0.3 - n10
-		local n12 = v27 and v27 + upVector * n11 or v22.Position + upVector * n9 + v24 * senaV4RaceRuntime.lateral
-		local v28 = fn69(v23.Position + v24 * senaV4RaceRuntime.lateral)
-		local n13 = (v28 and v28 + upVector * n11 or v23.Position + upVector * n9 + v24 * senaV4RaceRuntime.lateral) - n12
+		local n12 = v27 and v27 + upVector * n11 or v22.Position + upVector * n9 + v24 * quantumV4RaceRuntime.lateral
+		local v28 = fn69(v23.Position + v24 * quantumV4RaceRuntime.lateral)
+		local n13 = (v28 and v28 + upVector * n11 or v23.Position + upVector * n9 + v24 * quantumV4RaceRuntime.lateral) - n12
 		local unit = n13.Magnitude > 0.001 and n13.Unit or v22.LookVector
-		root.AssemblyLinearVelocity = unit * senaV4RaceRuntime.speed + (n12 - root.Position) * 9
+		root.AssemblyLinearVelocity = unit * quantumV4RaceRuntime.speed + (n12 - root.Position) * 9
 		root.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 		arg.Drive.Enabled = false
 		arg.Push.Force = Vector3.new(0, 1, 0) * root.AssemblyMass * Workspace.Gravity
@@ -19558,51 +19736,51 @@ do
 		arg.Up = upVector
 		arg.Heading = unit
 		arg.TravelDirection = unit
-		arg.Speed = senaV4RaceRuntime.speed
+		arg.Speed = quantumV4RaceRuntime.speed
 		arg.Grounded = v27 ~= nil
 		arg.AirSeconds = 0
 		arg.Launched = v27 == nil
 	end
 
-	senaV4RaceRuntime.override = function(arg, arg2)
-		if not pcall(senaV4RaceRuntime.step, arg, arg2) then
+	quantumV4RaceRuntime.override = function(arg, arg2)
+		if not pcall(quantumV4RaceRuntime.step, arg, arg2) then
 			arg.Override = nil
-			senaV4RaceRuntime.dist = nil
+			quantumV4RaceRuntime.dist = nil
 		end
 	end
 
-	senaV4RaceRuntime.drive = function(arg)
-		if senaV4RaceRuntime.active then
+	quantumV4RaceRuntime.drive = function(arg)
+		if quantumV4RaceRuntime.active then
 			return
 		end
-		senaV4RaceRuntime.active = true
-		senaV4RaceRuntime.dist = nil
-		senaV4RaceRuntime.mount = nil
-		senaV4RaceRuntime.stuns = 0
-		senaV4RaceRuntime.corrections = 0
-		senaV4RaceRuntime.scale = 1
-		senaV4RaceRuntime.startedAt = os.clock()
+		quantumV4RaceRuntime.active = true
+		quantumV4RaceRuntime.dist = nil
+		quantumV4RaceRuntime.mount = nil
+		quantumV4RaceRuntime.stuns = 0
+		quantumV4RaceRuntime.corrections = 0
+		quantumV4RaceRuntime.scale = 1
+		quantumV4RaceRuntime.startedAt = os.clock()
 
 		pcall(function()
 			local physics = settings().Physics
 
 			if physics.PhysicsEnvironmentalThrottle == Enum.EnviromentalPhysicsThrottle.Always then
-				senaV4RaceRuntime.pausedThrottle = physics.PhysicsEnvironmentalThrottle
+				quantumV4RaceRuntime.pausedThrottle = physics.PhysicsEnvironmentalThrottle
 				physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.DefaultAuto
 			end
 		end)
 
 		local tbl13 = {}
-		senaV4RaceRuntime.finishing = false
-		senaV4RaceRuntime.released = false
-		senaV4RaceRuntime.legitProg = nil
-		senaV4RaceRuntime.jumpProgs = nil
-		senaV4RaceRuntime.controls = nil
-		senaV4RaceRuntime.boosting, senaV4RaceRuntime.leadTarget = true, senaV4RaceRuntime.LEAD_START
-		senaV4RaceRuntime.leadDone = false
-		senaV4RaceRuntime.rivals = nil
-		senaV4RaceRuntime.rivalsAt = 0
-		senaV4RaceRuntime.boostStartedAt = nil
+		quantumV4RaceRuntime.finishing = false
+		quantumV4RaceRuntime.released = false
+		quantumV4RaceRuntime.legitProg = nil
+		quantumV4RaceRuntime.jumpProgs = nil
+		quantumV4RaceRuntime.controls = nil
+		quantumV4RaceRuntime.boosting, quantumV4RaceRuntime.leadTarget = true, quantumV4RaceRuntime.LEAD_START
+		quantumV4RaceRuntime.leadDone = false
+		quantumV4RaceRuntime.rivals = nil
+		quantumV4RaceRuntime.rivalsAt = 0
+		quantumV4RaceRuntime.boostStartedAt = nil
 
 		local function fn69()
 			for k in pairs(tbl13) do
@@ -19617,9 +19795,9 @@ do
 		end
 
 		local connection6 = game:GetService("RunService").Stepped:Connect(function()
-			if senaV4RaceRuntime.released then
+			if quantumV4RaceRuntime.released then
 				return
-			elseif senaV4RaceRuntime.LEGIT then
+			elseif quantumV4RaceRuntime.LEGIT then
 				return
 			end
 
@@ -19640,44 +19818,44 @@ do
 
 		if arg.Path and (v21 and v21:FindFirstChild("AttachmentTrack")) then
 			local ok, result = pcall(arg.Path.new, v21.AttachmentTrack)
-			senaV4RaceRuntime.path = ok and result or nil
+			quantumV4RaceRuntime.path = ok and result or nil
 		end
 
 		task.spawn(function()
-			while fn2() and senaV4Config.RaceAuto and senaV4RaceRuntime.inRace() and type(fn67(arg, "FinishPlace", "RaceFinishPlace")) ~= "number" do
+			while fn2() and quantumV4Config.RaceAuto and quantumV4RaceRuntime.inRace() and type(fn67(arg, "FinishPlace", "RaceFinishPlace")) ~= "number" do
 				pcall(function()
 					local physics = settings().Physics
 
 					if physics.PhysicsEnvironmentalThrottle == Enum.EnviromentalPhysicsThrottle.Always then
-						senaV4RaceRuntime.pausedThrottle = senaV4RaceRuntime.pausedThrottle or physics.PhysicsEnvironmentalThrottle
+						quantumV4RaceRuntime.pausedThrottle = quantumV4RaceRuntime.pausedThrottle or physics.PhysicsEnvironmentalThrottle
 						physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.DefaultAuto
 					end
 				end)
 
-				local v22 = senaV4RaceRuntime.findMount()
+				local v22 = quantumV4RaceRuntime.findMount()
 
-				if senaV4RaceRuntime.LEGIT then
-					if not senaV4RaceRuntime.jumpProgs then
-						senaV4RaceRuntime.findJumps()
+				if quantumV4RaceRuntime.LEGIT then
+					if not quantumV4RaceRuntime.jumpProgs then
+						quantumV4RaceRuntime.findJumps()
 					end
 
-					pcall(senaV4RaceRuntime.legitStep, v22)
+					pcall(quantumV4RaceRuntime.legitStep, v22)
 					task.wait()
 					continue
 				end
 
-				if v22 and not senaV4RaceRuntime.finishing then
+				if v22 and not quantumV4RaceRuntime.finishing then
 					local n8 = tonumber(v21 and v21:GetAttribute("RaceLaps")) or 3
 					local num = tonumber(fn67(arg, "Lap", "RaceLap"))
 					local finishLine = v21 and v21:FindFirstChild("FinishLine")
 					local humanoidRootPart = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
-					local n9 = senaV4RaceRuntime.path and senaV4RaceRuntime.dist and senaV4RaceRuntime.path.Length - senaV4RaceRuntime.dist % senaV4RaceRuntime.path.Length or 1 / 0
+					local n9 = quantumV4RaceRuntime.path and quantumV4RaceRuntime.dist and quantumV4RaceRuntime.path.Length - quantumV4RaceRuntime.dist % quantumV4RaceRuntime.path.Length or 1 / 0
 
-					if num and (num >= n8 and (finishLine and (finishLine:IsA("BasePart") and (humanoidRootPart and n9 < senaV4RaceRuntime.FINISH_RELEASE_STUDS)))) then
-						senaV4RaceRuntime.finishing = true
+					if num and (num >= n8 and (finishLine and (finishLine:IsA("BasePart") and (humanoidRootPart and n9 < quantumV4RaceRuntime.FINISH_RELEASE_STUDS)))) then
+						quantumV4RaceRuntime.finishing = true
 
-						if senaV4RaceRuntime.RELEASE_AT_FINISH then
-							if v22.Override == senaV4RaceRuntime.override then
+						if quantumV4RaceRuntime.RELEASE_AT_FINISH then
+							if v22.Override == quantumV4RaceRuntime.override then
 								v22.Override = nil
 							end
 
@@ -19685,7 +19863,7 @@ do
 								v22.Drive.Enabled = true
 							end)
 
-							senaV4RaceRuntime.released = true
+							quantumV4RaceRuntime.released = true
 							fn69()
 						end
 					end
@@ -19693,33 +19871,33 @@ do
 
 				local now = os.clock()
 
-				if not senaV4RaceRuntime.nextPulse then
-					senaV4RaceRuntime.nextPulse = now + 5
+				if not quantumV4RaceRuntime.nextPulse then
+					quantumV4RaceRuntime.nextPulse = now + 5
 				end
 
-				if now >= senaV4RaceRuntime.nextPulse then
-					senaV4RaceRuntime.pulseUntil = now + senaV4RaceRuntime.INPUT_PULSE_SECONDS
-					senaV4RaceRuntime.nextPulse = now + 15 + math.random() * 8
+				if now >= quantumV4RaceRuntime.nextPulse then
+					quantumV4RaceRuntime.pulseUntil = now + quantumV4RaceRuntime.INPUT_PULSE_SECONDS
+					quantumV4RaceRuntime.nextPulse = now + 15 + math.random() * 8
 				end
 
-				local flag6 = now < (senaV4RaceRuntime.pulseUntil or 0)
+				local flag6 = now < (quantumV4RaceRuntime.pulseUntil or 0)
 
-				if senaV4RaceRuntime.finishing then
+				if quantumV4RaceRuntime.finishing then
 				elseif flag6 then
-				elseif senaV4RaceRuntime.finishMove then
-					senaV4RaceRuntime.releaseControls()
+				elseif quantumV4RaceRuntime.finishMove then
+					quantumV4RaceRuntime.releaseControls()
 				end
 
-				if senaV4RaceRuntime.finishing or flag6 then
+				if quantumV4RaceRuntime.finishing or flag6 then
 					local finishLine = v21 and v21:FindFirstChild("FinishLine")
 					local humanoidRootPart = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
-					local v23 = senaV4RaceRuntime.findControls()
+					local v23 = quantumV4RaceRuntime.findControls()
 
-					if v23 and humanoidRootPart and (finishLine or senaV4RaceRuntime.path) then
+					if v23 and humanoidRootPart and (finishLine or quantumV4RaceRuntime.path) then
 						local hitbox = localPlayer.Character:FindFirstChild("RaceMount") and localPlayer.Character.RaceMount:FindFirstChild("Hitbox") or humanoidRootPart
 						local lookVector = hitbox.CFrame.LookVector
 						local upVector = hitbox.CFrame.UpVector
-						local n8 = (senaV4RaceRuntime.finishing and finishLine and finishLine.Position or senaV4RaceRuntime.path and senaV4RaceRuntime.dist and senaV4RaceRuntime.path:FrameAt((senaV4RaceRuntime.dist + 40) % senaV4RaceRuntime.path.Length).Position or humanoidRootPart.Position + lookVector * 40) - humanoidRootPart.Position
+						local n8 = (quantumV4RaceRuntime.finishing and finishLine and finishLine.Position or quantumV4RaceRuntime.path and quantumV4RaceRuntime.dist and quantumV4RaceRuntime.path:FrameAt((quantumV4RaceRuntime.dist + 40) % quantumV4RaceRuntime.path.Length).Position or humanoidRootPart.Position + lookVector * 40) - humanoidRootPart.Position
 						local n9 = lookVector - upVector * lookVector:Dot(upVector)
 						local n10 = n8 - upVector * n8:Dot(upVector)
 						local n11 = 0
@@ -19730,56 +19908,56 @@ do
 							n11 = math.clamp(-math.atan2(unit:Cross(unit2):Dot(upVector), unit:Dot(unit2)) * 2.5, -1, 1)
 						end
 
-						senaV4RaceRuntime.finishInput = Vector3.new(n11, 0, -1)
+						quantumV4RaceRuntime.finishInput = Vector3.new(n11, 0, -1)
 
-						if rawget(v23, "GetMoveVector") ~= senaV4RaceRuntime.finishMove then
-							function senaV4RaceRuntime.finishMove()
-								return senaV4RaceRuntime.finishInput or Vector3.new(0, 0, -1)
+						if rawget(v23, "GetMoveVector") ~= quantumV4RaceRuntime.finishMove then
+							function quantumV4RaceRuntime.finishMove()
+								return quantumV4RaceRuntime.finishInput or Vector3.new(0, 0, -1)
 							end
 
-							v23.GetMoveVector = senaV4RaceRuntime.finishMove
+							v23.GetMoveVector = quantumV4RaceRuntime.finishMove
 						end
 					end
 
-					if senaV4RaceRuntime.finishing and (finishLine and (humanoidRootPart and os.clock() - (senaV4RaceRuntime.lastLineTouch or 0) > 0.25)) then
-						senaV4RaceRuntime.lastLineTouch = os.clock()
+					if quantumV4RaceRuntime.finishing and (finishLine and (humanoidRootPart and os.clock() - (quantumV4RaceRuntime.lastLineTouch or 0) > 0.25)) then
+						quantumV4RaceRuntime.lastLineTouch = os.clock()
 						pcall(firetouchinterest, humanoidRootPart, finishLine, 0)
 						task.wait()
 						pcall(firetouchinterest, humanoidRootPart, finishLine, 1)
 					end
 				end
 
-				if v22 and senaV4RaceRuntime.path and not senaV4RaceRuntime.released then
+				if v22 and quantumV4RaceRuntime.path and not quantumV4RaceRuntime.released then
 					tonumber(fn67(arg, "Place", "RacePlace"))
 					local topSpeed = arg.Flags and arg.Flags.TopSpeed and arg.Flags.TopSpeed:Get() or 135
-					local scale = senaV4RaceRuntime.RIDE_SPEED / topSpeed
+					local scale = quantumV4RaceRuntime.RIDE_SPEED / topSpeed
 
-					if senaV4RaceRuntime.scale ~= scale and senaV4RaceRuntime.corrections == 0 then
-						senaV4RaceRuntime.scale = scale
+					if quantumV4RaceRuntime.scale ~= scale and quantumV4RaceRuntime.corrections == 0 then
+						quantumV4RaceRuntime.scale = scale
 					end
 
 					local override = v22.Override
 
-					if override ~= nil and override ~= senaV4RaceRuntime.override then
+					if override ~= nil and override ~= quantumV4RaceRuntime.override then
 						v22.Override = nil
-						senaV4RaceRuntime.dist = nil
-						senaV4RaceRuntime.stuns = senaV4RaceRuntime.stuns + 1
+						quantumV4RaceRuntime.dist = nil
+						quantumV4RaceRuntime.stuns = quantumV4RaceRuntime.stuns + 1
 					elseif override == nil then
 						if not v22:IsHeld() then
-							v22.Override = senaV4RaceRuntime.override
+							v22.Override = quantumV4RaceRuntime.override
 						end
 					end
 
-					senaV4RaceRuntime.status = string.format("Racing x%.2f  ·  Lap %s  ·  Place %s", senaV4RaceRuntime.scale, tostring(fn67(arg, "Lap", "RaceLap") or "?"), tostring(fn67(arg, "Place", "RacePlace") or "?"))
+					quantumV4RaceRuntime.status = string.format("Racing x%.2f  ·  Lap %s  ·  Place %s", quantumV4RaceRuntime.scale, tostring(fn67(arg, "Lap", "RaceLap") or "?"), tostring(fn67(arg, "Place", "RacePlace") or "?"))
 				end
 
 				task.wait()
 			end
 
 			connection6:Disconnect()
-			senaV4RaceRuntime.releaseControls()
-			senaV4RaceRuntime.finishing = false
-			senaV4RaceRuntime.released = false
+			quantumV4RaceRuntime.releaseControls()
+			quantumV4RaceRuntime.finishing = false
+			quantumV4RaceRuntime.released = false
 
 			for k in pairs(tbl13) do
 				if k.Parent then
@@ -19789,18 +19967,18 @@ do
 				end
 			end
 
-			if senaV4RaceRuntime.pausedThrottle then
-				local pausedThrottle = senaV4RaceRuntime.pausedThrottle
-				senaV4RaceRuntime.pausedThrottle = nil
+			if quantumV4RaceRuntime.pausedThrottle then
+				local pausedThrottle = quantumV4RaceRuntime.pausedThrottle
+				quantumV4RaceRuntime.pausedThrottle = nil
 
 				pcall(function()
 					settings().Physics.PhysicsEnvironmentalThrottle = pausedThrottle
 				end)
 			end
 
-			local mount = senaV4RaceRuntime.mount
+			local mount = quantumV4RaceRuntime.mount
 
-			if mount and mount.Override == senaV4RaceRuntime.override then
+			if mount and mount.Override == quantumV4RaceRuntime.override then
 				mount.Override = nil
 			end
 
@@ -19808,19 +19986,19 @@ do
 			local finishTime = fn67(arg, "FinishTime", "RaceFinishTime")
 
 			if type(finishPlace) == "number" then
-				senaV4RaceRuntime.lastResult = string.format("Place #%d in %s", finishPlace, type(finishTime) == "number" and string.format("%d:%02d", math.floor(finishTime / 60), math.floor(finishTime % 60)) or "?")
+				quantumV4RaceRuntime.lastResult = string.format("Place #%d in %s", finishPlace, type(finishTime) == "number" and string.format("%d:%02d", math.floor(finishTime / 60), math.floor(finishTime % 60)) or "?")
 			end
 
-			senaV4RaceRuntime.active = false
-			senaV4RaceRuntime.mount = nil
-			senaV4RaceRuntime.path = nil
-			senaV4RaceRuntime.dist = nil
+			quantumV4RaceRuntime.active = false
+			quantumV4RaceRuntime.mount = nil
+			quantumV4RaceRuntime.path = nil
+			quantumV4RaceRuntime.dist = nil
 		end)
 
 		task.spawn(function()
 			local attributes = arg.Power and arg.Power.Attributes or {}
 
-			while fn2() and senaV4RaceRuntime.active do
+			while fn2() and quantumV4RaceRuntime.active do
 				pcall(function()
 					local serverTimeNow = Workspace:GetServerTimeNow()
 					local attribute = localPlayer:GetAttribute(attributes.Item or "RaceItem")
@@ -19836,7 +20014,7 @@ do
 						elseif flag7 then
 						elseif humanoidRootPart then
 							arg.Remotes.MountRace.PowerUp:FireServer("Use", humanoidRootPart.Position, humanoidRootPart.CFrame.LookVector)
-							senaV4RaceRuntime.powerUps = (senaV4RaceRuntime.powerUps or 0) + 1
+							quantumV4RaceRuntime.powerUps = (quantumV4RaceRuntime.powerUps or 0) + 1
 							task.wait(1)
 						end
 					end
@@ -19847,11 +20025,11 @@ do
 		end)
 	end
 
-	senaV4RaceRuntime.claim = function(arg)
-		if os.clock() - senaV4RaceRuntime.lastClaim < 10 then
+	quantumV4RaceRuntime.claim = function(arg)
+		if os.clock() - quantumV4RaceRuntime.lastClaim < 10 then
 			return
 		end
-		senaV4RaceRuntime.lastClaim = os.clock()
+		quantumV4RaceRuntime.lastClaim = os.clock()
 		local n8 = fn68(arg)
 		local raceRally = n8 and n8.RaceRally
 		if type(raceRally) ~= "table" then
@@ -19900,8 +20078,8 @@ do
 		end
 	end
 
-	senaV4RaceRuntime.buy = function(arg)
-		local raceBuyList = senaV4Config.RaceBuyList
+	quantumV4RaceRuntime.buy = function(arg)
+		local raceBuyList = quantumV4Config.RaceBuyList
 
 		if type(raceBuyList) ~= "table" then
 			return
@@ -19909,7 +20087,7 @@ do
 			return
 		end
 
-		if os.clock() - senaV4RaceRuntime.lastBuy < 2 then
+		if os.clock() - quantumV4RaceRuntime.lastBuy < 2 then
 			return
 		end
 		local v21 = fn68(arg)
@@ -19926,7 +20104,7 @@ do
 				local n8, ok2, result2 = tonumber(v22.Config.Limit) or 0, pcall(arg.RR.PurchasedCount, raceRally, v22.Id)
 
 				if n8 == 0 or not ok2 or (tonumber(result2) or 0) < n8 then
-					senaV4RaceRuntime.lastBuy = os.clock()
+					quantumV4RaceRuntime.lastBuy = os.clock()
 
 					pcall(function()
 						arg.Remotes.RaceRally.AskBuy:InvokeServer(v22.Id)
@@ -19939,7 +20117,7 @@ do
 	end
 
 	task.spawn(function()
-		local remotes = fn66() and senaV4RaceRuntime.m.Remotes
+		local remotes = fn66() and quantumV4RaceRuntime.m.Remotes
 		local raise = remotes and remotes.Alerts and remotes.Alerts.Raise
 
 		if raise then
@@ -19952,7 +20130,7 @@ do
 				end
 
 				if (type(arg) == "table" and tostring(arg.Text or arg.Body or "") or tostring(arg)):lower():find("already raced", 1, true) then
-					senaV4RaceRuntime.racedRound = senaV4RaceRuntime.roundId() or senaV4RaceRuntime.racedRound
+					quantumV4RaceRuntime.racedRound = quantumV4RaceRuntime.roundId() or quantumV4RaceRuntime.racedRound
 				end
 			end
 
@@ -19970,10 +20148,10 @@ do
 					return
 				end
 
-				if senaV4RaceRuntime.active then
-					senaV4RaceRuntime.corrections = senaV4RaceRuntime.corrections + 1
-					senaV4RaceRuntime.scale = math.max(1, (senaV4RaceRuntime.scale or 3) - 0.15)
-					senaV4RaceRuntime.dist = nil
+				if quantumV4RaceRuntime.active then
+					quantumV4RaceRuntime.corrections = quantumV4RaceRuntime.corrections + 1
+					quantumV4RaceRuntime.scale = math.max(1, (quantumV4RaceRuntime.scale or 3) - 0.15)
+					quantumV4RaceRuntime.dist = nil
 				end
 			end
 
@@ -19984,50 +20162,50 @@ do
 			pcall(function()
 				local v21 = fn66()
 				if not v21 then
-					senaV4RaceRuntime.status = "Race data not loaded"
+					quantumV4RaceRuntime.status = "Race data not loaded"
 					return
 				end
 
-				if senaV4Config.RaceAuto then
+				if quantumV4Config.RaceAuto then
 					if type((fn67(v21, "RaceId", "RaceId"))) == "string" then
-						senaV4RaceRuntime.racedRound = senaV4RaceRuntime.roundId() or senaV4RaceRuntime.racedRound
+						quantumV4RaceRuntime.racedRound = quantumV4RaceRuntime.roundId() or quantumV4RaceRuntime.racedRound
 						local finishPlace = fn67(v21, "FinishPlace", "RaceFinishPlace")
 
 						if type(finishPlace) == "number" then
-							if senaV4RaceRuntime.leftFor ~= finishPlace and not senaV4RaceRuntime.active then
-								senaV4RaceRuntime.leftFor = finishPlace
+							if quantumV4RaceRuntime.leftFor ~= finishPlace and not quantumV4RaceRuntime.active then
+								quantumV4RaceRuntime.leftFor = finishPlace
 								task.wait(2)
 								v21.Remotes.MountRace.AskLeave:FireServer()
-								senaV4RaceRuntime.status = "Finished, back to base"
+								quantumV4RaceRuntime.status = "Finished, back to base"
 							end
 						else
-							senaV4RaceRuntime.leftFor = nil
-							senaV4RaceRuntime.drive(v21)
+							quantumV4RaceRuntime.leftFor = nil
+							quantumV4RaceRuntime.drive(v21)
 						end
-					elseif senaV4RaceRuntime.joinLeft() > 0 and senaV4RaceRuntime.racedThisRound() then
-						senaV4RaceRuntime.status = "Already raced this round, waiting for the next one"
-					elseif senaV4RaceRuntime.joinLeft() > 0 then
-						local race = senaV4TaskLadder.blocker("race")
-						local flag6 = senaV4RaceRuntime.joinLeft() > senaV4RaceRuntime.JOIN_LATE_SECONDS and senaV4RaceRuntime.fieldSettling() or nil
+					elseif quantumV4RaceRuntime.joinLeft() > 0 and quantumV4RaceRuntime.racedThisRound() then
+						quantumV4RaceRuntime.status = "Already raced this round, waiting for the next one"
+					elseif quantumV4RaceRuntime.joinLeft() > 0 then
+						local race = quantumV4TaskLadder.blocker("race")
+						local flag6 = quantumV4RaceRuntime.joinLeft() > quantumV4RaceRuntime.JOIN_LATE_SECONDS and quantumV4RaceRuntime.fieldSettling() or nil
 
 						if flag6 then
-							senaV4RaceRuntime.status = flag6 == 1 / 0 and "Race open, waiting for the field to reopen" or string.format("Race open, checking new eggs (%ds)", math.ceil(flag6))
+							quantumV4RaceRuntime.status = flag6 == 1 / 0 and "Race open, waiting for the field to reopen" or string.format("Race open, checking new eggs (%ds)", math.ceil(flag6))
 						elseif race then
-							senaV4RaceRuntime.status = "Yielding to " .. tostring(senaV4TaskLadder.TITLES[race] or race)
+							quantumV4RaceRuntime.status = "Yielding to " .. tostring(quantumV4TaskLadder.TITLES[race] or race)
 						else
-							senaV4RaceRuntime.join(v21)
+							quantumV4RaceRuntime.join(v21)
 						end
 					else
-						senaV4RaceRuntime.status = "Waiting for the next race"
+						quantumV4RaceRuntime.status = "Waiting for the next race"
 					end
 				end
 
-				if senaV4Config.RaceClaim then
-					senaV4RaceRuntime.claim(v21)
+				if quantumV4Config.RaceClaim then
+					quantumV4RaceRuntime.claim(v21)
 				end
 
-				if senaV4Config.RaceBuy then
-					senaV4RaceRuntime.buy(v21)
+				if quantumV4Config.RaceBuy then
+					quantumV4RaceRuntime.buy(v21)
 				end
 			end)
 
@@ -20035,21 +20213,21 @@ do
 		end
 	end)
 
-	genv.__SenaV4RaceRuntime = senaV4RaceRuntime
+	genv.__QuantumV4RaceRuntime = quantumV4RaceRuntime
 
-	senaV4TaskLadder.register("race", {wants = function()
-		return senaV4Config.RaceAuto == true and (senaV4RaceRuntime.inRace() or senaV4RaceRuntime.wantsJoin())
+	quantumV4TaskLadder.register("race", {wants = function()
+		return quantumV4Config.RaceAuto == true and (quantumV4RaceRuntime.inRace() or quantumV4RaceRuntime.wantsJoin())
 	end, active = function()
-		return senaV4RaceRuntime.active == true or senaV4RaceRuntime.inRace()
+		return quantumV4RaceRuntime.active == true or quantumV4RaceRuntime.inRace()
 	end, enabled = function()
-		return senaV4Config.RaceAuto == true
+		return quantumV4Config.RaceAuto == true
 	end, status = function()
-		return tostring(senaV4RaceRuntime.status)
+		return tostring(quantumV4RaceRuntime.status)
 	end})
 end
 
 do
-	local senaV4StarRuntime = {status = "No star right now", lastResult = "No star caught yet", session = nil, busy = false, caught = 0}
+	local quantumV4StarRuntime = {status = "No star right now", lastResult = "No star caught yet", session = nil, busy = false, caught = 0}
 
 	local function fn65()
 		local ok, result = pcall(require, ReplicatedStorage.Shared.Remotes)
@@ -20060,7 +20238,7 @@ do
 		return Workspace:GetServerTimeNow()
 	end
 
-	senaV4StarRuntime.position = function(arg)
+	quantumV4StarRuntime.position = function(arg)
 		local leg = arg.Leg
 
 		if type(leg) == "table" and (typeof(leg.From) == "Vector3" and typeof(leg.To) == "Vector3") then
@@ -20073,8 +20251,8 @@ do
 		return typeof(landing) == "CFrame" and landing.Position or landing
 	end
 
-	senaV4StarRuntime.alert = function(arg)
-		if not senaV4Config.StarAlert then
+	quantumV4StarRuntime.alert = function(arg)
+		if not quantumV4Config.StarAlert then
 			return
 		end
 		local n8 = math.max(0, math.floor((tonumber(arg.Payload.ExpiresAt) or 0) - fn66()))
@@ -20084,7 +20262,7 @@ do
 		end)
 	end
 
-	senaV4StarRuntime.begin = function(arg)
+	quantumV4StarRuntime.begin = function(arg)
 		if type(arg) ~= "table" then
 			return
 		elseif type(arg.Id) ~= "string" then
@@ -20094,21 +20272,21 @@ do
 		if (tonumber(arg.ExpiresAt) or 0) <= fn66() then
 			return
 		end
-		senaV4StarRuntime.session = {Payload = arg, Leg = arg.Leg, Id = arg.Id}
-		senaV4StarRuntime.status = "Star falling"
-		senaV4StarRuntime.alert(senaV4StarRuntime.session)
+		quantumV4StarRuntime.session = {Payload = arg, Leg = arg.Leg, Id = arg.Id}
+		quantumV4StarRuntime.status = "Star falling"
+		quantumV4StarRuntime.alert(quantumV4StarRuntime.session)
 	end
 
-	senaV4StarRuntime.finish = function(arg, lastResult)
-		if senaV4StarRuntime.session and senaV4StarRuntime.session.Id == arg then
-			senaV4StarRuntime.session = nil
-			senaV4StarRuntime.busy = false
-			senaV4StarRuntime.lastResult = lastResult
-			senaV4StarRuntime.status = "No star right now"
+	quantumV4StarRuntime.finish = function(arg, lastResult)
+		if quantumV4StarRuntime.session and quantumV4StarRuntime.session.Id == arg then
+			quantumV4StarRuntime.session = nil
+			quantumV4StarRuntime.busy = false
+			quantumV4StarRuntime.lastResult = lastResult
+			quantumV4StarRuntime.status = "No star right now"
 		end
 	end
 
-	senaV4StarRuntime.catch = function(arg)
+	quantumV4StarRuntime.catch = function(arg)
 		local v21 = fn65()
 		local character = localPlayer.Character
 		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
@@ -20122,16 +20300,16 @@ do
 
 		local function fn67()
 			local v22 = fn2()
-			return (if v22 then not senaV4Config.StarAutoCatch else not v22) or senaV4StarRuntime.session ~= arg or senaV4TaskLadder.blocker("star") ~= nil
+			return (if v22 then not quantumV4Config.StarAutoCatch else not v22) or quantumV4StarRuntime.session ~= arg or quantumV4TaskLadder.blocker("star") ~= nil
 		end
 
 		local function fn68(arg2)
-			local v22 = senaV4StarRuntime.position(arg)
+			local v22 = quantumV4StarRuntime.position(arg)
 			return v22 and (Vector3.new(v22.X, humanoidRootPart.Position.Y, v22.Z) - humanoidRootPart.Position).Magnitude <= arg2
 		end
 
 		local function fn69(arg2)
-			local v22 = senaV4StarRuntime.position(arg)
+			local v22 = quantumV4StarRuntime.position(arg)
 			if not v22 then
 				return false
 			end
@@ -20141,25 +20319,25 @@ do
 			end
 
 			fn38(humanoidRootPart, humanoid, CFrame.new(v22 + Vector3.new(0, 3, 0)), function()
-				local senaV4EggRuntime = genv.__SenaV4EggRuntime
-				return fn67() or senaV4EggRuntime ~= nil and senaV4EggRuntime.resetBlocked == true
+				local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+				return fn67() or quantumV4EggRuntime ~= nil and quantumV4EggRuntime.resetBlocked == true
 			end, false, nil, true)
 
 			return fn68(arg2)
 		end
 
-		senaV4StarRuntime.status = "Going to the star"
+		quantumV4StarRuntime.status = "Going to the star"
 		character = 0
 
 		while true do
-			local senaV4EggRuntime = fn67()
-			if not (if senaV4EggRuntime then not senaV4EggRuntime else character < 25) then
+			local quantumV4EggRuntime = fn67()
+			if not (if quantumV4EggRuntime then not quantumV4EggRuntime else character < 25) then
 				break
 			end
-			senaV4EggRuntime = genv.__SenaV4EggRuntime
+			quantumV4EggRuntime = genv.__QuantumV4EggRuntime
 
-			if senaV4EggRuntime and senaV4EggRuntime.resetBlocked then
-				senaV4StarRuntime.status = "Waiting for the field to reopen"
+			if quantumV4EggRuntime and quantumV4EggRuntime.resetBlocked then
+				quantumV4StarRuntime.status = "Waiting for the field to reopen"
 				task.wait(0.5)
 				continue
 			end
@@ -20167,15 +20345,15 @@ do
 			character += 1
 
 			if fn69(8) then
-				senaV4StarRuntime.status = "Catching the star"
+				quantumV4StarRuntime.status = "Catching the star"
 				v21.Hold:FireServer(arg.Id, true)
 				local n8 = (tonumber(arg.Payload.HoldSeconds) or 1.6) + 0.15
 				local now = os.clock()
 				local flag6 = false
 
 				while os.clock() - now < n8 and not fn67() do
-					local senaV4EggRuntime2 = genv.__SenaV4EggRuntime
-					if senaV4EggRuntime2 and senaV4EggRuntime2.resetBlocked then
+					local quantumV4EggRuntime2 = genv.__QuantumV4EggRuntime
+					if quantumV4EggRuntime2 and quantumV4EggRuntime2.resetBlocked then
 						flag6 = true
 						break
 					end
@@ -20195,11 +20373,11 @@ do
 					v21.Catch:FireServer(arg.Id)
 					local n9 = os.clock() + 2
 
-					while senaV4StarRuntime.session == arg and os.clock() < n9 do
+					while quantumV4StarRuntime.session == arg and os.clock() < n9 do
 						task.wait(0.1)
 					end
 
-					if senaV4StarRuntime.session ~= arg then
+					if quantumV4StarRuntime.session ~= arg then
 						return
 					end
 				end
@@ -20234,29 +20412,29 @@ do
 			end
 		end
 
-		fn67(v21.Fall, senaV4StarRuntime.begin)
+		fn67(v21.Fall, quantumV4StarRuntime.begin)
 
 		fn67(v21.Wander, function(arg, leg)
-			if senaV4StarRuntime.session and (senaV4StarRuntime.session.Id == arg and type(leg) == "table") then
-				senaV4StarRuntime.session.Leg = leg
+			if quantumV4StarRuntime.session and (quantumV4StarRuntime.session.Id == arg and type(leg) == "table") then
+				quantumV4StarRuntime.session.Leg = leg
 			end
 		end)
 
 		fn67(v21.Slipped, function(arg)
-			if senaV4StarRuntime.session and senaV4StarRuntime.session.Id == arg then
-				senaV4StarRuntime.status = "Star slipped away, trying again"
+			if quantumV4StarRuntime.session and quantumV4StarRuntime.session.Id == arg then
+				quantumV4StarRuntime.status = "Star slipped away, trying again"
 			end
 		end)
 
 		fn67(v21.Claimed, function(arg, arg2)
-			if senaV4StarRuntime.session and senaV4StarRuntime.session.Id == arg then
-				senaV4StarRuntime.caught = senaV4StarRuntime.caught + 1
-				senaV4StarRuntime.finish(arg, string.format("Caught a star (+%s)", tostring(arg2 or 1)))
+			if quantumV4StarRuntime.session and quantumV4StarRuntime.session.Id == arg then
+				quantumV4StarRuntime.caught = quantumV4StarRuntime.caught + 1
+				quantumV4StarRuntime.finish(arg, string.format("Caught a star (+%s)", tostring(arg2 or 1)))
 			end
 		end)
 
 		fn67(v21.Expired, function(arg)
-			senaV4StarRuntime.finish(arg, "Star went home before it was caught")
+			quantumV4StarRuntime.finish(arg, "Star went home before it was caught")
 		end)
 
 		task.spawn(function()
@@ -20264,35 +20442,35 @@ do
 				return v21.AskState:InvokeServer()
 			end)
 
-			if ok and (type(result) == "table" and senaV4StarRuntime.session == nil) then
-				senaV4StarRuntime.begin(result)
+			if ok and (type(result) == "table" and quantumV4StarRuntime.session == nil) then
+				quantumV4StarRuntime.begin(result)
 			end
 		end)
 	end
 
 	task.spawn(function()
 		while fn2() do
-			local session = senaV4StarRuntime.session
+			local session = quantumV4StarRuntime.session
 
 			if session and (tonumber(session.Payload.ExpiresAt) or 0) <= fn66() then
-				senaV4StarRuntime.finish(session.Id, "Star went home before it was caught")
-			elseif session and senaV4Config.StarAutoCatch and not senaV4StarRuntime.busy and fn66() >= (tonumber(session.Payload.LandAt) or 0) then
-				local star = senaV4TaskLadder.blocker("star")
+				quantumV4StarRuntime.finish(session.Id, "Star went home before it was caught")
+			elseif session and quantumV4Config.StarAutoCatch and not quantumV4StarRuntime.busy and fn66() >= (tonumber(session.Payload.LandAt) or 0) then
+				local star = quantumV4TaskLadder.blocker("star")
 
 				if star then
-					senaV4StarRuntime.status = "Yielding to " .. tostring(senaV4TaskLadder.TITLES[star] or star)
+					quantumV4StarRuntime.status = "Yielding to " .. tostring(quantumV4TaskLadder.TITLES[star] or star)
 				else
-					senaV4StarRuntime.busy = true
-					pcall(senaV4StarRuntime.catch, session)
-					senaV4StarRuntime.busy = false
+					quantumV4StarRuntime.busy = true
+					pcall(quantumV4StarRuntime.catch, session)
+					quantumV4StarRuntime.busy = false
 
-					if senaV4StarRuntime.session == session then
-						senaV4StarRuntime.status = "Star still out, retrying"
+					if quantumV4StarRuntime.session == session then
+						quantumV4StarRuntime.status = "Star still out, retrying"
 					end
 				end
 			elseif session then
 				if fn66() < (tonumber(session.Payload.LandAt) or 0) then
-					senaV4StarRuntime.status = string.format("Star lands in %ds", math.ceil((tonumber(session.Payload.LandAt) or 0) - fn66()))
+					quantumV4StarRuntime.status = string.format("Star lands in %ds", math.ceil((tonumber(session.Payload.LandAt) or 0) - fn66()))
 				end
 			end
 
@@ -20300,22 +20478,22 @@ do
 		end
 	end)
 
-	genv.__SenaV4StarRuntime = senaV4StarRuntime
+	genv.__QuantumV4StarRuntime = quantumV4StarRuntime
 
-	senaV4TaskLadder.register("star", {wants = function()
-		local session = senaV4StarRuntime.session
-		return senaV4Config.StarAutoCatch == true and session ~= nil and fn66() >= (tonumber(session.Payload.LandAt) or 0)
+	quantumV4TaskLadder.register("star", {wants = function()
+		local session = quantumV4StarRuntime.session
+		return quantumV4Config.StarAutoCatch == true and session ~= nil and fn66() >= (tonumber(session.Payload.LandAt) or 0)
 	end, active = function()
-		return senaV4StarRuntime.busy == true
+		return quantumV4StarRuntime.busy == true
 	end, enabled = function()
-		return senaV4Config.StarAutoCatch == true
+		return quantumV4Config.StarAutoCatch == true
 	end, status = function()
-		return tostring(senaV4StarRuntime.status)
+		return tostring(quantumV4StarRuntime.status)
 	end})
 end
 
 do
-	local senaV4ButterflyRuntime = {status = "Idle", active = false, wantsCharacter = false, lastSwing = 0, retryAt = {}, cards = {}, snap = {}}
+	local quantumV4ButterflyRuntime = {status = "Idle", active = false, wantsCharacter = false, lastSwing = 0, retryAt = {}, cards = {}, snap = {}}
 	local tbl13 = {"Green", "Blue", "Purple", "Golden"}
 	local tbl14 = {Green = 1, Blue = 2, Purple = 3, Golden = 4}
 	local n8 = 5
@@ -20413,11 +20591,11 @@ do
 	end
 
 	local function fn69(arg)
-		return (senaV4ButterflyRuntime.retryAt[arg] or 0) <= os.clock()
+		return (quantumV4ButterflyRuntime.retryAt[arg] or 0) <= os.clock()
 	end
 
 	local function fn70(arg)
-		senaV4ButterflyRuntime.retryAt[arg] = os.clock() + n8
+		quantumV4ButterflyRuntime.retryAt[arg] = os.clock() + n8
 	end
 
 	local function fn71()
@@ -20425,7 +20603,7 @@ do
 		return character and character:FindFirstChild("HumanoidRootPart") or nil
 	end
 
-	senaV4ButterflyRuntime.bloomLeft = function()
+	quantumV4ButterflyRuntime.bloomLeft = function()
 		local v22 = fn66()
 		local attribute = workspace:GetAttribute(v22 and v22.Catalog.EndsAtAttribute or "ButterflyBloomEndsAt")
 		if typeof(attribute) ~= "number" then
@@ -20434,7 +20612,7 @@ do
 		return math.max(0, attribute - workspace:GetServerTimeNow())
 	end
 
-	senaV4ButterflyRuntime.nextBloom = function()
+	quantumV4ButterflyRuntime.nextBloom = function()
 		local n10 = tonumber(fn67("IntervalSeconds", 1800)) or 1800
 		local n11 = tonumber(fn67("OffsetSeconds", 900)) or 900
 		local n12 = tonumber(fn67("DurationSeconds", 300)) or 300
@@ -20470,7 +20648,7 @@ do
 
 	local v22
 
-	senaV4ButterflyRuntime.tiers = function()
+	quantumV4ButterflyRuntime.tiers = function()
 		if v22 then
 			return v22
 		end
@@ -20489,17 +20667,17 @@ do
 		return tbl15
 	end
 
-	senaV4ButterflyRuntime.snapshot = function()
+	quantumV4ButterflyRuntime.snapshot = function()
 		local v23 = fn66()
-		local snap = senaV4ButterflyRuntime.snap
+		local snap = quantumV4ButterflyRuntime.snap
 		if not v23 then
 			return snap
 		end
-		snap.left = senaV4ButterflyRuntime.bloomLeft()
+		snap.left = quantumV4ButterflyRuntime.bloomLeft()
 		snap.active = snap.left > 0
 		snap.enabled = fn67("Enabled", true) ~= false
 		local active = snap.active
-		snap.nextIn = (if active then not active else senaV4ButterflyRuntime.nextBloom()) or nil
+		snap.nextIn = (if active then not active else quantumV4ButterflyRuntime.nextBloom()) or nil
 		local ok, result = pcall(v23.Save.Peek)
 		local v24 = ok and result or nil
 		local butterflies = v24 and v24.Butterflies
@@ -20544,8 +20722,8 @@ do
 		return snap
 	end
 
-	senaV4ButterflyRuntime.smartNext = function(arg)
-		local v23 = senaV4ButterflyRuntime.tiers()
+	quantumV4ButterflyRuntime.smartNext = function(arg)
+		local v23 = quantumV4ButterflyRuntime.tiers()
 
 		if v23 then
 			if not arg then
@@ -20567,9 +20745,9 @@ do
 		return nil
 	end
 
-	senaV4ButterflyRuntime.canTrade = function()
-		local snap = senaV4ButterflyRuntime.snap
-		local v23 = senaV4ButterflyRuntime.tiers()
+	quantumV4ButterflyRuntime.canTrade = function()
+		local snap = quantumV4ButterflyRuntime.snap
+		local v23 = quantumV4ButterflyRuntime.tiers()
 
 		if v23 then
 			if not snap.counts then
@@ -20579,9 +20757,9 @@ do
 			return false
 		end
 
-		local butterflyTradeRecipe = senaV4Config.ButterflyTradeRecipe
+		local butterflyTradeRecipe = quantumV4Config.ButterflyTradeRecipe
 		if butterflyTradeRecipe == "Smart" then
-			return senaV4ButterflyRuntime.smartNext(snap.counts) ~= nil
+			return quantumV4ButterflyRuntime.smartNext(snap.counts) ~= nil
 		end
 
 		for i = 1, 3, 1 do
@@ -20594,9 +20772,9 @@ do
 		return false
 	end
 
-	senaV4ButterflyRuntime.canCraft = function()
-		local snap = senaV4ButterflyRuntime.snap
-		local v23 = senaV4ButterflyRuntime.tiers()
+	quantumV4ButterflyRuntime.canCraft = function()
+		local snap = quantumV4ButterflyRuntime.snap
+		local v23 = quantumV4ButterflyRuntime.tiers()
 
 		if v23 then
 			if not snap.counts then
@@ -20616,7 +20794,7 @@ do
 	end
 
 	local function fn73()
-		local butterflyTiers = senaV4Config.ButterflyTiers
+		local butterflyTiers = quantumV4Config.ButterflyTiers
 
 		if type(butterflyTiers) ~= "table" then
 			return nil
@@ -20685,7 +20863,7 @@ do
 
 		if not (tbl15.part and tbl15.part.Parent) then
 			local part = Instance.new("Part")
-			part.Name = "SenaBloomPad"
+			part.Name = "QuantumBloomPad"
 			part.Anchored = true
 			part.CanCollide = true
 			part.CanTouch = false
@@ -20734,7 +20912,7 @@ do
 				return true
 			end
 
-			return senaV4TaskLadder.blocker("butterfly") ~= nil
+			return quantumV4TaskLadder.blocker("butterfly") ~= nil
 		end
 
 		if v13 and (humanoidRootPart.Position.Y < 16000 and (arg.Y < 16000 and (humanoidRootPart.Position - arg).Magnitude > 600)) then
@@ -20743,10 +20921,10 @@ do
 				local v23 = v13:_resolveSafeCFrame(humanoidRootPart)
 
 				if v23 and (v23.Position - arg).Magnitude > 40 then
-					local status = senaV4ButterflyRuntime.status
-					senaV4ButterflyRuntime.status = "Heading to the safe zone first"
+					local status = quantumV4ButterflyRuntime.status
+					quantumV4ButterflyRuntime.status = "Heading to the safe zone first"
 					pcall(fn38, humanoidRootPart, humanoid, v23, fn79)
-					senaV4ButterflyRuntime.status = status
+					quantumV4ButterflyRuntime.status = status
 					local v24 = fn71()
 
 					if v24 then
@@ -20826,11 +21004,11 @@ do
 		if fn31() then
 			return "night - the forest is sealed"
 		end
-		senaV4ButterflyRuntime.status = "Flying to the Enchanted Tree"
+		quantumV4ButterflyRuntime.status = "Flying to the Enchanted Tree"
 		if not fn78(worldPosition + Vector3.new(0, 3, 0), 60) then
 			return "could not reach the tree entrance"
 		end
-		senaV4ButterflyRuntime.status = "Entering the tree"
+		quantumV4ButterflyRuntime.status = "Entering the tree"
 		fn80(enchantedTreePrompt)
 		local n10 = os.clock() + 8
 
@@ -20858,7 +21036,7 @@ do
 			return false
 		end
 
-		senaV4ButterflyRuntime.status = "Leaving the tree"
+		quantumV4ButterflyRuntime.status = "Leaving the tree"
 		local n10 = os.clock() + 6
 
 		while os.clock() < n10 and fn79() do
@@ -20893,7 +21071,7 @@ do
 		if v25 then
 			return false, v25
 		end
-		senaV4ButterflyRuntime.status = "Walking to the " .. arg
+		quantumV4ButterflyRuntime.status = "Walking to the " .. arg
 		if not fn78(v23 + Vector3.new(0, 3, 0), 15) then
 			return false, "could not reach the " .. arg
 		end
@@ -20931,21 +21109,21 @@ do
 	end
 
 	local function fn88()
-		local senaV4TreadmillManager = genv.__SenaV4TreadmillManager
+		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
 
-		if senaV4TreadmillManager then
-			if not (senaV4TreadmillManager.activeTreadmill ~= nil) then
+		if quantumV4TreadmillManager then
+			if not (quantumV4TreadmillManager.activeTreadmill ~= nil) then
 				return
 			end
 		else
 			return
 		end
 
-		senaV4ButterflyRuntime.status = "Leaving the treadmill"
+		quantumV4ButterflyRuntime.status = "Leaving the treadmill"
 		local n10 = os.clock() + 5
 
-		while senaV4TreadmillManager.activeTreadmill ~= nil and os.clock() < n10 do
-			senaV4TreadmillManager:_requestUnequip()
+		while quantumV4TreadmillManager.activeTreadmill ~= nil and os.clock() < n10 do
+			quantumV4TreadmillManager:_requestUnequip()
 			task.wait(0.3)
 		end
 
@@ -20959,19 +21137,19 @@ do
 	end
 
 	local function fn89()
-		local senaV4TreadmillManager = genv.__SenaV4TreadmillManager
+		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
 
-		if senaV4TreadmillManager and not senaV4TreadmillManager.destroyed then
-			if not senaV4TreadmillManager.config.idleFarm then
+		if quantumV4TreadmillManager and not quantumV4TreadmillManager.destroyed then
+			if not quantumV4TreadmillManager.config.idleFarm then
 				return false
 			end
 		else
 			return false
 		end
 
-		if not senaV4TreadmillManager.busy and not senaV4TreadmillManager.idleRunning then
+		if not quantumV4TreadmillManager.busy and not quantumV4TreadmillManager.idleRunning then
 			task.defer(function()
-				senaV4TreadmillManager:_startIdle()
+				quantumV4TreadmillManager:_startIdle()
 			end)
 		end
 
@@ -21005,17 +21183,17 @@ do
 		local v24 = v13:_resolveSafeCFrame(v23)
 
 		if v24 then
-			senaV4ButterflyRuntime.status = "Back to the safe zone"
+			quantumV4ButterflyRuntime.status = "Back to the safe zone"
 			fn78(v24.Position, 60)
 		end
 	end
 
-	senaV4ButterflyRuntime.claimNet = function()
+	quantumV4ButterflyRuntime.claimNet = function()
 		local NetStand, v23 = fn84("NetStand")
 		if not NetStand then
 			return false, v23
 		end
-		senaV4ButterflyRuntime.status = "Claiming the net"
+		quantumV4ButterflyRuntime.status = "Claiming the net"
 		NetStand, v23 = fn83("NetStand")
 		local proximityPrompt = v23 and v23:FindFirstChildWhichIsA("ProximityPrompt", true)
 
@@ -21024,7 +21202,7 @@ do
 			local n10 = os.clock() + 2
 
 			while os.clock() < n10 do
-				if senaV4ButterflyRuntime.snapshot().net then
+				if quantumV4ButterflyRuntime.snapshot().net then
 					return true
 				end
 				task.wait(0.1)
@@ -21035,27 +21213,27 @@ do
 		return proximityPrompt, v23
 	end
 
-	senaV4ButterflyRuntime.tradeUp = function()
-		senaV4ButterflyRuntime.snapshot()
-		if not senaV4ButterflyRuntime.canTrade() then
+	quantumV4ButterflyRuntime.tradeUp = function()
+		quantumV4ButterflyRuntime.snapshot()
+		if not quantumV4ButterflyRuntime.canTrade() then
 			return false, "nothing to trade up"
 		end
 		local ButterflyMachine, v23 = fn84("ButterflyMachine")
 		if not ButterflyMachine then
 			return false, v23
 		end
-		local v24, butterflyTradeRecipe, n10, v25 = senaV4ButterflyRuntime.tiers(), senaV4Config.ButterflyTradeRecipe, 0
+		local v24, butterflyTradeRecipe, n10, v25 = quantumV4ButterflyRuntime.tiers(), quantumV4Config.ButterflyTradeRecipe, 0
 
 		if butterflyTradeRecipe == "Smart" then
-			local v26 = table.clone(senaV4ButterflyRuntime.snap.counts)
+			local v26 = table.clone(quantumV4ButterflyRuntime.snap.counts)
 			v25 = n10
 
 			while v25 < 50 do
-				local v27 = senaV4ButterflyRuntime.smartNext(v26)
+				local v27 = quantumV4ButterflyRuntime.smartNext(v26)
 				if not v27 then
 					break
 				end
-				senaV4ButterflyRuntime.status = "Trading up " .. v24[v27].name .. " for the essence"
+				quantumV4ButterflyRuntime.status = "Trading up " .. v24[v27].name .. " for the essence"
 				local Butterflies, v28 = fn68("Butterflies", "AskTradeUp", v27)
 
 				if not Butterflies then
@@ -21081,11 +21259,11 @@ do
 			local v26 = tbl13[i]
 
 			if butterflyTradeRecipe == nil or butterflyTradeRecipe == "All" or butterflyTradeRecipe == v26 then
-				n10 = senaV4ButterflyRuntime.snap.counts[v26] or 0
+				n10 = quantumV4ButterflyRuntime.snap.counts[v26] or 0
 				local trade = v24[v26].trade
 
 				while trade > 0 and n10 >= trade do
-					senaV4ButterflyRuntime.status = "Trading up " .. v24[v26].name
+					quantumV4ButterflyRuntime.status = "Trading up " .. v24[v26].name
 					local Butterflies, v27 = fn68("Butterflies", "AskTradeUp", v26)
 
 					if not Butterflies then
@@ -21105,11 +21283,11 @@ do
 		return true, v25
 	end
 
-	senaV4ButterflyRuntime.craft = function()
-		senaV4ButterflyRuntime.snapshot()
-		local v23, MutationShrine = senaV4ButterflyRuntime.canCraft()
+	quantumV4ButterflyRuntime.craft = function()
+		quantumV4ButterflyRuntime.snapshot()
+		local v23, MutationShrine = quantumV4ButterflyRuntime.canCraft()
 		if not v23 then
-			local v24 = senaV4ButterflyRuntime.tiers()
+			local v24 = quantumV4ButterflyRuntime.tiers()
 			return false, "need more " .. tostring(v24 and v24[MutationShrine] and v24[MutationShrine].name or MutationShrine)
 		end
 		MutationShrine, v23 = fn84("MutationShrine")
@@ -21118,8 +21296,8 @@ do
 		end
 		MutationShrine = 0
 
-		while MutationShrine < 10 and senaV4ButterflyRuntime.canCraft() do
-			senaV4ButterflyRuntime.status = "Crafting Enchanted Essence"
+		while MutationShrine < 10 and quantumV4ButterflyRuntime.canCraft() do
+			quantumV4ButterflyRuntime.status = "Crafting Enchanted Essence"
 			local Butterflies, v24 = fn68("Butterflies", "AskCraftEssence")
 
 			if not Butterflies then
@@ -21131,13 +21309,13 @@ do
 
 			MutationShrine += 1
 			task.wait(0.2)
-			senaV4ButterflyRuntime.snapshot()
+			quantumV4ButterflyRuntime.snapshot()
 		end
 
 		return true, MutationShrine
 	end
 
-	senaV4ButterflyRuntime.acceptWisp = function()
+	quantumV4ButterflyRuntime.acceptWisp = function()
 		local world = fn65(workspace, "World", "Build", "EnchantedForestZone", "WispSpawn")
 
 		if world then
@@ -21151,7 +21329,7 @@ do
 		if fn31() then
 			return false, "night - the forest is sealed"
 		end
-		senaV4ButterflyRuntime.status = "Flying to the Baby Wisp"
+		quantumV4ButterflyRuntime.status = "Flying to the Baby Wisp"
 		if not fn78(world.Position + Vector3.new(0, 3, 6), 60) then
 			return false, "could not reach the Baby Wisp"
 		end
@@ -21165,9 +21343,9 @@ do
 		return WispCompanion, v23
 	end
 
-	senaV4ButterflyRuntime.forestCategories = function()
-		if senaV4ButterflyRuntime.forestCats then
-			return senaV4ButterflyRuntime.forestCats
+	quantumV4ButterflyRuntime.forestCategories = function()
+		if quantumV4ButterflyRuntime.forestCats then
+			return quantumV4ButterflyRuntime.forestCats
 		end
 		local forestCats = {}
 
@@ -21182,13 +21360,13 @@ do
 		end)
 
 		if next(forestCats) then
-			senaV4ButterflyRuntime.forestCats = forestCats
+			quantumV4ButterflyRuntime.forestCats = forestCats
 		end
 
 		return forestCats
 	end
 
-	senaV4ButterflyRuntime.forestStock = function()
+	quantumV4ButterflyRuntime.forestStock = function()
 		local v23 = fn66()
 
 		local ok, result = pcall(function()
@@ -21196,7 +21374,7 @@ do
 		end)
 
 		local v24 = ok and result or nil
-		local v25 = senaV4ButterflyRuntime.forestCategories()
+		local v25 = quantumV4ButterflyRuntime.forestCategories()
 		local tbl16 = {eggs = 0, pets = 0, group = nil, best = 0}
 		if not v24 then
 			return tbl16
@@ -21257,7 +21435,7 @@ do
 		return tbl16
 	end
 
-	senaV4ButterflyRuntime.fuseForest = function(arg)
+	quantumV4ButterflyRuntime.fuseForest = function(arg)
 		local ok = fn66()
 		local ok2, result = pcall(ok.Save.Peek)
 		if ok2 and (result and result.FusionLocked) then
@@ -21309,11 +21487,11 @@ do
 		return true
 	end
 
-	senaV4ButterflyRuntime.questDrive = function(arg)
-		local senaV4EggRuntime, tbl16, questNote = genv.__SenaV4EggRuntime
-		local flag6 = senaV4Config.WispAutoQuest and arg.accepted and not arg.unlocked and not arg.claimable and not arg.readyReturn and (arg.progress or 0) < (arg.target or 0)
+	quantumV4ButterflyRuntime.questDrive = function(arg)
+		local quantumV4EggRuntime, tbl16, questNote = genv.__QuantumV4EggRuntime
+		local flag6 = quantumV4Config.WispAutoQuest and arg.accepted and not arg.unlocked and not arg.claimable and not arg.readyReturn and (arg.progress or 0) < (arg.target or 0)
 
-		if senaV4Config.WispAutoQuest and not arg.accepted and not arg.unlocked and (arg.speed or 0) < (arg.need or 0) then
+		if quantumV4Config.WispAutoQuest and not arg.accepted and not arg.unlocked and (arg.speed or 0) < (arg.need or 0) then
 			questNote = ("Wisp needs %gB SpeedPower"):format(math.floor((arg.need or 0) / 100000000) / 10)
 		else
 			if flag6 and arg.questId == "forest_eggs" then
@@ -21325,21 +21503,21 @@ do
 					questNote = "Hunting any Eternal egg"
 				else
 					if flag6 and arg.questId == "forest_fusion" then
-						local v23 = senaV4ButterflyRuntime.forestStock()
+						local v23 = quantumV4ButterflyRuntime.forestStock()
 						local str3
 
 						if v23.group then
 							local str4 = "Fusing 3 Enchanted Forest pets"
 
 							if fn69("fuse") then
-								local v24, v25 = senaV4ButterflyRuntime.fuseForest(v23.group)
+								local v24, v25 = quantumV4ButterflyRuntime.fuseForest(v23.group)
 								questNote = v24 and "Fused an Enchanted Forest animal" or "Fuse: " .. tostring(v25)
 								fn70("fuse")
 							else
 								questNote = str4
 							end
 						else
-							tbl16, str3 = if v23.eggs < 3 then {area = "Enchanted Forest"} else tbl16, ("Need 3 of one Enchanted Forest pet (best %d)%s"):format(v23.best, senaV4Config.AutoPlace and senaV4Config.AutoHatch and "" or "  ·  turn on Auto Place + Auto Hatch")
+							tbl16, str3 = if v23.eggs < 3 then {area = "Enchanted Forest"} else tbl16, ("Need 3 of one Enchanted Forest pet (best %d)%s"):format(v23.best, quantumV4Config.AutoPlace and quantumV4Config.AutoHatch and "" or "  ·  turn on Auto Place + Auto Hatch")
 							questNote = str3
 						end
 					end
@@ -21347,14 +21525,14 @@ do
 			end
 		end
 
-		if senaV4EggRuntime and senaV4EggRuntime.setWispObjective then
-			senaV4EggRuntime:setWispObjective(tbl16)
+		if quantumV4EggRuntime and quantumV4EggRuntime.setWispObjective then
+			quantumV4EggRuntime:setWispObjective(tbl16)
 		end
 
-		senaV4ButterflyRuntime.questNote = questNote
+		quantumV4ButterflyRuntime.questNote = questNote
 	end
 
-	senaV4ButterflyRuntime.promptPoint = function(arg)
+	quantumV4ButterflyRuntime.promptPoint = function(arg)
 		local parent = arg and arg.Parent
 		if not parent then
 			return nil
@@ -21374,7 +21552,7 @@ do
 		return nil
 	end
 
-	senaV4ButterflyRuntime.banjoPrompt = function(arg)
+	quantumV4ButterflyRuntime.banjoPrompt = function(arg)
 		local world = fn65(workspace, "World", "Build", "EnchantedTreeInterior", "Banjo Secret Room")
 		if not world then
 			return nil
@@ -21397,8 +21575,8 @@ do
 		return nil
 	end
 
-	senaV4ButterflyRuntime.firePrompt = function(arg)
-		local v23 = senaV4ButterflyRuntime.promptPoint(arg)
+	quantumV4ButterflyRuntime.firePrompt = function(arg)
+		local v23 = quantumV4ButterflyRuntime.promptPoint(arg)
 		if not v23 then
 			return false
 		end
@@ -21421,7 +21599,7 @@ do
 		return true
 	end
 
-	senaV4ButterflyRuntime.solveBanjo = function()
+	quantumV4ButterflyRuntime.solveBanjo = function()
 		local v23 = fn66()
 		local banjoCricket = v23.Remotes and v23.Remotes.BanjoCricket
 
@@ -21437,7 +21615,7 @@ do
 			return false, "Banjo remotes missing"
 		end
 
-		local BanjoCricketTalk = senaV4ButterflyRuntime.banjoPrompt("BanjoCricketTalk") or senaV4ButterflyRuntime.banjoPrompt("BanjoCricket")
+		local BanjoCricketTalk = quantumV4ButterflyRuntime.banjoPrompt("BanjoCricketTalk") or quantumV4ButterflyRuntime.banjoPrompt("BanjoCricket")
 		if not BanjoCricketTalk then
 			return false, "Banjo Cricket not found"
 		end
@@ -21472,19 +21650,19 @@ do
 		end
 
 		local connection6 = effect.OnClientEvent:Connect(fn91)
-		senaV4ButterflyRuntime.status = "Talking to the Banjo Cricket"
-		senaV4ButterflyRuntime.firePrompt(BanjoCricketTalk)
+		quantumV4ButterflyRuntime.status = "Talking to the Banjo Cricket"
+		quantumV4ButterflyRuntime.firePrompt(BanjoCricketTalk)
 		local n12 = os.clock() + 150
 		effect = os.clock()
 
-		while fn2() and senaV4Config.BanjoAuto and os.clock() < n12 and not tbl16.solved do
-			if senaV4ButterflyRuntime.manual then
+		while fn2() and quantumV4Config.BanjoAuto and os.clock() < n12 and not tbl16.solved do
+			if quantumV4ButterflyRuntime.manual then
 				break
-			elseif senaV4TaskLadder.blocker("butterfly") ~= nil then
+			elseif quantumV4TaskLadder.blocker("butterfly") ~= nil then
 				break
 			end
 
-			if senaV4ButterflyRuntime.snapshot().banjoSolved then
+			if quantumV4ButterflyRuntime.snapshot().banjoSolved then
 				tbl16.solved = true
 				break
 			end
@@ -21492,7 +21670,7 @@ do
 
 			if notes then
 				tbl16.notes = nil
-				senaV4ButterflyRuntime.status = ("Banjo Cricket  ·  stage %d  ·  %d notes"):format(tbl16.cleared + 1, #notes)
+				quantumV4ButterflyRuntime.status = ("Banjo Cricket  ·  stage %d  ·  %d notes"):format(tbl16.cleared + 1, #notes)
 				task.wait(#notes * (n10 + n11) + 0.3)
 
 				for i, note in ipairs(notes) do
@@ -21500,7 +21678,7 @@ do
 						break
 					end
 
-					if not senaV4ButterflyRuntime.hitMushroom(note, banjoCricket) then
+					if not quantumV4ButterflyRuntime.hitMushroom(note, banjoCricket) then
 						tbl16.err = "equip a bat first (the mushrooms only take bat hits)"
 						break
 					end
@@ -21512,7 +21690,7 @@ do
 				effect = os.clock()
 			else
 				if os.clock() - effect > 8 then
-					senaV4ButterflyRuntime.firePrompt(BanjoCricketTalk)
+					quantumV4ButterflyRuntime.firePrompt(BanjoCricketTalk)
 					effect = os.clock()
 				end
 			end
@@ -21524,7 +21702,7 @@ do
 		return tbl16.solved, tbl16.solved and nil or (tbl16.err or "the cricket stopped playing")
 	end
 
-	senaV4ButterflyRuntime.hitMushroom = function(arg, arg2)
+	quantumV4ButterflyRuntime.hitMushroom = function(arg, arg2)
 		local v23 = fn71()
 		local character = localPlayer.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -21551,8 +21729,8 @@ do
 		if not v24 then
 			return false
 		end
-		local senaV4GodMode = genv.__SenaV4GodMode
-		local v25 = senaV4GodMode and senaV4GodMode:_equipBat()
+		local quantumV4GodMode = genv.__QuantumV4GodMode
+		local v25 = quantumV4GodMode and quantumV4GodMode:_equipBat()
 		if not v25 then
 			return false
 		end
@@ -21580,13 +21758,13 @@ do
 
 		while os.clock() < n12 do
 			local attribute = v25:GetAttribute("CooldownEndTime")
-			if not (v25:GetAttribute("CooldownActive") == true and typeof(attribute) == "number" and workspace:GetServerTimeNow() < attribute) and os.clock() - (senaV4ButterflyRuntime.lastMushroomHit or 0) >= 0.75 then
+			if not (v25:GetAttribute("CooldownActive") == true and typeof(attribute) == "number" and workspace:GetServerTimeNow() < attribute) and os.clock() - (quantumV4ButterflyRuntime.lastMushroomHit or 0) >= 0.75 then
 				break
 			end
 			task.wait(0.05)
 		end
 
-		senaV4ButterflyRuntime.lastMushroomHit = os.clock()
+		quantumV4ButterflyRuntime.lastMushroomHit = os.clock()
 
 		pcall(function()
 			v25:Activate()
@@ -21596,22 +21774,22 @@ do
 		return true
 	end
 
-	senaV4ButterflyRuntime.claimBanjo = function()
-		local Jitterbug = senaV4ButterflyRuntime.banjoPrompt("Jitterbug")
+	quantumV4ButterflyRuntime.claimBanjo = function()
+		local Jitterbug = quantumV4ButterflyRuntime.banjoPrompt("Jitterbug")
 
 		if Jitterbug then
-			senaV4ButterflyRuntime.status = "Talking to Jitterbug"
-			senaV4ButterflyRuntime.firePrompt(Jitterbug)
+			quantumV4ButterflyRuntime.status = "Talking to Jitterbug"
+			quantumV4ButterflyRuntime.firePrompt(Jitterbug)
 			task.wait(0.6)
 		end
 
 		local BanjoCricket, v23 = fn68("BanjoCricket", "AskClaim")
 		task.wait(0.4)
-		return BanjoCricket or senaV4ButterflyRuntime.snapshot().banjoClaimed, v23
+		return BanjoCricket or quantumV4ButterflyRuntime.snapshot().banjoClaimed, v23
 	end
 
-	senaV4ButterflyRuntime.runBanjo = function()
-		local v23 = senaV4ButterflyRuntime.snapshot()
+	quantumV4ButterflyRuntime.runBanjo = function()
+		local v23 = quantumV4ButterflyRuntime.snapshot()
 		if v23.banjoClaimed then
 			return true
 		end
@@ -21624,18 +21802,18 @@ do
 		end
 
 		if not v23.banjoSolved then
-			local v24, v25 = senaV4ButterflyRuntime.solveBanjo()
+			local v24, v25 = quantumV4ButterflyRuntime.solveBanjo()
 			if not v24 then
 				return false, v25
 			end
-			task.wait(senaV4ButterflyRuntime.bridgeSeconds or 3.5)
+			task.wait(quantumV4ButterflyRuntime.bridgeSeconds or 3.5)
 		end
 
-		return senaV4ButterflyRuntime.claimBanjo()
+		return quantumV4ButterflyRuntime.claimBanjo()
 	end
 
-	senaV4ButterflyRuntime.returnWisp = function()
-		local v23 = senaV4ButterflyRuntime.snapshot()
+	quantumV4ButterflyRuntime.returnWisp = function()
+		local v23 = quantumV4ButterflyRuntime.snapshot()
 		if v23.unlocked then
 			return true
 		end
@@ -21657,7 +21835,7 @@ do
 			local worldPosition = parent and (parent:IsA("Attachment") and parent.WorldPosition or parent:IsA("BasePart") and parent.Position)
 
 			if worldPosition then
-				senaV4ButterflyRuntime.status = "Taking the wisp home"
+				quantumV4ButterflyRuntime.status = "Taking the wisp home"
 
 				if fn78(worldPosition + Vector3.new(0, 3, 4), 60) then
 					local n10 = os.clock() + 2
@@ -21669,11 +21847,11 @@ do
 					fn80(world)
 					local n11 = os.clock() + 3
 
-					while os.clock() < n11 and not senaV4ButterflyRuntime.snapshot().unlocked do
+					while os.clock() < n11 and not quantumV4ButterflyRuntime.snapshot().unlocked do
 						task.wait(0.1)
 					end
 
-					if senaV4ButterflyRuntime.snap.unlocked then
+					if quantumV4ButterflyRuntime.snap.unlocked then
 						return true
 					end
 				end
@@ -21690,27 +21868,27 @@ do
 		if not worldPosition then
 			return false, "tree entrance not found"
 		end
-		senaV4ButterflyRuntime.status = "Taking the wisp home"
+		quantumV4ButterflyRuntime.status = "Taking the wisp home"
 		if not fn78(worldPosition + Vector3.new(0, 3, 0), 60) then
 			return false, "could not reach the tree entrance"
 		end
 		fn80(enchantedTreePrompt)
 		local n10 = os.clock() + 3
 
-		while os.clock() < n10 and not senaV4ButterflyRuntime.snapshot().unlocked do
+		while os.clock() < n10 and not quantumV4ButterflyRuntime.snapshot().unlocked do
 			task.wait(0.1)
 		end
 
-		if senaV4ButterflyRuntime.snap.unlocked then
+		if quantumV4ButterflyRuntime.snap.unlocked then
 			return true
 		end
 		local WispCompanion, v24 = fn68("WispCompanion", "Request", "Return")
 		task.wait(0.5)
-		return WispCompanion or senaV4ButterflyRuntime.snapshot().unlocked, v24
+		return WispCompanion or quantumV4ButterflyRuntime.snapshot().unlocked, v24
 	end
 
-	senaV4ButterflyRuntime.tierOptions = function()
-		local v23 = senaV4ButterflyRuntime.tiers()
+	quantumV4ButterflyRuntime.tierOptions = function()
+		local v23 = quantumV4ButterflyRuntime.tiers()
 		local tbl16 = {}
 
 		for i = #tbl13, 1, -1 do
@@ -21721,8 +21899,8 @@ do
 		return tbl16
 	end
 
-	senaV4ButterflyRuntime.tierFromLabel = function(arg)
-		local v23 = senaV4ButterflyRuntime.tiers()
+	quantumV4ButterflyRuntime.tierFromLabel = function(arg)
+		local v23 = quantumV4ButterflyRuntime.tiers()
 
 		for i, v24 in ipairs(tbl13) do
 			if arg == v24 then
@@ -21737,51 +21915,51 @@ do
 		return nil
 	end
 
-	senaV4ButterflyRuntime.setTiers = function(arg)
+	quantumV4ButterflyRuntime.setTiers = function(arg)
 		local butterflyTiers = {}
 
 		for i, v23 in ipairs(type(arg) == "table" and arg or {}) do
-			local v24 = senaV4ButterflyRuntime.tierFromLabel(tostring(v23))
+			local v24 = quantumV4ButterflyRuntime.tierFromLabel(tostring(v23))
 
 			if v24 then
 				butterflyTiers[#butterflyTiers + 1] = v24
 			end
 		end
 
-		senaV4Config.ButterflyTiers = butterflyTiers
+		quantumV4Config.ButterflyTiers = butterflyTiers
 	end
 
 	local tbl16 = {"All Recipes", "For Essence (shortfall only)", "Emerald to Sapphire", "Sapphire to Amethyst", "Amethyst to Radiant"}
 	local tbl17 = {["For Essence (shortfall only)"] = "Smart", ["Emerald to Sapphire"] = "Green", ["Sapphire to Amethyst"] = "Blue", ["Amethyst to Radiant"] = "Purple"}
 
-	senaV4ButterflyRuntime.recipeOptions = function()
+	quantumV4ButterflyRuntime.recipeOptions = function()
 		return tbl16
 	end
 
-	senaV4ButterflyRuntime.setRecipe = function(arg)
-		senaV4Config.ButterflyTradeRecipe = tbl17[tostring(arg)] or "All"
+	quantumV4ButterflyRuntime.setRecipe = function(arg)
+		quantumV4Config.ButterflyTradeRecipe = tbl17[tostring(arg)] or "All"
 	end
 
 	local tbl18 = {"Tween to Butterfly", "Stand", "Zigzag", "Circle"}
 	local tbl19 = {["Tween to Butterfly"] = "Tween", Stand = "Stand", Zigzag = "Zigzag", Circle = "Circle"}
 
-	senaV4ButterflyRuntime.modeOptions = function()
+	quantumV4ButterflyRuntime.modeOptions = function()
 		return tbl18
 	end
 
-	senaV4ButterflyRuntime.setMode = function(arg)
-		senaV4Config.ButterflyCatchMode = tbl19[tostring(arg)] or "Tween"
+	quantumV4ButterflyRuntime.setMode = function(arg)
+		quantumV4Config.ButterflyCatchMode = tbl19[tostring(arg)] or "Tween"
 	end
 
 	local folder
 
 	local function fn91()
-		for k, card in pairs(senaV4ButterflyRuntime.cards) do
+		for k, card in pairs(quantumV4ButterflyRuntime.cards) do
 			pcall(function()
 				card.part:Destroy()
 			end)
 
-			senaV4ButterflyRuntime.cards[k] = nil
+			quantumV4ButterflyRuntime.cards[k] = nil
 		end
 
 		if folder then
@@ -21801,18 +21979,18 @@ do
 
 		if not (folder and folder.Parent) then
 			folder = Instance.new("Folder")
-			folder.Name = "SenaBloomEsp"
+			folder.Name = "QuantumBloomEsp"
 			folder.Parent = currentCamera
 		end
 
-		local tbl20 = senaV4ButterflyRuntime.tiers() or {}
+		local tbl20 = quantumV4ButterflyRuntime.tiers() or {}
 		local v23 = fn71()
 		local tbl21 = {}
 
 		for i, v24 in ipairs(fn74()) do
 			local str3 = ("%d_%d_%d"):format(v24.pos.X, v24.pos.Y, v24.pos.Z)
 			tbl21[str3] = true
-			currentCamera = senaV4ButterflyRuntime.cards[str3]
+			currentCamera = quantumV4ButterflyRuntime.cards[str3]
 
 			if currentCamera and currentCamera.part.Parent then
 			else
@@ -21839,7 +22017,7 @@ do
 				textLabel.TextStrokeTransparency = 0.35
 				textLabel.Parent = billboardGui
 				currentCamera = {part = part, label = textLabel}
-				senaV4ButterflyRuntime.cards[str3] = currentCamera
+				quantumV4ButterflyRuntime.cards[str3] = currentCamera
 			end
 
 			currentCamera.part.CFrame = CFrame.new(v24.pos)
@@ -21848,13 +22026,13 @@ do
 			currentCamera.label.Text = v23 and ("%s  %dm"):format(v25 and v25.name or v24.tier, math.floor((v24.pos - v23.Position).Magnitude)) or (v25 and v25.name or v24.tier)
 		end
 
-		for k, card in pairs(senaV4ButterflyRuntime.cards) do
+		for k, card in pairs(quantumV4ButterflyRuntime.cards) do
 			if not tbl21[k] then
 				pcall(function()
 					card.part:Destroy()
 				end)
 
-				senaV4ButterflyRuntime.cards[k] = nil
+				quantumV4ButterflyRuntime.cards[k] = nil
 			end
 		end
 	end
@@ -21909,7 +22087,7 @@ do
 	tbl20.gain = function()
 		local ok, result = pcall(fn66().Save.Peek)
 		local num = ok and result and result.Butterflies and tonumber(result.Butterflies.TotalCaught)
-		return num and senaV4ButterflyRuntime.bloomBase and math.max(0, num - senaV4ButterflyRuntime.bloomBase) or 0
+		return num and quantumV4ButterflyRuntime.bloomBase and math.max(0, num - quantumV4ButterflyRuntime.bloomBase) or 0
 	end
 
 	tbl20.swing = function(arg, arg2)
@@ -21917,7 +22095,7 @@ do
 			return
 		end
 		local n10 = tonumber(fn67("SwingCooldownSeconds", 0.45)) or 0.45
-		if os.clock() - senaV4ButterflyRuntime.lastSwing < n10 then
+		if os.clock() - quantumV4ButterflyRuntime.lastSwing < n10 then
 			return
 		end
 		local v23 = fn66()
@@ -21943,7 +22121,7 @@ do
 		if flight.Tier ~= nil and tostring(flight.Tier) ~= arg.Name then
 			return
 		end
-		senaV4ButterflyRuntime.lastSwing = os.clock()
+		quantumV4ButterflyRuntime.lastSwing = os.clock()
 		tbl20.swinging = true
 
 		task.spawn(function()
@@ -21958,9 +22136,9 @@ do
 				tbl20.target = nil
 			end
 
-			local v26 = senaV4ButterflyRuntime.tiers()
+			local v26 = quantumV4ButterflyRuntime.tiers()
 			local name2 = v26 and v26[arg.Name] and v26[arg.Name].name or arg.Name
-			senaV4ButterflyRuntime.status = ("%s %s  ·  +%d this Bloom"):format(v25 == "Caught" and "Caught" or "Chasing", name2, tbl20.gain())
+			quantumV4ButterflyRuntime.status = ("%s %s  ·  +%d this Bloom"):format(v25 == "Caught" and "Caught" or "Chasing", name2, tbl20.gain())
 		end)
 	end
 
@@ -22000,8 +22178,8 @@ do
 
 	tbl20.keepGoing = function(arg, arg2, arg3)
 		if fn2() then
-			if senaV4Config.ButterflyAutoCatch then
-				if senaV4ButterflyRuntime.bloomLeft() > 0 then
+			if quantumV4Config.ButterflyAutoCatch then
+				if quantumV4ButterflyRuntime.bloomLeft() > 0 then
 					if arg.Parent then
 						if not (arg2.Health > 0) then
 							return false
@@ -22019,10 +22197,10 @@ do
 			return false
 		end
 
-		if (senaV4Config.ButterflyCatchMode or "Tween") ~= arg3 then
+		if (quantumV4Config.ButterflyCatchMode or "Tween") ~= arg3 then
 			return false
 		end
-		return not (senaV4ButterflyRuntime.manual or fn79() or fn31() or senaV4TaskLadder.blocker("butterfly") ~= nil)
+		return not (quantumV4ButterflyRuntime.manual or fn79() or fn31() or quantumV4TaskLadder.blocker("butterfly") ~= nil)
 	end
 
 	tbl20.moveStep = function(arg, arg2, arg3, arg4, arg5, arg6, arg7)
@@ -22217,7 +22395,7 @@ do
 					if tbl20.swinging then
 					else
 						local n16 = now2 + 1
-						senaV4ButterflyRuntime.status = ("%s  ·  +%d this Bloom"):format(v27, tbl20.gain())
+						quantumV4ButterflyRuntime.status = ("%s  ·  +%d this Bloom"):format(v27, tbl20.gain())
 						n12 = n16
 					end
 				end
@@ -22257,8 +22435,8 @@ do
 				v27 = tbl20.pos(target)
 
 				if target then
-					local v28 = senaV4ButterflyRuntime.tiers()
-					senaV4ButterflyRuntime.status = ("Chasing %s  ·  +%d this Bloom"):format(v28 and v28[target.Name] and v28[target.Name].name or target.Name, tbl20.gain())
+					local v28 = quantumV4ButterflyRuntime.tiers()
+					quantumV4ButterflyRuntime.status = ("Chasing %s  ·  +%d this Bloom"):format(v28 and v28[target.Name] and v28[target.Name].name or target.Name, tbl20.gain())
 				end
 			end
 
@@ -22297,7 +22475,7 @@ do
 		if not fn86() then
 			fn76()
 			if fn31() then
-				senaV4ButterflyRuntime.status = "Night - waiting to fly to the forest"
+				quantumV4ButterflyRuntime.status = "Night - waiting to fly to the forest"
 				return
 			end
 
@@ -22307,36 +22485,36 @@ do
 			local v23 = fn87()
 
 			if not v23 then
-				senaV4ButterflyRuntime.status = "Butterfly Bloom zone not found"
+				quantumV4ButterflyRuntime.status = "Butterfly Bloom zone not found"
 				fn70("area")
 				return
 			end
 
-			senaV4ButterflyRuntime.status = "Flying to the Butterfly Bloom"
+			quantumV4ButterflyRuntime.status = "Flying to the Butterfly Bloom"
 
 			if not fn78(v23, 60) then
 				fn70("area")
-				senaV4ButterflyRuntime.status = "Could not reach the Enchanted Forest"
+				quantumV4ButterflyRuntime.status = "Could not reach the Enchanted Forest"
 			end
 
 			return
 		end
 
-		local senaV4TreadmillManager = genv.__SenaV4TreadmillManager
+		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
 
-		if senaV4TreadmillManager and senaV4TreadmillManager.activeTreadmill ~= nil then
+		if quantumV4TreadmillManager and quantumV4TreadmillManager.activeTreadmill ~= nil then
 			fn88()
 		end
 
 		if not arg.holding and not fn75() then
-			senaV4ButterflyRuntime.status = "Butterfly Net is not in your backpack"
+			quantumV4ButterflyRuntime.status = "Butterfly Net is not in your backpack"
 			return
 		end
-		local butterflyCatchMode = senaV4Config.ButterflyCatchMode or "Tween"
+		local butterflyCatchMode = quantumV4Config.ButterflyCatchMode or "Tween"
 
 		if not (if butterflyCatchMode == "Tween" then tbl20.run() else tbl20.patrol(butterflyCatchMode)) then
 			fn77()
-			senaV4ButterflyRuntime.status = ("Waiting for butterflies  ·  +%d this Bloom"):format(tbl20.gain())
+			quantumV4ButterflyRuntime.status = ("Waiting for butterflies  ·  +%d this Bloom"):format(tbl20.gain())
 		end
 	end
 
@@ -22356,21 +22534,21 @@ do
 	end
 
 	local function fn95()
-		if senaV4ButterflyRuntime.manual then
+		if quantumV4ButterflyRuntime.manual then
 			return
 		end
-		local v23 = senaV4ButterflyRuntime.snapshot()
+		local v23 = quantumV4ButterflyRuntime.snapshot()
 
 		if v23.active then
-			senaV4ButterflyRuntime.bloomBase = senaV4ButterflyRuntime.bloomBase or v23.caught
+			quantumV4ButterflyRuntime.bloomBase = quantumV4ButterflyRuntime.bloomBase or v23.caught
 		else
-			senaV4ButterflyRuntime.bloomBase = nil
+			quantumV4ButterflyRuntime.bloomBase = nil
 		end
 
-		if senaV4Config.ButterflyEsp and v23.active then
+		if quantumV4Config.ButterflyEsp and v23.active then
 			fn92()
 		else
-			if next(senaV4ButterflyRuntime.cards) then
+			if next(quantumV4ButterflyRuntime.cards) then
 				fn91()
 			else
 				if folder then
@@ -22379,11 +22557,11 @@ do
 			end
 		end
 
-		pcall(senaV4ButterflyRuntime.questDrive, v23)
+		pcall(quantumV4ButterflyRuntime.questDrive, v23)
 
-		if senaV4Config.WispAutoQuest and (v23.claimable and (v23.questId and fn69("quest"))) then
+		if quantumV4Config.WispAutoQuest and (v23.claimable and (v23.questId and fn69("quest"))) then
 			local WispCompanion, v24 = fn68("WispCompanion", "Request", "Claim", v23.questId)
-			senaV4ButterflyRuntime.status = WispCompanion and "Wisp quest claimed: " .. v23.quest or "Wisp claim: " .. tostring(v24 or "refused")
+			quantumV4ButterflyRuntime.status = WispCompanion and "Wisp quest claimed: " .. v23.quest or "Wisp claim: " .. tostring(v24 or "refused")
 
 			if not WispCompanion then
 				fn70("quest")
@@ -22392,44 +22570,44 @@ do
 
 		local str3 = nil
 
-		if senaV4Config.WispAutoQuest and not v23.accepted and not v23.unlocked and (v23.need or 0) > 0 and (v23.speed or 0) >= v23.need and fn69("accept") then
+		if quantumV4Config.WispAutoQuest and not v23.accepted and not v23.unlocked and (v23.need or 0) > 0 and (v23.speed or 0) >= v23.need and fn69("accept") then
 			str3 = "accept"
 		else
-			if senaV4Config.WispAutoQuest and not v23.unlocked and (v23.returning or v23.readyReturn) and fn69("wisp") then
+			if quantumV4Config.WispAutoQuest and not v23.unlocked and (v23.returning or v23.readyReturn) and fn69("wisp") then
 				str3 = "wisp"
 			else
-				if senaV4Config.ButterflyAutoNet and not v23.net and v23.treeUnlocked and fn69("net") then
+				if quantumV4Config.ButterflyAutoNet and not v23.net and v23.treeUnlocked and fn69("net") then
 					str3 = "net"
 				else
-					if senaV4Config.BanjoAuto and v23.treeUnlocked and not v23.banjoClaimed and not v23.active and fn69("banjo") then
+					if quantumV4Config.BanjoAuto and v23.treeUnlocked and not v23.banjoClaimed and not v23.active and fn69("banjo") then
 						str3 = "banjo"
 					else
-						if senaV4Config.ButterflyAutoCatch and v23.active and v23.net and not (v13 and v13.enabled and os.clock() - (tonumber(v13.gateOpenAt) or 0) < 3) then
+						if quantumV4Config.ButterflyAutoCatch and v23.active and v23.net and not (v13 and v13.enabled and os.clock() - (tonumber(v13.gateOpenAt) or 0) < 3) then
 							str3 = "catch"
 						else
 							local active = v23.active
-							str3 = if (if active then not active else senaV4Config.ButterflyAutoTrade) and v23.net and senaV4ButterflyRuntime.canTrade() and fn69("trade") then "trade" else if v23.active then str3 else if senaV4Config.ButterflyAutoCraft then if v23.net then if senaV4ButterflyRuntime.canCraft() then if fn69("craft") then "craft" else str3 else str3 else str3 else str3
+							str3 = if (if active then not active else quantumV4Config.ButterflyAutoTrade) and v23.net and quantumV4ButterflyRuntime.canTrade() and fn69("trade") then "trade" else if v23.active then str3 else if quantumV4Config.ButterflyAutoCraft then if v23.net then if quantumV4ButterflyRuntime.canCraft() then if fn69("craft") then "craft" else str3 else str3 else str3 else str3
 						end
 					end
 				end
 			end
 		end
 
-		senaV4ButterflyRuntime.wantsCharacter = str3 ~= nil
-		local butterfly = str3 and senaV4TaskLadder.blocker("butterfly") or nil
-		local butterfly2 = str3 and not butterfly and senaV4TaskLadder.holder("butterfly") or nil
-		local active = senaV4ButterflyRuntime.active
-		senaV4ButterflyRuntime.active = str3 ~= nil and butterfly == nil and butterfly2 == nil
+		quantumV4ButterflyRuntime.wantsCharacter = str3 ~= nil
+		local butterfly = str3 and quantumV4TaskLadder.blocker("butterfly") or nil
+		local butterfly2 = str3 and not butterfly and quantumV4TaskLadder.holder("butterfly") or nil
+		local active = quantumV4ButterflyRuntime.active
+		quantumV4ButterflyRuntime.active = str3 ~= nil and butterfly == nil and butterfly2 == nil
 
-		if str3 and not senaV4ButterflyRuntime.active then
+		if str3 and not quantumV4ButterflyRuntime.active then
 			fn76()
 
 			if butterfly and fn79() then
-				senaV4ButterflyRuntime.status = "Leaving the tree for " .. senaV4TaskLadder.TITLES[butterfly]
+				quantumV4ButterflyRuntime.status = "Leaving the tree for " .. quantumV4TaskLadder.TITLES[butterfly]
 				fn82()
 			end
 
-			senaV4ButterflyRuntime.status = butterfly and "Yielding to " .. senaV4TaskLadder.TITLES[butterfly] or "Waiting for " .. senaV4TaskLadder.TITLES[butterfly2] .. " to hand over"
+			quantumV4ButterflyRuntime.status = butterfly and "Yielding to " .. quantumV4TaskLadder.TITLES[butterfly] or "Waiting for " .. quantumV4TaskLadder.TITLES[butterfly2] .. " to hand over"
 			return
 		end
 
@@ -22439,7 +22617,7 @@ do
 			end
 
 			fn76()
-			senaV4ButterflyRuntime.status = fn94(v23)
+			quantumV4ButterflyRuntime.status = fn94(v23)
 			return
 		end
 
@@ -22448,22 +22626,22 @@ do
 		end
 
 		if str3 == "accept" then
-			butterfly, active = senaV4ButterflyRuntime.acceptWisp()
-			senaV4ButterflyRuntime.status = butterfly and "Wisp accepted - quests started" or "Wisp: " .. tostring(active or "refused")
+			butterfly, active = quantumV4ButterflyRuntime.acceptWisp()
+			quantumV4ButterflyRuntime.status = butterfly and "Wisp accepted - quests started" or "Wisp: " .. tostring(active or "refused")
 
 			if not butterfly then
 				fn70("accept")
 			end
 		elseif str3 == "wisp" then
-			local v24, v25 = senaV4ButterflyRuntime.returnWisp()
-			senaV4ButterflyRuntime.status = v24 and "Wisp returned - Enchanted Tree unlocked" or "Wisp: " .. tostring(v25 or "refused")
+			local v24, v25 = quantumV4ButterflyRuntime.returnWisp()
+			quantumV4ButterflyRuntime.status = v24 and "Wisp returned - Enchanted Tree unlocked" or "Wisp: " .. tostring(v25 or "refused")
 
 			if not v24 then
 				fn70("wisp")
 			end
 		elseif str3 == "banjo" then
-			local v24, v25 = senaV4ButterflyRuntime.runBanjo()
-			senaV4ButterflyRuntime.status = v24 and "Banjo Cricket secret claimed" or "Banjo: " .. tostring(v25 or "refused")
+			local v24, v25 = quantumV4ButterflyRuntime.runBanjo()
+			quantumV4ButterflyRuntime.status = v24 and "Banjo Cricket secret claimed" or "Banjo: " .. tostring(v25 or "refused")
 
 			if not v24 then
 				fn70("banjo")
@@ -22473,8 +22651,8 @@ do
 				fn82()
 			end
 		elseif str3 == "net" then
-			local v24, v25 = senaV4ButterflyRuntime.claimNet()
-			senaV4ButterflyRuntime.status = v24 and "Butterfly Net claimed" or "Net: " .. tostring(v25 or "refused")
+			local v24, v25 = quantumV4ButterflyRuntime.claimNet()
+			quantumV4ButterflyRuntime.status = v24 and "Butterfly Net claimed" or "Net: " .. tostring(v25 or "refused")
 
 			if not v24 then
 				fn70("net")
@@ -22482,12 +22660,12 @@ do
 		elseif str3 == "catch" then
 			fn93(v23)
 		elseif str3 == "trade" then
-			local v24, v25 = senaV4ButterflyRuntime.tradeUp()
-			senaV4ButterflyRuntime.status = v24 and ("Traded up %d time(s)"):format(tonumber(v25) or 0) or "Trade: " .. tostring(v25)
+			local v24, v25 = quantumV4ButterflyRuntime.tradeUp()
+			quantumV4ButterflyRuntime.status = v24 and ("Traded up %d time(s)"):format(tonumber(v25) or 0) or "Trade: " .. tostring(v25)
 			fn70("trade")
 		elseif str3 == "craft" then
-			local v24, v25 = senaV4ButterflyRuntime.craft()
-			senaV4ButterflyRuntime.status = v24 and ("Crafted %d Enchanted Essence"):format(tonumber(v25) or 0) or "Craft: " .. tostring(v25)
+			local v24, v25 = quantumV4ButterflyRuntime.craft()
+			quantumV4ButterflyRuntime.status = v24 and ("Crafted %d Enchanted Essence"):format(tonumber(v25) or 0) or "Craft: " .. tostring(v25)
 			fn70("craft")
 		end
 	end
@@ -22497,10 +22675,10 @@ do
 			local ok, result = pcall(fn95)
 
 			if not ok then
-				senaV4ButterflyRuntime.active = false
-				senaV4ButterflyRuntime.wantsCharacter = false
+				quantumV4ButterflyRuntime.active = false
+				quantumV4ButterflyRuntime.wantsCharacter = false
 				fn76()
-				senaV4ButterflyRuntime.status = "Error: " .. tostring(result)
+				quantumV4ButterflyRuntime.status = "Error: " .. tostring(result)
 				task.wait(1)
 			end
 
@@ -22511,25 +22689,25 @@ do
 		fn91()
 	end)
 
-	senaV4TaskLadder.register("butterfly", {wants = function()
-		return senaV4ButterflyRuntime.wantsCharacter == true
+	quantumV4TaskLadder.register("butterfly", {wants = function()
+		return quantumV4ButterflyRuntime.wantsCharacter == true
 	end, active = function()
-		return senaV4ButterflyRuntime.active == true
+		return quantumV4ButterflyRuntime.active == true
 	end, enabled = function()
-		return senaV4Config.ButterflyAutoCatch == true or senaV4Config.ButterflyAutoNet == true or senaV4Config.WispAutoQuest == true or senaV4Config.BanjoAuto == true or senaV4Config.ButterflyAutoTrade == true or senaV4Config.ButterflyAutoCraft == true
+		return quantumV4Config.ButterflyAutoCatch == true or quantumV4Config.ButterflyAutoNet == true or quantumV4Config.WispAutoQuest == true or quantumV4Config.BanjoAuto == true or quantumV4Config.ButterflyAutoTrade == true or quantumV4Config.ButterflyAutoCraft == true
 	end, status = function()
-		return tostring(senaV4ButterflyRuntime.status or "")
+		return tostring(quantumV4ButterflyRuntime.status or "")
 	end})
 
-	genv.__SenaV4ButterflyRuntime = senaV4ButterflyRuntime
+	genv.__QuantumV4ButterflyRuntime = quantumV4ButterflyRuntime
 end
 
 do
 	local Players2 = game:GetService("Players")
 	local ReplicatedStorage2 = game:GetService("ReplicatedStorage")
 	local localPlayer2 = Players2.LocalPlayer
-	local str3 = "SENAVIS_"
-	local senaV4VisualSAE = {held = {}}
+	local str3 = "QUANTUMVIS_"
+	local quantumV4VisualSAE = {held = {}}
 
 	local function fn65()
 		local ok, result = pcall(require, ReplicatedStorage2.Shared.Save)
@@ -22548,7 +22726,7 @@ do
 		return str3 .. arg .. "_" .. tostring(math.floor(os.clock() * 1000)) .. "_" .. tostring(math.random(1, 1000000))
 	end
 
-	senaV4VisualSAE.categories = function(arg)
+	quantumV4VisualSAE.categories = function(arg)
 		local v21 = fn66()
 		local tbl13 = {}
 		if not v21 then
@@ -22569,7 +22747,7 @@ do
 		return tbl13
 	end
 
-	senaV4VisualSAE.spawnEgg = function(arg, arg2)
+	quantumV4VisualSAE.spawnEgg = function(arg, arg2)
 		local v21 = fn65()
 		local v22 = fn66()
 
@@ -22592,7 +22770,7 @@ do
 		return v23
 	end
 
-	senaV4VisualSAE.spawnPet = function(arg, arg2)
+	quantumV4VisualSAE.spawnPet = function(arg, arg2)
 		local v21 = fn65()
 		local v22 = fn66()
 
@@ -22627,7 +22805,7 @@ do
 		return assetModels and assetModels:FindFirstChild(arg)
 	end
 
-	senaV4VisualSAE.hold = function(arg, arg2, arg3)
+	quantumV4VisualSAE.hold = function(arg, arg2, arg3)
 		local character = localPlayer2.Character
 		if not character then
 			return false
@@ -22734,11 +22912,11 @@ do
 			end)
 		end
 
-		senaV4VisualSAE.held[#senaV4VisualSAE.held + 1] = tool
+		quantumV4VisualSAE.held[#quantumV4VisualSAE.held + 1] = tool
 		return true
 	end
 
-	senaV4VisualSAE.spawn = function(arg, arg2, arg3, arg4)
+	quantumV4VisualSAE.spawn = function(arg, arg2, arg3, arg4)
 		if arg2 then
 			if arg2 == "None" then
 				return
@@ -22750,16 +22928,16 @@ do
 		local n8 = tonumber(arg3) or 50
 
 		if arg4 then
-			pcall(senaV4VisualSAE.hold, arg2, arg ~= "Pet", n8)
+			pcall(quantumV4VisualSAE.hold, arg2, arg ~= "Pet", n8)
 		elseif arg == "Pet" then
 			local n9 = math.clamp(1 + n8 / 25, 1.2, 5) * (0.85 + math.random() * 0.4)
-			senaV4VisualSAE.spawnPet(arg2, n9)
+			quantumV4VisualSAE.spawnPet(arg2, n9)
 		else
-			senaV4VisualSAE.spawnEgg(arg2, n8 * (0.85 + math.random() * 0.5))
+			quantumV4VisualSAE.spawnEgg(arg2, n8 * (0.85 + math.random() * 0.5))
 		end
 	end
 
-	senaV4VisualSAE.clear = function()
+	quantumV4VisualSAE.clear = function()
 		local v21 = fn65()
 
 		if v21 then
@@ -22796,13 +22974,13 @@ do
 			end)
 		end
 
-		for i, v22 in ipairs(senaV4VisualSAE.held) do
+		for i, v22 in ipairs(quantumV4VisualSAE.held) do
 			pcall(function()
 				v22:Destroy()
 			end)
 		end
 
-		senaV4VisualSAE.held = {}
+		quantumV4VisualSAE.held = {}
 
 		for i, v22 in ipairs({localPlayer2.Character, localPlayer2:FindFirstChild("Backpack")}) do
 			if v22 then
@@ -22817,7 +22995,7 @@ do
 		end
 	end
 
-	genv.__SenaV4VisualSAE = senaV4VisualSAE
+	genv.__QuantumV4VisualSAE = quantumV4VisualSAE
 end
 
 do
@@ -22840,10 +23018,10 @@ do
 	localPlayer:GetPropertyChangedSignal("CameraMaxZoomDistance"):Connect(fn66)
 end
 
-genv.__SenaV4Visual = (function()
+genv.__QuantumV4Visual = (function()
 	local HttpService = game:GetService("HttpService")
-	local tbl13 = {base = "https://senahub.xyz/api/visual/", manifest = nil, status = "Idle", spawned = {}, backs = {}, backRod = nil, remote = {}}
-	local str3 = "SenaVisual/cache"
+	local tbl13 = {base = "/visual/", manifest = nil, status = "Idle", spawned = {}, backs = {}, backRod = nil, remote = {}}
+	local str3 = "QuantumVisual/cache"
 	local unit = Vector3.new(0.3, 0.75, 0.6).Unit
 	local tbl14 = {RightShoulder = CFrame.Angles(0.6981317007977318, 0, 0.17453292519943295), RightElbow = CFrame.Angles(1.7453292519943295, 0, 0), RightWrist = CFrame.new(), LeftShoulder = CFrame.new(), LeftElbow = CFrame.new(), LeftWrist = CFrame.new()}
 	local n8 = 0.8
@@ -23067,7 +23245,7 @@ genv.__SenaV4Visual = (function()
 
 		if character then
 			for i, child in ipairs(character:GetChildren()) do
-				if child:IsA("Tool") and child:GetAttribute("SenaVisual") or child.Name == "SenaVisualBack" then
+				if child:IsA("Tool") and child:GetAttribute("QuantumVisual") or child.Name == "QuantumVisualBack" then
 					flag6 = true
 					break
 				end
@@ -23081,7 +23259,7 @@ genv.__SenaV4Visual = (function()
 		pcall(function()
 			if flag6 then
 				settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
-			elseif senaV4Config.StartupBoost then
+			elseif quantumV4Config.StartupBoost then
 				settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 			end
 		end)
@@ -23244,7 +23422,7 @@ genv.__SenaV4Visual = (function()
 
 	local function fn73(arg)
 		local clone = arg.model:Clone()
-		clone.Name = "SenaVisualBack"
+		clone.Name = "QuantumVisualBack"
 
 		for i, descendant in ipairs(clone:GetDescendants()) do
 			if descendant:IsA("BasePart") then
@@ -23396,7 +23574,7 @@ genv.__SenaV4Visual = (function()
 		tool.Name = arg2.name
 		tool.CanBeDropped = false
 		tool.RequiresHandle = false
-		tool:SetAttribute("SenaVisual", arg)
+		tool:SetAttribute("QuantumVisual", arg)
 
 		if arg == "fish" then
 			tool:SetAttribute("ItemType", "Phone")
@@ -23518,7 +23696,7 @@ genv.__SenaV4Visual = (function()
 			return false
 		end
 		local v23 = backpack:FindFirstChild(v22.name)
-		if v23 and v23:GetAttribute("SenaVisual") then
+		if v23 and v23:GetAttribute("QuantumVisual") then
 			tbl13.status = v22.name .. " is already in your backpack"
 			return true
 		end
@@ -23553,7 +23731,7 @@ genv.__SenaV4Visual = (function()
 			for i, v23 in ipairs({localPlayer:FindFirstChild("Backpack"), localPlayer.Character}) do
 				local v24 = v23 and v23:FindFirstChild(v22.label)
 
-				if v24 and (v24:IsA("Tool") and v24:GetAttribute("SenaVisual")) then
+				if v24 and (v24:IsA("Tool") and v24:GetAttribute("QuantumVisual")) then
 					v24:Destroy()
 				end
 			end
@@ -23568,7 +23746,7 @@ genv.__SenaV4Visual = (function()
 		for i, v22 in ipairs({localPlayer:FindFirstChild("Backpack"), localPlayer.Character}) do
 			if v22 then
 				for i2, child in ipairs(v22:GetChildren()) do
-					if child:IsA("Tool") and child:GetAttribute("SenaVisual") then
+					if child:IsA("Tool") and child:GetAttribute("QuantumVisual") then
 						child:Destroy()
 					end
 				end
@@ -23618,7 +23796,7 @@ genv.__SenaV4Visual = (function()
 			local v26 = fn72(v23, flag6, v23 == "fish" and (v25 or 0) or 0, v23 == "rods" and (v25 or 1) or 1)
 
 			if v26 and tbl13.remote[arg] == tbl15 and character.Parent then
-				v26.model.Name = "SenaVisualRemote"
+				v26.model.Name = "QuantumVisualRemote"
 				v26.model.Parent = character
 				table.insert(tbl15.cleanup, (v23 == "rods" and fn74 or fn75)(character, v26.handle, v26))
 
@@ -23665,25 +23843,25 @@ genv.__SenaV4Visual = (function()
 					return
 				end
 
-				local senaBackend = genv.SenaBackend or {}
-				local api = senaBackend.Api or "https://senahub.xyz/api"
+				local quantumBackend = genv.QuantumBackend or {}
+				local api = quantumBackend.Api or ""
 				local str4 = ""
 				local str5 = ""
 				local character = localPlayer.Character
 
 				if character then
 					for i, child in ipairs(character:GetChildren()) do
-						local attribute = child:IsA("Tool") and child:GetAttribute("SenaVisual")
+						local attribute = child:IsA("Tool") and child:GetAttribute("QuantumVisual")
 						if attribute then
 							str4 = attribute .. "|" .. child.Name .. "|" .. tostring(attribute == "fish" and tbl13.fishWeight or tbl13.rodScale)
 							break
 						end
 					end
 
-					str5 = if character:FindFirstChild("SenaVisualBack") then if tbl13.backRod then "rods|" .. tbl13.backRod.Name else str5 else str5
+					str5 = if character:FindFirstChild("QuantumVisualBack") then if tbl13.backRod then "rods|" .. tbl13.backRod.Name else str5 else str5
 				end
 
-				local data = HttpService:JSONDecode(game:HttpGet(string.format("%s/vstate?key=%s&job=%s&uid=%d&held=%s&back=%s", api, HttpService:UrlEncode(senaBackend.Key or "sena_20VvixjHsd1OPPwgHYJAstpM"), HttpService:UrlEncode(game.JobId), localPlayer.UserId, HttpService:UrlEncode(str4), HttpService:UrlEncode(str5)), true))
+				local data = HttpService:JSONDecode(game:HttpGet(string.format("%s/vstate?key=%s&job=%s&uid=%d&held=%s&back=%s", api, HttpService:UrlEncode(quantumBackend.Key or "quantum_token_fixed"), HttpService:UrlEncode(game.JobId), localPlayer.UserId, HttpService:UrlEncode(str4), HttpService:UrlEncode(str5)), true))
 
 				if type(data) ~= "table" then
 					return
@@ -23826,7 +24004,7 @@ do
 	tbl13.privateStatus = "Pick a max player count, then Hop Server Now."
 
 	tbl13.privateMax = function()
-		return math.max(1, math.floor(tonumber(tostring(senaV4Config.PrivateServerMax or "2"):match("%d+")) or 2))
+		return math.max(1, math.floor(tonumber(tostring(quantumV4Config.PrivateServerMax or "2"):match("%d+")) or 2))
 	end
 
 	tbl13.findPrivateTargets = function()
@@ -23903,7 +24081,7 @@ do
 		tbl13.privateAutoRunning = true
 
 		task.spawn(function()
-			while fn2() and senaV4Config.PrivateServerAuto do
+			while fn2() and quantumV4Config.PrivateServerAuto do
 				local v21 = tbl13.privateMax()
 
 				if #Players:GetPlayers() <= v21 then
@@ -23917,32 +24095,32 @@ do
 
 			tbl13.privateAutoRunning = false
 
-			if not senaV4Config.PrivateServerAuto then
+			if not quantumV4Config.PrivateServerAuto then
 				tbl13.privateStatus = "Auto hop stopped."
 			end
 		end)
 	end
 
 	tbl13.hubBusy = function()
-		if senaV4Config.IsPlacing then
+		if quantumV4Config.IsPlacing then
 			return true
 		end
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
 
-		if senaV4EggRuntime then
-			if senaV4EggRuntime.running then
+		if quantumV4EggRuntime then
+			if quantumV4EggRuntime.running then
 				return true
-			elseif senaV4EggRuntime.travelBusy then
+			elseif quantumV4EggRuntime.travelBusy then
 				return true
-			elseif senaV4EggRuntime.carry then
-				if senaV4EggRuntime.carry.active then
+			elseif quantumV4EggRuntime.carry then
+				if quantumV4EggRuntime.carry.active then
 					return true
 				end
 			end
 		end
 
-		local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-		if senaV4PlayerSteal and senaV4PlayerSteal.running then
+		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+		if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
 			return true
 		end
 		return false
@@ -23958,14 +24136,14 @@ do
 			while fn2() do
 				task.wait(2)
 
-				if senaV4Config.HopNoMatch and not tbl13.hubBusy() then
-					local n8 = tonumber(senaV4Config.HopCooldown) or 5
+				if quantumV4Config.HopNoMatch and not tbl13.hubBusy() then
+					local n8 = tonumber(quantumV4Config.HopCooldown) or 5
 
 					if os.clock() - tbl13.lastHopAt > n8 then
-						local senaV4EggRuntime = genv.__SenaV4EggRuntime
-						local matching = senaV4EggRuntime and senaV4EggRuntime.stats and senaV4EggRuntime.stats.matching or 0
+						local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+						local matching = quantumV4EggRuntime and quantumV4EggRuntime.stats and quantumV4EggRuntime.stats.matching or 0
 
-						if senaV4Config.AutoSteal and (matching <= 0 and not fn31()) then
+						if quantumV4Config.AutoSteal and (matching <= 0 and not fn31()) then
 							tbl13.lastHopAt = os.clock()
 							tbl13.hopEmptiest()
 						end
@@ -23985,13 +24163,13 @@ do
 
 		task.spawn(function()
 			while fn2() do
-				if senaV4Config.AntiTreadmill then
-					local senaV4TreadmillManager = genv.__SenaV4TreadmillManager
+				if quantumV4Config.AntiTreadmill then
+					local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
 
 					pcall(function()
-						if senaV4TreadmillManager and senaV4TreadmillManager.activeTreadmill ~= nil then
-							senaV4TreadmillManager:_cancelIdle(true)
-							senaV4TreadmillManager:_requestUnequip()
+						if quantumV4TreadmillManager and quantumV4TreadmillManager.activeTreadmill ~= nil then
+							quantumV4TreadmillManager:_cancelIdle(true)
+							quantumV4TreadmillManager:_requestUnequip()
 						end
 					end)
 
@@ -24013,7 +24191,7 @@ do
 	end
 
 	tbl13.setBackpackRates = function(arg)
-		senaV4Config.BackpackRateEsp = arg == true
+		quantumV4Config.BackpackRateEsp = arg == true
 		if tbl13.backpackRatesRunning then
 			return
 		end
@@ -24034,10 +24212,10 @@ do
 					scrollingFrame = localPlayer.PlayerGui.BackpackGui.Backpack.Main.Inventory.ScrollingFrame
 				end)
 
-				local senaV4Webhook = genv.__SenaV4Webhook
-				local senaDiscord = scrollingFrame and scrollingFrame.Parent:FindFirstChild("SenaDiscord")
+				local quantumV4Webhook = genv.__QuantumV4Webhook
+				local quantumWatermark = scrollingFrame and scrollingFrame.Parent:FindFirstChild("QuantumWatermark")
 
-				if scrollingFrame and senaV4Config.BackpackRateEsp and not senaDiscord then
+				if scrollingFrame and quantumV4Config.BackpackRateEsp and not quantumWatermark then
 					local textLabel = Instance.new("TextLabel")
 					textLabel.Name = "QuantumWatermark"
 					textLabel.BackgroundTransparency = 1
@@ -24051,16 +24229,16 @@ do
 					textLabel.TextStrokeTransparency = 0
 					textLabel.ZIndex = 40
 					textLabel.Parent = scrollingFrame.Parent
-				elseif senaDiscord then
-					if not senaV4Config.BackpackRateEsp then
-						senaDiscord:Destroy()
+				elseif quantumWatermark then
+					if not quantumV4Config.BackpackRateEsp then
+						quantumWatermark:Destroy()
 					end
 				end
 
 				if scrollingFrame then
 					local tbl14 = {}
 
-					if senaV4Config.BackpackRateEsp and EggRecords and Save and senaV4Webhook then
+					if quantumV4Config.BackpackRateEsp and EggRecords and Save and quantumV4Webhook then
 						local ok = (Save.Peek or Save.Get)()
 
 						for k, v21 in pairs(ok and ok.EggInventory or {}) do
@@ -24082,43 +24260,43 @@ do
 							local text = toolName.Text
 							local n8 = (tbl15[text] or 0) + 1
 							local v21 = tbl14[text] and tbl14[text][n8]
-							local senaRate = child:FindFirstChild("SenaRate")
+							local quantumRate = child:FindFirstChild("QuantumRate")
 
 							if v21 then
 								tbl15[text] = n8
 
-								if senaRate then
+								if quantumRate then
 								else
-									senaRate = Instance.new("TextLabel")
-									senaRate.Name = "SenaRate"
-									senaRate.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-									senaRate.BackgroundTransparency = 0.35
-									senaRate.BorderSizePixel = 0
-									senaRate.Position = UDim2.new(0.04, 0, 0, 3)
-									senaRate.Size = UDim2.new(0.92, 0, 0.24, 0)
-									senaRate.Font = Enum.Font.GothamBlack
-									senaRate.TextScaled = true
-									senaRate.TextColor3 = Color3.fromRGB(73, 211, 31)
-									senaRate.TextStrokeTransparency = 0
-									senaRate.ZIndex = 40
+									quantumRate = Instance.new("TextLabel")
+									quantumRate.Name = "QuantumRate"
+									quantumRate.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+									quantumRate.BackgroundTransparency = 0.35
+									quantumRate.BorderSizePixel = 0
+									quantumRate.Position = UDim2.new(0.04, 0, 0, 3)
+									quantumRate.Size = UDim2.new(0.92, 0, 0.24, 0)
+									quantumRate.Font = Enum.Font.GothamBlack
+									quantumRate.TextScaled = true
+									quantumRate.TextColor3 = Color3.fromRGB(73, 211, 31)
+									quantumRate.TextStrokeTransparency = 0
+									quantumRate.ZIndex = 40
 									local uiCorner = Instance.new("UICorner")
 									uiCorner.CornerRadius = UDim.new(0, 6)
-									uiCorner.Parent = senaRate
+									uiCorner.Parent = quantumRate
 									local uiTextSizeConstraint = Instance.new("UITextSizeConstraint")
 									uiTextSizeConstraint.MaxTextSize = 20
-									uiTextSizeConstraint.Parent = senaRate
-									senaRate.Parent = child
+									uiTextSizeConstraint.Parent = quantumRate
+									quantumRate.Parent = child
 								end
 
-								senaRate.Text = senaV4Webhook.compact(senaV4Webhook.rateOf(v21)) .. "/s"
-							elseif senaRate then
-								senaRate:Destroy()
+								quantumRate.Text = quantumV4Webhook.compact(quantumV4Webhook.rateOf(v21)) .. "/s"
+							elseif quantumRate then
+								quantumRate:Destroy()
 							end
 						end
 					end
 				end
 
-				if not senaV4Config.BackpackRateEsp then
+				if not quantumV4Config.BackpackRateEsp then
 					break
 				end
 				task.wait(1)
@@ -24130,7 +24308,7 @@ do
 end;
 
 (function()
-	local senaV4ScrambleTradeIn, directory, AssetItems, AssetEarnings, Save = {status = "Disabled", banner = "Unknown", rotation = 0, pity = 0, pityMax = 100, free = 0, trades = 0, demands = "-", stock = "-", ready = 0, total = 3, missing = "None", cache = nil, cacheAt = 0, lastReroll = 0}
+	local quantumV4ScrambleTradeIn, directory, AssetItems, AssetEarnings, Save = {status = "Disabled", banner = "Unknown", rotation = 0, pity = 0, pityMax = 100, free = 0, trades = 0, demands = "-", stock = "-", ready = 0, total = 3, missing = "None", cache = nil, cacheAt = 0, lastReroll = 0}
 
 	pcall(function()
 		directory = require(ReplicatedStorage.Data.Assets).Directory
@@ -24157,7 +24335,7 @@ end;
 	end
 
 	local function fn66()
-		return senaV4Config.ScrambleTradeInTrade or senaV4Config.ScrambleTradeInReroll
+		return quantumV4Config.ScrambleTradeInTrade or quantumV4Config.ScrambleTradeInReroll
 	end
 
 	local function fn67(arg)
@@ -24179,7 +24357,7 @@ end;
 		return v21 ~= "" and v21 == v22
 	end
 
-	senaV4ScrambleTradeIn.matches = matches
+	quantumV4ScrambleTradeIn.matches = matches
 
 	local function fn68(arg)
 		local v21 = directory and directory[arg]
@@ -24197,14 +24375,14 @@ end;
 		return table.concat(tbl14, arg2)
 	end
 
-	senaV4ScrambleTradeIn.state = function(arg)
+	quantumV4ScrambleTradeIn.state = function(arg)
 		local now = os.clock()
-		if not arg and (senaV4ScrambleTradeIn.cache and now - senaV4ScrambleTradeIn.cacheAt < 12) then
-			return senaV4ScrambleTradeIn.cache
+		if not arg and (quantumV4ScrambleTradeIn.cache and now - quantumV4ScrambleTradeIn.cacheAt < 12) then
+			return quantumV4ScrambleTradeIn.cache
 		end
 		local v21 = fn65()
 		if not (v21 and v21.AskState) then
-			return senaV4ScrambleTradeIn.cache
+			return quantumV4ScrambleTradeIn.cache
 		end
 
 		local ok, cache = pcall(function()
@@ -24212,15 +24390,15 @@ end;
 		end)
 
 		if ok and type(cache) == "table" then
-			senaV4ScrambleTradeIn.cache = cache
-			senaV4ScrambleTradeIn.cacheAt = now
+			quantumV4ScrambleTradeIn.cache = cache
+			quantumV4ScrambleTradeIn.cacheAt = now
 		end
 
-		return senaV4ScrambleTradeIn.cache
+		return quantumV4ScrambleTradeIn.cache
 	end
 
 	local function fn70(arg)
-		local scrambleTradeInBanners = senaV4Config.ScrambleTradeInBanners
+		local scrambleTradeInBanners = quantumV4Config.ScrambleTradeInBanners
 
 		if type(scrambleTradeInBanners) ~= "table" then
 			return true
@@ -24312,7 +24490,7 @@ end;
 		return tbl15, tbl16, v21
 	end
 
-	senaV4ScrambleTradeIn.selectEggs = selectEggs
+	quantumV4ScrambleTradeIn.selectEggs = selectEggs
 
 	local function fn74(arg, arg2, arg3)
 		local tbl14 = {}
@@ -24355,9 +24533,9 @@ end;
 		return true
 	end
 
-	senaV4ScrambleTradeIn.teleport = teleport
+	quantumV4ScrambleTradeIn.teleport = teleport
 
-	senaV4ScrambleTradeIn.openUI = function()
+	quantumV4ScrambleTradeIn.openUI = function()
 		return (pcall(function()
 			require(ReplicatedStorage.Client.Tabs).Activate("DrScrambleTradeIn")
 		end))
@@ -24378,7 +24556,7 @@ end;
 			tbl14[#tbl14 + 1] = v22.uid
 		end
 
-		senaV4ScrambleTradeIn.status = "Placing eggs into Dr Scramble's Lab"
+		quantumV4ScrambleTradeIn.status = "Placing eggs into Dr Scramble's Lab"
 
 		arg2, arg = pcall(function()
 			return v21.AskTradeIn:InvokeServer(tbl14)
@@ -24402,13 +24580,13 @@ end;
 			end
 		end)
 
-		senaV4ScrambleTradeIn.trades = senaV4ScrambleTradeIn.trades + 1
-		senaV4ScrambleTradeIn.state(true)
+		quantumV4ScrambleTradeIn.trades = quantumV4ScrambleTradeIn.trades + 1
+		quantumV4ScrambleTradeIn.state(true)
 		return true
 	end
 
-	senaV4ScrambleTradeIn.tradeOnce = function()
-		local v21 = fn71(senaV4ScrambleTradeIn.state(true))
+	quantumV4ScrambleTradeIn.tradeOnce = function()
+		local v21 = fn71(quantumV4ScrambleTradeIn.state(true))
 		if #v21 < 3 then
 			return false, "Cannot read the recipe"
 		end
@@ -24419,8 +24597,8 @@ end;
 		return fn75(v21, v22)
 	end
 
-	senaV4ScrambleTradeIn.reroll = function()
-		local v21 = senaV4ScrambleTradeIn.state(false)
+	quantumV4ScrambleTradeIn.reroll = function()
+		local v21 = quantumV4ScrambleTradeIn.state(false)
 		local num = tonumber(v21 and v21.FreeRefreshesRemaining)
 
 		if num then
@@ -24441,15 +24619,15 @@ end;
 		end) then
 			return false, "Reroll failed"
 		end
-		senaV4ScrambleTradeIn.state(true)
+		quantumV4ScrambleTradeIn.state(true)
 		return true
 	end
 
 	local function fn76(arg)
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
 
-		if senaV4EggRuntime and type(senaV4EggRuntime.setScrambleWants) == "function" then
-			pcall(senaV4EggRuntime.setScrambleWants, senaV4EggRuntime, arg or {}, false)
+		if quantumV4EggRuntime and type(quantumV4EggRuntime.setScrambleWants) == "function" then
+			pcall(quantumV4EggRuntime.setScrambleWants, quantumV4EggRuntime, arg or {}, false)
 		end
 	end
 
@@ -24457,31 +24635,31 @@ end;
 		fn76({})
 	end
 
-	senaV4ScrambleTradeIn.clearSteal = clearSteal
+	quantumV4ScrambleTradeIn.clearSteal = clearSteal
 
-	senaV4ScrambleTradeIn.tick = function()
-		local v21 = senaV4ScrambleTradeIn.state(true)
+	quantumV4ScrambleTradeIn.tick = function()
+		local v21 = quantumV4ScrambleTradeIn.state(true)
 
 		if not v21 then
-			senaV4ScrambleTradeIn.status = "Trade-In state unavailable"
+			quantumV4ScrambleTradeIn.status = "Trade-In state unavailable"
 			clearSteal()
 			return
 		end
 
 		if v21.Unlocked == false then
-			senaV4ScrambleTradeIn.status = "Dr Scramble Trade-In is locked"
+			quantumV4ScrambleTradeIn.status = "Dr Scramble Trade-In is locked"
 			clearSteal()
 			return
 		end
 
-		senaV4ScrambleTradeIn.banner = tostring(v21.BannerDisplayName or v21.BannerId or "Unknown")
-		senaV4ScrambleTradeIn.rotation = math.max(0, math.floor(tonumber(v21.SecondsUntilRotation) or 0))
-		senaV4ScrambleTradeIn.pity = tonumber(v21.PityCount) or 0
-		senaV4ScrambleTradeIn.pityMax = tonumber(v21.PityThreshold) or 100
-		senaV4ScrambleTradeIn.free = tonumber(v21.FreeRefreshesRemaining) or 0
+		quantumV4ScrambleTradeIn.banner = tostring(v21.BannerDisplayName or v21.BannerId or "Unknown")
+		quantumV4ScrambleTradeIn.rotation = math.max(0, math.floor(tonumber(v21.SecondsUntilRotation) or 0))
+		quantumV4ScrambleTradeIn.pity = tonumber(v21.PityCount) or 0
+		quantumV4ScrambleTradeIn.pityMax = tonumber(v21.PityThreshold) or 100
+		quantumV4ScrambleTradeIn.free = tonumber(v21.FreeRefreshesRemaining) or 0
 
 		if v21.PendingReward then
-			senaV4ScrambleTradeIn.status = "Finishing reward"
+			quantumV4ScrambleTradeIn.status = "Finishing reward"
 			local v22 = fn65()
 
 			pcall(function()
@@ -24490,16 +24668,16 @@ end;
 				end
 			end)
 
-			senaV4ScrambleTradeIn.cache = nil
+			quantumV4ScrambleTradeIn.cache = nil
 			return
 		end
 
 		if not fn70(v21) then
-			senaV4ScrambleTradeIn.status = "Waiting for banner (now: " .. senaV4ScrambleTradeIn.banner .. ")"
-			senaV4ScrambleTradeIn.demands = "-"
-			senaV4ScrambleTradeIn.stock = "-"
-			senaV4ScrambleTradeIn.ready = 0
-			senaV4ScrambleTradeIn.missing = "None"
+			quantumV4ScrambleTradeIn.status = "Waiting for banner (now: " .. quantumV4ScrambleTradeIn.banner .. ")"
+			quantumV4ScrambleTradeIn.demands = "-"
+			quantumV4ScrambleTradeIn.stock = "-"
+			quantumV4ScrambleTradeIn.ready = 0
+			quantumV4ScrambleTradeIn.missing = "None"
 			clearSteal()
 			return
 		end
@@ -24507,67 +24685,67 @@ end;
 		local v22 = fn71(v21)
 		local recipeSig = tostring(v21.BannerId or "?") .. "|" .. table.concat(v22, ",")
 
-		if recipeSig ~= senaV4ScrambleTradeIn.recipeSig then
-			senaV4ScrambleTradeIn.recipeSig = recipeSig
+		if recipeSig ~= quantumV4ScrambleTradeIn.recipeSig then
+			quantumV4ScrambleTradeIn.recipeSig = recipeSig
 			clearSteal()
 		end
 
-		senaV4ScrambleTradeIn.total = #v22
-		senaV4ScrambleTradeIn.demands = #v22 > 0 and fn69(v22, " / ") or "-"
+		quantumV4ScrambleTradeIn.total = #v22
+		quantumV4ScrambleTradeIn.demands = #v22 > 0 and fn69(v22, " / ") or "-"
 
 		if #v22 < 3 then
-			senaV4ScrambleTradeIn.status = "Waiting for requirements"
+			quantumV4ScrambleTradeIn.status = "Waiting for requirements"
 			clearSteal()
 			return
 		end
 
 		local v23 = fn72()
 		local v24, v25, v26 = selectEggs(v22, v23)
-		senaV4ScrambleTradeIn.stock = fn74(v22, v23, v26)
-		senaV4ScrambleTradeIn.ready = #v22 - #v25
-		senaV4ScrambleTradeIn.missing = #v25 > 0 and fn69(v25, ", ") or "None"
+		quantumV4ScrambleTradeIn.stock = fn74(v22, v23, v26)
+		quantumV4ScrambleTradeIn.ready = #v22 - #v25
+		quantumV4ScrambleTradeIn.missing = #v25 > 0 and fn69(v25, ", ") or "None"
 
 		if #v25 == 0 then
 			clearSteal()
 
-			if senaV4Config.ScrambleTradeInTrade then
-				senaV4ScrambleTradeIn.status = "Requirements complete, placing + trading"
+			if quantumV4Config.ScrambleTradeInTrade then
+				quantumV4ScrambleTradeIn.status = "Requirements complete, placing + trading"
 				recipeSig, v26 = fn75(v22, v24)
-				senaV4ScrambleTradeIn.status = recipeSig and "Trade complete" or "Trade: " .. tostring(v26)
+				quantumV4ScrambleTradeIn.status = recipeSig and "Trade complete" or "Trade: " .. tostring(v26)
 			else
-				senaV4ScrambleTradeIn.status = "Ready to trade (Auto Trade-In is off)"
+				quantumV4ScrambleTradeIn.status = "Ready to trade (Auto Trade-In is off)"
 			end
 
 			return
 		end
 
-		if senaV4Config.ScrambleTradeInTrade then
+		if quantumV4Config.ScrambleTradeInTrade then
 			fn76(v25)
 		else
 			clearSteal()
 		end
 
-		if senaV4Config.ScrambleTradeInReroll and (senaV4ScrambleTradeIn.free > 0 and os.clock() - senaV4ScrambleTradeIn.lastReroll > 3) then
-			senaV4ScrambleTradeIn.lastReroll = os.clock()
-			senaV4ScrambleTradeIn.status = "Rerolling the recipe"
-			senaV4ScrambleTradeIn.reroll()
+		if quantumV4Config.ScrambleTradeInReroll and (quantumV4ScrambleTradeIn.free > 0 and os.clock() - quantumV4ScrambleTradeIn.lastReroll > 3) then
+			quantumV4ScrambleTradeIn.lastReroll = os.clock()
+			quantumV4ScrambleTradeIn.status = "Rerolling the recipe"
+			quantumV4ScrambleTradeIn.reroll()
 			return
 		end
 
-		senaV4ScrambleTradeIn.status = "Stealing required eggs: " .. senaV4ScrambleTradeIn.missing
+		quantumV4ScrambleTradeIn.status = "Stealing required eggs: " .. quantumV4ScrambleTradeIn.missing
 	end
 
 	task.spawn(function()
 		while fn2() do
 			if fn66() then
-				local ok, result = pcall(senaV4ScrambleTradeIn.tick)
+				local ok, result = pcall(quantumV4ScrambleTradeIn.tick)
 
 				if not ok then
-					senaV4ScrambleTradeIn.status = "Trade-In error: " .. tostring(result)
+					quantumV4ScrambleTradeIn.status = "Trade-In error: " .. tostring(result)
 				end
 			else
-				if senaV4ScrambleTradeIn.status ~= "Disabled" then
-					senaV4ScrambleTradeIn.status = "Disabled"
+				if quantumV4ScrambleTradeIn.status ~= "Disabled" then
+					quantumV4ScrambleTradeIn.status = "Disabled"
 				end
 
 				clearSteal()
@@ -24577,7 +24755,7 @@ end;
 		end
 	end)
 
-	genv.__SenaV4ScrambleTradeIn = senaV4ScrambleTradeIn
+	genv.__QuantumV4ScrambleTradeIn = quantumV4ScrambleTradeIn
 end)();
 
 (function()
@@ -24697,7 +24875,7 @@ end)();
 		end
 	end)()
 
-	genv.__SenaV4IsBatTool = v21
+	genv.__QuantumV4IsBatTool = v21
 
 	local function fn67(arg, arg2)
 		if arg then
@@ -25789,18 +25967,18 @@ end)();
 				return n9
 			end
 
-			local mechBoss = senaV4TaskLadder.blocker("mech_boss")
+			local mechBoss = quantumV4TaskLadder.blocker("mech_boss")
 
 			if mechBoss then
 				arg.noMatchSince = nil
 				arg:_holdPortal(false)
 				arg:_releaseOperation()
 				arg:_restoreCharacterControl()
-				arg:_setStatus("Yielding to " .. senaV4TaskLadder.TITLES[mechBoss])
+				arg:_setStatus("Yielding to " .. quantumV4TaskLadder.TITLES[mechBoss])
 				return n9
 			end
 
-			if senaV4Config.AutoSteal and senaV4TaskLadder.rank("auto_steal") < senaV4TaskLadder.rank("mech_boss") then
+			if quantumV4Config.AutoSteal and quantumV4TaskLadder.rank("auto_steal") < quantumV4TaskLadder.rank("mech_boss") then
 				arg.noMatchSince = arg.noMatchSince or os.clock()
 				local n27 = os.clock() - arg.noMatchSince
 
@@ -25937,49 +26115,49 @@ end)();
 	end
 
 	pcall(function()
-		local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
+		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
 
-		if senaV4ScrambleBoss and type(senaV4ScrambleBoss.destroy) == "function" and senaV4ScrambleBoss ~= nil and getmetatable(senaV4ScrambleBoss) == index then
-			senaV4ScrambleBoss:destroy()
-		elseif type(senaV4ScrambleBoss) == "table" then
-			if type(senaV4ScrambleBoss.destroy) == "function" then
-				senaV4ScrambleBoss:destroy()
+		if quantumV4ScrambleBoss and type(quantumV4ScrambleBoss.destroy) == "function" and quantumV4ScrambleBoss ~= nil and getmetatable(quantumV4ScrambleBoss) == index then
+			quantumV4ScrambleBoss:destroy()
+		elseif type(quantumV4ScrambleBoss) == "table" then
+			if type(quantumV4ScrambleBoss.destroy) == "function" then
+				quantumV4ScrambleBoss:destroy()
 			end
 		end
 	end)
 
-	genv.__SenaV4ScrambleBoss = index.new(v12, v13)
+	genv.__QuantumV4ScrambleBoss = index.new(v12, v13)
 
-	senaV4TaskLadder.register("mech_boss", {wants = function()
-		local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
-		return senaV4ScrambleBoss ~= nil and senaV4ScrambleBoss:wantsCharacter()
+	quantumV4TaskLadder.register("mech_boss", {wants = function()
+		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
+		return quantumV4ScrambleBoss ~= nil and quantumV4ScrambleBoss:wantsCharacter()
 	end, active = function()
-		local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
+		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
 
-		if senaV4ScrambleBoss then
-			if senaV4ScrambleBoss.destroyed then
+		if quantumV4ScrambleBoss then
+			if quantumV4ScrambleBoss.destroyed then
 				return false
 			end
 		else
 			return false
 		end
 
-		local operationToken = senaV4ScrambleBoss.operationToken
-		return senaV4ScrambleBoss:_inArena() or operationToken ~= nil and not operationToken.released
+		local operationToken = quantumV4ScrambleBoss.operationToken
+		return quantumV4ScrambleBoss:_inArena() or operationToken ~= nil and not operationToken.released
 	end, enabled = function()
-		local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
-		return senaV4ScrambleBoss ~= nil and senaV4ScrambleBoss.enabled == true
+		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
+		return quantumV4ScrambleBoss ~= nil and quantumV4ScrambleBoss.enabled == true
 	end, status = function()
-		local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
-		return senaV4ScrambleBoss and tostring(senaV4ScrambleBoss.status or "") or ""
+		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
+		return quantumV4ScrambleBoss and tostring(quantumV4ScrambleBoss.status or "") or ""
 	end})
 
 	task.spawn(function()
 		while fn2() do
-			local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
-			local flag6 = senaV4Config.ScrambleBossAuto == true or senaV4ScrambleBoss ~= nil and senaV4ScrambleBoss.enabled == true
+			local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
+			local flag6 = quantumV4Config.ScrambleBossAuto == true or quantumV4ScrambleBoss ~= nil and quantumV4ScrambleBoss.enabled == true
 
-			if senaV4Config.AutoSteal and not flag6 and localPlayer2:GetAttribute("InScrambleArena") == true then
+			if quantumV4Config.AutoSteal and not flag6 and localPlayer2:GetAttribute("InScrambleArena") == true then
 				local v22 = Workspace2:FindFirstChild(str4)
 				local leaveTeleport = v22 and v22:FindFirstChild("LeaveTeleport")
 				local v23 = leaveTeleport and fn68(leaveTeleport)
@@ -26007,7 +26185,7 @@ end)();
 	end)
 end)()
 
-local senaPanels = {}
+local quantumPanels = {}
 
 local function fn65()
 	local function fn66(arg, arg2)
@@ -26034,8 +26212,8 @@ local function fn65()
 			if type(setthreadidentity) == "function" then
 				setthreadidentity(8)
 			elseif genv then
-				if type(genv.__SenaV4IdentitySetter) == "function" then
-					genv.__SenaV4IdentitySetter(8)
+				if type(genv.__QuantumV4IdentitySetter) == "function" then
+					genv.__QuantumV4IdentitySetter(8)
 				end
 			end
 		end)
@@ -26192,7 +26370,7 @@ local function fn65()
 		local n8 = 0
 
 		pcall(function()
-			n8 = senaV4Config:getAreaEggValue(arg) or 0
+			n8 = quantumV4Config:getAreaEggValue(arg) or 0
 		end)
 
 		if n8 > 0 then
@@ -26298,8 +26476,8 @@ local function fn65()
 			if type(chloeX) == "table" and type(chloeX.ApplyIcon) == "function" then
 				return (pcall(chloeX.ApplyIcon, arg, arg2, 48))
 			end
-			local senaLucideIcons = genv.SenaLucideIcons
-			local n48px = type(senaLucideIcons) == "table" and (senaLucideIcons["48px"] or senaLucideIcons["256px"]) or nil
+			local quantumLucideIcons = genv.quantumLucideIcons
+			local n48px = type(quantumLucideIcons) == "table" and (quantumLucideIcons["48px"] or quantumLucideIcons["256px"]) or nil
 			local v22 = n48px and n48px[arg2]
 
 			if type(v22) == "table" and (v22[2] and v22[3]) then
@@ -26904,7 +27082,7 @@ local function fn65()
 		local n8 = 0
 
 		for k, v22 in pairs(result) do
-			if v22.Placement == nil and tostring(k):sub(1, 8) ~= "SENAVIS_" then
+			if v22.Placement == nil and tostring(k):sub(1, 8) ~= "QUANTUMVIS_" then
 				local v23, v24, v25 = fn71(v22.AssetCategory)
 
 				if tbl23.filter == "All" or v24 == tbl23.filter then
@@ -27032,7 +27210,7 @@ local function fn65()
 				applyAutoPlace(true)
 			elseif type(tbl10) == "table" then
 				if type(tbl10.AutoPlaceLoop) == "function" then
-					senaV4Config.AutoPlace = true
+					quantumV4Config.AutoPlace = true
 					task.spawn(tbl10.AutoPlaceLoop)
 				end
 			end
@@ -27052,7 +27230,7 @@ local function fn65()
 		local n8 = 0
 
 		local function fn87(arg2, arg3)
-			if tostring(arg2):sub(1, 8) == "SENAVIS_" then
+			if tostring(arg2):sub(1, 8) == "QUANTUMVIS_" then
 				return
 			end
 			local assetCategory = arg3.AssetCategory or arg3.Category
@@ -27086,7 +27264,7 @@ local function fn65()
 		return tbl27, n8
 	end
 
-	senaPanels.collectPets = collectPets
+	quantumPanels.collectPets = collectPets
 	local tbl26 = {moneys = "Money/s", kg = "Kg", rarity = "Rarity", name = "Name"}
 
 	local function fn87()
@@ -27178,13 +27356,13 @@ local function fn65()
 	local tbl29 = {}
 
 	local function fn89()
-		local senaV4Webhook = genv.__SenaV4Webhook
+		local quantumV4Webhook = genv.__QuantumV4Webhook
 
-		if type(senaV4Webhook) == "table" and type(senaV4Webhook.stolen) == "function" and not rawget(senaV4Webhook, "__senaStatsWrapped") then
-			local stolen = senaV4Webhook.stolen
-			rawset(senaV4Webhook, "__senaStatsWrapped", true)
+		if type(quantumV4Webhook) == "table" and type(quantumV4Webhook.stolen) == "function" and not rawget(quantumV4Webhook, "__quantumStatsWrapped") then
+			local stolen = quantumV4Webhook.stolen
+			rawset(quantumV4Webhook, "__quantumStatsWrapped", true)
 
-			senaV4Webhook.stolen = function(arg, arg2, arg3)
+			quantumV4Webhook.stolen = function(arg, arg2, arg3)
 				pcall(function()
 					local uid = type(arg) == "table" and arg.Uid or nil
 
@@ -27195,7 +27373,7 @@ local function fn65()
 						tbl29[uid] = true
 					end
 
-					local n8 = type(senaV4Webhook.rateOf) == "function" and tonumber(senaV4Webhook.rateOf(arg)) or 0
+					local n8 = type(quantumV4Webhook.rateOf) == "function" and tonumber(quantumV4Webhook.rateOf(arg)) or 0
 
 					if if tbl28 then n8 > tbl28.rate else not tbl28 then
 						tbl28 = {name = tostring(type(arg2) == "table" and arg2.name or type(arg) == "table" and arg.AssetCategory or "Egg"), rate = n8 or 0}
@@ -27220,12 +27398,12 @@ local function fn65()
 			return
 		end
 		local tbl30 = (Save.Peek or Save.Get)() or {}
-		local senaV4TaskLadder2 = genv.__SenaV4TaskLadder
-		local n8 = senaV4TaskLadder2 and senaV4TaskLadder2.current() or nil
+		local quantumV4TaskLadder2 = genv.__QuantumV4TaskLadder
+		local n8 = quantumV4TaskLadder2 and quantumV4TaskLadder2.current() or nil
 
 		if n8 then
-			local v22 = senaV4TaskLadder2.describe(n8)
-			tbl27.nowTask.Text = senaV4TaskLadder2.TITLES[n8] or tostring(n8)
+			local v22 = quantumV4TaskLadder2.describe(n8)
+			tbl27.nowTask.Text = quantumV4TaskLadder2.TITLES[n8] or tostring(n8)
 			tbl27.nowStatus.Text = tostring(v22 or "")
 			tbl27.nowDot.BackgroundColor3 = v21.good
 		else
@@ -27241,26 +27419,26 @@ local function fn65()
 		end)
 
 		tbl27.nowMeta.Text = string.format("%s  ·  %d ms  ·  %d fps", fn90(os.clock() - now), n9, math.floor((tonumber(fn3()) or 0) + 0.5))
-		senaV4TaskLadder2, n8 = collectPets("inplot")
+		quantumV4TaskLadder2, n8 = collectPets("inplot")
 		local n10 = tonumber(tbl30.Money) or 0
 		tbl27.tiles.money.set(fn70(n10), "+" .. fn70(n8 * 3600) .. " per hour", v21.good)
-		tbl27.tiles.income.set(fn70(n8) .. "/s", #senaV4TaskLadder2 .. " pet" .. (#senaV4TaskLadder2 == 1 and "" or "s") .. " placed")
+		tbl27.tiles.income.set(fn70(n8) .. "/s", #quantumV4TaskLadder2 .. " pet" .. (#quantumV4TaskLadder2 == 1 and "" or "s") .. " placed")
 		local num
 		local str3 = ""
 
 		pcall(function()
-			local senaV4MovementExtras = genv.__SenaV4MovementExtras
+			local quantumV4MovementExtras = genv.__QuantumV4MovementExtras
 
-			if senaV4MovementExtras then
-				num = tonumber(senaV4MovementExtras:_gameWalkSpeed())
+			if quantumV4MovementExtras then
+				num = tonumber(quantumV4MovementExtras:_gameWalkSpeed())
 			end
 		end)
 
 		pcall(function()
-			local senaV4TreadmillManager = genv.__SenaV4TreadmillManager
+			local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
 
-			if senaV4TreadmillManager then
-				local v22, v23, v24 = senaV4TreadmillManager:_readUpgradeState()
+			if quantumV4TreadmillManager then
+				local v22, v23, v24 = quantumV4TreadmillManager:_readUpgradeState()
 
 				if v24 then
 					str3 = "Next: " .. tostring(v24.DisplayName or v24._id or "tier") .. "  " .. fn70(tonumber(v24.Price) or 0)
@@ -27271,14 +27449,14 @@ local function fn65()
 		end)
 
 		tbl27.tiles.speed.set(num and string.format("%.0f", num) or "--", str3)
-		local senaV4EggRuntime = genv.__SenaV4EggRuntime
-		local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-		n8 = (senaV4EggRuntime and senaV4EggRuntime.stats and tonumber(senaV4EggRuntime.stats.delivered) or 0) + (senaV4PlayerSteal and tonumber(senaV4PlayerSteal.taken) or 0)
+		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+		n8 = (quantumV4EggRuntime and quantumV4EggRuntime.stats and tonumber(quantumV4EggRuntime.stats.delivered) or 0) + (quantumV4PlayerSteal and tonumber(quantumV4PlayerSteal.taken) or 0)
 		tbl27.tiles.stolen.set(tostring(n8), tbl28 and "Best: " .. tbl28.name .. "  " .. fn70(tbl28.rate) .. "/s" or "No steal yet this session")
 		n10 = 0
 
 		for k in pairs(tbl30.Inventory or {}) do
-			n10 = if tostring(k):sub(1, 8) ~= "SENAVIS_" then n10 + 1 else n10
+			n10 = if tostring(k):sub(1, 8) ~= "QUANTUMVIS_" then n10 + 1 else n10
 		end
 
 		local v22, v23, v24 = fn77()
@@ -27286,14 +27464,14 @@ local function fn65()
 		local flag6 = false
 
 		pcall(function()
-			flag6 = senaV4EggRuntime ~= nil and senaV4EggRuntime:getSnapshot().wallClosed == true
+			flag6 = quantumV4EggRuntime ~= nil and quantumV4EggRuntime:getSnapshot().wallClosed == true
 		end)
 
 		tbl27.tiles.world.set(flag6 and "Night" or "Day", #Players:GetPlayers() .. " players in this server", flag6 and Color3.fromRGB(245, 196, 81) or v21.muted)
-		local senaV4ScrambleBoss, v25 = genv.__SenaV4ScrambleBoss
+		local quantumV4ScrambleBoss, v25 = genv.__QuantumV4ScrambleBoss
 
 		pcall(function()
-			v25 = senaV4ScrambleBoss and senaV4ScrambleBoss:_snapshot()
+			v25 = quantumV4ScrambleBoss and quantumV4ScrambleBoss:_snapshot()
 		end)
 
 		local eventActive = v25 ~= nil and (v25.eventActive or v25.portalOpen or v25.inArena)
@@ -27313,14 +27491,14 @@ local function fn65()
 			tbl27.scrambleLine2.Text = string.format("Mastery %s  ·  Samples %s  ·  Last reward: %s", tostring(v25.mastery or 0), tostring(v25.samples or 0), tostring(v25.reward or "--"))
 		end
 
-		table.sort(senaV4TaskLadder2, function(arg, arg2)
+		table.sort(quantumV4TaskLadder2, function(arg, arg2)
 			return (arg.moneys or 0) > (arg2.moneys or 0)
 		end)
 
 		local tbl31 = {}
 
-		for i = 1, math.min(5, #senaV4TaskLadder2), 1 do
-			tbl31[i] = senaV4TaskLadder2[i]
+		for i = 1, math.min(5, #quantumV4TaskLadder2), 1 do
+			tbl31[i] = quantumV4TaskLadder2[i]
 		end
 
 		tbl27.top.setData(tbl31)
@@ -27492,11 +27670,11 @@ local function fn65()
 	local tbl30 = {{"Low Speed User", "Low"}, {"High Speed User Normal", "High"}, {"High Speed User (Fly)", "High Fly"}, {"Zig-Zag High Speed User", "Zig-Zag"}}
 
 	local function fn92()
-		local flag6 = type(senaPanels.getStealMode) == "function" and senaPanels.getStealMode() or nil
+		local flag6 = type(quantumPanels.getStealMode) == "function" and quantumPanels.getStealMode() or nil
 		return type(flag6) == "string" and flag6 or "High Speed User Normal"
 	end
 
-	function senaPanels.syncStealMode()
+	function quantumPanels.syncStealMode()
 		if tbl20.modeSeg then
 			tbl20.modeSeg.set(fn92(), false)
 		end
@@ -27636,8 +27814,8 @@ local function fn65()
 		tbl17.text(frame, {text = "Move", style = "label", color = v21.muted, pos = UDim2.fromOffset(16, 92), size = UDim2.fromOffset(44, 20)})
 
 		tbl20.modeSeg = tbl17.segmented(frame, {options = tbl30, value = fn92(), pos = UDim2.fromOffset(58, 88), size = UDim2.new(1, -72, 0, 28), onChange = function(arg)
-			if type(senaPanels.setStealMode) == "function" then
-				senaPanels.setStealMode(arg)
+			if type(quantumPanels.setStealMode) == "function" then
+				quantumPanels.setStealMode(arg)
 			end
 		end})
 
@@ -27746,10 +27924,10 @@ local function fn65()
 				return
 			end
 
-			local senaV4EggRuntime = genv.__SenaV4EggRuntime
+			local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
 
-			if senaV4EggRuntime and type(senaV4EggRuntime.queueManual) == "function" then
-				local v24 = senaV4EggRuntime:queueManual(tbl33)
+			if quantumV4EggRuntime and type(quantumV4EggRuntime.queueManual) == "function" then
+				local v24 = quantumV4EggRuntime:queueManual(tbl33)
 				tbl20.picked = {}
 				tbl20.statusBtn.setText("Queued " .. tostring(v24))
 
@@ -28195,9 +28373,9 @@ local function fn65()
 		tbl21.lastSync = now2
 
 		task.spawn(function()
-			local senaBackend = getgenv and getgenv().SenaBackend or {}
-			local api = senaBackend.Api or "https://senahub.xyz/api"
-			local str3 = senaBackend.Key or ""
+			local quantumBackend = getgenv and getgenv().QuantumBackend or {}
+			local api = quantumBackend.Api or ""
+			local str3 = quantumBackend.Key or ""
 			local str4 = localPlayer and tostring(localPlayer.UserId) or "0"
 			local v22 = fn99({Url = api .. "/egg/latest?key=" .. tostring(str3) .. "&uid=" .. tostring(str4) .. "&t=" .. tostring(now2), Method = "GET"})
 
@@ -28950,7 +29128,7 @@ local function fn65()
 		uiListLayout.Padding = UDim.new(0, 8)
 		uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 		uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-		local v25 = tbl17.text(frame4, {text = "Sena", style = "title", order = 1, size = UDim2.new(0, 0, 1, 0)})
+		local v25 = tbl17.text(frame4, {text = "Quantum", style = "title", order = 1, size = UDim2.new(0, 0, 1, 0)})
 		v25.AutomaticSize = Enum.AutomaticSize.X
 		v25.TextTruncate = Enum.TextTruncate.None
 		local frame5 = Instance.new("Frame")
@@ -29220,17 +29398,17 @@ local function fn65()
 		local TweenService = game:GetService("TweenService")
 		local GuiService = game:GetService("GuiService")
 		local UserInputService = game:GetService("UserInputService")
-		local n8 = 380
-		local n9 = 108
-		local n10 = 12
-		local n11 = 48
-		local n12 = 12
+		local n8 = 240
+		local n9 = 56
+		local n10 = 8
+		local n11 = 36
+		local n12 = 8
 		local vector2 = Vector3.new(542.93, 71.5, -405.58)
 		local color2 = Color3.fromRGB(110, 231, 140)
 		local color3 = Color3.fromRGB(248, 113, 113)
 		local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-		local senaV4StealCardToken = {}
-		genv.__SenaV4StealCardToken = senaV4StealCardToken
+		local quantumV4StealCardToken = {}
+		genv.__QuantumV4StealCardToken = quantumV4StealCardToken
 		local tbl36 = {{"carried by another", "Another player took it"}, {"taken by another", "Another player took it"}, {"someone else grabbed", "Another player took it"}, {"no longer available", "The egg is gone"}, {"target unavailable", "The egg is gone"}, {"target changed", "The egg is gone"}, {"reset countdown", "Eggs are resetting"}, {"egg reset", "The egg reset"}, {"wall closed", "Night started"}, {"character unavailable", "You were knocked out"}, {"character died", "You were knocked out"}, {"they banked", "They banked it first"}, {"could not catch", "Could not catch them"}, {"lost sight", "Could not catch them"}, {"bank not confirmed", "Deposit not confirmed"}, {"delivery failed", "Deposit not confirmed"}, {"not banked", "Deposit not confirmed"}, {"carry", "Could not pick it up"}, {"stopped", "Stopped"}, {"mode changed", "Stopped"}}
 
 		local function fn107(arg)
@@ -29298,99 +29476,129 @@ local function fn65()
 			local v22 = fn109()
 
 			pcall(function()
-				local senaStealCard = v22:FindFirstChild("SenaStealCard")
-
-				if senaStealCard then
-					senaStealCard:Destroy()
+				local oldHUD = v22:FindFirstChild("QuantumStatusHUD") or v22:FindFirstChild("QuantumStatusHUD")
+				if oldHUD then
+					oldHUD:Destroy()
 				end
 			end)
 
 			local screenGui = Instance.new("ScreenGui")
-			screenGui.Name = "SenaStealCard"
+			screenGui.Name = "QuantumStatusHUD"
 			screenGui.ResetOnSpawn = false
 			screenGui.IgnoreGuiInset = true
-			screenGui.DisplayOrder = -1
+			screenGui.DisplayOrder = 10
 			screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
 			local frame = Instance.new("Frame")
 			frame.Name = "Card"
-			frame.AnchorPoint = Vector2.new(0.5, 0)
-			frame.Position = UDim2.new(0.5, 0, 0, -n9 - 24)
+			frame.AnchorPoint = Vector2.new(0, 0)
+			frame.Position = UDim2.new(0, -n8 - 30, 0, 68)
 			frame.Size = UDim2.fromOffset(n8, n9)
-			frame.BackgroundColor3 = tbl14.surface
+			frame.BackgroundColor3 = Color3.fromRGB(16, 17, 20)
+			frame.BackgroundTransparency = 0.05
 			frame.BorderSizePixel = 0
 			frame.Visible = false
+			frame.ClipsDescendants = true
 			frame.Parent = screenGui
-			fn110(frame)
+
+			local uiCorner = Instance.new("UICorner")
+			uiCorner.CornerRadius = UDim.new(0, 7)
+			uiCorner.Parent = frame
+
 			local uiStroke = Instance.new("UIStroke")
-			uiStroke.Color = tbl14.strokeCol
+			uiStroke.Color = Color3.fromRGB(38, 40, 48)
 			uiStroke.Thickness = 1
 			uiStroke.Parent = frame
-			local uiGradient = Instance.new("UIGradient")
-			uiGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, tbl14.obsTop), ColorSequenceKeypoint.new(0.55, tbl14.obsMid), ColorSequenceKeypoint.new(1, tbl14.obsLow)})
-			uiGradient.Rotation = 16
-			uiGradient.Parent = frame
-			local n13 = -(n10 * 2 + n11 + 12)
-			tbl39.head = tbl17.text(frame, {style = "label", text = "Stealing", color = tbl14.muted, pos = UDim2.fromOffset(n10, 10), size = UDim2.new(1, -(n10 * 2 + 124), 0, 14)})
+
+			local iconFrame = Instance.new("Frame")
+			iconFrame.Position = UDim2.fromOffset(8, 8)
+			iconFrame.Size = UDim2.fromOffset(36, 36)
+			iconFrame.BackgroundColor3 = Color3.fromRGB(24, 25, 30)
+			iconFrame.BorderSizePixel = 0
+			iconFrame.Parent = frame
+
+			local iconCorner = Instance.new("UICorner")
+			iconCorner.CornerRadius = UDim.new(0, 6)
+			iconCorner.Parent = iconFrame
+
+			tbl39.img = Instance.new("ImageLabel")
+			tbl39.img.BackgroundTransparency = 1
+			tbl39.img.Position = UDim2.fromOffset(3, 3)
+			tbl39.img.Size = UDim2.new(1, -6, 1, -6)
+			tbl39.img.ScaleType = Enum.ScaleType.Fit
+			tbl39.img.Parent = iconFrame
+
+			tbl39.head = tbl17.text(frame, {style = "label", text = "STEALING", color = Color3.fromRGB(130, 135, 150), pos = UDim2.fromOffset(50, 7), size = UDim2.new(1, -110, 0, 12)})
+			tbl39.head.Font = Enum.Font.GothamBold
+			tbl39.head.TextSize = 10
+
 			local frame2 = Instance.new("Frame")
 			frame2.Name = "Chip"
 			frame2.AnchorPoint = Vector2.new(1, 0)
-			frame2.Position = UDim2.new(1, -n10, 0, 8)
-			frame2.Size = UDim2.fromOffset(0, 18)
+			frame2.Position = UDim2.new(1, -8, 0, 6)
+			frame2.Size = UDim2.fromOffset(0, 14)
 			frame2.AutomaticSize = Enum.AutomaticSize.X
-			frame2.BackgroundColor3 = tbl14.btnBg
+			frame2.BackgroundColor3 = Color3.fromRGB(26, 28, 34)
 			frame2.BorderSizePixel = 0
 			frame2.Parent = frame
-			fn110(frame2, UDim.new(1, 0))
+
+			local chipCorner = Instance.new("UICorner")
+			chipCorner.CornerRadius = UDim.new(0, 4)
+			chipCorner.Parent = frame2
+
 			local uiPadding = Instance.new("UIPadding")
-			uiPadding.PaddingLeft = UDim.new(0, 7)
-			uiPadding.PaddingRight = UDim.new(0, 8)
+			uiPadding.PaddingLeft = UDim.new(0, 5)
+			uiPadding.PaddingRight = UDim.new(0, 5)
 			uiPadding.Parent = frame2
+
 			local uiListLayout = Instance.new("UIListLayout")
 			uiListLayout.FillDirection = Enum.FillDirection.Horizontal
 			uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-			uiListLayout.Padding = UDim.new(0, 4)
+			uiListLayout.Padding = UDim.new(0, 3)
 			uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 			uiListLayout.Parent = frame2
+
 			tbl39.chipIcon = Instance.new("ImageLabel")
 			tbl39.chipIcon.BackgroundTransparency = 1
-			tbl39.chipIcon.Size = UDim2.fromOffset(12, 12)
+			tbl39.chipIcon.Size = UDim2.fromOffset(10, 10)
 			tbl39.chipIcon.LayoutOrder = 1
 			tbl39.chipIcon.Parent = frame2
-			tbl39.chipText = tbl17.text(frame2, {style = "label", text = "", order = 2, size = UDim2.fromOffset(0, 14)})
+
+			tbl39.chipText = tbl17.text(frame2, {style = "label", text = "", order = 2, size = UDim2.fromOffset(0, 12)})
 			tbl39.chipText.AutomaticSize = Enum.AutomaticSize.X
-			tbl39.chipText.TextTruncate = Enum.TextTruncate.None
-			local frame3 = Instance.new("Frame")
-			frame3.Position = UDim2.fromOffset(n10, 32)
-			frame3.Size = UDim2.fromOffset(n11, n11)
-			frame3.BackgroundColor3 = tbl14.surfaceHi
-			frame3.BorderSizePixel = 0
-			frame3.Parent = frame
-			fn110(frame3, UDim.new(0, 8))
-			tbl39.img = Instance.new("ImageLabel")
-			tbl39.img.BackgroundTransparency = 1
-			tbl39.img.Position = UDim2.fromOffset(4, 4)
-			tbl39.img.Size = UDim2.new(1, -8, 1, -8)
-			tbl39.img.ScaleType = Enum.ScaleType.Fit
-			tbl39.img.Parent = frame3
-			tbl39.title = tbl17.text(frame, {style = "title", pos = UDim2.fromOffset(n10 + n11 + 12, 31), size = UDim2.new(1, n13, 0, 18)})
-			tbl39.rarity = tbl17.text(frame, {style = "body", pos = UDim2.fromOffset(n10 + n11 + 12, 50), size = UDim2.new(1, n13, 0, 16)})
-			tbl39.stats = tbl17.text(frame, {style = "meta", color = tbl14.muted, pos = UDim2.fromOffset(n10 + n11 + 12, 66), size = UDim2.new(1, n13, 0, 15)})
+			tbl39.chipText.TextSize = 10
+
+			tbl39.title = tbl17.text(frame, {style = "title", pos = UDim2.fromOffset(50, 19), size = UDim2.new(1, -58, 0, 15)})
+			tbl39.title.Font = Enum.Font.GothamBold
+			tbl39.title.TextSize = 12
+
+			tbl39.stats = tbl17.text(frame, {style = "meta", color = Color3.fromRGB(150, 155, 170), pos = UDim2.fromOffset(50, 34), size = UDim2.new(1, -58, 0, 12)})
+			tbl39.stats.TextSize = 10
+
 			tbl39.barBack = Instance.new("Frame")
-			tbl39.barBack.Position = UDim2.fromOffset(n10, 91)
-			tbl39.barBack.Size = UDim2.new(1, -(n10 * 2 + 84), 0, 6)
-			tbl39.barBack.BackgroundColor3 = tbl14.btnBg
+			tbl39.barBack.Position = UDim2.new(0, 0, 1, -2)
+			tbl39.barBack.Size = UDim2.new(1, 0, 0, 2)
+			tbl39.barBack.BackgroundColor3 = Color3.fromRGB(26, 28, 34)
 			tbl39.barBack.BorderSizePixel = 0
 			tbl39.barBack.Parent = frame
-			fn110(tbl39.barBack, UDim.new(1, 0))
+
 			tbl39.barFill = Instance.new("Frame")
 			tbl39.barFill.Size = UDim2.fromScale(0, 1)
-			tbl39.barFill.BackgroundColor3 = tbl14.accent
+			tbl39.barFill.BackgroundColor3 = Color3.fromRGB(56, 189, 248)
 			tbl39.barFill.BorderSizePixel = 0
 			tbl39.barFill.Parent = tbl39.barBack
-			fn110(tbl39.barFill, UDim.new(1, 0))
-			tbl39.eta = tbl17.text(frame, {style = "meta", color = tbl14.muted, align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 0), pos = UDim2.new(1, -n10, 0, 86), size = UDim2.fromOffset(80, 16)})
-			tbl39.reason = tbl17.text(frame, {style = "body", color = color3, pos = UDim2.fromOffset(n10, 86), size = UDim2.new(1, -n10 * 2, 0, 16)})
+
+			tbl39.rarity = Instance.new("TextLabel")
+			tbl39.rarity.Visible = false
+			tbl39.rarity.Parent = frame
+
+			tbl39.eta = tbl17.text(frame, {style = "meta", color = Color3.fromRGB(130, 135, 150), align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 1), pos = UDim2.new(1, -8, 1, -5), size = UDim2.fromOffset(60, 12)})
+			tbl39.eta.TextSize = 9
+
+			tbl39.reason = tbl17.text(frame, {style = "body", color = color3, pos = UDim2.fromOffset(50, 34), size = UDim2.new(1, -58, 0, 12)})
 			tbl39.reason.Visible = false
+			tbl39.reason.TextSize = 10
+
 			tbl39.scale = Instance.new("UIScale")
 			tbl39.scale.Parent = frame
 			screenGui.Parent = v22
@@ -29471,9 +29679,8 @@ local function fn65()
 			end
 			n13 = arg
 			local card = tbl39.card
-			local tbl41 = {}
-			tbl41.Position = UDim2.new(0.5, 0, 0, arg)
-			TweenService:Create(card, tweenInfo, tbl41):Play()
+			local targetY = math.clamp(arg, 60, 120)
+			TweenService:Create(card, tweenInfo, {Position = UDim2.new(0, 20, 0, targetY)}):Play()
 		end
 
 		local function fn117(arg)
@@ -29484,15 +29691,16 @@ local function fn65()
 
 			if arg then
 				n13 = nil
-				tbl39.card.Position = UDim2.new(0.5, 0, 0, -n9 - 24)
+				tbl39.card.Position = UDim2.new(0, -n8 - 30, 0, 68)
 				tbl39.card.Visible = true
 				local v23 = fn115()
 				tbl39.scale.Scale = v23 * 0.94
 				tween = TweenService:Create(tbl39.scale, tweenInfo, {Scale = v23})
 				tween:Play()
+				TweenService:Create(tbl39.card, tweenInfo, {Position = UDim2.new(0, 20, 0, 68)}):Play()
 			else
-				n13 = -n9 - 24
-				local tween2 = TweenService:Create(tbl39.card, tweenInfo, {Position = UDim2.new(0.5, 0, 0, n13)})
+				n13 = -n8 - 30
+				local tween2 = TweenService:Create(tbl39.card, tweenInfo, {Position = UDim2.new(0, -n8 - 30, 0, 68)})
 
 				tween2.Completed:Connect(function()
 					if not flag6 then
@@ -29828,24 +30036,24 @@ local function fn65()
 		local now2
 
 		local function fn128()
-			local senaV4EggRuntime = genv.__SenaV4EggRuntime
-			local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
-			fn125(senaV4EggRuntime)
+			local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+			local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+			fn125(quantumV4EggRuntime)
 			local str3, status
 			local flag7, player, v23, v24 = false
 
-			if senaV4PlayerSteal and senaV4PlayerSteal.running and type(senaV4PlayerSteal.cardTarget) == "table" then
-				local uid = senaV4PlayerSteal.cardTarget.uid
-				status = senaV4PlayerSteal.status
-				player = senaV4PlayerSteal.cardTarget.player
-				flag7 = senaV4EggRuntime ~= nil and senaV4EggRuntime._externalDeliver == true
+			if quantumV4PlayerSteal and quantumV4PlayerSteal.running and type(quantumV4PlayerSteal.cardTarget) == "table" then
+				local uid = quantumV4PlayerSteal.cardTarget.uid
+				status = quantumV4PlayerSteal.status
+				player = quantumV4PlayerSteal.cardTarget.player
+				flag7 = quantumV4EggRuntime ~= nil and quantumV4EggRuntime._externalDeliver == true
 				str3, v24 = "ps", uid
 			else
-				local v25 = fn126(senaV4EggRuntime)
+				local v25 = fn126(quantumV4EggRuntime)
 
 				if v25 then
-					status = senaV4EggRuntime.stats and senaV4EggRuntime.stats.status
-					flag7 = senaV4EggRuntime.carry and senaV4EggRuntime.carry.active and senaV4EggRuntime.carry.uid == v25
+					status = quantumV4EggRuntime.stats and quantumV4EggRuntime.stats.status
+					flag7 = quantumV4EggRuntime.carry and quantumV4EggRuntime.carry.active and quantumV4EggRuntime.carry.uid == v25
 					str3 = "auto"
 				end
 
@@ -29857,7 +30065,7 @@ local function fn65()
 
 				if v24 ~= nil or os.clock() - now2 >= 0.4 then
 					if v22.kind == "ps" then
-						local history = senaV4PlayerSteal and senaV4PlayerSteal.history and senaV4PlayerSteal.history[1]
+						local history = quantumV4PlayerSteal and quantumV4PlayerSteal.history and quantumV4PlayerSteal.history[1]
 						local str4 = history and tostring(history.outcome) or ""
 
 						if str4 == "taken" then
@@ -29868,7 +30076,7 @@ local function fn65()
 							fn124("fail", fn107(str4))
 						end
 					else
-						fn124(fn127(senaV4EggRuntime))
+						fn124(fn127(quantumV4EggRuntime))
 					end
 				end
 			else
@@ -29895,7 +30103,7 @@ local function fn65()
 				local flag8, record = str3 == "ps"
 
 				if flag8 then
-					record = senaV4PlayerSteal.cardTarget.record
+					record = quantumV4PlayerSteal.cardTarget.record
 				else
 					record = v25
 				end
@@ -29904,10 +30112,10 @@ local function fn65()
 					record = record or EggState2.ReadFieldEgg(v24)
 				end)
 
-				record = record or senaV4EggRuntime and senaV4EggRuntime.records and senaV4EggRuntime.records[v24]
+				record = record or quantumV4EggRuntime and quantumV4EggRuntime.records and quantumV4EggRuntime.records[v24]
 
 				if type(record) == "table" then
-					fn123(str3, v24, record, senaV4EggRuntime, player)
+					fn123(str3, v24, record, quantumV4EggRuntime, player)
 				end
 			end
 
@@ -29919,15 +30127,15 @@ local function fn65()
 				return
 			end
 
-			senaV4EggRuntime, senaV4PlayerSteal = fn112()
+			quantumV4EggRuntime, quantumV4PlayerSteal = fn112()
 			local v25 = fn115()
 
 			if not (tween and tween.PlaybackState == Enum.PlaybackState.Playing) then
 				fn113(tbl39.scale, "Scale", v25)
 			end
 
-			fn113(tbl39.card, "Size", UDim2.fromOffset(math.floor(math.min(n8, (fn114().X - 32) / v25)), n9))
-			fn116(math.floor(math.max(senaV4PlayerSteal + n12, senaV4EggRuntime + n12)))
+			fn113(tbl39.card, "Size", UDim2.fromOffset(n8, n9))
+			fn116(math.floor(math.max(quantumV4PlayerSteal + n12, quantumV4EggRuntime + n12)))
 			if v22.endedAt then
 				return
 			end
@@ -29935,7 +30143,7 @@ local function fn65()
 			if os.clock() >= (v22.netAt or 0) then
 				v22.netAt = os.clock() + 1
 				local v26 = fn3()
-				local v27 = genv.__SenaV4NetPing()
+				local v27 = genv.__QuantumV4NetPing()
 				str4 = v26 > 0 and v26 < 20 and "LOW FPS" or nil
 				str4 = if v27 > 250 then str4 and str4 .. " + HIGH PING" or "HIGH PING" else str4
 				fn113(tbl39.head, "Text", str4 and str4 .. "  ·  MAY TAKE LONGER" or v22.headBase)
@@ -29958,17 +30166,17 @@ local function fn65()
 
 			fn118(v25)
 			local n16 = os.clock() - v22.startedAt
-			senaV4PlayerSteal = fn122(v22, v25, status)
+			quantumV4PlayerSteal = fn122(v22, v25, status)
 			local v26 = tbl40[v22.key]
 
 			if v26 then
 				local n17 = v26 - n16
-				senaV4PlayerSteal = senaV4PlayerSteal and (senaV4PlayerSteal + n17) / 2 or n17
+				quantumV4PlayerSteal = quantumV4PlayerSteal and (quantumV4PlayerSteal + n17) / 2 or n17
 			end
 
-			if senaV4PlayerSteal then
-				v22.progress = math.max(v22.progress, math.min(n16 / math.max(n16 + math.max(senaV4PlayerSteal, 0), 0.1), 0.96))
-				fn113(tbl39.eta, "Text", senaV4PlayerSteal >= 1 and string.format("~%ds left", math.ceil(senaV4PlayerSteal)) or "Almost done")
+			if quantumV4PlayerSteal then
+				v22.progress = math.max(v22.progress, math.min(n16 / math.max(n16 + math.max(quantumV4PlayerSteal, 0), 0.1), 0.96))
+				fn113(tbl39.eta, "Text", quantumV4PlayerSteal >= 1 and string.format("~%ds left", math.ceil(quantumV4PlayerSteal)) or "Almost done")
 			else
 				v22.progress = math.max(v22.progress, math.min(n16 / (n16 + 12), 0.6))
 				fn113(tbl39.eta, "Text", string.format("%ds", math.floor(n16)))
@@ -29978,7 +30186,7 @@ local function fn65()
 		end
 
 		task.spawn(function()
-			while genv.__SenaV4StealCardToken == senaV4StealCardToken do
+			while genv.__QuantumV4StealCardToken == quantumV4StealCardToken do
 				task.wait(0.1)
 				fn67()
 				local ok, result = pcall(fn128)
@@ -30001,46 +30209,46 @@ local function fn65()
 		end)
 	end)()
 
-	senaPanels.windows = windows
+	quantumPanels.windows = windows
 
-	function senaPanels.openLogs()
+	function quantumPanels.openLogs()
 		fn104("logs")
 	end
 
-	function senaPanels.openBoard()
+	function quantumPanels.openBoard()
 		fn104("eggs")
 	end
 
-	function senaPanels.openInventory()
+	function quantumPanels.openInventory()
 		fn104("inventory")
 	end
 
-	function senaPanels.openChecker()
+	function quantumPanels.openChecker()
 		fn104("checker")
 	end
 
-	function senaPanels.openAnalyst()
+	function quantumPanels.openAnalyst()
 		fn104("eggdata")
 	end
 
-	function senaPanels.openStats()
+	function quantumPanels.openStats()
 		fn104("stats")
 	end
 
-	function senaPanels.openAll()
+	function quantumPanels.openAll()
 		fn105()
 	end
 
-	function senaPanels.closeAll()
+	function quantumPanels.closeAll()
 		fn106()
 	end
 
-	function senaPanels.isPlaceEnabled(arg)
+	function quantumPanels.isPlaceEnabled(arg)
 		return tbl24[arg] ~= false
 	end
 
 	pcall(function()
-		getgenv().SenaPanels = senaPanels
+		getgenv().QuantumPanels = quantumPanels
 	end)
 end
 
@@ -30051,13 +30259,13 @@ do
 	local ReplicatedStorage2 = game:GetService("ReplicatedStorage")
 	local hopHunt = {file = "QuantumID/SaeHopHunt.json", state = nil, status = "Checking this server...", watch = {}, gone = {}, revealed = nil, gui = nil, busy = false, prompting = false}
 	tbl13.hopHunt = hopHunt
-	hopHunt.bootCode = "if game:GetAttribute(\"SenaBootQueued\") then return end\ngame:SetAttribute(\"SenaBootQueued\", true)\nrepeat task.wait(0.5) until game:IsLoaded()\ntask.wait(1.5)\nloadstring(game:HttpGet(\"https://raw.githubusercontent.com/QuantumPH2/UI/refs/heads/main/NewEraUI.lua\"))()\n"
+	hopHunt.bootCode = "if game:GetAttribute(\"QuantumBootQueued\") then return end\ngame:SetAttribute(\"QuantumBootQueued\", true)\nrepeat task.wait(0.5) until game:IsLoaded()\ntask.wait(1.5)\nloadstring(game:HttpGet(\"https://raw.githubusercontent.com/QuantumPH2/UI/refs/heads/main/NewEraUI.lua\"))()\n"
 
 	hopHunt.elevate = function()
-		local senaV4IdentitySetter2 = genv.__SenaV4IdentitySetter
+		local quantumV4IdentitySetter2 = genv.__QuantumV4IdentitySetter
 
-		if type(senaV4IdentitySetter2) == "function" then
-			pcall(senaV4IdentitySetter2, genv.__SenaV4UICapabilityIdentity or 8)
+		if type(quantumV4IdentitySetter2) == "function" then
+			pcall(quantumV4IdentitySetter2, genv.__QuantumV4UICapabilityIdentity or 8)
 		end
 	end
 
@@ -30320,7 +30528,7 @@ do
 		local state = hopHunt.state or hopHunt.load()
 		local TweenService = game:GetService("TweenService")
 		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "SenaHopHunt"
+		screenGui.Name = "QuantumHopHunt"
 		screenGui.ResetOnSpawn = false
 		screenGui.DisplayOrder = 9999
 		screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -30688,7 +30896,7 @@ do
 				end
 
 				local flag8 = os.clock() - now > 6
-				local flag9 = senaV4Config.IsStealing == true or senaV4Config.IsPlacing == true
+				local flag9 = quantumV4Config.IsStealing == true or quantumV4Config.IsPlacing == true
 
 				if not hopHunt.busy then
 					if hopHunt.prompting then
@@ -30975,7 +31183,7 @@ local function fn66()
 	end
 
 	local function fn71(arg)
-		local placeRarities = senaV4Config.PlaceRarities or {}
+		local placeRarities = quantumV4Config.PlaceRarities or {}
 
 		if #placeRarities == 0 then
 			return true
@@ -30989,17 +31197,17 @@ local function fn66()
 	end
 
 	local function fn72(arg)
-		return not (type(senaPanels.isPlaceEnabled) == "function" and senaPanels.isPlaceEnabled(arg) == false)
+		return not (type(quantumPanels.isPlaceEnabled) == "function" and quantumPanels.isPlaceEnabled(arg) == false)
 	end
 
 	local tbl17 = {at = 0, value = false}
 
 	local function fn73()
-		if not senaV4Config.AutoPlace then
+		if not quantumV4Config.AutoPlace then
 			return false
 		end
 
-		if senaV4Config.IsPlacing then
+		if quantumV4Config.IsPlacing then
 			return true
 		end
 		local now = os.clock()
@@ -31036,12 +31244,12 @@ local function fn66()
 	end
 
 	function tbl10.AutoPlaceLoop()
-		if senaV4Config.IsAutoPlaceWorkerRunning then
+		if quantumV4Config.IsAutoPlaceWorkerRunning then
 			return
 		end
-		senaV4Config.IsAutoPlaceWorkerRunning = true
+		quantumV4Config.IsAutoPlaceWorkerRunning = true
 
-		while senaV4Config.AutoPlace and fn2() do
+		while quantumV4Config.AutoPlace and fn2() do
 			task.wait(1.5)
 
 			local ok2, result = pcall(function()
@@ -31126,28 +31334,28 @@ local function fn66()
 				end
 
 				local function fn74()
-					return senaV4TaskLadder.blocker("auto_place") ~= nil
+					return quantumV4TaskLadder.blocker("auto_place") ~= nil
 				end
 
 				if fn74() then
-					str3 = senaV4TaskLadder.yieldLabel("auto_place") or ""
+					str3 = quantumV4TaskLadder.yieldLabel("auto_place") or ""
 					return
 				end
-				Assets = senaV4TaskLadder.holder("auto_place")
+				Assets = quantumV4TaskLadder.holder("auto_place")
 				if Assets then
-					str3 = "Waiting for " .. senaV4TaskLadder.TITLES[Assets] .. " to hand over"
+					str3 = "Waiting for " .. quantumV4TaskLadder.TITLES[Assets] .. " to hand over"
 					return
 				end
-				senaV4Config.IsPlacing = true
+				quantumV4Config.IsPlacing = true
 				str3 = string.format("Placing %d egg%s", #tbl18, #tbl18 == 1 and "" or "s")
-				local senaV4TreadmillManager = genv.__SenaV4TreadmillManager
+				local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
 
-				if senaV4TreadmillManager and senaV4TreadmillManager.activeTreadmill ~= nil then
+				if quantumV4TreadmillManager and quantumV4TreadmillManager.activeTreadmill ~= nil then
 					Assets = os.clock() + 5
 
-					while senaV4TreadmillManager.activeTreadmill ~= nil and os.clock() < Assets and not fn74() do
+					while quantumV4TreadmillManager.activeTreadmill ~= nil and os.clock() < Assets and not fn74() do
 						pcall(function()
-							senaV4TreadmillManager:_requestUnequip()
+							quantumV4TreadmillManager:_requestUnequip()
 						end)
 
 						task.wait(0.3)
@@ -31173,7 +31381,7 @@ local function fn66()
 				local v21 = if humanoidRootPart then humanoidRootPart.CFrame else nil
 
 				local function fn75()
-					local autoPlace = senaV4Config.AutoPlace
+					local autoPlace = quantumV4Config.AutoPlace
 					return if autoPlace then fn74() else not autoPlace
 				end
 
@@ -31219,7 +31427,7 @@ local function fn66()
 				local n9 = 0
 
 				for i, v22 in ipairs(tbl18) do
-					if senaV4Config.AutoPlace then
+					if quantumV4Config.AutoPlace then
 						if flag7 then
 							break
 						end
@@ -31307,8 +31515,8 @@ local function fn66()
 								local str4 = v27 and string.lower(tostring(v27)) or ""
 
 								if string.find(str4, "full") or string.find(str4, "limit") or string.find(str4, "capacity") or string.find(str4, "maximum") then
-									if senaV4Config.AutoPlace then
-										senaV4Config.AutoPlace = false
+									if quantumV4Config.AutoPlace then
+										quantumV4Config.AutoPlace = false
 									end
 
 									flag7 = true
@@ -31338,11 +31546,11 @@ local function fn66()
 				end
 			end)
 
-			if senaV4Config.IsPlacing then
+			if quantumV4Config.IsPlacing then
 				str3 = ""
 			end
 
-			senaV4Config.IsPlacing = false
+			quantumV4Config.IsPlacing = false
 
 			if not ok2 then
 				str3 = "Error, retrying"
@@ -31350,27 +31558,27 @@ local function fn66()
 			end
 		end
 
-		senaV4Config.IsAutoPlaceWorkerRunning = false
+		quantumV4Config.IsAutoPlaceWorkerRunning = false
 	end
 
-	senaV4TaskLadder.register("auto_place", {wants = fn73, active = function()
-		return senaV4Config.IsPlacing == true
+	quantumV4TaskLadder.register("auto_place", {wants = fn73, active = function()
+		return quantumV4Config.IsPlacing == true
 	end, enabled = function()
-		return senaV4Config.AutoPlace == true
+		return quantumV4Config.AutoPlace == true
 	end, status = function()
 		return str3
 	end})
 
 	function tbl10.AutoHatchLoop()
-		if senaV4Config.IsAutoHatchWorkerRunning then
+		if quantumV4Config.IsAutoHatchWorkerRunning then
 			return
 		end
-		senaV4Config.IsAutoHatchWorkerRunning = true
+		quantumV4Config.IsAutoHatchWorkerRunning = true
 
 		task.spawn(function()
 			local tbl18 = {}
 
-			while senaV4Config.AutoHatch and fn2() do
+			while quantumV4Config.AutoHatch and fn2() do
 				task.wait(1.5)
 
 				pcall(function()
@@ -31390,7 +31598,7 @@ local function fn66()
 					local now = os.time()
 
 					for i, v22 in ipairs(tbl19) do
-						if not senaV4Config.AutoHatch then
+						if not quantumV4Config.AutoHatch then
 							break
 						end
 
@@ -31418,7 +31626,7 @@ local function fn66()
 				end)
 			end
 
-			senaV4Config.IsAutoHatchWorkerRunning = false
+			quantumV4Config.IsAutoHatchWorkerRunning = false
 		end)
 	end
 
@@ -31450,16 +31658,16 @@ local function fn66()
 		end
 
 		local function fn77()
-			return senaV4TaskLadder.blocker("use_scrambled") ~= nil
+			return quantumV4TaskLadder.blocker("use_scrambled") ~= nil
 		end
 
-		local str4 = ({Fractured = "Boss", Enchanted = "Enchanted"})[senaV4Config.MutationChoice] or "Scrambled"
+		local str4 = ({Fractured = "Boss", Enchanted = "Enchanted"})[quantumV4Config.MutationChoice] or "Scrambled"
 
 		local function fn78(arg)
 			local tbl19 = {AssetCategory = arg.AssetCategory or arg.Category, AssetScale = arg.AssetScale or arg.Scale or 1, Mutations = arg.Mutations or {}, BaseMutation = arg.BaseMutation, AssetEyeColor = arg.AssetEyeColor, AssetColorSeed = arg.AssetColorSeed, AssetColorIndex = arg.AssetColorIndex, Gender = arg.Gender, Personality = arg.Personality, HasBeenFirstPlaced = arg.HasBeenFirstPlaced}
 
 			local ok2, result = pcall(function()
-				return senaV4Config:getAreaEggValue(tbl19)
+				return quantumV4Config:getAreaEggValue(tbl19)
 			end)
 
 			return ok2 and tonumber(result) or 0
@@ -31506,11 +31714,11 @@ local function fn66()
 			return tostring(mutations):find(str4) ~= nil
 		end
 
-		local mutationSpecies = senaV4Config.MutationSpecies
+		local mutationSpecies = quantumV4Config.MutationSpecies
 		local flag8 = type(mutationSpecies) == "table" and #mutationSpecies > 0
-		local mutationRarities = senaV4Config.MutationRarities
+		local mutationRarities = quantumV4Config.MutationRarities
 		local flag9 = type(mutationRarities) == "table" and #mutationRarities > 0
-		local n8 = tonumber(senaV4Config.MutationMinRate) or 0
+		local n8 = tonumber(quantumV4Config.MutationMinRate) or 0
 
 		local function fn81(arg)
 			if type(arg) ~= "table" then
@@ -31577,10 +31785,10 @@ local function fn66()
 		tbl18.wants = wants
 
 		if not v21 then
-			tbl18.status = "No " .. tostring(senaV4Config.MutationChoice or "Scrambled") .. " item in your bag"
+			tbl18.status = "No " .. tostring(quantumV4Config.MutationChoice or "Scrambled") .. " item in your bag"
 
 			if not flag7 then
-				warn("[AutoMutation] no " .. tostring(senaV4Config.MutationChoice or "Scrambled") .. " consumable in the inventory, round skipped.")
+				warn("[AutoMutation] no " .. tostring(quantumV4Config.MutationChoice or "Scrambled") .. " consumable in the inventory, round skipped.")
 				flag7 = true
 			end
 
@@ -31594,12 +31802,12 @@ local function fn66()
 		end
 
 		if fn77() then
-			tbl18.status = senaV4TaskLadder.yieldLabel("use_scrambled") or ""
+			tbl18.status = quantumV4TaskLadder.yieldLabel("use_scrambled") or ""
 			return
 		end
-		local useScrambled = senaV4TaskLadder.holder("use_scrambled")
+		local useScrambled = quantumV4TaskLadder.holder("use_scrambled")
 		if useScrambled then
-			tbl18.status = "Waiting for " .. senaV4TaskLadder.TITLES[useScrambled] .. " to hand over"
+			tbl18.status = "Waiting for " .. quantumV4TaskLadder.TITLES[useScrambled] .. " to hand over"
 			return
 		end
 		local character = localPlayer.Character
@@ -31608,7 +31816,7 @@ local function fn66()
 			return
 		end
 		tbl18.busy = true
-		tbl18.status = "Applying " .. tostring(senaV4Config.MutationChoice or "Scrambled")
+		tbl18.status = "Applying " .. tostring(quantumV4Config.MutationChoice or "Scrambled")
 
 		if not character:FindFirstChild(v21.Name) then
 			pcall(function()
@@ -31650,7 +31858,7 @@ local function fn66()
 						local vector2 = Vector3.new(humanoidRootPart.Position.X - position.X, 0, humanoidRootPart.Position.Z - position.Z)
 						local n9 = position + (vector2.Magnitude > 0.1 and vector2.Unit or Vector3.new(1, 0, 0)) * 10 + Vector3.new(0, 3, 0)
 						pcall(fn38, humanoidRootPart, humanoid, CFrame.new(n9), fn77)
-						tbl18.status = "Applying " .. tostring(senaV4Config.MutationChoice or "Scrambled")
+						tbl18.status = "Applying " .. tostring(quantumV4Config.MutationChoice or "Scrambled")
 					end
 				end
 
@@ -31695,7 +31903,7 @@ local function fn66()
 					end
 
 					task.wait(0.25)
-				until flag10 or not senaV4Config.MutationRetry or n9 >= 40
+				until flag10 or not quantumV4Config.MutationRetry or n9 >= 40
 			end
 		end
 
@@ -31712,37 +31920,37 @@ local function fn66()
 		end
 	end
 
-	senaV4TaskLadder.register("use_scrambled", {wants = function()
-		return senaV4Config.AutoMutation == true and tbl18.wants == true
+	quantumV4TaskLadder.register("use_scrambled", {wants = function()
+		return quantumV4Config.AutoMutation == true and tbl18.wants == true
 	end, active = function()
 		return tbl18.busy == true
 	end, enabled = function()
-		return senaV4Config.AutoMutation == true
+		return quantumV4Config.AutoMutation == true
 	end, status = function()
 		return tbl18.status
 	end})
 
 	function tbl10.AutoMutationLoop()
-		if senaV4Config.IsAutoMutationWorkerRunning then
+		if quantumV4Config.IsAutoMutationWorkerRunning then
 			return
 		end
-		senaV4Config.IsAutoMutationWorkerRunning = true
+		quantumV4Config.IsAutoMutationWorkerRunning = true
 
 		task.spawn(function()
-			while senaV4Config.AutoMutation and fn2() do
+			while quantumV4Config.AutoMutation and fn2() do
 				task.wait(1)
 				pcall(tbl10.mutationSweep)
 			end
 
-			senaV4Config.IsAutoMutationWorkerRunning = false
+			quantumV4Config.IsAutoMutationWorkerRunning = false
 		end)
 	end
 
 	function tbl10.RingEventLoop()
-		if senaV4Config.IsRingEventRunning then
+		if quantumV4Config.IsRingEventRunning then
 			return
 		end
-		senaV4Config.IsRingEventRunning = true
+		quantumV4Config.IsRingEventRunning = true
 
 		task.spawn(function()
 			local cframe = CFrame.new(542.93, 71.5, -405.58)
@@ -31750,7 +31958,7 @@ local function fn66()
 			local cframe3 = CFrame.new(5573, 70.77, -363)
 
 			local function fn75()
-				local autoRingEvent = senaV4Config.AutoRingEvent
+				local autoRingEvent = quantumV4Config.AutoRingEvent
 				return if autoRingEvent then not fn2() else not autoRingEvent
 			end
 
@@ -31787,7 +31995,7 @@ local function fn66()
 				end
 			end
 
-			senaV4Config.IsRingEventRunning = false
+			quantumV4Config.IsRingEventRunning = false
 		end)
 	end
 
@@ -31880,7 +32088,7 @@ local function fn66()
 			end
 
 			local function fn77(arg, arg2)
-				if not senaV4Config.AutoSell then
+				if not quantumV4Config.AutoSell then
 					return false, "toggle Auto Sell Pet udah OFF", "global"
 				end
 
@@ -31914,7 +32122,7 @@ local function fn66()
 				if inventory == nil then
 					return false, "pet ini udah gak ada di inventory", "pet"
 				end
-				local sellPetMaxRate = senaV4Config.SellPetMaxRate or 0
+				local sellPetMaxRate = quantumV4Config.SellPetMaxRate or 0
 				if sellPetMaxRate > 0 and rateOf({Category = inventory.Category or inventory.AssetCategory, Scale = inventory.Scale or inventory.AssetScale or 1, Mutations = inventory.Mutations or {}}) > sellPetMaxRate then
 					return false, "money/s pet ini di atas batas value", "pet"
 				end
@@ -31933,10 +32141,10 @@ local function fn66()
 				return true
 			end
 
-			while senaV4Config.AutoSell and fn2() do
+			while quantumV4Config.AutoSell and fn2() do
 				local ok2, result = pcall(function()
 					if not fn32() then
-						tbl19.status = senaV4TaskLadder.yieldLabel("auto_sell") or ""
+						tbl19.status = quantumV4TaskLadder.yieldLabel("auto_sell") or ""
 						return
 					end
 					local v24 = fn33(v21)
@@ -31968,7 +32176,7 @@ local function fn66()
 
 							if n8 % 250 == 0 then
 								RunService.Heartbeat:Wait()
-								if not senaV4Config.AutoSell then
+								if not quantumV4Config.AutoSell then
 									return
 								end
 							end
@@ -31984,7 +32192,7 @@ local function fn66()
 								local rarity = v29 and v29.Rarity
 								local displayName2 = rarity and (rarity.DisplayName or rarity._id or rarity.Name) or "Unknown"
 								local v30 = fn34(displayName, displayName2, v24, v25)
-								local sellPetMaxRate = senaV4Config.SellPetMaxRate or 0
+								local sellPetMaxRate = quantumV4Config.SellPetMaxRate or 0
 								local v31 = if sellPetMaxRate > 0 then rateOf({Category = category, Scale = v28.Scale or v28.AssetScale or 1, Mutations = v28.Mutations or {}}) <= sellPetMaxRate else true
 
 								if v30 and v31 then
@@ -32088,7 +32296,7 @@ local function fn66()
 	local flag10 = false
 
 	local function fn76()
-		if not senaV4Config.AutoSellEgg then
+		if not quantumV4Config.AutoSellEgg then
 			return false
 		end
 		local v24 = fn33(v23)
@@ -32135,7 +32343,7 @@ local function fn66()
 		for k, v26 in pairs(eggInventory) do
 			local flag11 = type(v26) == "table" and directory[v26.AssetCategory]
 			local displayName = flag11 and flag11.Rarity and (flag11.Rarity.DisplayName or flag11.Rarity._id)
-			local sellEggMaxRate = senaV4Config.SellEggMaxRate or 0
+			local sellEggMaxRate = quantumV4Config.SellEggMaxRate or 0
 			local v27 = if sellEggMaxRate > 0 then if type(v26) == "table" then rateOf({Category = v26.AssetCategory, Scale = v26.AssetScale or 1, Mutations = v26.Mutations or {}}) <= sellEggMaxRate else true else true
 			if v26.Placement == nil and (v27 and fn35(displayName or "Unknown", v24)) then
 				return true
@@ -32145,7 +32353,7 @@ local function fn66()
 		return false
 	end
 
-	genv.__SenaV4IsAutoSellEggBusy = function()
+	genv.__QuantumV4IsAutoSellEggBusy = function()
 		return flag10 or fn76()
 	end
 
@@ -32162,12 +32370,12 @@ local function fn66()
 		return tbl20.value
 	end
 
-	senaV4TaskLadder.register("auto_sell", {wants = function()
-		return senaV4Config.AutoSell == true and tbl19.petPending == true or senaV4Config.AutoSellEgg == true and fn77()
+	quantumV4TaskLadder.register("auto_sell", {wants = function()
+		return quantumV4Config.AutoSell == true and tbl19.petPending == true or quantumV4Config.AutoSellEgg == true and fn77()
 	end, active = function()
 		return tbl19.petBusy == true or flag10 == true
 	end, enabled = function()
-		return senaV4Config.AutoSell == true or senaV4Config.AutoSellEgg == true
+		return quantumV4Config.AutoSell == true or quantumV4Config.AutoSellEgg == true
 	end, status = function()
 		if flag10 then
 			return "Selling eggs"
@@ -32188,14 +32396,14 @@ local function fn66()
 			local Remotes = require(ReplicatedStorage2.Shared.Remotes)
 			local Save = require(ReplicatedStorage2.Shared.Save)
 
-			while senaV4Config.AutoSellEgg and fn2() do
+			while quantumV4Config.AutoSellEgg and fn2() do
 				local v24 = fn33(v23)
 				local v25 = (Save.Peek or Save.Get)()
 				local eggInventory = v25 and v25.EggInventory
 
 				if v24 and type(eggInventory) == "table" and fn32() then
 					for k, v26 in pairs(eggInventory) do
-						if senaV4Config.AutoSellEgg then
+						if quantumV4Config.AutoSellEgg then
 							if not fn32() then
 								break
 							end
@@ -32205,7 +32413,7 @@ local function fn66()
 
 						local flag11 = type(v26) == "table" and directory[v26.AssetCategory]
 						local displayName = flag11 and flag11.Rarity and (flag11.Rarity.DisplayName or flag11.Rarity._id)
-						local sellEggMaxRate = senaV4Config.SellEggMaxRate or 0
+						local sellEggMaxRate = quantumV4Config.SellEggMaxRate or 0
 						local v27 = if sellEggMaxRate > 0 then if type(v26) == "table" then rateOf({Category = v26.AssetCategory, Scale = v26.AssetScale or 1, Mutations = v26.Mutations or {}}) <= sellEggMaxRate else true else true
 
 						if v26.Placement == nil and (v27 and fn35(displayName or "Unknown", v24)) then
@@ -32214,8 +32422,8 @@ local function fn66()
 							end
 							flag10 = true
 
-							if genv.__SenaV4TreadmillManager and genv.__SenaV4TreadmillManager.activeTreadmill ~= nil then
-								genv.__SenaV4TreadmillManager:_cancelIdle(true)
+							if genv.__QuantumV4TreadmillManager and genv.__QuantumV4TreadmillManager.activeTreadmill ~= nil then
+								genv.__QuantumV4TreadmillManager:_cancelIdle(true)
 								task.wait(0.25)
 							end
 
@@ -32286,87 +32494,87 @@ local function fn66()
 	fn73 = fn69((fn67(tbl21)))
 
 	local function fn78(arg)
-		senaV4Config.AutoSteal = arg == true
+		quantumV4Config.AutoSteal = arg == true
 
 		if v13 then
-			v13:setEnabled(senaV4Config.AutoSteal)
+			v13:setEnabled(quantumV4Config.AutoSteal)
 		end
 
-		if type(genv.__SenaV4SetStealDeclutter) == "function" then
-			pcall(genv.__SenaV4SetStealDeclutter, senaV4Config.AutoSteal)
+		if type(genv.__QuantumV4SetStealDeclutter) == "function" then
+			pcall(genv.__QuantumV4SetStealDeclutter, quantumV4Config.AutoSteal)
 		end
 	end
 
 	local function fn79(arg)
-		senaV4Config.StealHoldSeconds = math.clamp(math.floor((tonumber(arg) or 5) + 0.5), 1, 10)
+		quantumV4Config.StealHoldSeconds = math.clamp(math.floor((tonumber(arg) or 5) + 0.5), 1, 10)
 	end
 
 	local function fn80(arg)
-		senaV4Config.GodMode = arg == true
+		quantumV4Config.GodMode = arg == true
 
 		if v16 then
-			v16:setEnabled(senaV4Config.GodMode)
+			v16:setEnabled(quantumV4Config.GodMode)
 		end
 	end
 
 	local function fn81()
-		return genv.__SenaV4TreadmillManager
+		return genv.__QuantumV4TreadmillManager
 	end
 
 	local function fn82(arg)
-		senaV4Config.AutoTreadmillIdle = arg == true
+		quantumV4Config.AutoTreadmillIdle = arg == true
 		local v27 = fn81()
 
 		if v27 then
-			v27:setIdleFarm(senaV4Config.AutoTreadmillIdle and not senaV4Config.AntiTreadmill)
+			v27:setIdleFarm(quantumV4Config.AutoTreadmillIdle and not quantumV4Config.AntiTreadmill)
 		end
 	end
 
 	local function fn83(arg)
-		senaV4Config.AntiTreadmill = arg == true
+		quantumV4Config.AntiTreadmill = arg == true
 		local v27 = fn81()
 
-		if senaV4Config.AntiTreadmill then
+		if quantumV4Config.AntiTreadmill then
 			if v27 then
 				v27:setIdleFarm(false)
 			end
 
 			tbl13.startAntiTreadmillLoop()
 		elseif v27 then
-			v27:setIdleFarm(senaV4Config.AutoTreadmillIdle)
+			v27:setIdleFarm(quantumV4Config.AutoTreadmillIdle)
 		end
 	end
 
 	local function fn84(arg)
-		senaV4Config.HopNoMatch = arg == true
+		quantumV4Config.HopNoMatch = arg == true
 
-		if senaV4Config.HopNoMatch then
+		if quantumV4Config.HopNoMatch then
 			tbl13.startHopLoop()
 		end
 	end
 
 	local function fn85(arg)
-		senaV4Config.PrivateServerMax = tostring((if type(arg) == "table" then arg[1] else arg) or "2")
+		quantumV4Config.PrivateServerMax = tostring((if type(arg) == "table" then arg[1] else arg) or "2")
 	end
 
 	local function fn86(arg)
-		senaV4Config.PrivateServerAuto = arg == true
+		quantumV4Config.PrivateServerAuto = arg == true
 
-		if senaV4Config.PrivateServerAuto then
+		if quantumV4Config.PrivateServerAuto then
 			tbl13.startPrivateAutoHop()
 		end
 	end
 
 	local function fn87(arg)
-		senaV4Config.HopCooldown = math.max(1, math.floor(tonumber(arg) or 5))
+		quantumV4Config.HopCooldown = math.max(1, math.floor(tonumber(arg) or 5))
 	end
 
 	local function fn88(arg)
-		senaV4Config.AutoTreadmillUpgrade = arg == true
+		quantumV4Config.AutoTreadmillUpgrade = arg == true
 		local v27 = fn81()
 
 		if v27 then
-			v27:setAutoUpgrade(senaV4Config.AutoTreadmillUpgrade)
+			v27:setAutoUpgrade(quantumV4Config.AutoTreadmillUpgrade)
 		end
 	end
 
@@ -32384,9 +32592,9 @@ local function fn66()
 		end
 		local flyAerial = stealMode == "Fly" and not flag11 and (str4:find("%(Fly%)") ~= nil or str5:find("aerial") ~= nil)
 		local flyZigzag = flag11 and stealMode == "Fly"
-		senaV4Config.StealMode = stealMode
-		senaV4Config.FlyAerial = flyAerial
-		senaV4Config.FlyZigzag = flyZigzag
+		quantumV4Config.StealMode = stealMode
+		quantumV4Config.FlyAerial = flyAerial
+		quantumV4Config.FlyZigzag = flyZigzag
 
 		if v13 and v13.captureObjectiveEnabled then
 			v13._modeBeforeCapture = {stealMode, flyAerial, flyZigzag}
@@ -32407,42 +32615,53 @@ local function fn66()
 
 	local function fn91(arg, arg2, arg3)
 		local v27 = fn67(arg3)
+		local hasAll = table.find(v27, "All") ~= nil
+
+		if hasAll then
+			v27 = {}
+		end
 
 		if arg == "names" then
-			senaV4Config.StealNamesFilter = v27
+			quantumV4Config.StealNamesFilter = v27
 		elseif arg == "areas" then
-			senaV4Config.StealAreas = v27
+			quantumV4Config.StealAreas = v27
 		elseif arg == "rarities" then
-			senaV4Config.StealRarities = v27
+			quantumV4Config.StealRarities = v27
 		end
 
 		if v13 then
 			v13:setFilter(arg, v27)
-			v13:setFilterEnabled(arg2, #v27 > 0)
+			v13:setFilterEnabled(arg2, (not hasAll) and (#v27 > 0))
 		end
 	end
 
 	local function fn92(arg)
-		senaV4Config:applyStealValueInput(arg)
+		quantumV4Config:applyStealValueInput(arg)
 
 		if v13 then
-			v13:setMinValuePerSec(senaV4Config.StealMinValue or 0)
+			v13:setMinValuePerSec(quantumV4Config.StealMinValue or 0)
 		end
 	end
 
 	local function fn93(arg)
 		local v27 = fn67(arg)
-		senaV4Config.StealMutations = v27
+		local hasAll = table.find(v27, "All") ~= nil
+
+		if hasAll then
+			v27 = {}
+		end
+
+		quantumV4Config.StealMutations = v27
 
 		if v13 then
 			v13:setFilter("mutations", v27)
-			v13:setFilterEnabled("mutation", #v27 > 0)
+			v13:setFilterEnabled("mutation", (not hasAll) and (#v27 > 0))
 		end
 	end
 
 	local function fn94(arg)
 		local stealMinWeight = tonumber((tostring(arg or ""):gsub("[^%d%.]", ""))) or 0
-		senaV4Config.StealMinWeight = stealMinWeight
+		quantumV4Config.StealMinWeight = stealMinWeight
 
 		if v13 then
 			v13:setMinWeightKg(stealMinWeight)
@@ -32450,25 +32669,25 @@ local function fn66()
 	end
 
 	local function fn95(arg)
-		senaV4Config.StealPriority = tostring(arg or "Rarity")
+		quantumV4Config.StealPriority = tostring(arg or "Rarity")
 
 		if v13 then
-			v13:setHighestValueFirst(senaV4Config.StealPriority == "Highest Value")
-			v13:setHeaviestFirst(senaV4Config.StealPriority == "Heaviest")
+			v13:setHighestValueFirst(quantumV4Config.StealPriority == "Highest Value")
+			v13:setHeaviestFirst(quantumV4Config.StealPriority == "Heaviest")
 		end
 	end
 
 	local function fn96(arg)
-		senaV4Config.EggESP = arg == true
+		quantumV4Config.EggESP = arg == true
 
 		if v13 then
-			v13:setEggEsp(senaV4Config.EggESP)
+			v13:setEggEsp(quantumV4Config.EggESP)
 		end
 	end
 
 	local function fn97(arg)
 		local v27 = fn67(arg)
-		senaV4Config.EspDetails = v27
+		quantumV4Config.EspDetails = v27
 		if not v13 then
 			return
 		end
@@ -32489,23 +32708,23 @@ local function fn66()
 
 	function tbl10.applyEspMinRarity(arg)
 		local flag11 = type(arg) == "table" and arg[1] or arg
-		senaV4Config.EspMinRarity = type(flag11) == "string" and flag11 ~= "Any" and flag11 or nil
+		quantumV4Config.EspMinRarity = type(flag11) == "string" and flag11 ~= "Any" and flag11 or nil
 
 		if v13 then
-			v13:setEspMinRank(senaV4Config.EspMinRarity and v6.rarityRank(senaV4Config.EspMinRarity) or 0)
+			v13:setEspMinRank(quantumV4Config.EspMinRarity and v6.rarityRank(quantumV4Config.EspMinRarity) or 0)
 		end
 	end
 
 	function tbl10.applyEspMinValue(arg)
-		senaV4Config.EspMinValue = fn61(arg) or 0
+		quantumV4Config.EspMinValue = fn61(arg) or 0
 
 		if v13 then
-			v13:setEspMinValue(senaV4Config.EspMinValue)
+			v13:setEspMinValue(quantumV4Config.EspMinValue)
 		end
 	end
 
 	local function fn98(arg)
-		senaV4Config.ScrambleTradeInBanners = fn67(arg)
+		quantumV4Config.ScrambleTradeInBanners = fn67(arg)
 	end
 
 	local function fn99(arg)
@@ -32513,95 +32732,95 @@ local function fn66()
 	end
 
 	local function fn100(arg)
-		senaV4Config.AntiGuardKnockback = arg == true
-		local senaV4AntiGuard = genv.__SenaV4AntiGuard
+		quantumV4Config.AntiGuardKnockback = arg == true
+		local quantumV4AntiGuard = genv.__QuantumV4AntiGuard
 
-		if senaV4AntiGuard and type(senaV4AntiGuard.setEnabled) == "function" then
-			pcall(senaV4AntiGuard.setEnabled, senaV4AntiGuard, senaV4Config.AntiGuardKnockback)
+		if quantumV4AntiGuard and type(quantumV4AntiGuard.setEnabled) == "function" then
+			pcall(quantumV4AntiGuard.setEnabled, quantumV4AntiGuard, quantumV4Config.AntiGuardKnockback)
 		end
 	end
 
 	local function fn101(arg)
-		senaV4Config.AutoFavorite = arg == true
+		quantumV4Config.AutoFavorite = arg == true
 	end
 
 	local function fn102(arg)
-		senaV4Config.FavMode = arg == "Species" and "Species" or "Rarity"
+		quantumV4Config.FavMode = arg == "Species" and "Species" or "Rarity"
 	end
 
 	local function fn103(arg)
-		senaV4Config.FavRarities = fn67(arg)
+		quantumV4Config.FavRarities = fn67(arg)
 	end
 
 	local function fn104(arg)
-		senaV4Config.FavSpecies = fn67(arg)
+		quantumV4Config.FavSpecies = fn67(arg)
 	end
 
 	local function fn105(arg)
-		senaV4Config.AutoEquipBest = arg == true
+		quantumV4Config.AutoEquipBest = arg == true
 	end
 
 	local function fn106(arg)
-		senaV4Config.AutoClaimOffline = arg == true
+		quantumV4Config.AutoClaimOffline = arg == true
 	end
 
 	local function fn107(arg)
-		senaV4Config.AutoBaseUpgrade = arg == true
+		quantumV4Config.AutoBaseUpgrade = arg == true
 	end
 
 	local function fn108(arg)
-		senaV4Config.AutoClaimAlmanac = arg == true
+		quantumV4Config.AutoClaimAlmanac = arg == true
 	end
 
 	local function fn109(arg)
-		senaV4Config.AutoFusePets = arg == true
+		quantumV4Config.AutoFusePets = arg == true
 	end
 
 	local function fn110(arg)
-		senaV4Config.FuseSelectedOnly = arg == "Selected Species"
+		quantumV4Config.FuseSelectedOnly = arg == "Selected Species"
 	end
 
 	local function fn111(arg)
-		senaV4Config.FuseRarities = fn67(arg)
+		quantumV4Config.FuseRarities = fn67(arg)
 	end
 
 	local function fn112(arg)
-		senaV4Config.FuseSpecies = fn67(arg)
+		quantumV4Config.FuseSpecies = fn67(arg)
 	end
 
 	local function fn113(arg)
-		local senaV4Roaming = genv.__SenaV4Roaming
+		local quantumV4Roaming = genv.__QuantumV4Roaming
 
-		if senaV4Roaming and type(senaV4Roaming.setNoclip) == "function" then
-			pcall(senaV4Roaming.setNoclip, arg == true)
+		if quantumV4Roaming and type(quantumV4Roaming.setNoclip) == "function" then
+			pcall(quantumV4Roaming.setNoclip, arg == true)
 		end
 	end
 
 	local function fn114(arg)
-		local senaV4Roaming = genv.__SenaV4Roaming
+		local quantumV4Roaming = genv.__QuantumV4Roaming
 
-		if senaV4Roaming and type(senaV4Roaming.setBottingMode) == "function" then
-			pcall(senaV4Roaming.setBottingMode, arg == true)
+		if quantumV4Roaming and type(quantumV4Roaming.setBottingMode) == "function" then
+			pcall(quantumV4Roaming.setBottingMode, arg == true)
 		end
 	end
 
 	local function fn115(arg)
-		senaV4Config.AntiCutscene = arg == true
+		quantumV4Config.AntiCutscene = arg == true
 	end
 
 	local function runOnce(arg, arg2, arg3)
-		local v27 = senaV4Config[arg]
-		senaV4Config[arg] = true
+		local v27 = quantumV4Config[arg]
+		quantumV4Config[arg] = true
 		task.spawn(arg2)
 
 		task.delay(2.4, function()
 			local n8 = os.clock() + 30
 
-			while senaV4Config.IsPlacing and os.clock() < n8 do
+			while quantumV4Config.IsPlacing and os.clock() < n8 do
 				task.wait(0.25)
 			end
 
-			senaV4Config[arg] = v27
+			quantumV4Config[arg] = v27
 
 			if arg3 then
 				pcall(arg3)
@@ -32612,118 +32831,118 @@ local function fn66()
 	tbl10.runOnce = runOnce
 
 	local function fn116(arg)
-		senaV4Config.ScrambleAutoBuy = arg == true
+		quantumV4Config.ScrambleAutoBuy = arg == true
 	end
 
 	local function fn117(arg)
-		senaV4Config.ScrambleBuyList = fn67(arg)
+		quantumV4Config.ScrambleBuyList = fn67(arg)
 	end
 
 	local function fn118(arg)
-		senaV4Config.AutoPlace = arg == true
+		quantumV4Config.AutoPlace = arg == true
 
-		if senaV4Config.AutoPlace then
+		if quantumV4Config.AutoPlace then
 			task.spawn(tbl10.AutoPlaceLoop)
 		end
 	end
 
 	local function fn119(arg)
-		senaV4Config.AutoHatch = arg == true
+		quantumV4Config.AutoHatch = arg == true
 
-		if senaV4Config.AutoHatch then
+		if quantumV4Config.AutoHatch then
 			task.spawn(tbl10.AutoHatchLoop)
 		end
 	end
 
 	local function fn120(arg)
-		senaV4Config.AutoMutation = arg == true
+		quantumV4Config.AutoMutation = arg == true
 
-		if senaV4Config.AutoMutation then
+		if quantumV4Config.AutoMutation then
 			task.spawn(tbl10.AutoMutationLoop)
 		end
 	end
 
 	local function fn121(arg)
-		senaV4Config.AutoRingEvent = arg == true
+		quantumV4Config.AutoRingEvent = arg == true
 
-		if senaV4Config.AutoRingEvent then
+		if quantumV4Config.AutoRingEvent then
 			tbl10.RingEventLoop()
 		end
 	end
 
 	local function fn122(arg)
-		senaV4Config.MutationChoice = (arg == "Fractured" or arg == "Enchanted") and arg or "Scrambled"
+		quantumV4Config.MutationChoice = (arg == "Fractured" or arg == "Enchanted") and arg or "Scrambled"
 	end
 
 	local function fn123(arg)
-		senaV4Config.MutationSpecies = fn67(arg)
+		quantumV4Config.MutationSpecies = fn67(arg)
 	end
 
 	local function fn124(arg)
-		senaV4Config.MutationRarities = fn67(arg)
+		quantumV4Config.MutationRarities = fn67(arg)
 	end
 
 	local function fn125(arg)
-		senaV4Config.MutationMinRate = fn75(arg)
+		quantumV4Config.MutationMinRate = fn75(arg)
 	end
 
 	local function fn126(arg)
-		senaV4Config.MutationRetry = arg == true
+		quantumV4Config.MutationRetry = arg == true
 	end
 
 	local function fn127(arg)
-		senaV4Config.AutoSell = arg == true
+		quantumV4Config.AutoSell = arg == true
 
-		if senaV4Config.AutoSell then
+		if quantumV4Config.AutoSell then
 			tbl10.startAutoSellLoop()
 		end
 	end
 
 	local function fn128(arg)
-		senaV4Config.AutoSellEgg = arg == true
+		quantumV4Config.AutoSellEgg = arg == true
 
-		if senaV4Config.AutoSellEgg then
+		if quantumV4Config.AutoSellEgg then
 			tbl10.startAutoSellEggLoop()
 		end
 	end
 
 	local function fn129(arg)
-		senaV4Config.SellPetMaxRate = fn75(arg)
+		quantumV4Config.SellPetMaxRate = fn75(arg)
 	end
 
 	local function fn130(arg)
-		senaV4Config.SellEggMaxRate = fn75(arg)
+		quantumV4Config.SellEggMaxRate = fn75(arg)
 	end
 
 	local flag11 = false
 
 	local function fn131(arg)
-		local flag12 = senaV4Config.StartupBoost == true
-		senaV4Config.StartupBoost = arg == true
+		local flag12 = quantumV4Config.StartupBoost == true
+		quantumV4Config.StartupBoost = arg == true
 
-		if not senaV4Config.StartupBoost then
+		if not quantumV4Config.StartupBoost then
 			flag11 = false
 
-			if flag12 or senaV4DecomBoostUndo.snapshot then
-				task.spawn(senaV4DecomBoostUndo.revert)
+			if flag12 or quantumV4DecomBoostUndo.snapshot then
+				task.spawn(quantumV4DecomBoostUndo.revert)
 			end
 
 			return
 		end
 
-		if senaV4Config.StartupBoost and not flag11 then
+		if quantumV4Config.StartupBoost and not flag11 then
 			flag11 = true
 
 			task.spawn(function()
 				task.wait(1.5)
 
-				if fn2() and senaV4Config.StartupBoost then
+				if fn2() and quantumV4Config.StartupBoost then
 					fn46()
 				end
 
 				task.wait(4)
 
-				if fn2() and senaV4Config.StartupBoost then
+				if fn2() and quantumV4Config.StartupBoost then
 					fn46()
 				end
 			end)
@@ -32737,44 +32956,44 @@ local function fn66()
 	end
 
 	local function fn133(arg)
-		local senaV4SetCapFps = genv.__SenaV4SetCapFps
+		local quantumV4SetCapFps = genv.__QuantumV4SetCapFps
 
-		if type(senaV4SetCapFps) == "function" then
-			senaV4SetCapFps(arg == true and 1000 or 60)
+		if type(quantumV4SetCapFps) == "function" then
+			quantumV4SetCapFps(arg == true and 1000 or 60)
 		end
 	end
 
 	local function fn134()
-		return genv.__SenaV4MovementExtras
+		return genv.__QuantumV4MovementExtras
 	end
 
 	local function fn135(arg)
-		senaV4Config.FlyForCapture = arg == true
+		quantumV4Config.FlyForCapture = arg == true
 		local v27 = fn134()
 
 		if v27 then
-			v27:setFlyForCapture(senaV4Config.FlyForCapture)
+			v27:setFlyForCapture(quantumV4Config.FlyForCapture)
 		end
 	end
 
 	local function fn136(arg)
-		senaV4Config.InstantGrab = arg == true
+		quantumV4Config.InstantGrab = arg == true
 		local v27 = fn134()
 
 		if v27 then
-			v27:setInstantGrab(senaV4Config.InstantGrab)
+			v27:setInstantGrab(quantumV4Config.InstantGrab)
 		end
 	end
 
 	local function fn137(arg)
-		genv.__SenaV4AdminBoost = arg == true
+		genv.__QuantumV4AdminBoost = arg == true
 
 		if v13 then
-			v13:setSpeed(senaV4Config.TweenSpeedMultiplier or 60)
+			v13:setSpeed(quantumV4Config.TweenSpeedMultiplier or 60)
 		end
 
-		genv.__SenaV4AdminBoostSpeedGen = (genv.__SenaV4AdminBoostSpeedGen or 0) + 1
-		local senaV4AdminBoostSpeedGen = genv.__SenaV4AdminBoostSpeedGen
+		genv.__QuantumV4AdminBoostSpeedGen = (genv.__QuantumV4AdminBoostSpeedGen or 0) + 1
+		local quantumV4AdminBoostSpeedGen = genv.__QuantumV4AdminBoostSpeedGen
 
 		if arg == true then
 			task.spawn(function()
@@ -32782,7 +33001,7 @@ local function fn66()
 				local walkSpeed
 				local v27
 
-				while genv.__SenaV4AdminBoostSpeedGen == senaV4AdminBoostSpeedGen and fn2() do
+				while genv.__QuantumV4AdminBoostSpeedGen == quantumV4AdminBoostSpeedGen and fn2() do
 					local character = localPlayer.Character
 					local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 
@@ -32819,55 +33038,55 @@ local function fn66()
 	end
 
 	local function fn138(arg)
-		senaV4Config.AutoStealCapture = arg == true
+		quantumV4Config.AutoStealCapture = arg == true
 
 		if v13 then
-			v13:setCaptureObjective(senaV4Config.AutoStealCapture)
+			v13:setCaptureObjective(quantumV4Config.AutoStealCapture)
 		end
 	end
 
 	local function fn139(arg)
-		senaV4Config.InfiniteJump = arg == true
+		quantumV4Config.InfiniteJump = arg == true
 		local v27 = fn134()
 
 		if v27 then
-			v27:setInfiniteJump(senaV4Config.InfiniteJump)
+			v27:setInfiniteJump(quantumV4Config.InfiniteJump)
 		end
 	end
 
 	local function fn140(arg)
-		senaV4Config.AntiHitGuard = arg == true
-		local senaV4AntiHitGuard = genv.__SenaV4AntiHitGuard
+		quantumV4Config.AntiHitGuard = arg == true
+		local quantumV4AntiHitGuard = genv.__QuantumV4AntiHitGuard
 
-		if senaV4AntiHitGuard then
-			senaV4AntiHitGuard:setEnabled(senaV4Config.AntiHitGuard)
+		if quantumV4AntiHitGuard then
+			quantumV4AntiHitGuard:setEnabled(quantumV4Config.AntiHitGuard)
 		end
 	end
 
 	local function fn141(arg)
-		senaV4Config.AntiAFK = arg == true
-		genv.__SenaV4AntiAfkEnabled = senaV4Config.AntiAFK
+		quantumV4Config.AntiAFK = arg == true
+		genv.__QuantumV4AntiAfkEnabled = quantumV4Config.AntiAFK
 
-		if type(genv.__SenaV4SetAntiAfkEnabled) == "function" then
-			genv.__SenaV4SetAntiAfkEnabled(senaV4Config.AntiAFK)
+		if type(genv.__QuantumV4SetAntiAfkEnabled) == "function" then
+			genv.__QuantumV4SetAntiAfkEnabled(quantumV4Config.AntiAFK)
 		end
 	end
 
 	local function fn142(arg)
-		senaV4Config.AutoReconnect = arg == true
-		v19.autoReconnect = senaV4Config.AutoReconnect
+		quantumV4Config.AutoReconnect = arg == true
+		v19.autoReconnect = quantumV4Config.AutoReconnect
 
 		if getgenv then
-			getgenv().SNE_AutoReconnect = senaV4Config.AutoReconnect
+			getgenv().SNE_AutoReconnect = quantumV4Config.AutoReconnect
 		end
 	end
 
 	local function fn143(arg)
-		senaV4Config.AutoExecute = arg == true
-		v19.autoExecute = senaV4Config.AutoExecute
+		quantumV4Config.AutoExecute = arg == true
+		v19.autoExecute = quantumV4Config.AutoExecute
 
 		if getgenv then
-			getgenv().SNE_AutoExecute = senaV4Config.AutoExecute
+			getgenv().SNE_AutoExecute = quantumV4Config.AutoExecute
 		end
 
 		if arg then
@@ -32878,12 +33097,12 @@ local function fn66()
 	end
 
 	local v27 = (function()
-		local senaV4IdentitySetter2 = genv.__SenaV4IdentitySetter or type(setthreadidentity) == "function" and setthreadidentity or type(set_thread_identity) == "function" and set_thread_identity or type(setidentity) == "function" and setidentity or type(syn) == "table" and type(syn.set_thread_identity) == "function" and syn.set_thread_identity
-		local senaV4UICapabilityIdentity = genv.__SenaV4UICapabilityIdentity or 8
+		local quantumV4IdentitySetter2 = genv.__QuantumV4IdentitySetter or type(setthreadidentity) == "function" and setthreadidentity or type(set_thread_identity) == "function" and set_thread_identity or type(setidentity) == "function" and setidentity or type(syn) == "table" and type(syn.set_thread_identity) == "function" and syn.set_thread_identity
+		local quantumV4UICapabilityIdentity = genv.__QuantumV4UICapabilityIdentity or 8
 
 		return function()
-			if type(senaV4IdentitySetter2) == "function" then
-				pcall(senaV4IdentitySetter2, senaV4UICapabilityIdentity)
+			if type(quantumV4IdentitySetter2) == "function" then
+				pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
 			end
 		end
 	end)()
@@ -32906,16 +33125,16 @@ local function fn66()
 		end
 	end
 
-	local senaV4PlayerSteal = genv.__SenaV4PlayerSteal
+	local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
 
 	local function fn145(arg)
-		senaV4Config.StealPlayers = arg == true
+		quantumV4Config.StealPlayers = arg == true
 
-		if senaV4PlayerSteal then
-			senaV4PlayerSteal:setEnabled(senaV4Config.StealPlayers)
+		if quantumV4PlayerSteal then
+			quantumV4PlayerSteal:setEnabled(quantumV4Config.StealPlayers)
 		end
 
-		if senaV4Config.StealPlayers and not senaV4Config.GodMode then
+		if quantumV4Config.StealPlayers and not quantumV4Config.GodMode then
 			fn80(true)
 
 			if controls.godMode then
@@ -32927,7 +33146,7 @@ local function fn66()
 	end
 
 	local function fn146(arg)
-		senaV4Config.StealPlayerRarities = fn67(arg)
+		quantumV4Config.StealPlayerRarities = fn67(arg)
 	end
 
 	local function fn147(arg)
@@ -32956,31 +33175,31 @@ local function fn66()
 	end
 
 	local function fn148(arg)
-		senaV4Config.StealPlayerMinValue = fn147(arg)
+		quantumV4Config.StealPlayerMinValue = fn147(arg)
 	end
 
 	local function fn149(arg)
-		senaV4Config.AutoIndex = arg == true
+		quantumV4Config.AutoIndex = arg == true
 
 		if v13 then
-			v13:setIndexObjective(senaV4Config.AutoIndex)
+			v13:setIndexObjective(quantumV4Config.AutoIndex)
 		end
 	end
 
 	local function fn150(arg)
-		senaV4Config.WebhookEnabled = arg == true
+		quantumV4Config.WebhookEnabled = arg == true
 	end
 
 	local function fn151(arg)
-		senaV4Config.WebhookURL = type(arg) == "string" and arg:gsub("^%s+", ""):gsub("%s+$", "") or ""
+		quantumV4Config.WebhookURL = type(arg) == "string" and arg:gsub("^%s+", ""):gsub("%s+$", "") or ""
 	end
 
 	local function fn152(arg)
-		senaV4Config.WebhookRarities = fn67(arg)
+		quantumV4Config.WebhookRarities = fn67(arg)
 	end
 
 	local function fn153(arg)
-		senaV4Config.WebhookMinValue = fn147(arg)
+		quantumV4Config.WebhookMinValue = fn147(arg)
 	end
 
 	local tbl22 = {"Set", "SetValue", "LoadValue", "ResetValue", "SetContent", "SetTitle", "SetOptions", "Update", "Refresh", "Lock", "Unlock", "SetVisible", "SetStatus", "GetValue", "SetSubTitle", "SetBadge"}
@@ -32990,7 +33209,7 @@ local function fn66()
 			return arg
 		end
 
-		if rawget(arg, "__senaElevated") then
+		if rawget(arg, "__quantumElevated") then
 			return arg
 		end
 
@@ -33005,7 +33224,7 @@ local function fn66()
 			end
 		end
 
-		rawset(arg, "__senaElevated", true)
+		rawset(arg, "__quantumElevated", true)
 		return arg
 	end
 
@@ -33016,7 +33235,7 @@ local function fn66()
 			return arg
 		end
 		fn154(arg)
-		if rawget(arg, "__senaFactoryGuarded") then
+		if rawget(arg, "__quantumFactoryGuarded") then
 			return arg
 		end
 
@@ -33037,7 +33256,7 @@ local function fn66()
 			end
 		end
 
-		rawset(arg, "__senaFactoryGuarded", true)
+		rawset(arg, "__quantumFactoryGuarded", true)
 		return arg
 	end
 
@@ -33051,22 +33270,22 @@ local function fn66()
 		Acrylic = false,
 		Theme = "Cloudy",
 		MinimizeKey = Enum.KeyCode.LeftControl,
-		MinimizeIcon = "rbxassetid://109388426525855"
+		MinimizeIcon = "lucide/shield"
 	})
 
 	pcall(function()
 		if Window.SetMinimizeIcon then
-			Window:SetMinimizeIcon("rbxassetid://109388426525855")
+			Window:SetMinimizeIcon("lucide/shield")
 		end
 	end)
 
 	local v28 = Window
 	local tbl24 = {}
 	local tbl25 = {"Respawn Point"}
-	local senaV4Roaming = genv.__SenaV4Roaming
+	local quantumV4Roaming = genv.__QuantumV4Roaming
 
-	if senaV4Roaming and type(senaV4Roaming.waypointList) == "function" then
-		local ok2, result = pcall(senaV4Roaming.waypointList)
+	if quantumV4Roaming and type(quantumV4Roaming.waypointList) == "function" then
+		local ok2, result = pcall(quantumV4Roaming.waypointList)
 		tbl25 = if ok2 then if type(result) == "table" then if #result > 0 then result else tbl25 else tbl25 else tbl25
 	end
 
@@ -33074,11 +33293,11 @@ local function fn66()
 	local tbl26 = {}
 
 	do
-		local senaV4ScrambleRuntime = genv.__SenaV4ScrambleRuntime
+		local quantumV4ScrambleRuntime = genv.__QuantumV4ScrambleRuntime
 
-		if senaV4ScrambleRuntime and type(senaV4ScrambleRuntime.snapshot) == "function" then
+		if quantumV4ScrambleRuntime and type(quantumV4ScrambleRuntime.snapshot) == "function" then
 			pcall(function()
-				local v30 = senaV4ScrambleRuntime.snapshot()
+				local v30 = quantumV4ScrambleRuntime.snapshot()
 
 				if v30 and type(v30.Shop) == "table" then
 					for k, v31 in pairs(v30.Shop) do
@@ -33116,8 +33335,121 @@ local function fn66()
 		return pos or nil
 	end
 
+	local lucideIcons = {
+		["Informasi Script"] = "lucide/info",
+		["Auto Steal"] = "lucide/zap",
+		["Egg Filter"] = "lucide/filter",
+		["Capture The Egg"] = "lucide/flag",
+		["Steal From Players"] = "lucide/swords",
+		["Steal From Specific Player"] = "lucide/user-check",
+		["Steal History"] = "lucide/history",
+		["Egg Automation"] = "lucide/sparkles",
+		["Placed Eggs"] = "lucide/layout-grid",
+		["Egg Selling"] = "lucide/coins",
+		["Pet Selling"] = "lucide/badge-dollar-sign",
+		["Equip & Collect"] = "lucide/gem",
+		["Pet Favorite"] = "lucide/star",
+		["Pet Fusion"] = "lucide/combine",
+		["Movement"] = "lucide/gauge",
+		["Ring Event"] = "lucide/flame",
+		["Guard"] = "lucide/shield-check",
+		["Egg ESP"] = "lucide/eye",
+		["Steal an Egg"] = "lucide/sparkle",
+		["Server Hop"] = "lucide/server",
+		["Find Private Server"] = "lucide/lock",
+		["Performance"] = "lucide/cpu",
+		["Player"] = "lucide/user",
+		["Session"] = "lucide/clock",
+		["Run Once"] = "lucide/play",
+		["Panels & Logs"] = "lucide/layout-dashboard",
+		["Roaming"] = "lucide/compass",
+		["Settings"] = "lucide/sliders"
+	}
+
+	local function withAll(list)
+		local result = {"All"}
+		if type(list) == "table" then
+			for _, v in ipairs(list) do
+				if v ~= "All" and v ~= "None" then
+					result[#result + 1] = v
+				end
+			end
+		end
+		return result
+	end
+
+	tbl24.allDropdown = function(tabOrSection, name, config, originalList, callback)
+		local allItems = withAll(originalList)
+		config.Values = allItems
+		config.Multi = true
+
+		local isUpdating = false
+		local hadAll = false
+		local ddObj = nil
+
+		config.Callback = fn144(function(selected)
+			if isUpdating then return end
+			local raw = fn67(selected)
+			local hasAll = table.find(raw, "All") ~= nil
+
+			if hasAll and not hadAll then
+				hadAll = true
+				local full = {}
+				for _, v in ipairs(allItems) do
+					full[v] = true
+				end
+				isUpdating = true
+				if ddObj and ddObj.SetValue then
+					pcall(ddObj.SetValue, ddObj, full)
+				end
+				isUpdating = false
+				callback(full)
+				return
+			elseif not hasAll and hadAll then
+				hadAll = false
+				isUpdating = true
+				if ddObj and ddObj.SetValue then
+					pcall(ddObj.SetValue, ddObj, {})
+				end
+				isUpdating = false
+				callback({})
+				return
+			elseif hasAll and #raw < #allItems then
+				hadAll = false
+				local partial = {}
+				for _, v in ipairs(raw) do
+					if v ~= "All" then
+						partial[v] = true
+				end
+				end
+				isUpdating = true
+				if ddObj and ddObj.SetValue then
+					pcall(ddObj.SetValue, ddObj, partial)
+				end
+				isUpdating = false
+				callback(partial)
+				return
+			end
+
+			hadAll = hasAll
+			callback(selected)
+		end)
+
+		ddObj = tabOrSection:AddDropdown(name, config)
+		return ddObj
+	end
+
 	tbl24.section = function(arg, arg2, arg3)
-		local sec = arg:AddSection(arg2, arg3)
+		local title = type(arg2) == "table" and arg2.Title or tostring(arg2)
+		local icon = lucideIcons[title] or (type(arg2) == "table" and arg2.Icon) or arg3 or "lucide/folder"
+		local sec
+		if type(arg2) == "table" then
+			arg2.Icon = icon
+			arg2.AlwaysOpen = true
+			sec = arg:AddSection(arg2)
+		else
+			sec = arg:AddSection({ Title = title, Icon = icon, AlwaysOpen = true })
+		end
 		if sec and not sec.AddSubSection then
 			sec.AddSubSection = function(self, subTitle)
 				return self:AddParagraph({ Title = "• " .. tostring(subTitle), Content = "" })
@@ -33126,24 +33458,27 @@ local function fn66()
 		return sec
 	end
 
-	local InfoTab = Window:AddTab({ Title = "Info", Icon = "solar/info-circle-bold" })
-	local Section_Info_1 = InfoTab:AddSection("Informasi Script")
+	local InfoTab = Window:AddTab({ Title = "Info", Icon = "lucide/info" })
+	local Section_Info_1 = tbl24.section(InfoTab, "Informasi Script")
 	Section_Info_1:AddParagraph({ Title = "Quantum | ID", Content = "versi 1.0.4.0 Steal An Egg" })
 	Section_Info_1:AddParagraph({ Title = "Toggle LeftControl untuk Show/Hide UI", Content = "" })
 	Section_Info_1:AddParagraph({ Title = "Script FREE - Jangan diperjualbelikan!", Content = "" })
 
-	local v30 = Window:AddTab({ Title = "Home", Icon = "solar/home-2-bold" })
-	local v31 = Window:AddTab({ Title = "Windows", Icon = "solar/widget-bold" })
-	local v32 = Window:AddTab({ Title = "Steal", Icon = "solar/hand-money-bold" })
-	local v33 = Window:AddTab({ Title = "Eggs & Plot", Icon = "solar/box-bold" })
-	local v34 = Window:AddTab({ Title = "Pets", Icon = "solar/star-fall-bold" })
-	local v35 = Window:AddTab({ Title = "Events", Icon = "solar/flame-bold" })
-	local v36 = Window:AddTab({ Title = "Farm", Icon = "solar/fire-bold" })
-	local v37 = Window:AddTab({ Title = "Server", Icon = "solar/server-bold" })
+	local v32 = Window:AddTab({ Title = "Steal", Icon = "lucide/target" })
+	local v33 = Window:AddTab({ Title = "Eggs & Plot", Icon = "lucide/egg" })
+	local v35 = Window:AddTab({ Title = "Movement", Icon = "lucide/gauge" })
+	local v70 = Window:AddTab({ Title = "Visual", Icon = "lucide/eye" })
+	local v37 = Window:AddTab({ Title = "Server", Icon = "lucide/server" })
+	local v38 = Window:AddTab({ Title = "Settings", Icon = "lucide/settings" })
+
+	local v30 = v38
+	local v31 = v38
+	local v34 = v33
+	local v36 = v35
 	tbl24.privateTab = v37
-	local v38 = Window:AddTab({ Title = "Settings", Icon = "solar/settings-minimalistic-bold" })
-	tbl24.autoStealCapture = tbl24.section(v35, "Capture The Egg", tbl24.gameIcon("CaptureTheEgg", "BroadcastIconImage")):AddToggle("Toggle_AutoStealCapture", {Title = "Auto Steal Capture", Description = "For the Capture The Egg event. Steals the event egg the Low Speed User way, then holds it high up so your time keeps going. Re-steals it if you lose it.", Default = false, Callback = fn144(fn138)})
-	local v39 = tbl24.section(v35, "Movement", tbl24.gameIcon("Gears", "Directory", "GravityDisruptor", "Icon"))
+
+	tbl24.autoStealCapture = tbl24.section(v32, "Capture The Egg", "lucide/flag"):AddToggle("Toggle_AutoStealCapture", {Title = "Auto Steal Capture", Description = "For the Capture The Egg event. Steals the event egg the Low Speed User way, then holds it high up so your time keeps going. Re-steals it if you lose it.", Default = false, Callback = fn144(fn138)})
+	local v39 = tbl24.section(v35, "Movement", "lucide/gauge")
 	tbl24.adminBoost = v39:AddToggle("Toggle_AdminAbuseBoost", {Title = "Admin Abuse Boost", Description = "Only works during Admin Abuse: Auto Steal goes straight to each egg and straight home, at full speed. Do not use it when there is no Admin Abuse.", Default = false, Callback = fn144(fn137)})
 	tbl24.flyForCapture = v39:AddToggle("Toggle_FlyForCapture", {Title = "Fly For Capture", Description = "For the Capture The Egg event. After you pick up an egg, you fly up and stay still in the air so nobody can take it.", Default = false, Callback = fn144(fn135)})
 	tbl24.instantGrab = v39:AddToggle("Toggle_InstantGrab", {Title = "Instant Grab", Description = "Picking up an egg only needs a quick tap instead of a long hold.", Default = false, Callback = fn144(fn136)})
@@ -33164,7 +33499,7 @@ local function fn66()
 	end)})
 
 	tbl24.helpFriend = v40:AddToggle("Toggle_HelpFriend", {Title = "Help Friend", Description = "Instead of banking a stolen egg, drops it just before the safe zone line so a friend can pick it up.", Default = false, Callback = fn144(function(arg)
-		senaV4Config.HelpFriend = arg == true
+		quantumV4Config.HelpFriend = arg == true
 	end)})
 
 	tbl24.godMode = v40:AddToggle("Toggle_AuraBat", {Title = "Aura Bat", Description = "", Default = false, Callback = fn144(fn80)})
@@ -33172,17 +33507,17 @@ local function fn66()
 	tbl24.stealMode = v40:AddDropdown("Dropdown_StealMode", {Title = "Steal Mode", Description = "Metode Auto Steal (Instant Teleport direkomendasikan)", Values = {"Instant Teleport", "High Speed User Normal", "High Speed User (Fly)", "Zig-Zag High Speed User", "Low Speed User"}, MaxVisible = 5, Default = "Instant Teleport", Multi = false, Callback = fn144(function(arg)
 		fn89(arg)
 
-		if type(senaPanels.syncStealMode) == "function" then
-			senaPanels.syncStealMode()
+		if type(quantumPanels.syncStealMode) == "function" then
+			quantumPanels.syncStealMode()
 		end
 	end)})
 
-	function senaPanels.getStealMode()
+	function quantumPanels.getStealMode()
 		local value = tbl24.stealMode and tbl24.stealMode.Value
 		return if type(value) == "table" then value[1] else value
 	end
 
-	function senaPanels.setStealMode(arg)
+	function quantumPanels.setStealMode(arg)
 		if tbl24.stealMode then
 			tbl24.stealMode:SetValue(arg)
 		end
@@ -33221,32 +33556,32 @@ local function fn66()
 	tbl24.stealHold = v40:AddSlider("Slider_LowSpeedMultiplier", {Title = "Low Speed Multiplier", Description = "For Low Speed User mode. Higher = faster grab (shorter hold), lower = safer (longer). Raise it if your account speed is high; lower it if your speed is low.", Min = 1, Max = 10, Default = 5, Rounding = 0, Callback = fn144(fn79)})
 
 	tbl24.lowSpeedBoost = v40:AddToggle("Toggle_BoostforModeLowSpeed", {Title = "Boost for Mode Low Speed", Description = "Faster steals for Low Speed User on every area except Forest (about 6 s per egg). Keep it on when you use Low Speed User.", Default = true, Locked2 = true, Callback = fn144(function(arg)
-		senaV4Config.LowSpeedBoost = arg == true
+		quantumV4Config.LowSpeedBoost = arg == true
 	end)})
 
 	local v42 = tbl24.section(v32, "Egg Filter", tbl24.gameIcon("Assets", "Directory", "Unicorn", "Egg", "Icon"))
 	v42:AddParagraph({Title = "• Egg", Content = ""})
 
-	tbl24.names = v42:AddDropdown("Dropdown_FilterByEggName", {Title = "Filter By Egg Name", Description = "Only steal these eggs. Leave empty for any egg.", Values = v24, Multi = true, Default = {}, Callback = fn144(function(arg)
+	tbl24.names = tbl24.allDropdown(v42, "Dropdown_FilterByEggName", {Title = "Filter By Egg Name", Description = "Only steal these eggs. Pilih All untuk semua."}, v24, function(arg)
 		fn91("names", "name", arg)
-	end)})
+	end)
 
-	tbl24.rarities = v42:AddDropdown("Dropdown_FilterByRarity", {Title = "Filter By Rarity", Description = "Only steal these rarities. Leave empty for any rarity.", Values = v26, Multi = true, Default = {}, Callback = fn144(function(arg)
+	tbl24.rarities = tbl24.allDropdown(v42, "Dropdown_FilterByRarity", {Title = "Filter By Rarity", Description = "Only steal these rarities. Pilih All untuk semua."}, v26, function(arg)
 		fn91("rarities", "rarity", arg)
-	end)})
+	end)
 
 	v42:AddParagraph({Title = "• Area & Value", Content = ""})
 
-	tbl24.areas = v42:AddDropdown("Dropdown_SelectArea", {Title = "Select Area", Description = "Only steal from these areas. Leave empty for every area.", Values = v25, Multi = true, Default = {}, Callback = fn144(function(arg)
+	tbl24.areas = tbl24.allDropdown(v42, "Dropdown_SelectArea", {Title = "Select Area", Description = "Only steal from these areas. Pilih All untuk semua."}, v25, function(arg)
 		fn91("areas", "area", arg)
-	end)})
+	end)
 
 	tbl24.value = v42:AddInput("Input_StealByValue", {Title = "Steal By Value", Description = "Minimum money per second. Supports k, m and b.", Placeholder = "e.g. 500k, 2m, 1b", Default = "", Callback = fn144(fn92)})
-	tbl24.mutations = v42:AddDropdown("Dropdown_FilterByMutation", {Title = "Filter By Mutation", Description = "Only steal eggs carrying one of these mutations. Leave empty for any egg.", Values = tbl14, Multi = true, Default = {}, Callback = fn144(fn93)})
+	tbl24.mutations = tbl24.allDropdown(v42, "Dropdown_FilterByMutation", {Title = "Filter By Mutation", Description = "Only steal eggs carrying one of these mutations. Pilih All untuk semua."}, tbl14, fn93)
 	tbl24.weight = v42:AddInput("Input_StealByWeight", {Title = "Steal By Weight", Description = "Minimum egg weight in kilograms. 0 accepts any weight.", Placeholder = "e.g. 12000", Default = "", Callback = fn144(fn94)})
 	tbl24.priority = v42:AddDropdown("Dropdown_StealPriority", {Title = "Steal Priority", Description = "Which egg to go for first when more than one passes the filters.", Values = {"Rarity", "Highest Value", "Heaviest"}, Default = "Rarity", Callback = fn144(fn95)})
 	tbl24.autoIndex = v42:AddToggle("Toggle_AutoIndex", {Title = "Auto Index", Description = "Also steal eggs whose pet is still missing from your Pet Index, in any area, on top of the filters above. An egg you already hold counts as covered until it hatches.", Default = false, Callback = fn144(fn149)})
-	local v43 = tbl24.section(v32, "Egg ESP", tbl24.gameIcon("Assets", "Directory", "Kitsune", "Egg", "Icon"))
+	local v43 = tbl24.section(v70, "Egg ESP", "lucide/eye")
 	tbl24.eggEsp = v43:AddToggle("Toggle_EggESP", {Title = "Egg ESP", Description = "Draws a label over every egg on the field so you can read it from across the map.", Default = false, Callback = fn144(fn96)})
 	tbl24.espDetails = v43:AddDropdown("Dropdown_ESPDetails", {Title = "ESP Details", Description = "What each label shows. Placed Eggs also labels the eggs on your plot, Icon adds the animal picture to those labels.", Values = {"Name", "Rarity", "Value", "Weight", "Mutation", "Placed Eggs", "Icon"}, Multi = true, Default = {"Name", "Rarity", "Value", "Icon"}, Callback = fn144(fn97)})
 
@@ -33262,67 +33597,20 @@ local function fn66()
 
 	tbl24.espMinValue = v43:AddInput("Input_ESPMinValue", {Title = "ESP Min Value", Description = "Only label eggs making at least this much per second. Supports k, m and b.", Placeholder = "e.g. 500k, 2m, 1b", Default = "", Callback = fn144(tbl10.applyEspMinValue)})
 	tbl24.backpackRates = v43:AddToggle("Toggle_BackpackValues", {Title = "Backpack Value/s", Description = "Shows how much money per second each egg in your backpack makes, right on its slot.", Default = false, Callback = fn144(fn99)})
-	local v44 = tbl24.section(v32, "Steal Webhook", "bell")
-	tbl24.webhookEnabled = v44:AddToggle("Toggle_StealWebhook", {Title = "Steal Webhook", Description = "Posts a Discord embed the moment a stolen egg is banked, with its rarity, size, weight and cash per second.", Default = false, Callback = fn144(fn150)})
-	tbl24.webhookUrl = v44:AddInput("Input_WebhookURL", {Title = "Webhook URL", Description = "Paste the Discord webhook URL for the channel you want.", Placeholder = "https://discord.com/api/webhooks/...", Default = "", Callback = fn144(fn151)})
-
-	tbl24.webhookDisconnect = v44:AddToggle("Toggle_DisconnectAlert", {Title = "Disconnect Alert", Description = "Posts to the same webhook when this account gets disconnected or kicked, with the reason.", Default = false, Callback = fn144(function(arg)
-		senaV4Config.WebhookDisconnect = arg == true
-	end)})
-
-	v44:AddParagraph({Title = "• Filter", Content = ""})
-	tbl24.webhookRarities = v44:AddDropdown("Dropdown_NotifyRarities", {Title = "Notify Rarities", Description = "Only post these rarities. Empty = every egg you steal.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn152)})
-	tbl24.webhookValue = v44:AddInput("Input_NotifyMinimumValue", {Title = "Notify Minimum Value", Description = "Only post eggs worth at least this per second. Supports k, m and b.", Placeholder = "e.g. 500k, 2m, 1b", Default = "", Callback = fn144(fn153)})
-
-	v44:AddButton({Title = "Test Webhook", Description = "Sends one test embed so you can confirm the URL works.", Callback = fn144(function()
-		local senaV4Webhook = genv.__SenaV4Webhook
-		local value = tbl24.webhookUrl and tbl24.webhookUrl.Value
-
-		if type(value) == "string" and value ~= "" then
-			fn151(value)
-		end
-
-		if if senaV4Webhook then not senaV4Webhook.test() else not senaV4Webhook then
-			flag6:Notify({Title = "Steal Webhook", Content = "Enter a webhook URL first", Duration = 3})
-			return
-		end
-		flag6:Notify({Title = "Steal Webhook", Content = "Test embed sent", Duration = 3})
-	end)})
-
-	fn68 = v30:AddSection("Task Order")
-	local tbl27 = {auto_steal = "hand", race = "flag", star = "star", mech_boss = "swords", butterfly = "flower", auto_place = "egg", use_scrambled = "flask-conical", auto_sell = "coins", treadmill = "activity"}
-	local tbl28 = {}
-
-	for i, v45 in ipairs(senaV4TaskLadder.DEFAULT) do
-		local n8 = #tbl28 + 1
-		local tbl29 = {Id = v45, Title = senaV4TaskLadder.TITLES[v45], Icon = tbl27[v45], Pinned = senaV4TaskLadder.PINNED[v45] == true}
-		tbl29.Sub, tbl28[n8] = senaV4TaskLadder.PINNED[v45] and "Runs when every other task is idle" or nil, tbl29
-	end
-
-	local function fn156(arg)
-		senaV4Config.TaskOrder = senaV4TaskLadder.sanitize(arg)
-	end
-
-	if type(fn68.AddPriorityList) == "function" then
-		tbl24.taskOrder = fn68:AddPriorityList({Title = "Task Order", Content = "Higher rows get the character first. An egg you are carrying is always delivered first, and a boss fight that has started is never left.", Flag = "TaskOrder", Items = tbl28, Default = senaV4TaskLadder.DEFAULT, EmptyText = "Turn on Auto Steal, Auto Place or another feature to order it here.", Callback = fn144(fn156)})
-	else
-		fn68:AddParagraph({Title = "Task Order", Content = "Update the Sena library to reorder tasks. Using the default order: Auto Steal, Race Rally, Shooting Star, Mech Boss, Farm Drones, Auto Place, Use Scrambled, Auto Sell, Treadmill."})
-	end
-
 	v25 = tbl24.section(v33, "Egg Automation", tbl24.gameIcon("Assets", "Directory", "Dragon", "Egg", "Icon"))
 	v25:AddParagraph({Title = "• Place", Content = ""})
 	tbl24.autoPlace = v25:AddToggle("Toggle_AutoPlaceEgg", {Title = "Auto Place Egg", Description = "Places eggs from your inventory on your plot.", Default = false, Callback = fn144(fn118)})
 
-	tbl24.placeRarity = v25:AddDropdown("Dropdown_PlaceEggRarity", {Title = "Place Egg Rarity", Description = "Only place these rarities. Leave empty for all.", Values = v26, Multi = true, Default = {}, Callback = fn144(function(arg)
-		senaV4Config.PlaceRarities = fn67(arg)
-	end)})
+	tbl24.placeRarity = tbl24.allDropdown(v25, "Dropdown_PlaceEggRarity", {Title = "Place Egg Rarity", Description = "Only place these rarities. Pilih All untuk semua."}, v26, function(arg)
+		quantumV4Config.PlaceRarities = fn67(arg)
+	end)
 
 	v25:AddParagraph({Title = "• Hatch", Content = ""})
 	tbl24.autoHatch = v25:AddToggle("Toggle_AutoHatchEgg", {Title = "Auto Hatch Egg", Description = "Hatches your placed eggs when they are ready.", Default = false, Callback = fn144(fn119)})
 	v25:AddParagraph({Title = "• Mutate", Content = ""})
 	tbl24.mutationChoice = v25:AddDropdown("Dropdown_SelectMutation", {Title = "Select Mutation", Description = "Which mutation to apply to your placed eggs. Enchanted uses the Enchanted Essence from the Butterfly Bloom shrine.", Values = {"Scrambled", "Fractured", "Enchanted"}, Multi = false, Default = "Scrambled", Callback = fn144(fn122)})
-	tbl24.mutationSpecies = v25:AddDropdown("Dropdown_MutateEggName", {Title = "Mutate Egg Name", Description = "Only mutate these eggs by name. Leave empty for every placed egg.", Values = v24, Multi = true, Default = {}, Callback = fn144(fn123)})
-	tbl24.mutationRarity = v25:AddDropdown("Dropdown_MutateEggRarity", {Title = "Mutate Egg Rarity", Description = "Only mutate placed eggs of these rarities. Leave empty for every rarity.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn124)})
+	tbl24.mutationSpecies = tbl24.allDropdown(v25, "Dropdown_MutateEggName", {Title = "Mutate Egg Name", Description = "Only mutate these eggs by name. Pilih All untuk semua."}, v24, fn123)
+	tbl24.mutationRarity = tbl24.allDropdown(v25, "Dropdown_MutateEggRarity", {Title = "Mutate Egg Rarity", Description = "Only mutate placed eggs of these rarities. Pilih All untuk semua."}, v26, fn124)
 	tbl24.mutationMinValue = v25:AddInput("Input_MutateMinValuemoneys", {Flag = "mutationMinValue", Title = "Mutate Min Value (money/s)", Description = "Only mutate placed eggs whose money per second is this or higher. Blank = no value limit. Supports k, m, b.", Placeholder = "e.g. 100k, 2m", Default = "", Callback = fn144(fn125)})
 	tbl24.mutationRetry = v25:AddToggle("Toggle_RetryUntilMutated", {Title = "Retry Until Mutated", Description = "Keep applying to one egg until it mutates or charges run out (10% per use).", Default = true, Callback = fn144(fn126)})
 	tbl24.autoMutation = v25:AddToggle("Toggle_AutoApplyMutation", {Title = "Auto Apply Mutation", Description = "Equips the selected mutation consumable and applies it to your placed eggs.", Default = false, Callback = fn144(fn120)})
@@ -33339,8 +33627,8 @@ local function fn66()
 
 		if addActionList then
 			local ReplicatedStorage2 = game:GetService("ReplicatedStorage")
-			local senaV4IdentitySetter2 = genv.__SenaV4IdentitySetter
-			local senaV4UICapabilityIdentity, Mutations, PlacedEggGrowthPresentationPolicy = genv.__SenaV4UICapabilityIdentity or 8
+			local quantumV4IdentitySetter2 = genv.__QuantumV4IdentitySetter
+			local quantumV4UICapabilityIdentity, Mutations, PlacedEggGrowthPresentationPolicy = genv.__QuantumV4UICapabilityIdentity or 8
 
 			pcall(function()
 				Mutations = require(ReplicatedStorage2.Shared.Modules.Mutations)
@@ -33506,14 +33794,14 @@ local function fn66()
 
 				task.spawn(function()
 					local ok2, result = pcall(function()
-						if senaV4IdentitySetter2 then
-							pcall(senaV4IdentitySetter2, senaV4UICapabilityIdentity)
+						if quantumV4IdentitySetter2 then
+							pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
 						end
 
 						local v47 = fn162()
 
-						if senaV4IdentitySetter2 then
-							pcall(senaV4IdentitySetter2, senaV4UICapabilityIdentity)
+						if quantumV4IdentitySetter2 then
+							pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
 						end
 
 						if addActionList:Alive() then
@@ -33537,42 +33825,42 @@ local function fn66()
 	tbl24.autoSell = v45:AddToggle("Toggle_AutoSellPet", {Title = "Auto Sell Pet", Description = "Sells pets that match a filter below. Favorite, placed and equipped pets are kept.", Default = false, Callback = fn144(fn127)})
 	v45:AddParagraph({Title = "• Filter", Content = ""})
 
-	v21 = v45:AddDropdown("Dropdown_PetNameFilter", {Title = "Pet Name Filter", Description = "Pets to sell by name. Pick All for every name.", Values = fn73, Multi = true, Default = {}, Callback = fn144(function(arg)
-		senaV4Config.SellNames = fn67(arg)
-	end)})
+	v21 = tbl24.allDropdown(v45, "Dropdown_PetNameFilter", {Title = "Pet Name Filter", Description = "Pets to sell by name. Pilih All untuk semua."}, fn73, function(arg)
+		quantumV4Config.SellNames = fn67(arg)
+	end)
 
-	v22 = v45:AddDropdown("Dropdown_PetRarityFilter", {Title = "Pet Rarity Filter", Description = "Pets to sell by rarity. Pick All for every rarity.", Values = fn69(v26), Multi = true, Default = {}, Callback = fn144(function(arg)
-		senaV4Config.SellRarities = fn67(arg)
-	end)})
+	v22 = tbl24.allDropdown(v45, "Dropdown_PetRarityFilter", {Title = "Pet Rarity Filter", Description = "Pets to sell by rarity. Pilih All untuk semua."}, fn69(v26), function(arg)
+		quantumV4Config.SellRarities = fn67(arg)
+	end)
 
 	tbl24.sellPetValue = v45:AddInput("Input_SellByValuemaxmoneys", {Flag = "sellPetValue", Title = "Sell By Value (max money/s)", Description = "Only sell pets whose money per second is this or lower. Blank = no value limit. Supports k, m, b.", Placeholder = "e.g. 100k, 2m", Default = "", Callback = fn144(fn129)})
 	local v46 = tbl24.section(v33, "Egg Selling", tbl24.gameIcon("Currency", "Directory", "Money", "Icon"))
 	tbl24.autoSellEgg = v46:AddToggle("Toggle_AutoSellEgg", {Title = "Auto Sell Egg", Description = "Sells unplaced eggs of the rarities below.", Default = false, Callback = fn144(fn128)})
 
-	v23 = v46:AddDropdown("Dropdown_EggRarityFilter", {Title = "Egg Rarity Filter", Description = "Egg rarities to sell. Pick All for every rarity.", Values = fn69(v26), Multi = true, Default = {}, Callback = fn144(function(arg)
-		senaV4Config.SellEggRarities = fn67(arg)
-	end)})
+	v23 = tbl24.allDropdown(v46, "Dropdown_EggRarityFilter", {Title = "Egg Rarity Filter", Description = "Egg rarities to sell. Pilih All untuk semua."}, fn69(v26), function(arg)
+		quantumV4Config.SellEggRarities = fn67(arg)
+	end)
 
 	tbl24.sellEggValue = v46:AddInput("Input_SellByValuemaxmoneys_2", {Flag = "sellEggValue", Title = "Sell By Value (max money/s)", Description = "Only sell eggs whose money per second is this or lower. Blank = no value limit. Supports k, m, b.", Placeholder = "e.g. 100k, 2m", Default = "", Callback = fn144(fn130)})
 	fn68 = tbl24.section(v34, "Pet Favorite", tbl24.gameIcon("Assets", "Directory", "Unicorn", "Icon"))
 	tbl24.autoFavorite = fn68:AddToggle("Toggle_AutoFavorite", {Title = "Auto Favorite", Description = "Marks every pet that matches the rule below as a favorite, so Auto Sell and Auto Fuse leave it alone.", Default = false, Callback = fn144(fn101)})
 	tbl24.favoriteRule = fn68:AddDropdown("Dropdown_FavoriteRule", {Title = "Favorite Rule", Description = "Match pets by rarity or by species.", Values = {"Rarity", "Species"}, Default = "Rarity", Callback = fn144(fn102)})
 	fn68:AddParagraph({Title = "• Only when Rule = Rarity", Content = ""})
-	tbl24.favoriteRarities = fn68:AddDropdown("Dropdown_RaritiestoKeep", {Title = "Rarities to Keep", Description = "Pets of these rarities get favorited.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn103)})
+	tbl24.favoriteRarities = tbl24.allDropdown(fn68, "Dropdown_RaritiestoKeep", {Title = "Rarities to Keep", Description = "Pets of these rarities get favorited. Pilih All untuk semua."}, v26, fn103)
 	fn68:AddParagraph({Title = "• Only when Rule = Species", Content = ""})
-	tbl24.favoriteSpecies = fn68:AddDropdown("Dropdown_SpeciestoKeep", {Title = "Species to Keep", Description = "Pets of these species get favorited.", Values = v24, Multi = true, Default = {}, Callback = fn144(fn104)})
+	tbl24.favoriteSpecies = tbl24.allDropdown(fn68, "Dropdown_SpeciestoKeep", {Title = "Species to Keep", Description = "Pets of these species get favorited. Pilih All untuk semua."}, v24, fn104)
 
 	tbl24.unfavoriteAll = fn68:AddButton({Title = "Unfavorite Everything", Description = "Clears the favorite flag on every pet you own.", Callback = fn144(function()
-		local senaV4PetBarn = genv.__SenaV4PetBarn
-		flag6:Notify({Title = "Pet Favorite", Content = (if senaV4PetBarn then if type(senaV4PetBarn.unfavoriteAll) == "function" then senaV4PetBarn.unfavoriteAll() or 0 else 0 else 0) .. " pets unfavorited", Duration = 3})
+		local quantumV4PetBarn = genv.__QuantumV4PetBarn
+		flag6:Notify({Title = "Pet Favorite", Content = (if quantumV4PetBarn then if type(quantumV4PetBarn.unfavoriteAll) == "function" then quantumV4PetBarn.unfavoriteAll() or 0 else 0 else 0) .. " pets unfavorited", Duration = 3})
 	end)})
 
 	local v47 = tbl24.section(v34, "Pet Fusion", tbl24.gameIcon("FallenPowerUp", "Kinds", "Fusion", "Icon"))
 	tbl24.autoFuse = v47:AddToggle("Toggle_AutoFuse", {Title = "Auto Fuse", Description = "Feeds three matching pets into the Fusion machine over and over. Favorited and equipped pets are never used.", Default = false, Callback = fn144(fn109)})
 	tbl24.fuseRule = v47:AddDropdown("Dropdown_FusionRule", {Title = "Fusion Rule", Description = "Fuse anything that passes the rarity filter, or only the species you pick below.", Values = {"Any Species", "Selected Species"}, Default = "Any Species", Callback = fn144(fn110)})
-	tbl24.fuseRarities = v47:AddDropdown("Dropdown_RaritiestoFuse", {Title = "Rarities to Fuse", Description = "Only fuse pets of these rarities. Leave empty for any rarity.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn111)})
+	tbl24.fuseRarities = tbl24.allDropdown(v47, "Dropdown_RaritiestoFuse", {Title = "Rarities to Fuse", Description = "Only fuse pets of these rarities. Pilih All untuk semua."}, v26, fn111)
 	v47:AddParagraph({Title = "• Only when Rule = Selected Species", Content = ""})
-	tbl24.fuseSpecies = v47:AddDropdown("Dropdown_SpeciestoFuse", {Title = "Species to Fuse", Description = "Only these species go into the machine.", Values = v24, Multi = true, Default = {}, Callback = fn144(fn112)})
+	tbl24.fuseSpecies = tbl24.allDropdown(v47, "Dropdown_SpeciestoFuse", {Title = "Species to Fuse", Description = "Only these species go into the machine. Pilih All untuk semua."}, v24, fn112)
 	local v48 = tbl24.section(v33, "Equip & Collect", tbl24.gameIcon("Assets", "Directory", "Dog", "Icon"))
 	tbl24.autoEquipBest = v48:AddToggle("Toggle_AutoEquipBest", {Title = "Auto Equip Best", Description = "Keeps your strongest pets equipped as better ones hatch.", Default = false, Callback = fn144(fn105)})
 	tbl24.autoClaimOffline = v48:AddToggle("Toggle_CollectOfflineIncome", {Title = "Collect Offline Income", Description = "Claims the money your base earned while you were away, as soon as there is any.", Default = false, Callback = fn144(fn106)})
@@ -33580,444 +33868,61 @@ local function fn66()
 	tbl24.autoClaimAlmanac = v48:AddToggle("Toggle_AutoClaimAlmanac", {Title = "Auto Claim Almanac", Description = "Redeems every Pet Index reward that is ready. This is the reward claim, not the steal objective.", Default = false, Callback = fn144(fn108)})
 
 	tbl24.upgradeBaseOnce = v48:AddButton({Title = "Upgrade Base Now", Description = "Buys one base tier right away.", Callback = fn144(function()
-		local senaV4Upgrades = genv.__SenaV4Upgrades
+		local quantumV4Upgrades = genv.__QuantumV4Upgrades
 		local flag14 = false
 		local str4 = "Upgrades not ready"
 
-		if senaV4Upgrades and type(senaV4Upgrades.upgradeBase) == "function" then
-			flag14, str4 = senaV4Upgrades.upgradeBase()
+		if quantumV4Upgrades and type(quantumV4Upgrades.upgradeBase) == "function" then
+			flag14, str4 = quantumV4Upgrades.upgradeBase()
 		end
 
 		flag6:Notify({Title = "Base", Content = flag14 and "Base upgraded" or tostring(str4 or "Could not upgrade"), Duration = 3})
 	end)})
 
-	do
-		local senaV4ButterflyRuntime = genv.__SenaV4ButterflyRuntime
-		v25 = tbl24.section(v35, "Wisp Event", tbl24.gameIcon("WispQuests", "List", 1, "Icon"))
-		local v49 = v25:AddParagraph({Title = "Wisp Companion", Content = "Reading your wisp progress..."})
-
-		tbl24.wispAutoQuest = v25:AddToggle("Toggle_AutoWispQuest", {Title = "Auto Wisp Quest", Description = "Meets the Baby Wisp, hunts the quest eggs (Enchanted Forest eggs, an Eternal), fuses an Enchanted Forest animal, claims every reward and flies the wisp home to unlock the Enchanted Tree. Needs 50B SpeedPower.", Default = false, Callback = fn144(function(arg)
-			senaV4Config.WispAutoQuest = arg == true
-		end)})
-
-		tbl24.banjoAuto = v25:AddToggle("Toggle_AutoBanjoCricket", {Title = "Auto Banjo Cricket", Description = "Goes into the Enchanted Tree, plays the Banjo Cricket's mushroom song back for all 5 stages, then claims the secret from Jitterbug. Needs the tree unlocked.", Default = false, Callback = fn144(function(arg)
-			senaV4Config.BanjoAuto = arg == true
-		end)})
-
-		local v50 = tbl24.section(v35, "Butterfly Bloom", tbl24.gameIcon("ButterflyCatalog", "Icons", "Net"))
-		local v51 = v50:AddParagraph({Title = "Bloom Status", Content = "Reading the Bloom schedule..."})
-		local addIconGrid, v52 = v50.AddIconGrid and v50:AddIconGrid({Title = "Butterflies Caught", Note = "", Columns = 4})
-		local tbl29 = {}
-
-		tbl24.bloomAutoNet = v50:AddToggle("Toggle_AutoClaimNet", {Title = "Auto Claim Net", Description = "Goes into the Enchanted Tree and claims your free Butterfly Net once.", Default = false, Callback = fn144(function(arg)
-			senaV4Config.ButterflyAutoNet = arg == true
-		end)})
-
-		tbl24.bloomAutoCatch = v50:AddToggle("Toggle_AutoCatch", {Title = "Auto Catch", Description = "During every Bloom (every 30 min, 5 min long) flies to the Enchanted Forest, equips the net and catches with the Catch Mode below.", Default = false, Callback = fn144(function(arg)
-			senaV4Config.ButterflyAutoCatch = arg == true
-		end)})
-
-		fn68 = senaV4ButterflyRuntime and senaV4ButterflyRuntime.modeOptions() or {"Tween to Butterfly"}
-
-		tbl24.bloomMode = v50:AddDropdown("Dropdown_CatchMode", {Title = "Catch Mode", Description = "Tween to Butterfly chases one butterfly at a time. Stand waits in the thickest part of the swarm, Zigzag sweeps back and forth across the forest, Circle loops around the swarm.", Values = fn68, Multi = false, Default = fn68[1], Callback = fn144(function(arg)
-			if senaV4ButterflyRuntime then
-				senaV4ButterflyRuntime.setMode(arg)
-			end
-		end)})
-
-		tbl24.bloomTiers = v50:AddDropdown("Dropdown_CatchTiers", {Title = "Catch Tiers", Description = "Only swing at these butterflies. Leave empty to catch every tier.", Values = senaV4ButterflyRuntime and senaV4ButterflyRuntime.tierOptions() or {"Radiant", "Amethyst", "Sapphire", "Emerald"}, Multi = true, Default = {}, Callback = fn144(function(arg)
-			if senaV4ButterflyRuntime then
-				senaV4ButterflyRuntime.setTiers(fn67(arg))
-			end
-		end)})
-
-		tbl24.bloomEsp = v50:AddToggle("Toggle_ButterflyESP", {Title = "Butterfly ESP", Description = "Shows every butterfly's tier and distance while a Bloom is live.", Default = false, Callback = fn144(function(arg)
-			senaV4Config.ButterflyEsp = arg == true
-		end)})
-
-	v50:AddParagraph({Title = "• Trade & Craft", Content = ""})
-
-		tbl24.bloomAutoTrade = v50:AddToggle("Toggle_AutoTradeUp", {Title = "Auto Trade Up", Description = "After each Bloom, trades your butterflies up at the machine inside the Enchanted Tree.", Default = false, Callback = fn144(function(arg)
-			senaV4Config.ButterflyAutoTrade = arg == true
-		end)})
-
-		fn73 = senaV4ButterflyRuntime and senaV4ButterflyRuntime.recipeOptions() or {"All Recipes"}
-
-		tbl24.bloomRecipe = v50:AddDropdown("Dropdown_TradeRecipe", {Title = "Trade Recipe", Description = "Which trade Auto Trade Up runs. For Essence only trades up what the essence recipe is still short of.", Values = fn73, Multi = false, Default = fn73[1], Callback = fn144(function(arg)
-			if senaV4ButterflyRuntime then
-				senaV4ButterflyRuntime.setRecipe(arg)
-			end
-		end)})
-
-		tbl24.bloomAutoCraft = v50:AddToggle("Toggle_AutoCraftEssence", {Title = "Auto Craft Essence", Description = "After each Bloom, crafts Enchanted Essence at the shrine once you hold the full recipe.", Default = false, Callback = fn144(function(arg)
-			senaV4Config.ButterflyAutoCraft = arg == true
-		end)})
-
-		local function fn157(arg, arg2, arg3, arg4)
-			v50:AddButton({Title = arg, Description = arg2, Callback = fn144(function()
-				if not senaV4ButterflyRuntime then
-					return
-				end
-
-				task.spawn(function()
-					senaV4ButterflyRuntime.manual = true
-					local ok2, result, result2 = pcall(arg3)
-					senaV4ButterflyRuntime.manual = false
-
-					if ok2 then
-					else
-						result, result2 = false, result
-					end
-
-					flag6:Notify({Title = "Butterfly Bloom", Content = result and arg4(result2) or tostring(result2 or "Could not do that"), Duration = 4})
-				end)
-			end)})
-		end
-
-		fn157("Claim Net Now", "Claims the Butterfly Net right now.", function()
-			return senaV4ButterflyRuntime.claimNet()
-		end, function()
-			return "Butterfly Net claimed"
-		end)
-
-		fn157("Trade Up Now", "Runs the trade recipe once, even with Auto Trade Up off.", function()
-			return senaV4ButterflyRuntime.tradeUp()
-		end, function(arg)
-			return ("Traded up %d time(s)"):format(tonumber(arg) or 0)
-		end)
-
-		fn157("Craft Essence Now", "Crafts Enchanted Essence right now if you hold the full recipe.", function()
-			return senaV4ButterflyRuntime.craft()
-		end, function(arg)
-			return ("Crafted %d Enchanted Essence"):format(tonumber(arg) or 0)
-		end)
-
-		local function fn158(arg)
-			local n8 = tonumber(arg) or 0
-			if n8 >= 1000000000000 then
-				return ("%.2fT"):format(n8 / 1000000000000)
-			end
-
-			if n8 >= 1000000000 then
-				return ("%.2fB"):format(n8 / 1000000000)
-			end
-
-			if n8 >= 1000000 then
-				return ("%.2fM"):format(n8 / 1000000)
-			end
-
-			if n8 >= 1000 then
-				return ("%.1fK"):format(n8 / 1000)
-			end
-			return tostring(math.floor(n8))
-		end
-
-		task.spawn(function()
-			while fn2() do
-				if senaV4ButterflyRuntime then
-					local function fn159()
-						local snap = senaV4ButterflyRuntime.snap
-						local tbl30 = senaV4ButterflyRuntime.tiers() or {}
-
-						if snap.unlocked then
-							v49:SetContent("Complete - the Enchanted Tree is unlocked.")
-						elseif snap.accepted then
-							v49:SetContent(("Stage %d / %d  ·  %s  (%d / %d)%s"):format(snap.stage or 1, snap.stages or 4, tostring(snap.quest), snap.progress or 0, snap.target or 0, snap.readyReturn and "\nAll quests done - return the wisp to unlock the tree." or (snap.claimable and "\nReady to claim." or (senaV4ButterflyRuntime.questNote and "\n" .. senaV4ButterflyRuntime.questNote or ""))))
-						elseif (snap.speed or 0) < (snap.need or 0) then
-							v49:SetContent(("Not eligible yet: SpeedPower %s of %s."):format(fn158(snap.speed), fn158(snap.need)))
-						else
-							v49:SetContent(("Eligible (SpeedPower %s). The Baby Wisp waits in the Enchanted Forest."):format(fn158(snap.speed)))
-						end
-
-						local str4
-
-						if snap.active then
-							local n8 = math.floor(snap.left or 0)
-							str4 = ("LIVE - ends in %dm %02ds"):format(math.floor(n8 / 60), n8 % 60)
-						else
-							if snap.enabled == false then
-								str4 = "Disabled on this server"
-							else
-								if snap.nextIn then
-									local n8 = math.floor(snap.nextIn)
-									str4 = ("Next in %dm %02ds"):format(math.floor(n8 / 60), n8 % 60)
-								else
-									str4 = "Not running"
-								end
-							end
-						end
-
-						local tbl31 = {}
-
-						for i, v53 in ipairs({"Golden", "Purple", "Blue", "Green"}) do
-							tbl31[#tbl31 + 1] = ("%s %d"):format(tbl30[v53] and tbl30[v53].name or v53, snap.counts and snap.counts[v53] or 0)
-						end
-
-						if addIconGrid then
-							local tbl32 = {}
-
-							for i, v53 in ipairs({"Green", "Blue", "Purple", "Golden"}) do
-								local counts = snap.counts and snap.counts[v53] or 0
-
-								if v52 and counts > (v52[v53] or 0) then
-									tbl29[v53] = (tbl29[v53] or 0) + counts - v52[v53]
-								end
-
-								local tbl33 = tbl30[v53] or {}
-								local n8 = tbl29[v53] or 0
-								tbl32[#tbl32 + 1] = {Name = tbl33.name or v53, Icon = tbl33.icon, Color = tbl33.color, Value = fn158(counts), Sub = n8 > 0 and ("+%d session"):format(n8) or (tbl33.rarity or ""), SubColor = n8 > 0 and Color3.fromRGB(74, 222, 128) or nil}
-							end
-
-							v52 = table.clone(snap.counts or {})
-							addIconGrid:SetItems(tbl32)
-							addIconGrid:SetNote(("Total %s  ·  Essence %d"):format(fn158(snap.caught), snap.essence or 0))
-							tbl31 = {}
-						end
-
-						v51:SetContent((("%s\n%s  ·  Essence %d  ·  Caught %d\n%s\n%s"):format(str4, snap.net and (snap.holding and "Net equipped" or "Net owned") or "No Butterfly Net", snap.essence or 0, snap.caught or 0, table.concat(tbl31, "  ·  "), tostring(senaV4ButterflyRuntime.status or "Idle")):gsub("\n\n", "\n")))
-					end
-
-					pcall(fn159)
-				end
-
-				task.wait(1)
-			end
-		end)
-	end
-
-	local v49 = tbl24.section(v35, "Race Rally", tbl24.gameIcon("FallenPowerUp", "Kinds", "x2Rings", "Icon"))
-	v49:AddParagraph({Title = "About This Event", Content = "Race Rally opens every 30 minutes for 60 seconds. Auto Race joins from anywhere, rides the track for you and brings you back to base after the finish."})
-
-	tbl24.raceAuto = v49:AddToggle("Toggle_AutoRace", {Title = "Auto Race", Description = "Joins every race, rides the track, uses power-ups and returns to base. Auto Steal pauses while you race.", Default = false, Callback = fn144(function(arg)
-		senaV4Config.RaceAuto = arg == true
-	end)})
-
-	tbl24.raceClaim = v49:AddToggle("Toggle_AutoClaimEquipBestRacer", {Title = "Auto Claim & Equip Best Racer", Description = "Claims every win milestone you reached and equips the best racer you own.", Default = false, Callback = fn144(function(arg)
-		senaV4Config.RaceClaim = arg == true
-	end)})
-
-	tbl24.raceBuy = v49:AddToggle("Toggle_AutoBuyShop", {Title = "Auto Buy Shop", Description = "Spends race tokens on the items you pick below.", Default = false, Callback = fn144(function(arg)
-		senaV4Config.RaceBuy = arg == true
-	end)})
-
-	tbl24.raceBuyList = v49:AddDropdown("Dropdown_ShopBuyList", {Title = "Shop Buy List", Description = "Which race shop items Auto Buy should purchase.", Values = {"CashBooster", "SpeedBoost", "TreadmillBoost", "MutationToken", "RacingBat"}, Multi = true, Default = {}, Callback = fn144(function(arg)
-		senaV4Config.RaceBuyList = fn67(arg)
-	end)})
-
-	local v50 = v49:AddParagraph({Title = "Race Status", Content = "Waiting for the next race."})
-
-	task.spawn(function()
-		while fn2() do
-			local senaV4RaceRuntime = genv.__SenaV4RaceRuntime
-
-			if senaV4RaceRuntime then
-				pcall(function()
-					local v51 = senaV4RaceRuntime.joinLeft()
-					local str4 = v51 > 0 and string.format("  ·  Join open %ds", math.floor(v51)) or ""
-					v50:SetContent(tostring(senaV4RaceRuntime.status) .. str4 .. "\nLast: " .. tostring(senaV4RaceRuntime.lastResult))
-				end)
-			end
-
-			task.wait(1)
-		end
-	end)
-
-	local v51 = tbl24.section(v35, "Shooting Star", "rbxassetid://92160802930122")
-	v51:AddParagraph({Title = "About This Event", Content = "Sometimes a little star falls near you and runs around for a few minutes. Hold next to it to catch it."})
-
-	tbl24.starAlert = v51:AddToggle("Toggle_StarAlert", {Title = "Star Alert", Description = "Shows a notification the moment a star starts falling.", Default = true, Callback = fn144(function(arg)
-		senaV4Config.StarAlert = arg == true
-	end)})
-
-	tbl24.starAutoCatch = v51:AddToggle("Toggle_AutoCatchStar", {Title = "Auto Catch Star", Description = "Goes to the star when it lands and catches it. Other tasks pause until it is caught.", Default = false, Callback = fn144(function(arg)
-		senaV4Config.StarAutoCatch = arg == true
-	end)})
-
-	local v52 = v51:AddParagraph({Title = "Star Status", Content = "No star right now."})
-
-	task.spawn(function()
-		while fn2() do
-			local senaV4StarRuntime = genv.__SenaV4StarRuntime
-
-			if senaV4StarRuntime then
-				pcall(function()
-					v52:SetContent(tostring(senaV4StarRuntime.status) .. "\nLast: " .. tostring(senaV4StarRuntime.lastResult))
-				end)
-			end
-
-			task.wait(1)
-		end
-	end)
-
-	local v53 = tbl24.section(v35, "Dr Scramble Event", tbl24.gameIcon("Gears", "Directory", "The Scrambler", "Icon"))
-	v53:AddParagraph({Title = "About This Event", Content = "Dr Scramble only runs during the live event. The shop, trade-in and boss fight are still up; the rest of the time these toggles sit idle."})
-	tbl24.scrambleBuy = v53:AddToggle("Toggle_AutoBuyShop_2", {Title = "Auto Buy Shop", Description = "Spends samples on the shop items you pick below, as soon as you can afford them.", Default = false, Callback = fn144(fn116)})
-	tbl24.scrambleBuyList = v53:AddDropdown("Dropdown_ShopBuyList_2", {Title = "Shop Buy List", Description = "Which shop items Auto Buy should purchase. This list fills in once the event shop is open.", Values = tbl26, Multi = true, Default = {}, Callback = fn144(fn117)})
-	local v54 = v53:AddParagraph({Title = "Scramble Telemetry", Content = "Waiting for the event to start."})
-
-	task.spawn(function()
-		while fn2() do
-			local senaV4ScrambleRuntime = genv.__SenaV4ScrambleRuntime
-
-			if senaV4ScrambleRuntime and type(senaV4ScrambleRuntime.samples) == "function" then
-				local ok2, result = pcall(senaV4ScrambleRuntime.samples)
-
-				if ok2 then
-					pcall(function()
-						v54:SetContent(string.format("Samples %d  ·  %s", result or 0, senaV4ScrambleRuntime.status or "Idle"))
-					end)
-				end
-			end
-
-			task.wait(2)
-		end
-	end)
-
-	v53:AddParagraph({Title = "• Trade-In (Experimental Pets)", Content = ""})
-
-	tbl24.scrambleTradeInTrade = v53:AddToggle("Toggle_AutoTradeIn", {Title = "Auto Trade-In", Description = "Auto-completes the recipe: uses the required eggs you already have, and auto-adds any you're missing to the Auto Steal hunt (works even with Auto Steal off) so they get stolen off the field, then combines once all three are ready. Favorited / placed eggs are never spent.", Default = false, Callback = fn144(function(arg)
-		senaV4Config.ScrambleTradeInTrade = arg == true
-	end)})
-
-	tbl24.scrambleTradeInReroll = v53:AddToggle("Toggle_AutoFreeReroll", {Title = "Auto Free Reroll", Description = "When pets are missing and a free reroll is left, rerolls the recipe instead of waiting.", Default = false, Callback = fn144(function(arg)
-		senaV4Config.ScrambleTradeInReroll = arg == true
-	end)})
-
-	tbl24.scrambleTradeInBanners = v53:AddDropdown("Dropdown_TargetBanners", {Title = "Target Banners", Description = "Only work the trade-in while one of these banners is up. Leave empty to accept any banner.", Values = {"Biohazard Pets", "Experimental Pets", "Unstable DNA"}, Multi = true, Default = {}, Callback = fn144(fn98)})
-
-	v53:AddButton({Title = "Trade-In Once", Description = "Runs one sacrifice right now, even with Auto Trade-In off.", Callback = fn144(function()
-		local senaV4ScrambleTradeIn = genv.__SenaV4ScrambleTradeIn
-		local flag14 = false
-		local str4 = "Trade-In not ready"
-
-		if senaV4ScrambleTradeIn then
-			flag14, str4 = senaV4ScrambleTradeIn.tradeOnce()
-		end
-
-		flag6:Notify({Title = "Dr Scramble", Content = flag14 and "Sacrifice complete" or tostring(str4), Duration = 4})
-	end)})
-
-	v53:AddButton({Title = "Use Free Reroll", Description = "Spends one of today's free rerolls on a new recipe.", Callback = fn144(function()
-		local senaV4ScrambleTradeIn = genv.__SenaV4ScrambleTradeIn
-		local flag14 = false
-		local str4 = "Trade-In not ready"
-
-		if senaV4ScrambleTradeIn then
-			flag14, str4 = senaV4ScrambleTradeIn.reroll()
-		end
-
-		flag6:Notify({Title = "Dr Scramble", Content = flag14 and "Recipe rerolled" or tostring(str4), Duration = 4})
-	end)})
-
-	v53:AddButton({Title = "Open Trade-In UI", Description = "Opens Dr Scramble's Lab window so you can pick pets by hand.", Callback = fn144(function()
-		if not pcall(function()
-			require(ReplicatedStorage.Client.Tabs).Activate("DrScrambleTradeIn")
-		end) then
-			flag6:Notify({Title = "Dr Scramble", Content = "Could not open the trade-in window", Duration = 3})
-		end
-	end)})
-
-	local v55 = v53:AddParagraph({Title = "Trade-In Status", Content = "Turn a trade-in toggle on to start reading the recipe."})
-
-	task.spawn(function()
-		while fn2() do
-			local senaV4ScrambleTradeIn = genv.__SenaV4ScrambleTradeIn
-
-			if senaV4ScrambleTradeIn then
-				pcall(function()
-					v55:SetContent(string.format("%s  ·  %s\nRotates in %02d:%02d  ·  Pity %d/%d  ·  Free rerolls %d  ·  Traded %d\nRecipe (%d/%d): %s\nHeld: %s\nMissing: %s", senaV4ScrambleTradeIn.banner, senaV4ScrambleTradeIn.status, math.floor(senaV4ScrambleTradeIn.rotation / 60), senaV4ScrambleTradeIn.rotation % 60, senaV4ScrambleTradeIn.pity, senaV4ScrambleTradeIn.pityMax, senaV4ScrambleTradeIn.free, senaV4ScrambleTradeIn.trades, senaV4ScrambleTradeIn.ready, senaV4ScrambleTradeIn.total, senaV4ScrambleTradeIn.demands, senaV4ScrambleTradeIn.stock, senaV4ScrambleTradeIn.missing))
-				end)
-			end
-
-			task.wait(1)
-		end
-	end)
-
-	v53:AddParagraph({Title = "• Boss Fight", Content = ""})
-
-	tbl24.scrambleBossAuto = v53:AddToggle("Toggle_AutoBoss", {Title = "Auto Boss", Description = "When Dr Scramble's boss is live, walks into the arena portal, joins the fight, hits the nearest target with your bat and breaks free from grabs. The clear reward lands automatically. While Auto Steal is on and this is off, an accidental touch on the arena portal is bounced back out so your steal is never hijacked.", Default = false, Callback = fn144(function(arg)
-		senaV4Config.ScrambleBossAuto = arg == true
-		local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
-
-		if senaV4ScrambleBoss and type(senaV4ScrambleBoss.setEnabled) == "function" then
-			pcall(senaV4ScrambleBoss.setEnabled, senaV4ScrambleBoss, arg == true)
-		end
-
-		if v13 and type(v13._reconcileScramblePortal) == "function" then
-			pcall(v13._reconcileScramblePortal, v13)
-		end
-	end)})
-
-	local v56 = v53:AddParagraph({Title = "Boss Status", Content = "Turn Auto Boss on. It sits idle until the boss event goes live."})
-
-	task.spawn(function()
-		while fn2() do
-			local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
-
-			if senaV4ScrambleBoss then
-				pcall(function()
-					local flag14 = type(senaV4ScrambleBoss._snapshot) == "function" and senaV4ScrambleBoss:_snapshot() or nil
-
-					if type(flag14) == "table" then
-						v56:SetContent(string.format("%s\nPhase %s  ·  HP %d/%d%s\nSamples %d  ·  Reward %s", tostring(flag14.status), tostring(flag14.phase), math.floor((flag14.health or 0) + 0.5), math.floor((flag14.maxHealth or 0) + 0.5), flag14.overheated and "  ·  OVERHEAT" or "", flag14.samples or 0, tostring(flag14.reward)))
-					else
-						v56:SetContent(tostring(senaV4ScrambleBoss.status or "Idle"))
-					end
-				end)
-			end
-
-			task.wait(1)
-		end
-	end)
-
-	local v57 = tbl24.section(v36, "Treadmill", tbl24.gameIcon("Treadmills", "Directory", "Treadmill", "Icon"))
-	tbl24.autoTreadmill = v57:AddToggle("Toggle_AutoTreadmill", {Title = "Auto Treadmill", Description = "Walks to your treadmill and farms speed whenever nothing else is running.", Default = false, Callback = fn144(fn82)})
-	tbl24.treadmillUpgrade = v57:AddToggle("Toggle_AutoUpgradeTreadmill", {Title = "Auto Upgrade Treadmill", Description = "Buys the next treadmill tier with cash as soon as you can afford it.", Default = false, Callback = fn144(fn88)})
-	local Performance = v38:AddSection("Performance")
+	local Performance = tbl24.section(v38, "Performance", "lucide/cpu")
 	tbl24.startupBoost = Performance:AddToggle("Toggle_StartupBoost", {Title = "Startup Boost", Description = "Lowers graphics when the script starts. Turn it off to get the graphics back; hidden pets and eggs return after a rejoin.", Default = true, Callback = fn144(fn131)})
 	tbl24.boostFps = Performance:AddToggle("Toggle_BoostFPS", {Title = "Boost FPS", Description = "Removes extra map details and other players' plots for more FPS.", Default = false, Callback = fn144(fn132)})
 	tbl24.uncapFps = Performance:AddToggle("Toggle_UncapFPS", {Title = "Uncap FPS", Description = "Raises the FPS cap to 1000.", Default = true, Callback = fn144(fn133)})
-	local Guard = v38:AddSection("Guard")
+	local Guard = tbl24.section(v35, "Guard", "lucide/shield-check")
 	tbl24.antiGuardKnockback = Guard:AddToggle("Toggle_AntiGuardKnockback", {Title = "Anti Guard Knockback", Description = "Cancels the knockback the Forest guard puts on you, so a hit never throws you off the lane.", Default = true, Callback = fn144(fn100)})
 	tbl24.antiHitGuard = Guard:AddToggle("Toggle_AntiHitGuard", {Title = "Anti Hit Guard", Description = "For eggs you pick up by hand. Pins you in the safe zone behind a look-alike clone until the guard goes back to sleep. Auto Steal has its own guard handling and always wins.", Default = false, Callback = fn144(fn140)})
-	local Windows = v31:AddSection("Windows", true)
+	local Windows = tbl24.section(v38, "Panels & Logs", "lucide/layout-dashboard")
 
 	Windows:AddButton({Title = "Egg Logs", Description = "Live feed of every egg that spawns on the server.", Callback = fn144(function()
-		senaPanels.openLogs()
+		quantumPanels.openLogs()
 	end)})
 
 	Windows:AddButton({Title = "Egg Board", Description = "Sortable list of the eggs currently up for grabs.", Callback = fn144(function()
-		senaPanels.openBoard()
+		quantumPanels.openBoard()
 	end)})
 
 	Windows:AddButton({Title = "Inventory & Base", Description = "Your pets, eggs and plot status in one window.", Callback = fn144(function()
-		senaPanels.openInventory()
+		quantumPanels.openInventory()
 	end)})
 
 	Windows:AddButton({Title = "Egg Checker", Description = "Pick eggs off the field by hand, then send them all to the steal queue.", Callback = fn144(function()
-		senaPanels.openChecker()
+		quantumPanels.openChecker()
 	end)})
 
 	Windows:AddButton({Title = "Egg Data & History", Description = "Drop-table values per area, plus what has actually spawned this session.", Callback = fn144(function()
-		senaPanels.openAnalyst()
+		quantumPanels.openAnalyst()
 	end)})
 
 	Windows:AddButton({Title = "Farm Stats", Description = "What is running now, money and income, steals, your plot and the Dr Scramble event at a glance.", Icon = "trending-up", Callback = fn144(function()
-		senaPanels.openStats()
+		quantumPanels.openStats()
 	end)})
 
 	Windows:AddButton({Title = "Open All Windows", SubTitle = "Close All Windows", Description = "Opens every window at once, or hides them again.", Callback = fn144(function()
-		senaPanels.openAll()
+		quantumPanels.openAll()
 	end), SubCallback = fn144(function()
-		senaPanels.closeAll()
+		quantumPanels.closeAll()
 	end)})
 
-	tbl24.antiTreadmill = tbl24.section(v36, "Blocker", tbl24.gameIcon("Gears", "Directory", "Trap", "Icon")):AddToggle("Toggle_AntiTreadmill", {Title = "Anti Treadmill", Description = "Never stay on a treadmill: any mount is dropped right away, and Auto Treadmill is held off while this is on.", Default = false, Callback = fn144(fn83)})
-	local v58 = v37:AddSection("Server Hop")
+	local v58 = tbl24.section(v37, "Server Hop", "lucide/server")
 	tbl24.hopNoMatch = v58:AddToggle("Toggle_HopWhenNothingMatches", {Title = "Hop When Nothing Matches", Description = "Hop to the emptiest server when no egg matches your filters.", Default = false, Callback = fn144(fn84)})
 	v58:AddParagraph({Title = "• Limits", Content = ""})
 	tbl24.hopCooldown = v58:AddSlider("Slider_HopCooldown", {Title = "Hop Cooldown", Description = "Seconds between auto hops and wait after rejoining.", Min = 1, Max = 60, Default = 5, Rounding = 0, Callback = fn144(fn87)})
-	local v59 = tbl24.privateTab:AddSection("Find Private Server", true)
+	local v59 = tbl24.section(tbl24.privateTab, "Find Private Server", "lucide/lock")
 	local v60 = v59:AddParagraph({Title = "Current Server", Content = "Checking..."})
 	tbl24.privateServerMax = v59:AddDropdown("Dropdown_MaxPlayers", {Title = "Max Players", Description = "The most players you want in your server, you included. 2 (you + 1) is the easiest to find.", Values = {"1", "2", "3", "4", "5"}, Default = "2", Multi = false, Callback = fn144(fn85)})
 
@@ -34047,18 +33952,18 @@ local function fn66()
 		end
 	end)
 
-	local v61 = tbl24.section(v36, "Roaming", tbl24.gameIcon("Trails", "Directory", "PurpleTrail", "Icon"))
+	local v61 = tbl24.section(v35, "Roaming", "lucide/compass")
 
 	tbl24.waypoint = v61:AddDropdown("Dropdown_Waypoint", {Title = "Waypoint", Description = "Pick a place, then hit Teleport below.", Values = tbl25, Default = tbl25[1], Callback = fn144(function(arg)
 		v29 = arg
 	end)})
 
 	v61:AddButton({Title = "Teleport To Waypoint", Description = "Moves you straight to the waypoint you picked.", Callback = fn144(function()
-		local senaV4Roaming2 = genv.__SenaV4Roaming
-		flag6:Notify({Title = "Waypoint", Content = (if senaV4Roaming2 then if type(senaV4Roaming2.teleportWaypoint) == "function" then senaV4Roaming2.teleportWaypoint(v29) == true else false else false) and "Moved to " .. tostring(v29) or "That waypoint is not in this server", Duration = 3})
+		local quantumV4Roaming2 = genv.__QuantumV4Roaming
+		flag6:Notify({Title = "Waypoint", Content = (if quantumV4Roaming2 then if type(quantumV4Roaming2.teleportWaypoint) == "function" then quantumV4Roaming2.teleportWaypoint(v29) == true else false else false) and "Moved to " .. tostring(v29) or "That waypoint is not in this server", Duration = 3})
 	end)})
 
-	local v62 = v30:AddSection("Run Once")
+	local v62 = tbl24.section(v38, "Run Once", "lucide/play")
 
 	v62:AddButton({Title = "Place Everything Now", Description = "Runs one pass of Auto Place, even while the toggle is off.", Callback = fn144(function()
 		runOnce("AutoPlace", tbl10.AutoPlaceLoop)
@@ -34076,7 +33981,7 @@ local function fn66()
 		runOnce("AutoSellEgg", tbl10.startAutoSellEggLoop)
 	end)})
 
-	local Session = v38:AddSection("Session")
+	local Session = tbl24.section(v38, "Session", "lucide/clock")
 	tbl24.bottingMode = Session:AddToggle("Toggle_BottingMode", {Title = "Botting Mode", Description = "Turns off 3D rendering and covers the screen in black. Everything keeps running, your GPU does not.", Default = false, Callback = fn144(fn114)})
 	tbl24.antiCutscene = Session:AddToggle("Toggle_AntiCutscene", {Title = "Anti Cutscene", Description = "Closes event cutscenes and the intro as soon as the game opens them, so nothing locks your camera.", Default = false, Callback = fn144(fn115)})
 
@@ -34088,7 +33993,7 @@ local function fn66()
 
 	Session:AddButton({Title = "Stop & Unload", Description = "Turns every loop off and closes the hub. Run the script again to bring it back.", Callback = fn144(function()
 		for i, v63 in ipairs({"AutoSteal", "AutoPlace", "AutoHatch", "AutoSell", "AutoSellEgg", "StealPlayers", "AutoFavorite", "AutoFusePets", "AutoEquipBest", "AutoClaimOffline", "AutoBaseUpgrade", "AutoClaimAlmanac", "Noclip", "BottingMode", "AntiCutscene"}) do
-			senaV4Config[v63] = false
+			quantumV4Config[v63] = false
 		end
 
 		fn113(false)
@@ -34098,22 +34003,22 @@ local function fn66()
 			pcall(v13.setEnabled, v13, false)
 		end
 
-		local senaV4HubShutdown = genv.__SenaV4HubShutdown
+		local quantumV4HubShutdown = genv.__QuantumV4HubShutdown
 
-		if type(senaV4HubShutdown) == "function" then
+		if type(quantumV4HubShutdown) == "function" then
 			task.delay(0.2, function()
-				pcall(senaV4HubShutdown)
+				pcall(quantumV4HubShutdown)
 			end)
 		end
 	end)})
 
-	local Player = v38:AddSection("Player")
+	local Player = tbl24.section(v38, "Player", "lucide/user")
 	tbl24.antiAfk = Player:AddToggle("Toggle_AntiAFK", {Title = "Anti AFK", Description = "Blocks the game's idle kick while the script runs.", Default = true, Callback = fn144(fn141)})
 	tbl24.autoReconnect = Player:AddToggle("Toggle_AutoReconnect", {Title = "Auto Reconnect", Description = "Automatically reconnects you back to the server upon kick or disconnect.", Default = true, Callback = fn144(fn142)})
 	tbl24.autoExecute = Player:AddToggle("Toggle_AutoExecuteRejoin", {Title = "Auto Execute (Rejoin)", Description = "Prepares the bootstrapper so the script runs automatically after teleport or reconnect.", Default = false, Callback = fn144(fn143)})
 	local v63 = tbl24.section(v32, "Steal From Players", tbl24.gameIcon("Gears", "Directory", "Bat", "Icon"))
 	tbl24.stealPlayers = v63:AddToggle("Toggle_AutoStealFromPlayers", {Title = "Auto Steal From Players", Description = "Chases anyone carrying an egg in the field, bats them until the egg drops, grabs it and banks it. A carrier is only chased when the egg clears the filters below.", Default = false, Callback = fn144(fn145)})
-	tbl24.stealPlayerRarities = v63:AddDropdown("Dropdown_RarityFilter", {Title = "Rarity Filter", Description = "Only chase eggs of these rarities. Empty = uses the Auto Steal rarity filter.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn146)})
+	tbl24.stealPlayerRarities = tbl24.allDropdown(v63, "Dropdown_RarityFilter", {Title = "Rarity Filter", Description = "Only chase eggs of these rarities. Pilih All untuk semua."}, v26, fn146)
 	tbl24.stealPlayerValue = v63:AddInput("Input_MinimumValue", {Title = "Minimum Value", Description = "Skip carriers holding less than this per second. Supports k, m and b.", Placeholder = "e.g. 500k, 2m, 1b", Default = "", Callback = fn144(fn148)})
 	local v64 = v32:AddSection({Title = "Steal From Specific Player", AlwaysOpen = true, Icon = tbl24.gameIcon("Gears", "Directory", "Katana", "Icon")})
 	fn69 = v32:AddSection({Title = "Steal History", AlwaysOpen = true, Icon = tbl24.gameIcon("Gears", "Directory", "Flyswatter", "Icon")})
@@ -34122,23 +34027,23 @@ local function fn66()
 	if v64.AddActionList then
 		v67, v68 = v64:AddActionList({Title = "Players in this server", EmptyText = "Nobody else is in this server.", VisibleRows = 6, ButtonWidth = 76}), fn69:AddActionList({Title = "History of stolen eggs from players", EmptyText = "No player steals yet.", VisibleRows = 5, ButtonWidth = 72})
 	else
-		v64:AddParagraph({Title = "Update required", Content = "This Sena UI build has no player list yet. Rejoin to pull the latest version."})
+		v64:AddParagraph({Title = "Update required", Content = "Player list unavailable. Rejoin to refresh."})
 		v67, v68 = v65, v66
 	end
 
 	fn69:AddButton({Title = "Clear History", Description = "Wipe the list above.", Callback = fn144(function()
-		if senaV4PlayerSteal then
-			senaV4PlayerSteal:clearHistory()
+		if quantumV4PlayerSteal then
+			quantumV4PlayerSteal:clearHistory()
 		end
 	end)})
 
-	if senaV4PlayerSteal and v67 then
-		local senaV4IdentitySetter2 = genv.__SenaV4IdentitySetter
-		local senaV4UICapabilityIdentity = genv.__SenaV4UICapabilityIdentity or 8
+	if quantumV4PlayerSteal and v67 then
+		local quantumV4IdentitySetter2 = genv.__QuantumV4IdentitySetter
+		local quantumV4UICapabilityIdentity = genv.__QuantumV4UICapabilityIdentity or 8
 
 		local function fn157(arg)
-			if senaV4IdentitySetter2 then
-				pcall(senaV4IdentitySetter2, senaV4UICapabilityIdentity)
+			if quantumV4IdentitySetter2 then
+				pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
 			end
 
 			if v68 then
@@ -34158,13 +34063,13 @@ local function fn66()
 			v68:Update(tbl29)
 		end
 
-		senaV4PlayerSteal:onChanged(fn157)
-		fn157(senaV4PlayerSteal)
+		quantumV4PlayerSteal:onChanged(fn157)
+		fn157(quantumV4PlayerSteal)
 		local v69
 		local n8, connection6 = 0
 
 		connection6 = game:GetService("RunService").Heartbeat:Connect(function()
-			if genv.__SenaV4PlayerSteal ~= senaV4PlayerSteal then
+			if genv.__QuantumV4PlayerSteal ~= quantumV4PlayerSteal then
 				connection6:Disconnect()
 				return
 			elseif not v67:Alive() then
@@ -34186,14 +34091,14 @@ local function fn66()
 
 			task.spawn(function()
 				local ok2, result = pcall(function()
-					if senaV4IdentitySetter2 then
-						pcall(senaV4IdentitySetter2, senaV4UICapabilityIdentity)
+					if quantumV4IdentitySetter2 then
+						pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
 					end
 
-					local v71 = senaV4PlayerSteal:listEntries()
+					local v71 = quantumV4PlayerSteal:listEntries()
 
-					if senaV4IdentitySetter2 then
-						pcall(senaV4IdentitySetter2, senaV4UICapabilityIdentity)
+					if quantumV4IdentitySetter2 then
+						pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
 					end
 
 					if v67:Alive() then
@@ -34215,114 +34120,13 @@ local function fn66()
 
 
 	do
-		local senaV4Visual = genv.__SenaV4Visual
-		local v70, tbl29, v71 = Window:AddTab({ Title = "Visual", Icon = "solar/eye-bold" }), {rods = nil, fish = nil}
+		local quantumV4Visual = genv.__QuantumV4Visual
+		local tbl29 = {rods = nil, fish = nil}
 
-		local function fn157()
-			if v71 and senaV4Visual then
-				pcall(function()
-					v71:SetContent(senaV4Visual.status)
-				end)
-			end
-		end
-
-		local function fn158(arg)
-			if not senaV4Visual then
-				return
-			end
-
-			task.spawn(function()
-				senaV4Visual.spawn(arg, tbl29[arg])
-				fn157()
-				flag6:Notify({Title = "Visual", Content = senaV4Visual.status, Duration = 3})
-			end)
-
-			task.delay(0.1, fn157)
-		end
-
-		local v72 = v70:AddSection("Fish It")
-	v72:AddParagraph({Title = "• Rods", Content = ""})
-
-		local v73 = v72:AddDropdown("Dropdown_SelectRod", {Title = "Select Rod", Description = "Rods and skins from Fish It. Loading list...", Values = {}, Multi = false, Default = nil, Callback = fn144(function(rods)
-			tbl29.rods = rods
-		end)})
-
-		v72:AddButton({Title = "Spawn Rod", Description = "Downloads the rod and puts it in your backpack. Equip it like a bat. Only you can see it.", Callback = fn144(function()
-			fn158("rods")
-		end)})
-
-		v72:AddSlider("Slider_RodSize", {Title = "Rod Size", Description = "1 = the size it has in Fish It. Spawned rods update right away.", Min = 0.5, Max = 2, Default = 1, Rounding = 1, Callback = fn144(function(rodScale)
-			if senaV4Visual then
-				if senaV4Visual.rodScale == rodScale then
-					return
-				end
-			else
-				return
-			end
-
-			senaV4Visual.rodScale = rodScale
-			task.spawn(senaV4Visual.respawn, "rods")
-		end)})
-
-	v72:AddParagraph({Title = "• Fish", Content = ""})
-
-		local v74 = v72:AddDropdown("Dropdown_SelectFish", {Title = "Select Fish", Description = "Secret and Forgotten fish from Fish It. Loading list...", Values = {}, Multi = false, Default = nil, Callback = fn144(function(fish)
-			tbl29.fish = fish
-		end)})
-
-		v72:AddButton({Title = "Spawn Fish", Description = "Downloads the fish and puts it in your backpack under Pets. Only you can see it.", Callback = fn144(function()
-			fn158("fish")
-		end)})
-
-		v72:AddSlider("Slider_FishWeight", {Title = "Fish Weight", Description = "0% = lightest catch, 100% = heaviest Big catch. Size follows Fish It: weight / min weight.", Min = 0, Max = 100, Default = 0, Rounding = 0, Callback = fn144(function(arg)
-			local fishWeight = (tonumber(arg) or 0) / 100
-
-			if senaV4Visual then
-				if senaV4Visual.fishWeight == fishWeight then
-					return
-				end
-			else
-				return
-			end
-
-			senaV4Visual.fishWeight = fishWeight
-			task.spawn(senaV4Visual.respawn, "fish")
-		end)})
-
-	v72:AddParagraph({Title = "• Manage", Content = ""})
-		v71 = v72:AddParagraph({Title = "Status", Content = "Idle"})
-
-		v72:AddButton({Title = "Remove All Visual Items", Description = "Takes every spawned rod and fish out of your backpack.", Callback = fn144(function()
-			if senaV4Visual then
-				senaV4Visual.clear()
-			end
-
-			fn157()
-		end)})
-
-		task.spawn(function()
-			if not senaV4Visual then
-				return
-			end
-			local rods = senaV4Visual.names("rods")
-			local fish = senaV4Visual.names("fish")
-
-			pcall(function()
-				v73:SetValues(rods)
-			end)
-
-			pcall(function()
-				v74:SetValues(fish)
-			end)
-
-			senaV4Visual.status = #rods > 0 and string.format("%d rods and %d fish available", #rods, #fish) or "Could not load the item list. Try again later."
-			fn157()
-		end)
-
-		local v75 = v70:AddSection("Steal an Egg")
+		local v75 = tbl24.section(v70, "Steal an Egg", "lucide/sparkle")
 		local str4 = "Egg"
 		local n8 = 50
-		local Egg = genv.__SenaV4VisualSAE and genv.__SenaV4VisualSAE.categories("Egg") or {}
+		local Egg = genv.__QuantumV4VisualSAE and genv.__QuantumV4VisualSAE.categories("Egg") or {}
 		local v76 = Egg[1]
 
 		v75:AddDropdown("Dropdown_Type", {Title = "Type", Description = "Egg shows in the Eggs tab, Pet under Pets. Both are fake and local-only.", Values = {"Egg", "Pet"}, Multi = false, Default = "Egg", Callback = fn144(function(arg)
@@ -34338,26 +34142,26 @@ local function fn66()
 		end)})
 
 		v75:AddButton({Title = "Hold in Hand", Description = "Spawns a model of it in your hand. Press again for more. (In-hand only - use the other button to also add it to All Items.)", Callback = fn144(function()
-			local senaV4VisualSAE = genv.__SenaV4VisualSAE
+			local quantumV4VisualSAE = genv.__QuantumV4VisualSAE
 
-			if senaV4VisualSAE then
-				senaV4VisualSAE.spawn(str4, v76, n8, true)
+			if quantumV4VisualSAE then
+				quantumV4VisualSAE.spawn(str4, v76, n8, true)
 			end
 		end)})
 
 		v75:AddButton({Title = "Add to Backpack (Kg)", Description = "Drops it in All Items (eggs) or Pets with a huge Kg for the inventory flex. Press again for more.", Callback = fn144(function()
-			local senaV4VisualSAE = genv.__SenaV4VisualSAE
+			local quantumV4VisualSAE = genv.__QuantumV4VisualSAE
 
-			if senaV4VisualSAE then
-				senaV4VisualSAE.spawn(str4, v76, n8, false)
+			if quantumV4VisualSAE then
+				quantumV4VisualSAE.spawn(str4, v76, n8, false)
 			end
 		end)})
 
 		v75:AddButton({Title = "Remove Egg / Pet Visuals", Description = "Takes every spawned fake egg/pet and held model out.", Callback = fn144(function()
-			local senaV4VisualSAE = genv.__SenaV4VisualSAE
+			local quantumV4VisualSAE = genv.__QuantumV4VisualSAE
 
-			if senaV4VisualSAE then
-				senaV4VisualSAE.clear()
+			if quantumV4VisualSAE then
+				quantumV4VisualSAE.clear()
 			end
 		end)})
 	end
@@ -34399,54 +34203,54 @@ local function fn66()
 	fn157(tbl24.scrambleBuyList, fn117)
 
 	fn157(tbl24.wispAutoQuest, function(arg)
-		senaV4Config.WispAutoQuest = arg == true
+		quantumV4Config.WispAutoQuest = arg == true
 	end)
 
 	fn157(tbl24.banjoAuto, function(arg)
-		senaV4Config.BanjoAuto = arg == true
+		quantumV4Config.BanjoAuto = arg == true
 	end)
 
 	fn157(tbl24.bloomAutoNet, function(arg)
-		senaV4Config.ButterflyAutoNet = arg == true
+		quantumV4Config.ButterflyAutoNet = arg == true
 	end)
 
 	fn157(tbl24.bloomAutoCatch, function(arg)
-		senaV4Config.ButterflyAutoCatch = arg == true
+		quantumV4Config.ButterflyAutoCatch = arg == true
 	end)
 
 	fn157(tbl24.bloomEsp, function(arg)
-		senaV4Config.ButterflyEsp = arg == true
+		quantumV4Config.ButterflyEsp = arg == true
 	end)
 
 	fn157(tbl24.bloomAutoTrade, function(arg)
-		senaV4Config.ButterflyAutoTrade = arg == true
+		quantumV4Config.ButterflyAutoTrade = arg == true
 	end)
 
 	fn157(tbl24.bloomAutoCraft, function(arg)
-		senaV4Config.ButterflyAutoCraft = arg == true
+		quantumV4Config.ButterflyAutoCraft = arg == true
 	end)
 
 	fn157(tbl24.bloomTiers, function(arg)
-		local senaV4ButterflyRuntime = genv.__SenaV4ButterflyRuntime
+		local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
 
-		if senaV4ButterflyRuntime then
-			senaV4ButterflyRuntime.setTiers(fn67(arg))
+		if quantumV4ButterflyRuntime then
+			quantumV4ButterflyRuntime.setTiers(fn67(arg))
 		end
 	end)
 
 	fn157(tbl24.bloomRecipe, function(arg)
-		local senaV4ButterflyRuntime = genv.__SenaV4ButterflyRuntime
+		local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
 
-		if senaV4ButterflyRuntime then
-			senaV4ButterflyRuntime.setRecipe(arg)
+		if quantumV4ButterflyRuntime then
+			quantumV4ButterflyRuntime.setRecipe(arg)
 		end
 	end)
 
 	fn157(tbl24.bloomMode, function(arg)
-		local senaV4ButterflyRuntime = genv.__SenaV4ButterflyRuntime
+		local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
 
-		if senaV4ButterflyRuntime then
-			senaV4ButterflyRuntime.setMode(arg)
+		if quantumV4ButterflyRuntime then
+			quantumV4ButterflyRuntime.setMode(arg)
 		end
 	end)
 
@@ -34481,19 +34285,19 @@ local function fn66()
 	fn157(tbl24.antiGuardKnockback, fn100)
 
 	fn157(tbl24.placeRarity, function(arg)
-		senaV4Config.PlaceRarities = fn67(arg)
+		quantumV4Config.PlaceRarities = fn67(arg)
 	end)
 
 	fn157(v21, function(arg)
-		senaV4Config.SellNames = fn67(arg)
+		quantumV4Config.SellNames = fn67(arg)
 	end)
 
 	fn157(v22, function(arg)
-		senaV4Config.SellRarities = fn67(arg)
+		quantumV4Config.SellRarities = fn67(arg)
 	end)
 
 	fn157(v23, function(arg)
-		senaV4Config.SellEggRarities = fn67(arg)
+		quantumV4Config.SellEggRarities = fn67(arg)
 	end)
 
 	fn157(tbl24.sellPetValue, fn129)
@@ -34521,45 +34325,45 @@ local function fn66()
 	fn157(tbl24.stealHold, fn79)
 
 	fn157(tbl24.raceClaim, function(arg)
-		senaV4Config.RaceClaim = arg == true
+		quantumV4Config.RaceClaim = arg == true
 	end)
 
 	fn157(tbl24.raceBuyList, function(arg)
-		senaV4Config.RaceBuyList = fn67(arg)
+		quantumV4Config.RaceBuyList = fn67(arg)
 	end)
 
 	fn157(tbl24.raceBuy, function(arg)
-		senaV4Config.RaceBuy = arg == true
+		quantumV4Config.RaceBuy = arg == true
 	end)
 
 	fn157(tbl24.raceAuto, function(arg)
-		senaV4Config.RaceAuto = arg == true
+		quantumV4Config.RaceAuto = arg == true
 	end)
 
 	fn157(tbl24.starAlert, function(arg)
-		senaV4Config.StarAlert = arg == true
+		quantumV4Config.StarAlert = arg == true
 	end)
 
 	fn157(tbl24.starAutoCatch, function(arg)
-		senaV4Config.StarAutoCatch = arg == true
+		quantumV4Config.StarAutoCatch = arg == true
 	end)
 
 	fn157(tbl24.scrambleTradeInBanners, fn98)
 
 	fn157(tbl24.scrambleTradeInReroll, function(arg)
-		senaV4Config.ScrambleTradeInReroll = arg == true
+		quantumV4Config.ScrambleTradeInReroll = arg == true
 	end)
 
 	fn157(tbl24.scrambleTradeInTrade, function(arg)
-		senaV4Config.ScrambleTradeInTrade = arg == true
+		quantumV4Config.ScrambleTradeInTrade = arg == true
 	end)
 
 	fn157(tbl24.scrambleBossAuto, function(arg)
-		senaV4Config.ScrambleBossAuto = arg == true
-		local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
+		quantumV4Config.ScrambleBossAuto = arg == true
+		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
 
-		if senaV4ScrambleBoss and type(senaV4ScrambleBoss.setEnabled) == "function" then
-			pcall(senaV4ScrambleBoss.setEnabled, senaV4ScrambleBoss, arg == true)
+		if quantumV4ScrambleBoss and type(quantumV4ScrambleBoss.setEnabled) == "function" then
+			pcall(quantumV4ScrambleBoss.setEnabled, quantumV4ScrambleBoss, arg == true)
 		end
 	end)
 
@@ -34568,15 +34372,15 @@ local function fn66()
 
 		task.spawn(function()
 			while fn2() do
-				for i, v70 in ipairs(senaV4TaskLadder.DEFAULT) do
-					local v71 = senaV4TaskLadder.enabled(v70)
+				for i, v70 in ipairs(quantumV4TaskLadder.DEFAULT) do
+					local v71 = quantumV4TaskLadder.enabled(v70)
 
 					if type(taskOrder.SetVisible) == "function" then
 						pcall(taskOrder.SetVisible, taskOrder, v70, v71)
 					end
 
 					if v71 then
-						local v72, v73 = senaV4TaskLadder.describe(v70)
+						local v72, v73 = quantumV4TaskLadder.describe(v70)
 						pcall(taskOrder.SetStatus, taskOrder, v70, v72, v73)
 					end
 				end
@@ -34597,15 +34401,15 @@ local function fn66()
 	fn157(tbl24.webhookEnabled, fn150)
 
 	fn157(tbl24.webhookDisconnect, function(arg)
-		senaV4Config.WebhookDisconnect = arg == true
+		quantumV4Config.WebhookDisconnect = arg == true
 	end)
 
 	fn157(tbl24.helpFriend, function(arg)
-		senaV4Config.HelpFriend = arg == true
+		quantumV4Config.HelpFriend = arg == true
 	end)
 
 	fn157(tbl24.lowSpeedBoost, function(arg)
-		senaV4Config.LowSpeedBoost = arg == true
+		quantumV4Config.LowSpeedBoost = arg == true
 	end)
 
 	fn157(tbl24.autoSteal, fn78)
@@ -34626,23 +34430,23 @@ local function fn66()
 		end
 	end
 
-	genv.__SenaV4HubShutdown = function()
-		if senaV4PlayerSteal then
-			pcall(senaV4PlayerSteal.setEnabled, senaV4PlayerSteal, false)
+	genv.__QuantumV4HubShutdown = function()
+		if quantumV4PlayerSteal then
+			pcall(quantumV4PlayerSteal.setEnabled, quantumV4PlayerSteal, false)
 		end
 
 		for i, v70 in ipairs({"AutoSteal", "AutoPlace", "AutoHatch", "AutoMutation", "AutoRingEvent", "AutoSell", "AutoSellEgg", "StealPlayers", "ScrambleBossAuto", "RaceAuto", "RaceClaim", "RaceBuy", "StarAutoCatch", "ButterflyAutoCatch", "ButterflyAutoNet", "ButterflyAutoTrade", "ButterflyAutoCraft"}) do
-			senaV4Config[v70] = false
+			quantumV4Config[v70] = false
 		end
 
 		if v13 then
 			pcall(v13.setEnabled, v13, false)
 		end
 
-		local senaV4ScrambleBoss = genv.__SenaV4ScrambleBoss
+		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
 
-		if senaV4ScrambleBoss and type(senaV4ScrambleBoss.setEnabled) == "function" then
-			pcall(senaV4ScrambleBoss.setEnabled, senaV4ScrambleBoss, false)
+		if quantumV4ScrambleBoss and type(quantumV4ScrambleBoss.setEnabled) == "function" then
+			pcall(quantumV4ScrambleBoss.setEnabled, quantumV4ScrambleBoss, false)
 		end
 
 		local value = v28 and rawget(v28, "Gui") or nil
