@@ -8707,6 +8707,125 @@ local v8 = (function()
 		return true
 	end
 
+	index._fireEggPickup = function(arg, uid, eggRecord, slotKey)
+		if not uid then
+			return
+		end
+		local rec = eggRecord or EggState2.ReadFieldEgg(uid) or (arg.records and arg.records[uid])
+		if not slotKey and rec and rec.AreaId and rec.NestId then
+			pcall(function()
+				local AreaEggSlotIdentity = require(ReplicatedStorage2.Shared.Util.AreaEggSlotIdentity)
+				if AreaEggSlotIdentity then
+					slotKey = AreaEggSlotIdentity.SlotKey(rec.AreaId, rec.NestId)
+				end
+			end)
+			if not slotKey then
+				slotKey = string.format("%s:%s", tostring(rec.AreaId), tostring(rec.NestId))
+			end
+		end
+
+		local character = localPlayer2.Character
+		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+		if humanoid then
+			pcall(humanoid.UnequipTools, humanoid)
+			humanoid.PlatformStand = false
+			humanoid.Sit = false
+		end
+
+		pcall(function()
+			local RagdollJoints = require(ReplicatedStorage2.Shared.Modules.RagdollJoints)
+			if RagdollJoints and RagdollJoints.Release and character then
+				RagdollJoints.Release(character)
+			end
+		end)
+
+		task.spawn(function()
+			pcall(function()
+				if slotKey then
+					eggWorld.AskFieldEggCarry:InvokeServer({ Uid = uid, FirstAreaSlotKey = slotKey })
+				end
+				eggWorld.AskFieldEggCarry:InvokeServer({ Uid = uid })
+			end)
+		end)
+
+		task.spawn(function()
+			pcall(function()
+				if slotKey then
+					EggState2.CarryFieldEgg(uid, slotKey)
+				end
+				EggState2.CarryFieldEgg(uid)
+			end)
+		end)
+
+		local prompts = {}
+		local function scanPrompts(container)
+			if not container then
+				return
+			end
+			for _, d in ipairs(container:GetDescendants()) do
+				if d:IsA("ProximityPrompt") then
+					table.insert(prompts, d)
+				end
+			end
+		end
+
+		local areaSlots = workspace:FindFirstChild("AreaEggSlotsClient")
+		scanPrompts(areaSlots and areaSlots:FindFirstChild(tostring(uid)))
+
+		local fieldSlots = workspace:FindFirstChild("FieldEggsClient")
+		scanPrompts(fieldSlots and fieldSlots:FindFirstChild(tostring(uid)))
+
+		local dropSlots = workspace:FindFirstChild("DroppedEggsClient")
+		scanPrompts(dropSlots and dropSlots:FindFirstChild(tostring(uid)))
+
+		if #prompts == 0 and humanoidRootPart then
+			for _, d in ipairs(workspace:GetDescendants()) do
+				if d:IsA("ProximityPrompt") and (d.Name == "CarryAreaEgg" or (d.ActionText and d.ActionText:lower():find("carry"))) then
+					local p = d.Parent
+					if p and p:IsA("BasePart") and (p.Position - humanoidRootPart.Position).Magnitude <= 20 then
+						table.insert(prompts, d)
+					end
+				end
+			end
+		end
+
+		for _, prompt in ipairs(prompts) do
+			pcall(function()
+				prompt.HoldDuration = 0
+				prompt.RequiresLineOfSight = false
+				prompt.MaxActivationDistance = 999
+				if type(fireproximityprompt) == "function" then
+					pcall(fireproximityprompt, prompt, 0)
+					pcall(fireproximityprompt, prompt)
+				end
+				prompt:InputHoldBegin()
+				prompt:InputHoldEnd()
+				local conns = getconnections and getconnections(prompt.Triggered) or {}
+				for _, c in ipairs(conns) do
+					if c.Fire then
+						pcall(c.Fire, c)
+					end
+					if c.Function then
+						pcall(c.Function)
+					end
+				end
+			end)
+		end
+
+		if type(firetouchinterest) == "function" and humanoidRootPart then
+			pcall(function()
+				local slotObj = (areaSlots and areaSlots:FindFirstChild(tostring(uid))) or (fieldSlots and fieldSlots:FindFirstChild(tostring(uid)))
+				local hit = slotObj and (slotObj:FindFirstChild("Hitbox") or slotObj:FindFirstChildWhichIsA("BasePart", true))
+				if hit then
+					firetouchinterest(humanoidRootPart, hit, 0)
+					firetouchinterest(humanoidRootPart, hit, 1)
+				end
+			end)
+		end
+	end
+
 	index._requestCarry = function(arg, arg2, arg3)
 		if not arg:_wallOpen() then
 			arg:_finish("Wall closed before carry")
@@ -8867,7 +8986,8 @@ local v8 = (function()
 					end
 				end
 
-				local v11 = AreaEggSlotIdentity.LooksLikeFirstAreaUid(v8.Uid) and AreaEggSlotIdentity.SlotKey(v8.AreaId, v8.NestId) or nil
+				local v11 = AreaEggSlotIdentity.LooksLikeFirstAreaUid(v8.Uid) and AreaEggSlotIdentity.SlotKey(v8.AreaId, v8.NestId) or AreaEggSlotIdentity.SlotKey(v8.AreaId, v8.NestId)
+				arg:_fireEggPickup(v8.Uid, v8, v11)
 				humanoidRootPart, character, position = pcall(fn62, v8.Uid, v11)
 				local v12 = if humanoidRootPart then if character == true then nil else position else tostring(character)
 
@@ -10302,7 +10422,7 @@ local v8 = (function()
 		end
 
 		arg:_setStatus("Securing egg")
-		local carryDeadline = os.clock() + 1.8
+		local carryDeadline = os.clock() + 2.5
 		local carried = false
 
 		local function checkCarried()
@@ -10315,6 +10435,17 @@ local v8 = (function()
 				return true
 			end
 			return false
+		end
+
+		local slotKey = nil
+		pcall(function()
+			local AreaEggSlotIdentity = require(ReplicatedStorage2.Shared.Util.AreaEggSlotIdentity)
+			if AreaEggSlotIdentity and targetEgg.AreaId and targetEgg.NestId then
+				slotKey = AreaEggSlotIdentity.SlotKey(targetEgg.AreaId, targetEgg.NestId)
+			end
+		end)
+		if not slotKey and targetEgg.AreaId and targetEgg.NestId then
+			slotKey = string.format("%s:%s", tostring(targetEgg.AreaId), tostring(targetEgg.NestId))
 		end
 
 		while os.clock() < carryDeadline and not arg.destroyed and arg.enabled do
@@ -10331,22 +10462,7 @@ local v8 = (function()
 				humanoidRootPart.AssemblyAngularVelocity = Vector3.zero
 			end
 
-			pcall(function()
-				eggWorld.AskFieldEggCarry:InvokeServer({ Uid = uid })
-			end)
-			pcall(function()
-				EggState2.CarryFieldEgg(uid)
-			end)
-			pcall(function()
-				local slots = workspace:FindFirstChild("AreaEggSlotsClient")
-				local slotObj = slots and slots:FindFirstChild(tostring(uid))
-				local prompt = slotObj and (slotObj:FindFirstChild("CarryAreaEgg", true) or slotObj:FindFirstChildWhichIsA("ProximityPrompt", true))
-				if prompt and prompt.Enabled and type(fireproximityprompt) == "function" then
-					prompt.HoldDuration = 0
-					prompt.RequiresLineOfSight = false
-					fireproximityprompt(prompt, 0)
-				end
-			end)
+			arg:_fireEggPickup(uid, targetEgg, slotKey)
 
 			RunService2.Heartbeat:Wait()
 		end
@@ -10954,11 +11070,7 @@ local v8 = (function()
 					n71 = os.clock() + 0.1
 					arg:_setStatus("Securing egg")
 
-					task.spawn(function()
-						pcall(function()
-							eggWorld.AskFieldEggCarry:InvokeServer({Uid = uid})
-						end)
-					end)
+					arg:_fireEggPickup(uid, v8, nil)
 				end
 
 				RunService2.Heartbeat:Wait()
@@ -33321,12 +33433,36 @@ local function fn66()
 		Acrylic = false,
 		Theme = "Cloudy",
 		MinimizeKey = Enum.KeyCode.LeftControl,
-		MinimizeIcon = "lucide/shield"
+		MinimizeIcon = "rbxassetid://10734950309"
 	})
 
 	pcall(function()
 		if Window.SetMinimizeIcon then
-			Window:SetMinimizeIcon("lucide/shield")
+			Window:SetMinimizeIcon("rbxassetid://10734950309")
+		elseif Window.SetFloatingIcon then
+			Window:SetFloatingIcon("rbxassetid://10734950309")
+		end
+	end)
+
+	pcall(function()
+		if Window.TitleBar and Window.TitleBar.CloseButton then
+			if type(Window.TitleBar.CloseButton.SetCallback) == "function" then
+				Window.TitleBar.CloseButton.SetCallback(function()
+					Window:Minimize()
+				end)
+			end
+			if Window.TitleBar.CloseButton.Frame then
+				pcall(function()
+					if getconnections then
+						for _, conn in ipairs(getconnections(Window.TitleBar.CloseButton.Frame.MouseButton1Click)) do
+							conn:Disable()
+						end
+					end
+				end)
+				Window.TitleBar.CloseButton.Frame.MouseButton1Click:Connect(function()
+					Window:Minimize()
+				end)
+			end
 		end
 	end)
 
