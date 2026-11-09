@@ -14,15 +14,15 @@ end
 
 local genv = getgenv and getgenv() or _G
 
-if type(genv.__QuantumV4HubShutdown) == "function" then
-	pcall(genv.__QuantumV4HubShutdown)
+if type(genv.__QuantumHubShutdown) == "function" then
+	pcall(genv.__QuantumHubShutdown)
 end
 
-local quantumV4HubSession = {}
-genv.__QuantumV4HubSession = quantumV4HubSession
+local quantumHubSession = {}
+genv.__QuantumHubSession = quantumHubSession
 
 local function fn2()
-	return genv.__QuantumV4HubSession == quantumV4HubSession
+	return genv.__QuantumHubSession == quantumHubSession
 end
 
 do
@@ -91,10 +91,10 @@ do
 	end
 
 	local function fn5(arg)
-		if genv.__QuantumV4TamperRejoining then
+		if genv.__QuantumTamperRejoining then
 			return
 		end
-		genv.__QuantumV4TamperRejoining = true
+		genv.__QuantumTamperRejoining = true
 		warn("[Quantum] tamper detected (" .. tostring(arg) .. ") - rejoining")
 
 		pcall(function()
@@ -126,20 +126,20 @@ do
 	end)
 end
 
-genv.__QuantumV4IdentityGetter = genv.getthreadidentity or genv.get_thread_identity or genv.getidentity or genv.getthreadcontext or genv.get_thread_context
-genv.__QuantumV4IdentitySetter = genv.setthreadidentity or genv.set_thread_identity or genv.setidentity or genv.setthreadcontext or genv.set_thread_context
-local quantumV4IdentitySetter = genv.__QuantumV4IdentitySetter
+genv.__QuantumIdentityGetter = genv.getthreadidentity or genv.get_thread_identity or genv.getidentity or genv.getthreadcontext or genv.get_thread_context
+genv.__QuantumIdentitySetter = genv.setthreadidentity or genv.set_thread_identity or genv.setidentity or genv.setthreadcontext or genv.set_thread_context
+local quantumIdentitySetter = genv.__QuantumIdentitySetter
 
-if type(quantumV4IdentitySetter) == "function" then
-	pcall(quantumV4IdentitySetter, 8)
-	genv.__QuantumV4UICapabilityIdentity = 8
+if type(quantumIdentitySetter) == "function" then
+	pcall(quantumIdentitySetter, 8)
+	genv.__QuantumUICapabilityIdentity = 8
 end
 
 if not rawget(_G, "setfpscap") and not rawget(_G, "set_fps_cap") then
-	quantumV4IdentitySetter = type(setfpscap) == "function"
+	quantumIdentitySetter = type(setfpscap) == "function"
 end
 
-genv.__QuantumV4SetCapFps = function(arg)
+genv.__QuantumSetCapFps = function(arg)
 	local n = tonumber(arg) or 240
 	local n2 = math.clamp(math.floor(n), 1, 1000)
 	local flag = rawget(_G, "setfpscap") or rawget(_G, "set_fps_cap") or type(setfpscap) == "function" and setfpscap
@@ -149,20 +149,20 @@ genv.__QuantumV4SetCapFps = function(arg)
 	return false
 end
 
-if type(genv.__QuantumV4TweenRuntimeCleanup) == "function" then
-	pcall(genv.__QuantumV4TweenRuntimeCleanup)
+if type(genv.__QuantumTweenRuntimeCleanup) == "function" then
+	pcall(genv.__QuantumTweenRuntimeCleanup)
 end
 
-if type(genv.__QuantumV4EggRuntimeCleanup) == "function" then
-	pcall(genv.__QuantumV4EggRuntimeCleanup)
+if type(genv.__QuantumEggRuntimeCleanup) == "function" then
+	pcall(genv.__QuantumEggRuntimeCleanup)
 end
 
-if type(genv.__QuantumV4AntiGuardCleanup) == "function" then
-	pcall(genv.__QuantumV4AntiGuardCleanup)
+if type(genv.__QuantumAntiGuardCleanup) == "function" then
+	pcall(genv.__QuantumAntiGuardCleanup)
 end
 
-genv.__QuantumV4TweenRuntimeGeneration = (genv.__QuantumV4TweenRuntimeGeneration or 0) + 1
-local tbl2 = {genv.__QuantumV4TweenRuntimeGeneration, {KEY = "__QuantumV4StealAnEggMovementSpoof", VERSION = 436, INTEGRITY_KEY = "__QuantumV4StealAnEggIntegritySpoof", SIGNAL = "ClientCharacter: GetDebugSnapshot", HEADROOM = 1.35, CLAMP = 0.15, PADDING = 24, MULTIPLIER = 10, MIN_INPUT = 20, MAX_INPUT = 100, DEF_INPUT = 60, MIN_SPEED = 200, MAX_SPEED = 1000, DEF_SPEED = 600, FIELDS = {"LastObservedSample", "LastSample", "LastGoodSample", "LastGameplayTrustedSample", "LastValidatedSample", "LastValidatedGroundedSample", "LastConfirmedGroundSample", "CandidateGroundedSample"}}}
+genv.__QuantumTweenRuntimeGeneration = (genv.__QuantumTweenRuntimeGeneration or 0) + 1
+local tbl2 = {genv.__QuantumTweenRuntimeGeneration, {KEY = "__QuantumStealAnEggMovementSpoof", VERSION = 436, INTEGRITY_KEY = "__QuantumStealAnEggIntegritySpoof", SIGNAL = "ClientCharacter: GetDebugSnapshot", HEADROOM = 1.35, CLAMP = 0.15, PADDING = 24, MULTIPLIER = 10, MIN_INPUT = 20, MAX_INPUT = 100, DEF_INPUT = 60, MIN_SPEED = 200, MAX_SPEED = 1000, DEF_SPEED = 600, FIELDS = {"LastObservedSample", "LastSample", "LastGoodSample", "LastGameplayTrustedSample", "LastValidatedSample", "LastValidatedGroundedSample", "LastConfirmedGroundSample", "CandidateGroundedSample"}}}
 tbl2.n = 2
 local v2
 v, v2 = tbl2[1], tbl2[2]
@@ -193,7 +193,7 @@ local function fn3()
 	return n
 end
 
-genv.__QuantumV4NetPing = function()
+genv.__QuantumNetPing = function()
 	local n2 = 0
 
 	pcall(function()
@@ -203,7 +203,7 @@ genv.__QuantumV4NetPing = function()
 	return tonumber(n2) or 0
 end
 
-local n2, n3, name, str, v3 = 8, 1, "__QuantumV4HoverPad", "QuantumV4RuntimeOwner"
+local n2, n3, name, str, v3 = 8, 1, "__QuantumHoverPad", "QuantumRuntimeOwner"
 local str2 = tostring(math.random(100000, 999999))
 local connection, connection2
 local tbl3, v4, fn4 = {}
@@ -374,7 +374,7 @@ local function fn12()
 	fn8()
 end
 
-genv.__QuantumV4TweenRuntimeCleanup = function()
+genv.__QuantumTweenRuntimeCleanup = function()
 	for k, v5 in pairs(tbl3) do
 		if type(v5) == "table" then
 			v5.cancelled = true
@@ -718,7 +718,7 @@ local function fn26()
 	end
 
 	connection3 = RunService.PreSimulation:Connect(function()
-		if genv.__QuantumV4TweenRuntimeGeneration ~= v then
+		if genv.__QuantumTweenRuntimeGeneration ~= v then
 			local v5 = connection3
 			connection3 = nil
 
@@ -766,7 +766,7 @@ local function fn27()
 	fn25()
 end
 
-genv.__QuantumV4TweenRuntimeCleanup = function()
+genv.__QuantumTweenRuntimeCleanup = function()
 	fn12()
 	fn27()
 end
@@ -885,7 +885,7 @@ local function fn30(character)
 end
 
 localPlayer.CharacterAdded:Connect(fn30)
-local quantumV4Config = {AutoSteal = false, HelpFriend = false, LowSpeedBoost = false, StarAlert = true, ScrambleTradeInTrade = false, ScrambleTradeInReroll = false, ScrambleTradeInBanners = {}, ScrambleBossAuto = false, StealMode = "Instant", FlyAerial = false, FlyZigzag = false, StealHoldSeconds = 5, StealAreas = {"None"}, StealRarities = {"None"}, StealNamesFilter = {"None"}, StealMinValue = 0, StealMutations = {"None"}, StealMinWeight = 0, StealPriority = "Rarity", TaskOrder = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}, AutoFavorite = false, FavMode = "Rarity", FavRarities = {"None"}, FavSpecies = {"None"}, AutoEquipBest = false, AutoClaimOffline = false, AutoBaseUpgrade = false, AutoClaimAlmanac = false, AutoFusePets = false, ScrambleAutoBuy = false, ScrambleBuyList = {}, ButterflyAutoNet = false, ButterflyAutoCatch = false, ButterflyEsp = false, ButterflyTiers = {}, ButterflyAutoTrade = false, ButterflyTradeRecipe = "All", ButterflyCatchMode = "Tween", ButterflyAutoCraft = false, WispAutoQuest = false, BanjoAuto = false, Noclip = false, BottingMode = false, AntiCutscene = false, FuseSelectedOnly = false, FuseRarities = {"None"}, FuseSpecies = {"None"}, EspDetails = {"Name", "Rarity", "Value"}, BackpackRateEsp = false, AntiAFK = true, AutoReconnect = true, AutoExecute = false, AutoPlace = false, PlaceRarities = {"None"}, AutoHatch = false, SellAll = false, AutoSell = false, SellNames = {"None"}, SellRarities = {"None"}, AutoSellEgg = false, SellEggRarities = {"None"}, WebhookEnabled = false, WebhookURL = "", WebhookDisconnect = false, TweenSpeedMultiplier = 60, AutoTreadmillIdle = false, AutoTreadmillUpgrade = false, AntiTreadmill = false, HopNoMatch = false, PrivateServerMax = "2", PrivateServerAuto = false, HopCooldown = 5, AutoIndex = false, AntiHitGuard = false, FlyForCapture = false, AutoStealCapture = false, InstantGrab = false, InfiniteJump = false, WalkSpeedMultiplier = 1, AntiGuardKnockback = true, GodMode = true, EggPredictUI = false, EggESP = false, StealPlayers = false, StealPlayerRarities = {"None"}, StealPlayerMinValue = 0, StealPlayerTarget = "Any Player", WebhookRarities = {"None"}, WebhookMinValue = 0}
+local quantumConfig = {AutoSteal = false, HelpFriend = false, LowSpeedBoost = false, StarAlert = true, ScrambleTradeInTrade = false, ScrambleTradeInReroll = false, ScrambleTradeInBanners = {}, ScrambleBossAuto = false, StealMode = "Fly", FlyAerial = false, FlyZigzag = false, StealHoldSeconds = 5, StealAreas = {"None"}, StealRarities = {"None"}, StealNamesFilter = {"None"}, StealMinValue = 0, StealMutations = {"None"}, StealMinWeight = 0, StealPriority = "Rarity", TaskOrder = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}, AutoFavorite = false, FavMode = "Rarity", FavRarities = {"None"}, FavSpecies = {"None"}, AutoEquipBest = false, AutoClaimOffline = false, AutoBaseUpgrade = false, AutoClaimAlmanac = false, AutoFusePets = false, ScrambleAutoBuy = false, ScrambleBuyList = {}, ButterflyAutoNet = false, ButterflyAutoCatch = false, ButterflyEsp = false, ButterflyTiers = {}, ButterflyAutoTrade = false, ButterflyTradeRecipe = "All", ButterflyCatchMode = "Tween", ButterflyAutoCraft = false, WispAutoQuest = false, BanjoAuto = false, Noclip = false, BottingMode = false, AntiCutscene = false, FuseSelectedOnly = false, FuseRarities = {"None"}, FuseSpecies = {"None"}, EspDetails = {"Name", "Rarity", "Value"}, BackpackRateEsp = false, AntiAFK = true, AutoReconnect = true, AutoExecute = false, AutoPlace = false, PlaceRarities = {"None"}, AutoHatch = false, SellAll = false, AutoSell = false, SellNames = {"None"}, SellRarities = {"None"}, AutoSellEgg = false, SellEggRarities = {"None"}, WebhookEnabled = false, WebhookURL = "", WebhookDisconnect = false, TweenSpeedMultiplier = 60, AutoTreadmillIdle = false, AutoTreadmillUpgrade = false, AntiTreadmill = false, HopNoMatch = false, PrivateServerMax = "2", PrivateServerAuto = false, HopCooldown = 5, AutoIndex = false, AntiHitGuard = false, FlyForCapture = false, AutoStealCapture = false, InstantGrab = false, InfiniteJump = false, WalkSpeedMultiplier = 1, AntiGuardKnockback = true, GodMode = true, EggPredictUI = false, EggESP = false, StealPlayers = false, StealPlayerRarities = {"None"}, StealPlayerMinValue = 0, StealPlayerTarget = "Any Player", WebhookRarities = {"None"}, WebhookMinValue = 0}
 local EggState = require(game:GetService("ReplicatedStorage").Client.EggState)
 EggState.GetAreaEggSnapshot = EggState.ReadFieldEggs
 EggState.GetAreaEggRecord = EggState.ReadFieldEgg
@@ -913,13 +913,13 @@ local AreaEggResetWall = require(game:GetService("ReplicatedStorage").Client.Are
 AreaEggResetWall.IsClosed = AreaEggResetWall.IsSealed
 
 fn4 = function()
-	if genv.__QuantumV4AdminBoost == true then
+	if genv.__QuantumAdminBoost == true then
 		return 4000
 	end
-	return math.clamp(math.floor((tonumber(quantumV4Config.TweenSpeedMultiplier) or v2.DEF_INPUT) + 0.5), v2.MIN_INPUT, v2.MAX_INPUT) * v2.MULTIPLIER
+	return math.clamp(math.floor((tonumber(quantumConfig.TweenSpeedMultiplier) or v2.DEF_INPUT) + 0.5), v2.MIN_INPUT, v2.MAX_INPUT) * v2.MULTIPLIER
 end
 
-quantumV4Config.applyStealValueInput = function(arg, arg2)
+quantumConfig.applyStealValueInput = function(arg, arg2)
 	local str3 = string.lower(tostring(arg2 or "")):gsub("[%s,]", "")
 	if str3 == "" then
 		arg.StealMinValue = 0
@@ -934,7 +934,7 @@ quantumV4Config.applyStealValueInput = function(arg, arg2)
 	return true
 end
 
-quantumV4Config.getAreaEggValue = function(arg, arg2)
+quantumConfig.getAreaEggValue = function(arg, arg2)
 	if not arg._assetGenerationUtil then
 		arg._assetGenerationUtil = require(game:GetService("ReplicatedStorage").Shared.Util.AssetEarnings)
 	end
@@ -976,26 +976,26 @@ local function fn31()
 	return false
 end
 
-local quantumV4TaskLadder = {}
+local quantumTaskLadder = {}
 
 do
-	quantumV4TaskLadder.DEFAULT = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}
-	quantumV4TaskLadder.TITLES = {auto_steal = "Auto Steal", race = "Race Rally", star = "Shooting Star", mech_boss = "Mech Boss", butterfly = "Butterfly Bloom", auto_place = "Auto Place", use_scrambled = "Use Scrambled", auto_sell = "Auto Sell", treadmill = "Treadmill"}
-	quantumV4TaskLadder.PINNED = {treadmill = true}
+	quantumTaskLadder.DEFAULT = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}
+	quantumTaskLadder.TITLES = {auto_steal = "Auto Steal", race = "Race Rally", star = "Shooting Star", mech_boss = "Mech Boss", butterfly = "Butterfly Bloom", auto_place = "Auto Place", use_scrambled = "Use Scrambled", auto_sell = "Auto Sell", treadmill = "Treadmill"}
+	quantumTaskLadder.PINNED = {treadmill = true}
 	local tbl5 = {}
 
-	quantumV4TaskLadder.register = function(arg, arg2)
+	quantumTaskLadder.register = function(arg, arg2)
 		tbl5[arg] = arg2
 	end
 
-	quantumV4TaskLadder.sanitize = function(arg)
+	quantumTaskLadder.sanitize = function(arg)
 		local tbl6 = {}
 		local tbl7 = {}
 
 		local function fn32(arg2)
 			local str3 = tostring(arg2)
 
-			if quantumV4TaskLadder.TITLES[str3] and (not tbl7[str3] and not quantumV4TaskLadder.PINNED[str3]) then
+			if quantumTaskLadder.TITLES[str3] and (not tbl7[str3] and not quantumTaskLadder.PINNED[str3]) then
 				tbl7[str3] = true
 				tbl6[#tbl6 + 1] = str3
 			end
@@ -1005,12 +1005,12 @@ do
 			fn32(v5)
 		end
 
-		for i, v5 in ipairs(quantumV4TaskLadder.DEFAULT) do
+		for i, v5 in ipairs(quantumTaskLadder.DEFAULT) do
 			fn32(v5)
 		end
 
-		for i, v5 in ipairs(quantumV4TaskLadder.DEFAULT) do
-			if quantumV4TaskLadder.PINNED[v5] and not tbl7[v5] then
+		for i, v5 in ipairs(quantumTaskLadder.DEFAULT) do
+			if quantumTaskLadder.PINNED[v5] and not tbl7[v5] then
 				tbl7[v5] = true
 				tbl6[#tbl6 + 1] = v5
 			end
@@ -1021,19 +1021,19 @@ do
 
 	local v5, v6
 
-	quantumV4TaskLadder.order = function()
-		local taskOrder = quantumV4Config and quantumV4Config.TaskOrder
+	quantumTaskLadder.order = function()
+		local taskOrder = quantumConfig and quantumConfig.TaskOrder
 
 		if taskOrder ~= v6 or not v5 then
 			v6 = taskOrder
-			v5 = quantumV4TaskLadder.sanitize(taskOrder)
+			v5 = quantumTaskLadder.sanitize(taskOrder)
 		end
 
 		return v5
 	end
 
-	quantumV4TaskLadder.rank = function(arg)
-		for i, v7 in ipairs(quantumV4TaskLadder.order()) do
+	quantumTaskLadder.rank = function(arg)
+		for i, v7 in ipairs(quantumTaskLadder.order()) do
 			if v7 == arg then
 				return i
 			end
@@ -1055,19 +1055,19 @@ do
 		return nil
 	end
 
-	quantumV4TaskLadder.wants = function(arg)
+	quantumTaskLadder.wants = function(arg)
 		return fn32(arg, "wants") == true
 	end
 
-	quantumV4TaskLadder.active = function(arg)
+	quantumTaskLadder.active = function(arg)
 		return fn32(arg, "active") == true
 	end
 
-	quantumV4TaskLadder.enabled = function(arg)
+	quantumTaskLadder.enabled = function(arg)
 		return fn32(arg, "enabled") == true
 	end
 
-	quantumV4TaskLadder.bossFighting = function()
+	quantumTaskLadder.bossFighting = function()
 		if localPlayer:GetAttribute("InScrambleArena") == true then
 			return true
 		end
@@ -1075,48 +1075,48 @@ do
 		if type(localPlayer:GetAttribute("RaceId")) == "string" then
 			return true
 		end
-		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
-		return quantumV4ScrambleBoss ~= nil and not quantumV4ScrambleBoss.destroyed and quantumV4ScrambleBoss.enabled == true and quantumV4ScrambleBoss:_inArena() == true
+		local quantumScrambleBoss = genv.__QuantumScrambleBoss
+		return quantumScrambleBoss ~= nil and not quantumScrambleBoss.destroyed and quantumScrambleBoss.enabled == true and quantumScrambleBoss:_inArena() == true
 	end
 
-	quantumV4TaskLadder.stealCarrying = function()
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+	quantumTaskLadder.stealCarrying = function()
+		local quantumEggRuntime = genv.__QuantumEggRuntime
 
-		if quantumV4EggRuntime then
-			if quantumV4EggRuntime.destroyed then
+		if quantumEggRuntime then
+			if quantumEggRuntime.destroyed then
 				return false
 			end
 		else
 			return false
 		end
 
-		if quantumV4EggRuntime._instantReturnToken ~= nil then
+		if quantumEggRuntime._instantReturnToken ~= nil then
 			return true
-		elseif quantumV4EggRuntime._forestDropInProgress ~= nil then
+		elseif quantumEggRuntime._forestDropInProgress ~= nil then
 			return true
 		end
 
-		local carry = quantumV4EggRuntime.carry
-		return carry ~= nil and carry.active == true and carry.uid ~= nil and carry.uid ~= quantumV4EggRuntime.primerUid
+		local carry = quantumEggRuntime.carry
+		return carry ~= nil and carry.active == true and carry.uid ~= nil and carry.uid ~= quantumEggRuntime.primerUid
 	end
 
 	local tbl6 = {}
 
 	local function fn33(arg)
-		if arg ~= "mech_boss" and quantumV4TaskLadder.bossFighting() then
+		if arg ~= "mech_boss" and quantumTaskLadder.bossFighting() then
 			return "mech_boss"
 		end
 
-		if arg ~= "auto_steal" and quantumV4TaskLadder.stealCarrying() then
+		if arg ~= "auto_steal" and quantumTaskLadder.stealCarrying() then
 			return "auto_steal"
 		end
 
-		for i, v7 in ipairs(quantumV4TaskLadder.order()) do
+		for i, v7 in ipairs(quantumTaskLadder.order()) do
 			if v7 == arg then
 				return nil
 			end
 
-			if quantumV4TaskLadder.wants(v7) then
+			if quantumTaskLadder.wants(v7) then
 				return v7
 			end
 		end
@@ -1124,7 +1124,7 @@ do
 		return nil
 	end
 
-	quantumV4TaskLadder.blocker = function(arg)
+	quantumTaskLadder.blocker = function(arg)
 		local now = os.clock()
 		local v7 = tbl6[arg]
 		if v7 and now - v7.at < 0.1 then
@@ -1142,9 +1142,9 @@ do
 		return v8
 	end
 
-	quantumV4TaskLadder.holder = function(arg)
-		for i, v7 in ipairs(quantumV4TaskLadder.order()) do
-			if v7 ~= arg and (not quantumV4TaskLadder.PINNED[v7] and quantumV4TaskLadder.active(v7)) then
+	quantumTaskLadder.holder = function(arg)
+		for i, v7 in ipairs(quantumTaskLadder.order()) do
+			if v7 ~= arg and (not quantumTaskLadder.PINNED[v7] and quantumTaskLadder.active(v7)) then
 				return v7
 			end
 		end
@@ -1152,22 +1152,22 @@ do
 		return nil
 	end
 
-	quantumV4TaskLadder.yieldLabel = function(arg)
-		local v7 = quantumV4TaskLadder.blocker(arg)
-		return v7 and "Yielding to " .. quantumV4TaskLadder.TITLES[v7] or nil
+	quantumTaskLadder.yieldLabel = function(arg)
+		local v7 = quantumTaskLadder.blocker(arg)
+		return v7 and "Yielding to " .. quantumTaskLadder.TITLES[v7] or nil
 	end
 
-	quantumV4TaskLadder.current = function()
-		if quantumV4TaskLadder.bossFighting() then
+	quantumTaskLadder.current = function()
+		if quantumTaskLadder.bossFighting() then
 			return "mech_boss"
 		end
 
-		if quantumV4TaskLadder.stealCarrying() then
+		if quantumTaskLadder.stealCarrying() then
 			return "auto_steal"
 		end
 
-		for i, v7 in ipairs(quantumV4TaskLadder.order()) do
-			if quantumV4TaskLadder.active(v7) then
+		for i, v7 in ipairs(quantumTaskLadder.order()) do
+			if quantumTaskLadder.active(v7) then
 				return v7
 			end
 		end
@@ -1175,31 +1175,31 @@ do
 		return nil
 	end
 
-	quantumV4TaskLadder.describe = function(arg)
-		if not quantumV4TaskLadder.enabled(arg) then
+	quantumTaskLadder.describe = function(arg)
+		if not quantumTaskLadder.enabled(arg) then
 			return "Off", "off"
 		end
 		local v7 = fn32(arg, "status")
 		local flag2 = type(v7) == "string" and v7 ~= "" and v7 or nil
 
-		if quantumV4TaskLadder.active(arg) then
+		if quantumTaskLadder.active(arg) then
 			return flag2 or "Running", "run"
-		elseif quantumV4TaskLadder.current() == arg then
+		elseif quantumTaskLadder.current() == arg then
 			return flag2 or "Running", "run"
 		end
 
-		local v8 = quantumV4TaskLadder.blocker(arg)
-		if v8 and quantumV4TaskLadder.wants(arg) then
-			return "Yielding to " .. quantumV4TaskLadder.TITLES[v8], "wait"
+		local v8 = quantumTaskLadder.blocker(arg)
+		if v8 and quantumTaskLadder.wants(arg) then
+			return "Yielding to " .. quantumTaskLadder.TITLES[v8], "wait"
 		end
 		return flag2 or "Idle", "off"
 	end
 end
 
-genv.__QuantumV4TaskLadder = quantumV4TaskLadder
+genv.__QuantumTaskLadder = quantumTaskLadder
 
 local function fn32()
-	return quantumV4TaskLadder.blocker("auto_sell") == nil
+	return quantumTaskLadder.blocker("auto_sell") == nil
 end
 
 local function fn33(arg)
@@ -1238,7 +1238,7 @@ local function fn33(arg)
 end
 
 local function fn34(arg, arg2, arg3, arg4)
-	if quantumV4Config.SellAll then
+	if quantumConfig.SellAll then
 		return true
 	end
 
@@ -1284,10 +1284,10 @@ local tbl5 = {CarryRetry = 0.25, CarryTimeout = 2, EarlyCarryDistance = 8, SafeS
 
 local function fn37(arg)
 	local tweenSpeedMultiplier = math.clamp(math.floor((tonumber(arg) or v2.DEF_INPUT) + 0.5), v2.MIN_INPUT, v2.MAX_INPUT)
-	if math.abs((quantumV4Config.TweenSpeedMultiplier or 0) - tweenSpeedMultiplier) <= 0.001 then
+	if math.abs((quantumConfig.TweenSpeedMultiplier or 0) - tweenSpeedMultiplier) <= 0.001 then
 		return
 	end
-	quantumV4Config.TweenSpeedMultiplier = tweenSpeedMultiplier
+	quantumConfig.TweenSpeedMultiplier = tweenSpeedMultiplier
 end
 
 local n7 = 0.08
@@ -1333,7 +1333,7 @@ local function fn38(arg, cameraSubject, arg2, arg3, arg4, arg5, arg6)
 	cameraSubject.AutoRotate = false
 	local n8 = arg6 and math.max(arg.Position.Y, arg2.Position.Y + n6, vector.Y + n6) or nil
 	local n9 = n8 and CFrame.new(arg2.Position.X, n8, arg2.Position.Z) * arg2.Rotation or arg2
-	local n10 = math.clamp(fn4(), v2.MIN_SPEED, genv.__QuantumV4AdminBoost == true and 3000 or v2.MAX_SPEED)
+	local n10 = math.clamp(fn4(), v2.MIN_SPEED, genv.__QuantumAdminBoost == true and 3000 or v2.MAX_SPEED)
 	fn15(parent, n10 * v2.HEADROOM)
 	local tbl7 = {cancelled = false}
 	tbl6[arg] = tbl7
@@ -1360,7 +1360,7 @@ local function fn38(arg, cameraSubject, arg2, arg3, arg4, arg5, arg6)
 		end
 		local result = RunService.Heartbeat:Wait()
 		local n13 = math.max(math.min(result, n4), 0.004166666666666667)
-		local n14 = math.clamp(fn4(), v2.MIN_SPEED, genv.__QuantumV4AdminBoost == true and 3000 or v2.MAX_SPEED)
+		local n14 = math.clamp(fn4(), v2.MIN_SPEED, genv.__QuantumAdminBoost == true and 3000 or v2.MAX_SPEED)
 		fn15(parent, n14 * v2.HEADROOM)
 		local v7 = fn13()[v2.INTEGRITY_KEY]
 		local state = type(v7) == "table" and v7.State or nil
@@ -1487,7 +1487,7 @@ do
 		local humanoid = parent and parent:FindFirstChildOfClass("Humanoid")
 
 		if humanoid then
-			local n8 = math.clamp(fn4(), v2.MIN_SPEED, genv.__QuantumV4AdminBoost == true and 3000 or v2.MAX_SPEED)
+			local n8 = math.clamp(fn4(), v2.MIN_SPEED, genv.__QuantumAdminBoost == true and 3000 or v2.MAX_SPEED)
 			fn15(parent, n8 * v2.HEADROOM)
 
 			if not fn24(humanoid, arg, n8, (Vector3.new(0, 0, 0))) then
@@ -1499,7 +1499,7 @@ do
 		return true
 	end
 
-	getgenv().QuantumV4Config = quantumV4Config
+	getgenv().QuantumConfig = quantumConfig
 
 	local function fn40(arg)
 		if arg and arg.Name == "PlayerTrap" then
@@ -1572,7 +1572,7 @@ do
 	task.spawn(fn41)
 	local v5
 	local flag2 = false
-	local tbl7 = {HoldSeconds = 0.3, ConfirmStableSeconds = 0.3, ConfirmTimeout = 2.5, PollSeconds = 0.05, ArrivalSettle = 0.5, DecoyName = "__QuantumV4TweenTreadmillDecoy"}
+	local tbl7 = {HoldSeconds = 0.3, ConfirmStableSeconds = 0.3, ConfirmTimeout = 2.5, PollSeconds = 0.05, ArrivalSettle = 0.5, DecoyName = "__QuantumTweenTreadmillDecoy"}
 
 	local function fn42()
 		local ok, result = pcall(function()
@@ -1647,7 +1647,7 @@ do
 	end
 
 	tbl7.destroyStealPopup = function(arg)
-		if quantumV4TaskLadder.current() == "auto_steal" and typeof(arg) == "Instance" then
+		if quantumTaskLadder.current() == "auto_steal" and typeof(arg) == "Instance" then
 			if arg.Name == "SpeedGainPopup" then
 				pcall(arg.Destroy, arg)
 			elseif arg.Name == "PlusOne" then
@@ -1974,9 +1974,9 @@ do
 		return humanoidRootPart and not fn45()
 	end
 
-	tbl7.previousCleanup = genv.__QuantumV4TweenRuntimeCleanup
+	tbl7.previousCleanup = genv.__QuantumTweenRuntimeCleanup
 
-	genv.__QuantumV4TweenRuntimeCleanup = function()
+	genv.__QuantumTweenRuntimeCleanup = function()
 		flag2 = false
 		fn43()
 		tbl7.removeDecoy()
@@ -1998,8 +1998,8 @@ do
 end
 
 do
-	if type(genv.__QuantumV4CosmeticSuppressCleanup) == "function" then
-		pcall(genv.__QuantumV4CosmeticSuppressCleanup)
+	if type(genv.__QuantumCosmeticSuppressCleanup) == "function" then
+		pcall(genv.__QuantumCosmeticSuppressCleanup)
 	end
 
 	local tbl7 = {}
@@ -2049,7 +2049,7 @@ do
 		local GuardPresentationComponent = require(ReplicatedStorage.Shared.Modules.GuardAreas.GuardPresentationComponent)
 
 		if type(GuardPresentationComponent) == "table" then
-			genv.__QuantumV4GuardPresentOrig = genv.__QuantumV4GuardPresentOrig or {PlayWake = GuardPresentationComponent.PlayWake, PlayHit = GuardPresentationComponent.PlayHit, PlayAfterWake = GuardPresentationComponent.PlayAfterWake, ScheduleAfterWake = GuardPresentationComponent.ScheduleAfterWake}
+			genv.__QuantumGuardPresentOrig = genv.__QuantumGuardPresentOrig or {PlayWake = GuardPresentationComponent.PlayWake, PlayHit = GuardPresentationComponent.PlayHit, PlayAfterWake = GuardPresentationComponent.PlayAfterWake, ScheduleAfterWake = GuardPresentationComponent.ScheduleAfterWake}
 
 			local function playWake()
 			end
@@ -2065,7 +2065,7 @@ do
 		end
 	end)
 
-	genv.__QuantumV4CosmeticSuppressCleanup = function()
+	genv.__QuantumCosmeticSuppressCleanup = function()
 		for i, v5 in ipairs(tbl7) do
 			pcall(function()
 				v5:Disconnect()
@@ -2073,13 +2073,13 @@ do
 		end
 
 		table.clear(tbl7)
-		local quantumV4GuardPresentOrig = genv.__QuantumV4GuardPresentOrig
+		local quantumGuardPresentOrig = genv.__QuantumGuardPresentOrig
 
-		if type(quantumV4GuardPresentOrig) == "table" then
+		if type(quantumGuardPresentOrig) == "table" then
 			pcall(function()
 				local GuardPresentationComponent = require(ReplicatedStorage.Shared.Modules.GuardAreas.GuardPresentationComponent)
 
-				for k, v5 in pairs(quantumV4GuardPresentOrig) do
+				for k, v5 in pairs(quantumGuardPresentOrig) do
 					GuardPresentationComponent[k] = v5
 				end
 			end)
@@ -2088,8 +2088,8 @@ do
 end
 
 do
-	if type(genv.__QuantumV4StealDeclutterCleanup) == "function" then
-		pcall(genv.__QuantumV4StealDeclutterCleanup)
+	if type(genv.__QuantumStealDeclutterCleanup) == "function" then
+		pcall(genv.__QuantumStealDeclutterCleanup)
 	end
 
 	local tbl7 = {{name = "ProximityPrompts", restore = true}, {name = "AreaGui", restore = false}}
@@ -2211,7 +2211,7 @@ do
 		end)
 	end
 
-	genv.__QuantumV4SetStealDeclutter = function(arg)
+	genv.__QuantumSetStealDeclutter = function(arg)
 		local flag3 = arg == true
 		if flag3 == flag2 then
 			return
@@ -2225,20 +2225,20 @@ do
 		end
 	end
 
-	genv.__QuantumV4StealDeclutterCleanup = function()
+	genv.__QuantumStealDeclutterCleanup = function()
 		flag2 = false
 		fn44()
 	end
 end
 
-if type(genv.__QuantumV4DecomBoostCleanup) == "function" then
-	pcall(genv.__QuantumV4DecomBoostCleanup)
+if type(genv.__QuantumDecomBoostCleanup) == "function" then
+	pcall(genv.__QuantumDecomBoostCleanup)
 end
 
 local tbl7 = {}
 local flag2 = false
 
-genv.__QuantumV4DecomBoostCleanup = function()
+genv.__QuantumDecomBoostCleanup = function()
 	for i, v5 in ipairs(tbl7) do
 		pcall(function()
 			v5:Disconnect()
@@ -2307,7 +2307,7 @@ local function fn43(arg)
 	return tool ~= nil and tool:GetAttribute("QuantumVisual") ~= nil
 end
 
-local quantumV4DecomBoostUndo = {effects = {}, parts = {}, decals = {}, snapshot = nil}
+local quantumDecomBoostUndo = {effects = {}, parts = {}, decals = {}, snapshot = nil}
 local tbl8 = {PlusOne = true, SpeedGainPopup = true, SellPayout = true, SyncedIncomeCash = true}
 local tbl9 = {PlayerPlotSign = true, CanUpgrade = true, AlertGui = true, OfflineMoneyClaimBillboard = true}
 
@@ -2324,7 +2324,7 @@ local function fn44(descendant)
 
 		if descendant:IsA("BillboardGui") and tbl9[descendant.Name] then
 			if descendant.Enabled then
-				quantumV4DecomBoostUndo.effects[descendant] = true
+				quantumDecomBoostUndo.effects[descendant] = true
 			end
 
 			descendant.Enabled = false
@@ -2333,7 +2333,7 @@ local function fn44(descendant)
 
 		if descendant:IsA("ParticleEmitter") or descendant:IsA("Trail") or descendant:IsA("Beam") or descendant:IsA("Sparkles") or descendant:IsA("Fire") or descendant:IsA("Smoke") or descendant:IsA("PostEffect") then
 			if descendant.Enabled then
-				quantumV4DecomBoostUndo.effects[descendant] = true
+				quantumDecomBoostUndo.effects[descendant] = true
 			end
 
 			descendant.Enabled = false
@@ -2410,7 +2410,7 @@ local function fn46()
 	flag3 = true
 	local Lighting = game:GetService("Lighting")
 
-	if not quantumV4DecomBoostUndo.snapshot then
+	if not quantumDecomBoostUndo.snapshot then
 		local tbl10 = {}
 
 		pcall(function()
@@ -2435,7 +2435,7 @@ local function fn46()
 				local clouds = terrain:FindFirstChildOfClass("Clouds")
 
 				if clouds then
-					tbl10.cloudsEnabled = clouds.Enabled
+					tbl10.cloudStateEnabled = clouds.Enabled
 				end
 			end)
 		end
@@ -2453,8 +2453,8 @@ local function fn46()
 			tbl10.quality = Enum.QualityLevel.Automatic
 		end
 
-		quantumV4DecomBoostUndo.snapshot = genv.__QuantumV4DecomSnapshot or tbl10
-		genv.__QuantumV4DecomSnapshot = quantumV4DecomBoostUndo.snapshot
+		quantumDecomBoostUndo.snapshot = genv.__QuantumDecomSnapshot or tbl10
+		genv.__QuantumDecomSnapshot = quantumDecomBoostUndo.snapshot
 	end
 
 	pcall(function()
@@ -2477,8 +2477,8 @@ local function fn46()
 				continue
 			elseif descendant:IsA("BasePart") then
 				pcall(function()
-					if not quantumV4DecomBoostUndo.parts[descendant] then
-						quantumV4DecomBoostUndo.parts[descendant] = {descendant.Material, descendant.CastShadow, descendant:IsA("MeshPart") and descendant.RenderFidelity or nil}
+					if not quantumDecomBoostUndo.parts[descendant] then
+						quantumDecomBoostUndo.parts[descendant] = {descendant.Material, descendant.CastShadow, descendant:IsA("MeshPart") and descendant.RenderFidelity or nil}
 					end
 
 					descendant.Material = Enum.Material.SmoothPlastic
@@ -2490,8 +2490,8 @@ local function fn46()
 				end)
 			elseif descendant:IsA("Decal") or descendant:IsA("Texture") then
 				pcall(function()
-					if descendant.Texture ~= "" and not quantumV4DecomBoostUndo.decals[descendant] then
-						quantumV4DecomBoostUndo.decals[descendant] = descendant.Texture
+					if descendant.Texture ~= "" and not quantumDecomBoostUndo.decals[descendant] then
+						quantumDecomBoostUndo.decals[descendant] = descendant.Texture
 					end
 
 					descendant.Texture = ""
@@ -2546,7 +2546,7 @@ local function fn46()
 	flag3 = false
 end
 
-quantumV4DecomBoostUndo.revert = function()
+quantumDecomBoostUndo.revert = function()
 	for i, v5 in ipairs(tbl7) do
 		pcall(function()
 			v5:Disconnect()
@@ -2555,7 +2555,7 @@ quantumV4DecomBoostUndo.revert = function()
 
 	table.clear(tbl7)
 	flag2 = false
-	local snapshot = quantumV4DecomBoostUndo.snapshot
+	local snapshot = quantumDecomBoostUndo.snapshot
 	local Lighting = game:GetService("Lighting")
 
 	if snapshot then
@@ -2585,12 +2585,12 @@ quantumV4DecomBoostUndo.revert = function()
 				end)
 			end
 
-			if snapshot.cloudsEnabled ~= nil then
+			if snapshot.cloudStateEnabled ~= nil then
 				pcall(function()
 					local clouds = terrain:FindFirstChildOfClass("Clouds")
 
 					if clouds then
-						clouds.Enabled = snapshot.cloudsEnabled
+						clouds.Enabled = snapshot.cloudStateEnabled
 					end
 				end)
 			end
@@ -2609,7 +2609,7 @@ quantumV4DecomBoostUndo.revert = function()
 
 	local n8 = 0
 
-	for k, part in pairs(quantumV4DecomBoostUndo.parts) do
+	for k, part in pairs(quantumDecomBoostUndo.parts) do
 		if k.Parent then
 			pcall(function()
 				k.Material = part[1]
@@ -2628,7 +2628,7 @@ quantumV4DecomBoostUndo.revert = function()
 		end
 	end
 
-	for k, decal in pairs(quantumV4DecomBoostUndo.decals) do
+	for k, decal in pairs(quantumDecomBoostUndo.decals) do
 		if k.Parent then
 			pcall(function()
 				k.Texture = decal
@@ -2636,7 +2636,7 @@ quantumV4DecomBoostUndo.revert = function()
 		end
 	end
 
-	for k in pairs(quantumV4DecomBoostUndo.effects) do
+	for k in pairs(quantumDecomBoostUndo.effects) do
 		if k.Parent then
 			pcall(function()
 				k.Enabled = true
@@ -2644,13 +2644,13 @@ quantumV4DecomBoostUndo.revert = function()
 		end
 	end
 
-	quantumV4DecomBoostUndo.parts = {}
-	quantumV4DecomBoostUndo.decals = {}
-	quantumV4DecomBoostUndo.effects = {}
-	quantumV4DecomBoostUndo.snapshot = nil
+	quantumDecomBoostUndo.parts = {}
+	quantumDecomBoostUndo.decals = {}
+	quantumDecomBoostUndo.effects = {}
+	quantumDecomBoostUndo.snapshot = nil
 end
 
-genv.__QuantumV4DecomBoostUndo = quantumV4DecomBoostUndo
+genv.__QuantumDecomBoostUndo = quantumDecomBoostUndo
 local flag4 = false
 
 local function fn47(arg)
@@ -2696,7 +2696,7 @@ local function fn47(arg)
 end
 
 local function fn48()
-	if quantumV4Config._fpsEggsReady then
+	if quantumConfig._fpsEggsReady then
 		return true
 	end
 	local flag5 = false
@@ -2737,7 +2737,7 @@ local function fn49(arg)
 end
 
 local function fn50()
-	if quantumV4Config._fpsPetsReady then
+	if quantumConfig._fpsPetsReady then
 		return true
 	end
 	local isOn
@@ -2796,8 +2796,8 @@ local function fn50()
 end
 
 local function fn51()
-	if type(genv.__QuantumV4SetCapFps) == "function" then
-		pcall(genv.__QuantumV4SetCapFps, 1000)
+	if type(genv.__QuantumSetCapFps) == "function" then
+		pcall(genv.__QuantumSetCapFps, 1000)
 	end
 
 	pcall(function()
@@ -2918,7 +2918,7 @@ local function fn53(arg)
 end
 
 local function fn54()
-	if quantumV4Config._fpsWorldReady then
+	if quantumConfig._fpsWorldReady then
 		return true
 	end
 	local flag5 = false
@@ -2983,7 +2983,7 @@ local function fn54()
 end
 
 local function fn55()
-	if quantumV4Config._fpsAreasReady then
+	if quantumConfig._fpsAreasReady then
 		return true
 	end
 	local n8 = fn()
@@ -3093,14 +3093,14 @@ local function fn55()
 		end
 	end
 
-	quantumV4Config._fpsAreaListener = connection6
-	quantumV4Config._fpsAreaDeleted = areas
-	quantumV4Config._fpsAreasReady = true
+	quantumConfig._fpsAreaListener = connection6
+	quantumConfig._fpsAreaDeleted = areas
+	quantumConfig._fpsAreasReady = true
 	return true
 end
 
 local function fn56()
-	if quantumV4Config._fpsPlotsReady then
+	if quantumConfig._fpsPlotsReady then
 		return true
 	end
 	local flag5 = false
@@ -3152,7 +3152,7 @@ local function fn56()
 end
 
 local function fn57()
-	if quantumV4Config._fpsTreadmillsReady then
+	if quantumConfig._fpsTreadmillsReady then
 		return true
 	end
 	local flag5 = false
@@ -3245,24 +3245,24 @@ end
 local function fn58()
 	if flag4 then
 		return
-	elseif quantumV4Config._fpsBoostApplying then
+	elseif quantumConfig._fpsBoostApplying then
 		return
 	end
 
-	quantumV4Config._fpsBoostApplying = true
+	quantumConfig._fpsBoostApplying = true
 
 	local ok, result = pcall(function()
 		fn51()
-		quantumV4Config._fpsPlotsReady = fn56() == true
-		quantumV4Config._fpsTreadmillsReady = fn57() == true
-		quantumV4Config._fpsAreasReady = fn55() == true
-		quantumV4Config._fpsWorldReady = fn54() == true
-		quantumV4Config._fpsPetsReady = fn50() == true
-		quantumV4Config._fpsEggsReady = fn48() == true
-		flag4 = quantumV4Config._fpsEggsReady and quantumV4Config._fpsPetsReady and quantumV4Config._fpsWorldReady and quantumV4Config._fpsPlotsReady and quantumV4Config._fpsTreadmillsReady and quantumV4Config._fpsAreasReady
+		quantumConfig._fpsPlotsReady = fn56() == true
+		quantumConfig._fpsTreadmillsReady = fn57() == true
+		quantumConfig._fpsAreasReady = fn55() == true
+		quantumConfig._fpsWorldReady = fn54() == true
+		quantumConfig._fpsPetsReady = fn50() == true
+		quantumConfig._fpsEggsReady = fn48() == true
+		flag4 = quantumConfig._fpsEggsReady and quantumConfig._fpsPetsReady and quantumConfig._fpsWorldReady and quantumConfig._fpsPlotsReady and quantumConfig._fpsTreadmillsReady and quantumConfig._fpsAreasReady
 	end)
 
-	quantumV4Config._fpsBoostApplying = nil
+	quantumConfig._fpsBoostApplying = nil
 
 	if not ok then
 		warn("[FPSBoost] Gagal menerapkan FPS Boost:", result)
@@ -3701,20 +3701,20 @@ local v8 = (function()
 	local speed = 3000
 
 	local function fn61()
-		return genv.__QuantumV4AdminBoost == true and speed or n14
+		return genv.__QuantumAdminBoost == true and speed or n14
 	end
 
-	local str3 = "__QuantumV4StealAnEggMovementSpoof"
+	local str3 = "__QuantumStealAnEggMovementSpoof"
 	local n16 = 436
-	local str4 = "__QuantumV4StealAnEggIntegritySpoof"
+	local str4 = "__QuantumStealAnEggIntegritySpoof"
 	local tbl11 = {Divine = true, Eternal = true}
 	local str5 = "ClientCharacter: GetDebugSnapshot"
 	local tbl12 = {"LastObservedSample", "LastSample", "LastGoodSample", "LastGameplayTrustedSample", "LastValidatedSample", "LastValidatedGroundedSample", "LastConfirmedGroundSample", "CandidateGroundedSample"}
 	local n17 = 0.15
 	local n18 = 8
 	local n19 = 1
-	local name2 = "__QuantumV4HoverPad"
-	local str6 = "QuantumV4RuntimeOwner"
+	local name2 = "__QuantumHoverPad"
+	local str6 = "QuantumRuntimeOwner"
 	local vector2 = Vector3.new(542.93, 71.5, -405.58)
 	local n20 = 612
 	local tbl13 = {-364.3, -367.21, -371.12, -375.65}
@@ -3735,7 +3735,7 @@ local v8 = (function()
 	local n32 = 0.35
 	local n33 = 2
 	local n34 = 0.1
-	local name3 = "__QuantumV4TreadmillDecoy"
+	local name3 = "__QuantumTreadmillDecoy"
 	local tbl14 = {Script = true, LocalScript = true, BillboardGui = true, Sound = true}
 	local n35 = 0.25
 	local n36 = 5
@@ -4347,7 +4347,7 @@ local v8 = (function()
 		obj.hitTimer = nil
 		obj.guardHitBoostInstalled = false
 		obj.stats = {status = obj.resetBlocked and "Reset wall closed" or "Ready", available = 0, matching = 0, lastTarget = "None", lastResult = "Idle"}
-		obj.config = {stealMode = "Instant", flyAerial = false, flyZigzag = false, speed = n15, antiTrap = true, heaviestFirst = false, highestValueFirst = false, minWeightKg = 0, espEnabled = false, espRarity = true, espName = true, espKg = true, espMutation = true, espValue = true, espPlaced = false, espIcon = true, espMinRank = 0, espMinValue = 0, minValuePerSec = 0, rarityEnabled = false, rarities = {}, nameEnabled = false, names = {}, areaEnabled = false, areas = {}, mutationEnabled = false, mutations = {}}
+		obj.config = {stealMode = "Fly", flyAerial = false, flyZigzag = false, speed = n15, antiTrap = true, heaviestFirst = false, highestValueFirst = false, minWeightKg = 0, espEnabled = false, espRarity = true, espName = true, espKg = true, espMutation = true, espValue = true, espPlaced = false, espIcon = true, espMinRank = 0, espMinValue = 0, minValuePerSec = 0, rarityEnabled = false, rarities = {}, nameEnabled = false, names = {}, areaEnabled = false, areas = {}, mutationEnabled = false, mutations = {}}
 		obj.gameAntiAfkDisabled = fn72()
 
 		if localPlayer2.Character then
@@ -4454,7 +4454,7 @@ local v8 = (function()
 					end
 
 					if obj.activeTarget == activeTarget and activeTarget.Uid == arg then
-						obj:_finish("Target removed — continuing")
+						obj:_finish("Target removed \226\128\148 continuing")
 					end
 				end)
 			end
@@ -4594,8 +4594,8 @@ local v8 = (function()
 
 					task.defer(function()
 						if not obj.destroyed and (obj.enabled and (obj.carry.uid == arg.Uid and obj:_hasConfirmedCarry(arg.Uid))) then
-							if genv.__QuantumV4GodMode then
-								genv.__QuantumV4GodMode:stopDefend()
+							if genv.__QuantumGodMode then
+								genv.__QuantumGodMode:stopDefend()
 							end
 
 							obj:_returnToSafe()
@@ -4622,8 +4622,8 @@ local v8 = (function()
 			obj.carry.active = false
 			obj.carry.uid = nil
 
-			if genv.__QuantumV4GodMode then
-				genv.__QuantumV4GodMode:startDefend(uid)
+			if genv.__QuantumGodMode then
+				genv.__QuantumGodMode:startDefend(uid)
 			end
 
 			if obj._captureHoldUid ~= nil and uid == obj._captureHoldUid then
@@ -5241,7 +5241,7 @@ local v8 = (function()
 				return
 			end
 
-			arg:_finish(arg.captureObjectiveEnabled and "Capture egg lost — re-grabbing" or "Capture stopped")
+			arg:_finish(arg.captureObjectiveEnabled and "Capture egg lost \226\128\148 re-grabbing" or "Capture stopped")
 		end)
 	end
 
@@ -5842,7 +5842,7 @@ local v8 = (function()
 				pcall(EggState2.DropFieldEgg, "PlayerRequest")
 			end
 
-			arg:_finish("Steal timed out — retrying")
+			arg:_finish("Steal timed out \226\128\148 retrying")
 		end)
 	end
 
@@ -5895,12 +5895,12 @@ local v8 = (function()
 	end
 
 	index._resolveSettleSeconds = function(arg, arg2)
-		local n58 = math.clamp(tonumber(quantumV4Config.StealHoldSeconds) or 5, 1, 10)
+		local n58 = math.clamp(tonumber(quantumConfig.StealHoldSeconds) or 5, 1, 10)
 		local flag5 = arg.settleBonus and type(arg2) == "table" and arg.settleBonus[arg2.Uid]
 		local seconds = flag5 and flag5.untilAt > os.clock() and flag5.seconds or 0
 		local v8 = fn3()
 		seconds = if v8 > 0 then if v8 < 12 then seconds + 2 else seconds else seconds
-		local v9 = if genv.__QuantumV4NetPing() > 300 then seconds + 1 else seconds
+		local v9 = if genv.__QuantumNetPing() > 300 then seconds + 1 else seconds
 		return fn87(type(arg2) == "table" and arg2.AreaId, n58) + v9
 	end
 
@@ -5986,7 +5986,7 @@ local v8 = (function()
 
 				if not v10 then
 					if not fn88() then
-						arg:_finish("Could not reach the egg — retrying")
+						arg:_finish("Could not reach the egg \226\128\148 retrying")
 					end
 
 					return
@@ -6033,22 +6033,18 @@ local v8 = (function()
 				return arg.destroyed or not arg.enabled or arg.instantPhase ~= "hunting" or not arg.activeTarget or arg.activeTarget.Uid ~= uid
 			end
 
-			arg:_setStatus("Teleporting to target egg")
+			local n58 = v9 + Vector3.new(0, n25, 0)
+			arg:_setStatus("Heading to target egg")
 
-			if not arg:_instantTeleport(v9, 0.35, fn88) then
+			if not arg:_glideRoot(n58, fn88) then
 				if not fn88() then
-					arg:_finish("Could not reach the egg — retrying")
+					arg:_finish("Could not reach the egg \226\128\148 retrying")
 				end
+
 				return
 			end
 
-			if fn88() then
-				return
-			end
-
-			arg:_setArrivalHold(v9, uid)
-			arg:_setStatus("Securing target egg")
-			arg:_requestCarry(v8, true)
+			task.spawn(arg._hoverSettleCarry, arg, v8, v9, n58, fn88)
 			return
 		end
 
@@ -6595,50 +6591,23 @@ local v8 = (function()
 	index._resolveEggDestination = function(arg, arg2, arg3, arg4)
 		if type(arg2) ~= "table" then
 			return nil
-		end
-
-		local baseCFrame = nil
-		if typeof(arg2.BottomCFrame) == "CFrame" then
-			baseCFrame = arg2.BottomCFrame
-		elseif typeof(arg2.BoundsCFrame) == "CFrame" then
-			baseCFrame = arg2.BoundsCFrame
-		elseif typeof(arg2.CFrame) == "CFrame" then
-			baseCFrame = arg2.CFrame
-		elseif typeof(arg2.Position) == "Vector3" then
-			baseCFrame = CFrame.new(arg2.Position)
-		end
-
-		if not baseCFrame and arg2.Uid then
-			local areaEggSlotsClient = workspace:FindFirstChild("AreaEggSlotsClient")
-			local slot = areaEggSlotsClient and areaEggSlotsClient:FindFirstChild(tostring(arg2.Uid))
-			if not slot then
-				local fieldEggsClient = workspace:FindFirstChild("FieldEggsClient")
-				slot = fieldEggsClient and fieldEggsClient:FindFirstChild(tostring(arg2.Uid))
-			end
-			if slot then
-				local part = slot.PrimaryPart or slot:FindFirstChildWhichIsA("BasePart")
-				if part then
-					baseCFrame = part.CFrame
-				end
-			end
-		end
-
-		if not baseCFrame then
+		elseif typeof(arg2.BottomCFrame) ~= "CFrame" then
 			return nil
 		end
 
 		local character = localPlayer2.Character
-		arg3 = arg3 or (character and character:FindFirstChild("HumanoidRootPart"))
-		arg4 = arg4 or (character and character:FindFirstChildOfClass("Humanoid"))
+		arg3, arg4 = arg3 or character and character:FindFirstChild("HumanoidRootPart"), arg4 or character and character:FindFirstChildOfClass("Humanoid")
 
-		local offset = 3
-		if arg3 and arg4 and type(arg._feetOffset) == "function" then
-			pcall(function()
-				offset = arg:_feetOffset(arg3, arg4) + (n17 or 0)
-			end)
+		if arg3 then
+			if not arg4 then
+				return nil
+			end
+		else
+			return nil
 		end
 
-		return CFrame.new(baseCFrame.Position + Vector3.new(0, offset, 0))
+		local n58 = arg:_feetOffset(arg3, arg4) + n17
+		return CFrame.new(arg2.BottomCFrame.Position + Vector3.new(0, n58, 0))
 	end
 
 	local n58 = 110
@@ -6700,109 +6669,6 @@ local v8 = (function()
 		return arg3
 	end
 
-	index._instantTeleport = function(arg, targetCFrame, holdSeconds, abortFn, withDecoy)
-		if typeof(targetCFrame) == "Vector3" then
-			targetCFrame = CFrame.new(targetCFrame)
-		end
-		if typeof(targetCFrame) ~= "CFrame" then
-			return false
-		end
-
-		local character = localPlayer2.Character
-		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		if not humanoidRootPart or not humanoid then
-			return false
-		end
-
-		pcall(fn67, character)
-		pcall(function()
-			humanoid.AutoRotate = false
-		end)
-
-		arg:_startHoverPad()
-		local holdTime = holdSeconds or 0.35
-		local startTime = os.clock()
-
-		local fakeChar = nil
-		local currentCamera = workspace.CurrentCamera
-		if withDecoy then
-			pcall(function()
-				local originalCFrame = humanoidRootPart.CFrame
-				character.Archivable = true
-				fakeChar = character:Clone()
-				character.Archivable = false
-				fakeChar.Name = "FakeVisualPlayer"
-				for _, part in ipairs(fakeChar:GetDescendants()) do
-					if part:IsA("BasePart") then
-						part.CanCollide = false
-						part.Anchored = true
-					elseif part:IsA("Script") or part:IsA("LocalScript") then
-						part:Destroy()
-					end
-				end
-				fakeChar.Parent = workspace
-				fakeChar:PivotTo(originalCFrame)
-				local fakeHumanoid = fakeChar:FindFirstChildOfClass("Humanoid")
-				if fakeHumanoid and currentCamera then
-					currentCamera.CameraSubject = fakeHumanoid
-				end
-			end)
-		end
-
-		local function syncPos(cf)
-			pcall(function()
-				humanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				humanoidRootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-				humanoidRootPart.CFrame = cf
-				character:PivotTo(cf)
-				humanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				humanoidRootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-		end)
-			arg:_syncHoverPad(cf.Position)
-			local n65 = math.clamp(arg.config.speed or n15, n13, fn61())
-			pcall(function()
-				fn74(character, n65 * n44)
-				fn83(humanoid, humanoidRootPart, n65, Vector3.new(0, 0, 0))
-			end)
-		end
-
-		syncPos(targetCFrame)
-
-		while os.clock() - startTime < holdTime do
-			if abortFn and abortFn() then
-				if fakeChar then pcall(fakeChar.Destroy, fakeChar) end
-				if humanoid and currentCamera then currentCamera.CameraSubject = humanoid end
-				return false
-			end
-			if arg.destroyed or (not arg.enabled and not arg._externalDeliver) then
-				if fakeChar then pcall(fakeChar.Destroy, fakeChar) end
-				if humanoid and currentCamera then currentCamera.CameraSubject = humanoid end
-				return false
-			end
-			character = localPlayer2.Character
-			humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-			humanoid = character and character:FindFirstChildOfClass("Humanoid")
-			if not humanoidRootPart or not humanoid then
-				if fakeChar then pcall(fakeChar.Destroy, fakeChar) end
-				return false
-			end
-			syncPos(targetCFrame)
-			RunService2.Heartbeat:Wait()
-		end
-
-		if fakeChar then
-			task.delay(0.2, function()
-				pcall(fakeChar.Destroy, fakeChar)
-				if humanoid and currentCamera then
-					currentCamera.CameraSubject = humanoid
-				end
-			end)
-		end
-
-		return true
-	end
-
 	index._teleportRoot = function(arg, arg2, arg3, cFrame)
 		if not arg2 or not arg3 then
 			return false
@@ -6810,20 +6676,18 @@ local v8 = (function()
 			return false
 		end
 
-		local character = localPlayer2.Character
-		if character then
-			pcall(function()
-				arg2.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				arg2.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-				arg2.CFrame = cFrame
-				character:PivotTo(cFrame)
-				arg2.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-				arg2.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-		end)
+		if not pcall(function()
+			arg2.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			arg2.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+			arg2.CFrame = cFrame
+			arg2.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			arg2.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+		end) then
+			return false
 		end
 
 		local n65 = math.clamp(arg.config.speed or n15, n13, fn61())
-		fn74(character, n65 * n44)
+		fn74(localPlayer2.Character, n65 * n44)
 
 		if not fn83(arg3, arg2, n65, (Vector3.new(0, 0, 0))) then
 			fn82(arg3, arg2, n65)
@@ -6858,9 +6722,6 @@ local v8 = (function()
 	index._glideRoot = function(arg, cFrame, arg2, arg3)
 		if typeof(cFrame) ~= "CFrame" then
 			return false
-		end
-		if arg.config.stealMode == "Instant" and not arg3 then
-			return arg:_instantTeleport(cFrame, 0.25, arg2)
 		end
 		local v8 = arg3 or arg:_activeGlideSpeed()
 		local character = localPlayer2.Character
@@ -6994,9 +6855,6 @@ local v8 = (function()
 		if typeof(arg2) ~= "CFrame" then
 			return false
 		end
-		if arg.config.stealMode == "Instant" then
-			return arg:_instantTeleport(arg2, 0.35, arg3)
-		end
 		local hop = index.HOP
 		local character = localPlayer2.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -7088,11 +6946,11 @@ local v8 = (function()
 		if arg._brakeDecel then
 			return arg._brakeDecel
 		end
-		local quantumV4BrakeDecel = genv.__QuantumV4BrakeDecel
+		local quantumBrakeDecel = genv.__QuantumBrakeDecel
 		local humanoid = localPlayer2.Character and localPlayer2.Character:FindFirstChildOfClass("Humanoid")
-		if type(quantumV4BrakeDecel) == "table" and (humanoid and math.abs((quantumV4BrakeDecel.ws or 0) - humanoid.WalkSpeed) < 15) then
-			arg._brakeDecel = quantumV4BrakeDecel.decel
-			return quantumV4BrakeDecel.decel
+		if type(quantumBrakeDecel) == "table" and (humanoid and math.abs((quantumBrakeDecel.ws or 0) - humanoid.WalkSpeed) < 15) then
+			arg._brakeDecel = quantumBrakeDecel.decel
+			return quantumBrakeDecel.decel
 		end
 		return n65
 	end
@@ -7171,7 +7029,7 @@ local v8 = (function()
 
 					if n69 > 20 and n69 < 5000 then
 						arg._brakeDecel = arg:_walkBrakeDecel() * 0.8 + n69 * 0.93 * 0.2
-						genv.__QuantumV4BrakeDecel = {ws = humanoid.WalkSpeed, decel = arg._brakeDecel}
+						genv.__QuantumBrakeDecel = {ws = humanoid.WalkSpeed, decel = arg._brakeDecel}
 					end
 				end
 
@@ -8202,8 +8060,8 @@ local v8 = (function()
 
 				if state ~= AreaEggs.States.Slot and (state ~= AreaEggs.States.Dropped and (state ~= "GuardCarried" and (not (v10 and v10.CarrierUserId == localPlayer2.UserId) and not arg:_hasConfirmedCarry(uid)))) then
 					fn91(false)
-					local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-					arg:_finish(state == "Carried" and quantumV4PlayerSteal ~= nil and quantumV4PlayerSteal:intercept(uid) and "Target taken - chasing the carrier" or "Target taken by someone else")
+					local quantumPlayerSteal = genv.__QuantumPlayerSteal
+					arg:_finish(state == "Carried" and quantumPlayerSteal ~= nil and quantumPlayerSteal:intercept(uid) and "Target taken - chasing the carrier" or "Target taken by someone else")
 					return
 				end
 			end
@@ -8401,10 +8259,10 @@ local v8 = (function()
 
 	index._reStealDroppedEgg = function(arg, arg2)
 		if type(arg2) ~= "string" then
-			arg:_finish("Egg lost — retrying")
+			arg:_finish("Egg lost \226\128\148 retrying")
 			return
 		elseif arg2 == "" then
-			arg:_finish("Egg lost — retrying")
+			arg:_finish("Egg lost \226\128\148 retrying")
 			return
 		end
 
@@ -8425,8 +8283,8 @@ local v8 = (function()
 			return
 		end
 
-		if genv.__QuantumV4GodMode then
-			genv.__QuantumV4GodMode:startDefend(arg2)
+		if genv.__QuantumGodMode then
+			genv.__QuantumGodMode:startDefend(arg2)
 		end
 
 		local n68 = os.clock() + 5
@@ -8455,7 +8313,7 @@ local v8 = (function()
 
 		if if v9 then not arg:_wallOpen() else not v9 then
 			arg:_releaseCarryWorker(v8)
-			arg:_finish("Egg lost — retrying")
+			arg:_finish("Egg lost \226\128\148 retrying")
 			return
 		end
 
@@ -8486,7 +8344,7 @@ local v8 = (function()
 
 		if not arg:_teleportRoot(humanoidRootPart, humanoid, v10) then
 			arg:_releaseCarryWorker(v8)
-			arg:_finish("Re-steal failed — retrying")
+			arg:_finish("Re-steal failed \226\128\148 retrying")
 			return
 		end
 
@@ -8671,12 +8529,12 @@ local v8 = (function()
 			end)
 
 			if flag5 then
-				arg:_setStatus(lastCarryReject and "Carry refused (" .. lastCarryReject .. ") — skipping egg" or "Carry timed out twice — skipping egg")
+				arg:_setStatus(lastCarryReject and "Carry refused (" .. lastCarryReject .. ") \226\128\148 skipping egg" or "Carry timed out twice \226\128\148 skipping egg")
 			else
-				arg:_setStatus("Carry timeout — retrying")
+				arg:_setStatus("Carry timeout \226\128\148 retrying")
 			end
 		else
-			arg:_setStatus("Carry timeout — safe area unavailable")
+			arg:_setStatus("Carry timeout \226\128\148 safe area unavailable")
 		end
 
 		arg.running = false
@@ -8705,125 +8563,6 @@ local v8 = (function()
 		end)
 
 		return true
-	end
-
-	index._fireEggPickup = function(arg, uid, eggRecord, slotKey)
-		if not uid then
-			return
-		end
-		local rec = eggRecord or EggState2.ReadFieldEgg(uid) or (arg.records and arg.records[uid])
-		if not slotKey and rec and rec.AreaId and rec.NestId then
-			pcall(function()
-				local AreaEggSlotIdentity = require(ReplicatedStorage2.Shared.Util.AreaEggSlotIdentity)
-				if AreaEggSlotIdentity then
-					slotKey = AreaEggSlotIdentity.SlotKey(rec.AreaId, rec.NestId)
-				end
-			end)
-			if not slotKey then
-				slotKey = string.format("%s:%s", tostring(rec.AreaId), tostring(rec.NestId))
-			end
-		end
-
-		local character = localPlayer2.Character
-		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-
-		if humanoid then
-			pcall(humanoid.UnequipTools, humanoid)
-			humanoid.PlatformStand = false
-			humanoid.Sit = false
-		end
-
-		pcall(function()
-			local RagdollJoints = require(ReplicatedStorage2.Shared.Modules.RagdollJoints)
-			if RagdollJoints and RagdollJoints.Release and character then
-				RagdollJoints.Release(character)
-			end
-		end)
-
-		task.spawn(function()
-			pcall(function()
-				if slotKey then
-					eggWorld.AskFieldEggCarry:InvokeServer({ Uid = uid, FirstAreaSlotKey = slotKey })
-				end
-				eggWorld.AskFieldEggCarry:InvokeServer({ Uid = uid })
-			end)
-		end)
-
-		task.spawn(function()
-			pcall(function()
-				if slotKey then
-					EggState2.CarryFieldEgg(uid, slotKey)
-				end
-				EggState2.CarryFieldEgg(uid)
-			end)
-		end)
-
-		local prompts = {}
-		local function scanPrompts(container)
-			if not container then
-				return
-			end
-			for _, d in ipairs(container:GetDescendants()) do
-				if d:IsA("ProximityPrompt") then
-					table.insert(prompts, d)
-				end
-			end
-		end
-
-		local areaSlots = workspace:FindFirstChild("AreaEggSlotsClient")
-		scanPrompts(areaSlots and areaSlots:FindFirstChild(tostring(uid)))
-
-		local fieldSlots = workspace:FindFirstChild("FieldEggsClient")
-		scanPrompts(fieldSlots and fieldSlots:FindFirstChild(tostring(uid)))
-
-		local dropSlots = workspace:FindFirstChild("DroppedEggsClient")
-		scanPrompts(dropSlots and dropSlots:FindFirstChild(tostring(uid)))
-
-		if #prompts == 0 and humanoidRootPart then
-			for _, d in ipairs(workspace:GetDescendants()) do
-				if d:IsA("ProximityPrompt") and (d.Name == "CarryAreaEgg" or (d.ActionText and d.ActionText:lower():find("carry"))) then
-					local p = d.Parent
-					if p and p:IsA("BasePart") and (p.Position - humanoidRootPart.Position).Magnitude <= 20 then
-						table.insert(prompts, d)
-					end
-				end
-			end
-		end
-
-		for _, prompt in ipairs(prompts) do
-			pcall(function()
-				prompt.HoldDuration = 0
-				prompt.RequiresLineOfSight = false
-				prompt.MaxActivationDistance = 999
-				if type(fireproximityprompt) == "function" then
-					pcall(fireproximityprompt, prompt, 0)
-					pcall(fireproximityprompt, prompt)
-				end
-				prompt:InputHoldBegin()
-				prompt:InputHoldEnd()
-				local conns = getconnections and getconnections(prompt.Triggered) or {}
-				for _, c in ipairs(conns) do
-					if c.Fire then
-						pcall(c.Fire, c)
-					end
-					if c.Function then
-						pcall(c.Function)
-					end
-				end
-			end)
-		end
-
-		if type(firetouchinterest) == "function" and humanoidRootPart then
-			pcall(function()
-				local slotObj = (areaSlots and areaSlots:FindFirstChild(tostring(uid))) or (fieldSlots and fieldSlots:FindFirstChild(tostring(uid)))
-				local hit = slotObj and (slotObj:FindFirstChild("Hitbox") or slotObj:FindFirstChildWhichIsA("BasePart", true))
-				if hit then
-					firetouchinterest(humanoidRootPart, hit, 0)
-					firetouchinterest(humanoidRootPart, hit, 1)
-				end
-			end)
-		end
 	end
 
 	index._requestCarry = function(arg, arg2, arg3)
@@ -8957,7 +8696,7 @@ local v8 = (function()
 					if arg3 then
 						arg:_setStatus("Re-stealing egg")
 						if not arg:_teleportRoot(humanoidRootPart, humanoid2, v10) then
-							arg:_finish("Re-steal failed — retrying")
+							arg:_finish("Re-steal failed \226\128\148 retrying")
 							return
 						end
 						arg:_setArrivalHold(v10, uid)
@@ -8986,8 +8725,7 @@ local v8 = (function()
 					end
 				end
 
-				local v11 = AreaEggSlotIdentity.LooksLikeFirstAreaUid(v8.Uid) and AreaEggSlotIdentity.SlotKey(v8.AreaId, v8.NestId) or AreaEggSlotIdentity.SlotKey(v8.AreaId, v8.NestId)
-				arg:_fireEggPickup(v8.Uid, v8, v11)
+				local v11 = AreaEggSlotIdentity.LooksLikeFirstAreaUid(v8.Uid) and AreaEggSlotIdentity.SlotKey(v8.AreaId, v8.NestId) or nil
 				humanoidRootPart, character, position = pcall(fn62, v8.Uid, v11)
 				local v12 = if humanoidRootPart then if character == true then nil else position else tostring(character)
 
@@ -9002,7 +8740,7 @@ local v8 = (function()
 
 				n68 = n68 or os.clock() + n69
 				arg.stats.lastResult = "Carry requested"
-				arg:_setStatus(v12 and "Waiting for carry · " .. v12 or "Waiting for carry confirmation")
+				arg:_setStatus(v12 and "Waiting for carry \194\183 " .. v12 or "Waiting for carry confirmation")
 				task.wait(n35)
 			end
 		end)
@@ -9086,7 +8824,7 @@ local v8 = (function()
 	local n69 = 5000
 
 	index._usesPortalBoost = function(arg, arg2)
-		return quantumV4Config.LowSpeedBoost == true and arg.config.stealMode == "Instant" and type(arg2) == "table" and tbl16[arg2.AreaId] ~= nil and not (arg.portalBoostFailed and (arg.portalBoostFailed[arg2.Uid] or 0) > os.clock())
+		return quantumConfig.LowSpeedBoost == true and arg.config.stealMode == "Instant" and type(arg2) == "table" and tbl16[arg2.AreaId] ~= nil and not (arg.portalBoostFailed and (arg.portalBoostFailed[arg2.Uid] or 0) > os.clock())
 	end
 
 	local function fn91(arg, arg2)
@@ -9411,7 +9149,7 @@ local v8 = (function()
 			warn("[Quantum Steal] steal error: " .. tostring(result))
 
 			if not arg.destroyed and arg.enabled then
-				arg:_finish("Steal error — retrying")
+				arg:_finish("Steal error \226\128\148 retrying")
 			end
 		end
 	end
@@ -9670,22 +9408,22 @@ local v8 = (function()
 		if enchantedTreePrompt and exitTrigger then
 			if build then
 				if not arg2 then
-					fn98("Steal unavailable — retrying")
+					fn98("Steal unavailable \226\128\148 retrying")
 					return
 				end
 			else
-				fn98("Steal unavailable — retrying")
+				fn98("Steal unavailable \226\128\148 retrying")
 				return
 			end
 		else
-			fn98("Steal unavailable — retrying")
+			fn98("Steal unavailable \226\128\148 retrying")
 			return
 		end
 
 		local parent = enchantedTreePrompt.Parent
 		local worldPosition = parent and (parent:IsA("Attachment") and parent.WorldPosition or parent:IsA("BasePart") and parent.Position)
 		if not worldPosition then
-			fn98("Steal unavailable — retrying")
+			fn98("Steal unavailable \226\128\148 retrying")
 			return
 		end
 		parent = os.clock() + 4
@@ -9736,13 +9474,13 @@ local v8 = (function()
 		end
 
 		if not fn96() then
-			fn98("Could not reach the egg — retrying")
+			fn98("Could not reach the egg \226\128\148 retrying")
 			return
 		end
 		arg:_setStatus("Securing target egg")
 		task.wait(0.3)
 		if not fn97() then
-			fn98("Could not reach the egg — retrying")
+			fn98("Could not reach the egg \226\128\148 retrying")
 			return
 		end
 
@@ -9786,10 +9524,10 @@ local v8 = (function()
 		local flag5 = not parent
 
 		if if parent then not arg2 else flag5 then
-			fn98("Could not reach the egg — retrying")
+			fn98("Could not reach the egg \226\128\148 retrying")
 			return
 		elseif (parent.Position - v10.Position).Magnitude > 25 then
-			fn98("Could not reach the egg — retrying")
+			fn98("Could not reach the egg \226\128\148 retrying")
 			return
 		end
 
@@ -9854,19 +9592,19 @@ local v8 = (function()
 
 		if FuseBiomeLanePortals then
 			if not FuseBiomeZone then
-				fn97("Steal unavailable — retrying")
+				fn97("Steal unavailable \226\128\148 retrying")
 				return
 			elseif v8 then
 				if not v9 then
-					fn97("Steal unavailable — retrying")
+					fn97("Steal unavailable \226\128\148 retrying")
 					return
 				end
 			else
-				fn97("Steal unavailable — retrying")
+				fn97("Steal unavailable \226\128\148 retrying")
 				return
 			end
 		else
-			fn97("Steal unavailable — retrying")
+			fn97("Steal unavailable \226\128\148 retrying")
 			return
 		end
 
@@ -9897,12 +9635,12 @@ local v8 = (function()
 		local v11 = arg:_crossPortal(FuseBiomeLanePortals, fn94, 6)
 		arg:_guardLagback(false)
 		if not v11 then
-			fn97("Could not reach the egg — retrying")
+			fn97("Could not reach the egg \226\128\148 retrying")
 			return
 		end
 		arg:_setStatus("Securing target egg")
 		if not arg:_crossPortal(FuseBiomeZone, fn94, 8) then
-			fn97("Could not reach the egg — retrying")
+			fn97("Could not reach the egg \226\128\148 retrying")
 			return
 		end
 
@@ -9922,7 +9660,7 @@ local v8 = (function()
 		end
 
 		if (v9.Position - v10.Position).Magnitude > 25 then
-			fn97("Could not reach the egg — retrying")
+			fn97("Could not reach the egg \226\128\148 retrying")
 			return
 		end
 		local v12 = EggState2.ReadFieldEgg(uid) or arg.records[uid]
@@ -10061,7 +9799,7 @@ local v8 = (function()
 
 		arg.boostedUid = nil
 		local v9 = EggState2.ReadFieldEgg(arg2)
-		local flag6 = v9 == nil or v9.State == AreaEggs.States.Claimed or quantumV4Config.HelpFriend and v9.State == AreaEggs.States.Dropped
+		local flag6 = v9 == nil or v9.State == AreaEggs.States.Claimed or quantumConfig.HelpFriend and v9.State == AreaEggs.States.Dropped
 		local character2 = localPlayer2.Character
 		local humanoidRootPart2 = character2 and character2:FindFirstChild("HumanoidRootPart")
 		return flag6 and humanoidRootPart2 ~= nil and arg:_isInSafeArea(humanoidRootPart2)
@@ -10348,142 +10086,6 @@ local v8 = (function()
 		return flag5 and flag6
 	end
 
-	index._instantStealTarget = function(arg, targetEgg)
-		if not targetEgg or type(targetEgg) ~= "table" then
-			arg:_finish("Target unavailable")
-			return
-		end
-
-		local uid = targetEgg.Uid
-		if not uid then
-			arg:_finish("Target UID unavailable")
-			return
-		end
-
-		local character = localPlayer2.Character
-		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		if not humanoidRootPart or not humanoid then
-			arg:_finish("Character unavailable")
-			return
-		end
-
-		local destCFrame = arg:_resolveEggDestination(targetEgg, humanoidRootPart, humanoid)
-		if not destCFrame then
-			local pos = targetEgg.BottomCFrame or targetEgg.BoundsCFrame or targetEgg.CFrame
-			if typeof(pos) == "CFrame" then
-				destCFrame = CFrame.new(pos.Position + Vector3.new(0, 3, 0))
-			elseif typeof(pos) == "Vector3" then
-				destCFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
-			else
-				local slot = (workspace:FindFirstChild("AreaEggSlotsClient") and workspace.AreaEggSlotsClient:FindFirstChild(tostring(uid)))
-					or (workspace:FindFirstChild("FieldEggsClient") and workspace.FieldEggsClient:FindFirstChild(tostring(uid)))
-				if slot then
-					local p = slot.PrimaryPart or slot:FindFirstChildWhichIsA("BasePart")
-					if p then
-						destCFrame = CFrame.new(p.Position + Vector3.new(0, 3, 0))
-					end
-				end
-			end
-		end
-
-		if not destCFrame then
-			arg.skippedEggs[uid] = os.clock() + 5
-			arg:_finish("Destination unavailable")
-			return
-		end
-
-		pcall(function()
-			local RagdollJoints = require(ReplicatedStorage2.Shared.Modules.RagdollJoints)
-			if RagdollJoints and RagdollJoints.Release then
-				RagdollJoints.Release(character)
-			end
-		end)
-		pcall(function()
-			humanoid.PlatformStand = false
-			humanoid.Sit = false
-			if humanoid:GetState() ~= Enum.HumanoidStateType.Running then
-				humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-			end
-			humanoid:UnequipTools()
-		end)
-
-		arg:_startMovementProtection()
-		arg:_setStatus("Teleporting to egg")
-		arg.stats.lastResult = "Instant teleporting"
-
-		local teleportOk = arg:_instantTeleport(destCFrame, 0.35, function()
-			return arg.destroyed or not arg.enabled
-		end, false)
-
-		if not teleportOk or arg.destroyed or not arg.enabled then
-			arg:_finish("Teleport aborted")
-			return
-		end
-
-		arg:_setStatus("Securing egg")
-		local carryDeadline = os.clock() + 2.5
-		local carried = false
-
-		local function checkCarried()
-			local rec = EggState2.ReadFieldEgg(uid) or (arg.records and arg.records[uid])
-			if rec and rec.State == AreaEggs.States.Carried and rec.CarrierUserId == localPlayer2.UserId then
-				arg:_adoptCarryFromRecord(uid)
-				return true
-			end
-			if arg.carry.active and arg.carry.uid == uid then
-				return true
-			end
-			return false
-		end
-
-		local slotKey = nil
-		pcall(function()
-			local AreaEggSlotIdentity = require(ReplicatedStorage2.Shared.Util.AreaEggSlotIdentity)
-			if AreaEggSlotIdentity and targetEgg.AreaId and targetEgg.NestId then
-				slotKey = AreaEggSlotIdentity.SlotKey(targetEgg.AreaId, targetEgg.NestId)
-			end
-		end)
-		if not slotKey and targetEgg.AreaId and targetEgg.NestId then
-			slotKey = string.format("%s:%s", tostring(targetEgg.AreaId), tostring(targetEgg.NestId))
-		end
-
-		while os.clock() < carryDeadline and not arg.destroyed and arg.enabled do
-			if checkCarried() then
-				carried = true
-				break
-			end
-
-			character = localPlayer2.Character
-			humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-			if humanoidRootPart then
-				humanoidRootPart.CFrame = destCFrame
-				humanoidRootPart.AssemblyLinearVelocity = Vector3.zero
-				humanoidRootPart.AssemblyAngularVelocity = Vector3.zero
-			end
-
-			arg:_fireEggPickup(uid, targetEgg, slotKey)
-
-			RunService2.Heartbeat:Wait()
-		end
-
-		if not carried then
-			carried = checkCarried()
-		end
-
-		if not carried then
-			arg.skippedEggs[uid] = os.clock() + 5
-			arg:_finish("Egg grab missed")
-			return
-		end
-
-		arg.carry.active = true
-		arg.carry.uid = uid
-		arg.stats.lastResult = "Carry confirmed"
-		arg:_setStatus("Egg secured, teleporting home")
-		arg:_instantReturn(uid)
-	end
-
 	index._instantReturn = function(arg, forestDropInProgress)
 		if arg._instantReturnToken ~= nil then
 			return
@@ -10597,8 +10199,8 @@ local v8 = (function()
 				return arg:_glideRoot(arg2, arg3)
 			end
 
-			local flag5 = arg.config.stealMode == "Fly" or arg.boostedUid == forestDropInProgress and not quantumV4Config.HelpFriend
-			local n70 = arg.boostedUid == forestDropInProgress and not quantumV4Config.HelpFriend and 0.3 or flag5 and 0.15 or 0.4
+			local flag5 = arg.config.stealMode == "Fly" or arg.boostedUid == forestDropInProgress and not quantumConfig.HelpFriend
+			local n70 = arg.boostedUid == forestDropInProgress and not quantumConfig.HelpFriend and 0.3 or flag5 and 0.15 or 0.4
 			local n71 = flag5 and 0.45 or n22
 			local v8 = fn97()
 
@@ -10626,49 +10228,6 @@ local v8 = (function()
 
 			if v8 then
 				arg._forestDropInProgress = forestDropInProgress
-
-				if arg.config.stealMode == "Instant" then
-					arg:_setStatus("Teleporting home with egg")
-					local homeTarget = fn99() or cframe
-					arg:_instantTeleport(homeTarget, 0.5, function()
-						return not fn94() or not fn97()
-					end, true)
-
-					if not fn94() then
-						return
-					end
-
-					if quantumV4Config.HelpFriend then
-						arg.skippedEggs[forestDropInProgress] = os.clock() + 1800
-						arg._forestDropInProgress = nil
-						arg.carry.active = false
-						arg.carry.uid = nil
-						arg.stats.lastResult = "Dropped for a friend"
-						arg:_setStatus("Egg dropped for a friend, heading back")
-						pcall(EggState2.DropFieldEgg, "PlayerRequest")
-						local v9 = fn99()
-						if v9 then
-							arg:_instantTeleport(v9, 0.3)
-						end
-						if not fn94() then
-							return
-						end
-						arg._instantReturnToken = nil
-						arg._externalDeliver = nil
-						if arg.enabled then
-							arg:_finish("Dropped for a friend")
-						end
-						return
-					end
-
-					local depositWait = os.clock() + 3
-					while fn94() and not fn98() and os.clock() < depositWait do
-						RunService2.Heartbeat:Wait()
-					end
-
-					fn101(fn98() and "Safe return complete" or "Safe return complete")
-					return
-				end
 
 				for i = 1, index.RELAY_ROUNDS, 1 do
 					arg._forestDropInProgress = forestDropInProgress
@@ -10745,11 +10304,11 @@ local v8 = (function()
 
 						arg._forestDropInProgress = nil
 						fn100(false)
-						arg:_finish("Drop failed — retrying")
+						arg:_finish("Drop failed \226\128\148 retrying")
 						return
 					end
 
-					if quantumV4Config.HelpFriend then
+					if quantumConfig.HelpFriend then
 						arg.skippedEggs[forestDropInProgress] = os.clock() + 1800
 						arg._forestDropInProgress = nil
 						arg.carry.active = false
@@ -10903,7 +10462,7 @@ local v8 = (function()
 					end
 
 					if not n72 and not fn97() then
-						fn101(fn98() and "Safe return complete" or "Re-grab failed — retrying")
+						fn101(fn98() and "Safe return complete" or "Re-grab failed \226\128\148 retrying")
 						return
 					end
 
@@ -10969,7 +10528,7 @@ local v8 = (function()
 				task.wait(0.1)
 			end
 
-			fn101(fn98() and "Safe return complete" or "Bank not confirmed — retrying")
+			fn101(fn98() and "Safe return complete" or "Bank not confirmed \226\128\148 retrying")
 		end)
 	end
 
@@ -11032,7 +10591,7 @@ local v8 = (function()
 
 		local function fn95()
 			local destroyed = arg.destroyed
-			return (if destroyed then not destroyed else arg.enabled) and genv.__QuantumV4AdminBoost == true and arg._adminBusyUid == uid
+			return (if destroyed then not destroyed else arg.enabled) and genv.__QuantumAdminBoost == true and arg._adminBusyUid == uid
 		end
 
 		local ok, result = pcall(function()
@@ -11048,7 +10607,7 @@ local v8 = (function()
 			while fn95() and not fn94() do
 				if os.clock() >= n70 then
 					arg.skippedEggs[uid] = os.clock() + 10
-					return arg:_finish("Carry refused — next egg")
+					return arg:_finish("Carry refused \226\128\148 next egg")
 				end
 				local v8 = EggState2.ReadFieldEgg(uid)
 				if if v8 then v8.State ~= AreaEggs.States.Slot and v8.State ~= AreaEggs.States.Dropped else not v8 then
@@ -11070,7 +10629,11 @@ local v8 = (function()
 					n71 = os.clock() + 0.1
 					arg:_setStatus("Securing egg")
 
-					arg:_fireEggPickup(uid, v8, nil)
+					task.spawn(function()
+						pcall(function()
+							eggWorld.AskFieldEggCarry:InvokeServer({Uid = uid})
+						end)
+					end)
 				end
 
 				RunService2.Heartbeat:Wait()
@@ -11092,7 +10655,7 @@ local v8 = (function()
 			warn("[Quantum Steal] admin steal error: " .. tostring(result))
 
 			if not arg.destroyed and arg.enabled then
-				arg:_finish("Steal error — retrying")
+				arg:_finish("Steal error \226\128\148 retrying")
 			end
 		end
 	end
@@ -11156,7 +10719,7 @@ local v8 = (function()
 			arg:_reportStolen()
 			arg:_finish("Safe return complete")
 		else
-			arg:_finish(fn95() and "Bank not confirmed — retrying" or "Egg lost — retrying")
+			arg:_finish(fn95() and "Bank not confirmed \226\128\148 retrying" or "Egg lost \226\128\148 retrying")
 		end
 	end
 
@@ -11165,7 +10728,7 @@ local v8 = (function()
 
 		if arg:_isPrimerEgg(arg.carry.uid) then
 			local uid2 = arg.carry.uid
-			arg.stats.lastResult = "Steal not banked — retrying"
+			arg.stats.lastResult = "Steal not banked \226\128\148 retrying"
 			arg.carry.active = false
 			arg.carry.uid = nil
 			arg.carry.generation += 1
@@ -11192,7 +10755,7 @@ local v8 = (function()
 			return
 		end
 
-		if genv.__QuantumV4AdminBoost == true then
+		if genv.__QuantumAdminBoost == true then
 			uid = arg.carry.uid or arg.activeTarget and arg.activeTarget.Uid
 
 			if uid and arg._adminBusyUid ~= uid then
@@ -11208,7 +10771,7 @@ local v8 = (function()
 				arg:_instantReturn(uid)
 				return
 			end
-			arg:_finish("Carry lost — retrying")
+			arg:_finish("Carry lost \226\128\148 retrying")
 			return
 		end
 
@@ -11238,7 +10801,7 @@ local v8 = (function()
 
 		if if v9 then arg:_recordShowsForeignCarry(uid2) else not v9 then
 			arg:_releaseCarryWorker(v8)
-			arg:_finish("Carry not confirmed — retrying")
+			arg:_finish("Carry not confirmed \226\128\148 retrying")
 			return
 		end
 
@@ -11247,7 +10810,7 @@ local v8 = (function()
 			return
 		end
 
-		if quantumV4Config.HelpFriend then
+		if quantumConfig.HelpFriend then
 			arg.handoffLane = (arg.handoffLane or 0) % #tbl13 + 1
 			local n70 = CFrame.new(n20, vector2.Y, tbl13[arg.handoffLane]) * humanoidRootPart.CFrame.Rotation
 			arg:_setStatus("Taking the egg to the friend drop")
@@ -11266,15 +10829,6 @@ local v8 = (function()
 		if not v10 then
 			arg:_releaseCarryWorker(v8)
 			arg:_finish("Safe destination unavailable")
-			return
-		end
-
-		if arg.config.stealMode == "Instant" then
-			arg:_setStatus("Teleporting to safe area")
-			arg:_instantTeleport(v10, 0.45, nil, true)
-			if arg:_isCarryWorkerCurrent(v8) then
-				arg:_finalizeReturn(v8)
-			end
 			return
 		end
 
@@ -11350,7 +10904,7 @@ local v8 = (function()
 
 			if arg:_isCarryWorkerCurrent(arg2) then
 				arg:_releaseCarryWorker(arg2)
-				arg:_finish("Friend drop failed — retrying")
+				arg:_finish("Friend drop failed \226\128\148 retrying")
 			end
 
 			return
@@ -11405,7 +10959,7 @@ local v8 = (function()
 			if type(v8) == "table" and (v8.State == AreaEggs.States.Slot or v8.State == AreaEggs.States.Dropped or v8.State == AreaEggs.States.Carried and v8.CarrierUserId ~= localPlayer2.UserId) then
 				arg.reportedUid = nil
 				arg.stats.deliveryFailed = (arg.stats.deliveryFailed or 0) + 1
-				arg.stats.lastResult = "Delivery failed — retrying"
+				arg.stats.lastResult = "Delivery failed \226\128\148 retrying"
 				arg:_notify()
 
 				if arg.enabled and not arg.running then
@@ -11532,7 +11086,7 @@ local v8 = (function()
 										arg:_invalidateCarryWorker()
 									end)
 
-									arg:_finish("Stuck — retrying")
+									arg:_finish("Stuck \226\128\148 retrying")
 									v9 = nil
 								end
 							end
@@ -11605,7 +11159,7 @@ local v8 = (function()
 			end
 
 			if not arg:_isInSafeArea(humanoidRootPart) then
-				arg:_setStatus("Rollback detected — returning again")
+				arg:_setStatus("Rollback detected \226\128\148 returning again")
 				arg:_releaseCarryWorker(arg2)
 
 				task.defer(function()
@@ -11635,7 +11189,7 @@ local v8 = (function()
 			return
 		end
 
-		arg:_setStatus("Deposit pending — validating again")
+		arg:_setStatus("Deposit pending \226\128\148 validating again")
 
 		task.defer(function()
 			if arg:_isCarryWorkerCurrent(arg2) and arg.carry.active then
@@ -11722,10 +11276,10 @@ local v8 = (function()
 
 		if v8 >= eggFullCount then
 			arg._eggFullHold = true
-			local quantumV4IsAutoSellEggBusy = genv.__QuantumV4IsAutoSellEggBusy and genv.__QuantumV4IsAutoSellEggBusy()
+			local quantumIsAutoSellEggBusy = genv.__QuantumIsAutoSellEggBusy and genv.__QuantumIsAutoSellEggBusy()
 			arg._eggFullAt = arg._eggFullAt or os.clock()
 
-			if not quantumV4IsAutoSellEggBusy and os.clock() - arg._eggFullAt > 60 then
+			if not quantumIsAutoSellEggBusy and os.clock() - arg._eggFullAt > 60 then
 				arg.eggFullCount = nil
 				arg._eggFullHold = false
 				arg._eggFullAt = nil
@@ -11738,7 +11292,7 @@ local v8 = (function()
 		arg._eggFullAt = nil
 
 		if arg._eggFullHold then
-			if genv.__QuantumV4IsAutoSellEggBusy and (genv.__QuantumV4IsAutoSellEggBusy() and v8 > eggFullCount - index.EGG_FREE_SLOTS) then
+			if genv.__QuantumIsAutoSellEggBusy and (genv.__QuantumIsAutoSellEggBusy() and v8 > eggFullCount - index.EGG_FREE_SLOTS) then
 				return true
 			end
 			arg._eggFullHold = false
@@ -11842,13 +11396,13 @@ local v8 = (function()
 			return
 		end
 
-		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-		local autoSteal = quantumV4TaskLadder.blocker("auto_steal")
-		local v8 = (if autoSteal then not autoSteal else quantumV4TaskLadder.holder("auto_steal")) or nil
+		local quantumPlayerSteal = genv.__QuantumPlayerSteal
+		local autoSteal = quantumTaskLadder.blocker("auto_steal")
+		local v8 = (if autoSteal then not autoSteal else quantumTaskLadder.holder("auto_steal")) or nil
 
-		if autoSteal or v8 or quantumV4PlayerSteal and quantumV4PlayerSteal.running then
+		if autoSteal or v8 or quantumPlayerSteal and quantumPlayerSteal.running then
 			arg:_releaseOperation()
-			arg:_setStatus(autoSteal and "Yielding to " .. quantumV4TaskLadder.TITLES[autoSteal] or v8 and "Waiting for " .. quantumV4TaskLadder.TITLES[v8] .. " to hand over" or "Yielding to Steal Players")
+			arg:_setStatus(autoSteal and "Yielding to " .. quantumTaskLadder.TITLES[autoSteal] or v8 and "Waiting for " .. quantumTaskLadder.TITLES[v8] .. " to hand over" or "Yielding to Steal Players")
 			if arg._yieldRetryPending then
 				return
 			end
@@ -11889,7 +11443,7 @@ local v8 = (function()
 
 					if minWeightKg then
 						if minWeightKg > 0 then
-							arg:_setStatus(string.format("No eggs ≥ %dKg", arg.config.minWeightKg))
+							arg:_setStatus(string.format("No eggs \226\137\165 %dKg", arg.config.minWeightKg))
 						else
 							arg:_setStatus("No matching eggs")
 						end
@@ -11924,10 +11478,10 @@ local v8 = (function()
 		end
 
 		local planGeneration = arg.planGeneration
-		quantumV4PlayerSteal, autoSteal = arg:_acquireOperation()
+		quantumPlayerSteal, autoSteal = arg:_acquireOperation()
 
-		if not quantumV4PlayerSteal then
-			arg:_setStatus("Waiting · " .. tostring(autoSteal or "another operation"))
+		if not quantumPlayerSteal then
+			arg:_setStatus("Waiting \194\183 " .. tostring(autoSteal or "another operation"))
 
 			task.delay(0.5, function()
 				if not arg.destroyed and (arg.enabled and arg.planGeneration == planGeneration) then
@@ -11942,7 +11496,7 @@ local v8 = (function()
 		arg.running = true
 		arg.activeTarget = v10
 		local v11 = arg.catalog.resolve(v10)
-		arg.stats.lastTarget = string.format("%s · %s · %s", v11.rarity, v11.name, v10.AreaId)
+		arg.stats.lastTarget = string.format("%s \194\183 %s \194\183 %s", v11.rarity, v11.name, v10.AreaId)
 
 		if character then
 			arg.safeStarting = false
@@ -11982,7 +11536,7 @@ local v8 = (function()
 			return
 		end
 
-		if genv.__QuantumV4AdminBoost == true and not (arg.captureObjectiveEnabled and arg:_isCaptureEgg(v10.Uid)) then
+		if genv.__QuantumAdminBoost == true and not (arg.captureObjectiveEnabled and arg:_isCaptureEgg(v10.Uid)) then
 			arg.safeStarting = false
 			task.spawn(arg._adminSteal, arg, v10)
 			return
@@ -12010,19 +11564,6 @@ local v8 = (function()
 				arg.lastSafeRepositionAt = os.clock()
 				arg:_setStatus("Repositioning to safe area")
 
-				if arg.config.stealMode == "Instant" then
-					arg:_instantTeleport(v12, 0.3)
-					arg:_groundSnap()
-					arg.safeStarting = false
-					arg.running = false
-					task.delay(0.1, function()
-						if not arg.destroyed and (arg.enabled and arg.planGeneration == planGeneration) then
-							arg:_schedule()
-						end
-					end)
-					return
-				end
-
 				arg:_tweenRoot(v12, function()
 					arg:_groundSnap()
 					arg.safeStarting = false
@@ -12040,17 +11581,6 @@ local v8 = (function()
 		end
 
 		arg.safeStarting = false
-
-		if arg.config.stealMode == "Instant" then
-			arg.instantPhase = "stealing"
-			arg.primerUid = nil
-			arg.targetUid = v10.Uid
-			arg.activeTarget = v10
-			arg._flyDeparting = false
-			arg:_startMovementProtection()
-			task.spawn(arg._instantStealTarget, arg, v10)
-			return
-		end
 
 		if arg:_usesPortalBoost(v10) then
 			arg.instantPhase = "hunting"
@@ -12114,7 +11644,7 @@ local v8 = (function()
 		arg.lowFpsPrime = fn3() < 30
 		local v13 = arg:_resolveEggDestination(v12, humanoidRootPart, humanoid)
 		if not v13 then
-			arg:_finish("Steal unavailable — retrying")
+			arg:_finish("Steal unavailable \226\128\148 retrying")
 			return
 		end
 
@@ -12139,7 +11669,7 @@ local v8 = (function()
 
 			if not arg:_glideRoot(v13, fn94) then
 				if arg.instantPhase == "priming" and arg.primerUid == v12.Uid then
-					arg:_finish("Steal unavailable — retrying")
+					arg:_finish("Steal unavailable \226\128\148 retrying")
 				end
 
 				return
@@ -12151,21 +11681,9 @@ local v8 = (function()
 		end
 
 		arg:_setStatus("Preparing steal")
-		if arg.config.stealMode == "Instant" then
-			local function fn94()
-				return arg.destroyed or not arg.enabled or arg.instantPhase ~= "priming" or arg.primerUid ~= v12.Uid
-			end
-			if not arg:_instantTeleport(v13, 0.3, fn94) then
-				if arg.instantPhase == "priming" and arg.primerUid == v12.Uid then
-					arg:_finish("Steal unavailable — retrying")
-				end
-				return
-			end
-		else
-			if not arg:_teleportRoot(humanoidRootPart, humanoid, v13) then
-				arg:_finish("Steal unavailable — retrying")
-				return
-			end
+		if not arg:_teleportRoot(humanoidRootPart, humanoid, v13) then
+			arg:_finish("Steal unavailable \226\128\148 retrying")
+			return
 		end
 		arg:_setArrivalHold(v13, v12.Uid)
 		arg:_requestCarry(v12, true)
@@ -12346,13 +11864,13 @@ local v8 = (function()
 		for i, descendant in ipairs(arg2:GetDescendants()) do
 			if descendant:IsA("BasePart") then
 				if arg.scramblePortalOriginals[descendant] == nil then
-					local attribute = descendant:GetAttribute("QuantumV4PortalOrig")
+					local attribute = descendant:GetAttribute("QuantumPortalOrig")
 
 					if type(attribute) == "string" then
 						arg.scramblePortalOriginals[descendant] = {CanCollide = attribute:sub(1, 1) == "1", CanTouch = attribute:sub(2, 2) == "1"}
 					else
 						arg.scramblePortalOriginals[descendant] = {CanCollide = descendant.CanCollide, CanTouch = descendant.CanTouch}
-						pcall(descendant.SetAttribute, descendant, "QuantumV4PortalOrig", (descendant.CanCollide and "1" or "0") .. (descendant.CanTouch and "1" or "0"))
+						pcall(descendant.SetAttribute, descendant, "QuantumPortalOrig", (descendant.CanCollide and "1" or "0") .. (descendant.CanTouch and "1" or "0"))
 					end
 				end
 
@@ -12410,7 +11928,7 @@ local v8 = (function()
 					pcall(function()
 						k.CanCollide = scramblePortalOriginal.CanCollide
 						k.CanTouch = scramblePortalOriginal.CanTouch
-						k:SetAttribute("QuantumV4PortalOrig", nil)
+						k:SetAttribute("QuantumPortalOrig", nil)
 					end)
 				end
 			end
@@ -12486,8 +12004,8 @@ local v8 = (function()
 		arg:_schedule()
 	end
 
-	local name4 = "__QuantumV4EggEsp"
-	local name5 = "__QuantumV4EggHighlight"
+	local name4 = "__QuantumEggEsp"
+	local name5 = "__QuantumEggHighlight"
 	local tbl18 = {rarity = true, name = true, kg = true, mutation = true, value = true, placed = true, icon = true}
 
 	fn66 = function(arg)
@@ -12549,7 +12067,7 @@ local v8 = (function()
 	local n71 = 3.2
 	local n72 = 1.25
 	local n73 = 597
-	local tbl19 = {["Carry not confirmed — retrying"] = true, ["Carry refused — next egg"] = true, ["Carry lost — retrying"] = true, ["Drop failed — retrying"] = true, ["Egg lost — retrying"] = true, ["Re-steal failed — retrying"] = true, ["Steal timed out — retrying"] = true}
+	local tbl19 = {["Carry not confirmed \226\128\148 retrying"] = true, ["Carry refused \226\128\148 next egg"] = true, ["Carry lost \226\128\148 retrying"] = true, ["Drop failed \226\128\148 retrying"] = true, ["Egg lost \226\128\148 retrying"] = true, ["Re-steal failed \226\128\148 retrying"] = true, ["Steal timed out \226\128\148 retrying"] = true}
 	local n74 = 8
 	local n75 = 600
 	local tbl20 = {}
@@ -12594,7 +12112,7 @@ local v8 = (function()
 		arg2 = 10
 
 		for i, v11 in ipairs(tbl21) do
-			if quantumV4Config.LowSpeedBoost == true and tbl16[v11] ~= nil then
+			if quantumConfig.LowSpeedBoost == true and tbl16[v11] ~= nil then
 			else
 				local v12 = arg:settleNeed(v11, v9)
 				local n77 = 1
@@ -12651,7 +12169,7 @@ local v8 = (function()
 		if not failed and arg2 ~= "Safe return complete" then
 			return
 		end
-		local n76 = math.clamp(tonumber(quantumV4Config.StealHoldSeconds) or 5, 1, 10)
+		local n76 = math.clamp(tonumber(quantumConfig.StealHoldSeconds) or 5, 1, 10)
 		arg.lowSpeedOutcomes = arg.lowSpeedOutcomes or {}
 		flag5 = arg.lowSpeedOutcomes[n76] or {}
 		arg.lowSpeedOutcomes[n76] = flag5
@@ -12691,7 +12209,7 @@ local v8 = (function()
 		end)
 
 		local v10, v11, v12 = arg:recommendLowSpeedLevel()
-		local n76 = math.clamp(tonumber(quantumV4Config.StealHoldSeconds) or 5, 1, 10)
+		local n76 = math.clamp(tonumber(quantumConfig.StealHoldSeconds) or 5, 1, 10)
 		local lowSpeedAdvice = arg.lowSpeedAdvice
 		local v13 = lowSpeedAdvice and (if n76 <= lowSpeedAdvice.to then nil else lowSpeedAdvice)
 		return {speedText = type(v9) == "number" and fn94(v9) or "?", walkSpeed = math.floor((v12 or 0) + 0.5), safe = v10, fast = v11, level = n76, advice = v13}
@@ -12827,21 +12345,21 @@ local v8 = (function()
 				icon.Image = icon2 or ""
 				icon.Visible = icon2 ~= nil
 				local rarityColor = typeof(tbl21.rarityColor) == "Color3" and tbl21.rarityColor or Color3.fromRGB(255, 255, 255)
-				local tbl22 = {}
+				local espList22 = {}
 
 				if config.espRarity then
-					tbl22[#tbl22 + 1] = string.upper(tbl21.rarity or "?")
+					espList22[#espList22 + 1] = string.upper(tbl21.rarity or "?")
 				end
 
 				if config.espName then
-					tbl22[#tbl22 + 1] = tostring(tbl21.name)
+					espList22[#espList22 + 1] = tostring(tbl21.name)
 				end
 
 				if config.espKg then
 					tbl21 = arg:_resolveWeightKg(v9)
 
 					if tbl21 then
-						tbl22[#tbl22 + 1] = string.format("%d Kg", math.floor(tbl21))
+						espList22[#espList22 + 1] = string.format("%d Kg", math.floor(tbl21))
 					end
 				end
 
@@ -12854,7 +12372,7 @@ local v8 = (function()
 
 					if #tbl21 > 0 then
 						table.sort(tbl21)
-						tbl22[#tbl22 + 1] = table.concat(tbl21, ", ")
+						espList22[#espList22 + 1] = table.concat(tbl21, ", ")
 					end
 				end
 
@@ -12862,12 +12380,12 @@ local v8 = (function()
 					tbl21 = fn66(v9)
 
 					if tbl21 then
-						tbl22[#tbl22 + 1] = "$" .. fn94(tbl21) .. "/s"
+						espList22[#espList22 + 1] = "$" .. fn94(tbl21) .. "/s"
 					end
 				end
 
 				local text = billboardGui:FindFirstChild("Text")
-				text.Text = table.concat(tbl22, " | ")
+				text.Text = table.concat(espList22, " | ")
 				text.TextColor3 = rarityColor
 
 				if highlight then
@@ -12901,23 +12419,23 @@ local v8 = (function()
 			local v9 = (Save.Peek or Save.Get)()
 			local eggInventory = type(v9) == "table" and v9.EggInventory or nil
 			local centerPoint = PlotState2.ResolveLocalSlot()
-			local quantumV4PlacedEggAnchors = PlotState2.ResolveFolder()
-			local v10 = quantumV4PlacedEggAnchors and centerPoint and quantumV4PlacedEggAnchors:FindFirstChild(tostring(centerPoint))
+			local quantumPlacedEggAnchors = PlotState2.ResolveFolder()
+			local v10 = quantumPlacedEggAnchors and centerPoint and quantumPlacedEggAnchors:FindFirstChild(tostring(centerPoint))
 			centerPoint = v10 and v10:FindFirstChild("CenterPoint")
 			local v11 = centerPoint and (if centerPoint:IsA("BasePart") then centerPoint else nil)
 			local tbl21 = {}
 
 			if type(eggInventory) == "table" and v11 then
-				quantumV4PlacedEggAnchors = workspace:FindFirstChild("QuantumV4PlacedEggAnchors")
+				quantumPlacedEggAnchors = workspace:FindFirstChild("QuantumPlacedEggAnchors")
 
-				if quantumV4PlacedEggAnchors then
+				if quantumPlacedEggAnchors then
 				else
-					quantumV4PlacedEggAnchors = Instance.new("Folder")
-					quantumV4PlacedEggAnchors.Name = "QuantumV4PlacedEggAnchors"
-					quantumV4PlacedEggAnchors.Parent = workspace
+					quantumPlacedEggAnchors = Instance.new("Folder")
+					quantumPlacedEggAnchors.Name = "QuantumPlacedEggAnchors"
+					quantumPlacedEggAnchors.Parent = workspace
 				end
 
-				for i, child in ipairs(quantumV4PlacedEggAnchors:GetChildren()) do
+				for i, child in ipairs(quantumPlacedEggAnchors:GetChildren()) do
 					if child:IsA("Highlight") then
 						child:Destroy()
 					elseif child:IsA("BillboardGui") then
@@ -12946,14 +12464,14 @@ local v8 = (function()
 
 							if typeof(v13.anchor) ~= "Instance" then
 								local part = Instance.new("Part")
-								part.Name = "QuantumV4PE_" .. k
+								part.Name = "QuantumPE_" .. k
 								part.Size = Vector3.new(1.5, 1.5, 1.5)
 								part.Transparency = 1
 								part.Anchored = true
 								part.CanCollide = false
 								part.CanQuery = false
 								part.CanTouch = false
-								part.Parent = quantumV4PlacedEggAnchors
+								part.Parent = quantumPlacedEggAnchors
 								v13.anchor = part
 							end
 
@@ -12965,33 +12483,33 @@ local v8 = (function()
 								tbl21[k] = nil
 								continue
 							end
-							local tbl22 = {}
+							local espList22 = {}
 
 							if config.espRarity then
-								tbl22[#tbl22 + 1] = string.upper(v14.rarity or "?")
+								espList22[#espList22 + 1] = string.upper(v14.rarity or "?")
 							end
 
 							if config.espName then
-								tbl22[#tbl22 + 1] = tostring(v14.name)
+								espList22[#espList22 + 1] = tostring(v14.name)
 							end
 
 							if config.espKg then
 								local ok2, result2 = pcall(EggRecords.WeightKgForScale, flag5.AssetCategory, result)
 
 								if ok2 and type(result2) == "number" then
-									tbl22[#tbl22 + 1] = string.format("%d Kg", math.floor(result2))
+									espList22[#espList22 + 1] = string.format("%d Kg", math.floor(result2))
 								end
 							end
 
 							if config.espValue and billboardGui then
-								tbl22[#tbl22 + 1] = "$" .. fn94(billboardGui) .. "/s"
+								espList22[#espList22 + 1] = "$" .. fn94(billboardGui) .. "/s"
 							end
 
 							if type(v12.Placement.ReadyAt) == "number" then
-								tbl22[#tbl22 + 1] = "READY"
+								espList22[#espList22 + 1] = "READY"
 							elseif type(flag5.Placement) == "table" then
 								if flag5.Placement.ReadyAt ~= nil then
-									tbl22[#tbl22 + 1] = "READY"
+									espList22[#espList22 + 1] = "READY"
 								end
 							end
 
@@ -13038,7 +12556,7 @@ local v8 = (function()
 							end
 
 							local text = billboardGui:FindFirstChild("Text")
-							text.Text = table.concat(tbl22, " | ")
+							text.Text = table.concat(espList22, " | ")
 							text.TextColor3 = rarityColor
 							local v15 = v13.anchor:FindFirstChild(name5)
 
@@ -13094,7 +12612,7 @@ local v8 = (function()
 		local n76 = math.clamp(math.floor((tonumber(arg2) or n11) + 0.5), n9, n10)
 		arg.config.speed = n76 * n8
 
-		if genv.__QuantumV4AdminBoost == true then
+		if genv.__QuantumAdminBoost == true then
 			arg.config.speed = speed
 		end
 
@@ -13121,17 +12639,17 @@ local v8 = (function()
 		local tbl21 = type(arg3) == "table" and table.clone(arg3) or {}
 
 		if arg2 == "mutations" and type(arg.catalog.resolveMutationId) == "function" then
-			local tbl22 = {}
+			local espList22 = {}
 
 			for i, v9 in ipairs(tbl21) do
 				local v10 = arg.catalog.resolveMutationId(v9)
 
 				if v10 then
-					table.insert(tbl22, v10)
+					table.insert(espList22, v10)
 				end
 			end
 
-			tbl21 = tbl22
+			tbl21 = espList22
 		end
 
 		arg.config[arg2] = tbl21
@@ -13194,10 +12712,10 @@ local v8 = (function()
 				end
 			end
 
-			local quantumV4PlacedEggAnchors = workspace:FindFirstChild("QuantumV4PlacedEggAnchors")
+			local quantumPlacedEggAnchors = workspace:FindFirstChild("QuantumPlacedEggAnchors")
 
-			if quantumV4PlacedEggAnchors then
-				quantumV4PlacedEggAnchors:Destroy()
+			if quantumPlacedEggAnchors then
+				quantumPlacedEggAnchors:Destroy()
 			end
 		end)
 
@@ -13385,11 +12903,11 @@ local v9 = (function()
 
 		task.spawn(function()
 			task.wait()
-			local quantumV4ForestGate = genv.__QuantumV4ForestGate
+			local quantumForestGate = genv.__QuantumForestGate
 
-			if type(quantumV4ForestGate) == "table" and (quantumV4ForestGate.comp and quantumV4ForestGate.orig) then
-				pcall(rawset, quantumV4ForestGate.comp, "_attackHandler", quantumV4ForestGate.orig)
-				genv.__QuantumV4ForestGate = nil
+			if type(quantumForestGate) == "table" and (quantumForestGate.comp and quantumForestGate.orig) then
+				pcall(rawset, quantumForestGate.comp, "_attackHandler", quantumForestGate.orig)
+				genv.__QuantumForestGate = nil
 			end
 
 			if type(getgc) ~= "function" then
@@ -13417,15 +12935,15 @@ local v9 = (function()
 				if type(v9) == "table" and rawget(v9, "_areaId") == "Forest" and type(rawget(v9, "_attackHandler")) == "function" then
 					local value = rawget(v9, "_attackHandler")
 					arg._forestGate = {comp = v9, orig = value}
-					genv.__QuantumV4ForestGate = arg._forestGate
+					genv.__QuantumForestGate = arg._forestGate
 
 					rawset(v9, "_attackHandler", function(...)
-						if arg.enabled and (not arg.destroyed and (not (arg.eggRuntime and arg.eggRuntime.instantPhase == "priming") and not (genv.__QuantumV4PlayerSteal and genv.__QuantumV4PlayerSteal.running))) then
+						if arg.enabled and (not arg.destroyed and (not (arg.eggRuntime and arg.eggRuntime.instantPhase == "priming") and not (genv.__QuantumPlayerSteal and genv.__QuantumPlayerSteal.running))) then
 							arg.stats.blockedHits = arg.stats.blockedHits + 1
 							arg:_recoverBody(true)
 
-							if genv.__QuantumV4GodMode then
-								genv.__QuantumV4GodMode:startDefend()
+							if genv.__QuantumGodMode then
+								genv.__QuantumGodMode:startDefend()
 							end
 
 							return
@@ -13560,8 +13078,8 @@ local v9 = (function()
 				return
 			end
 
-			local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-			if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
+			local quantumPlayerSteal = genv.__QuantumPlayerSteal
+			if quantumPlayerSteal and quantumPlayerSteal.running then
 				return
 			end
 			local uid = arg2.Uid or arg.lastHeldEggUid
@@ -13574,8 +13092,8 @@ local v9 = (function()
 				arg.stats.blockedDrops = arg.stats.blockedDrops + 1
 				arg:_startSticky(uid, lastHeldSlotKey)
 
-				if genv.__QuantumV4GodMode then
-					genv.__QuantumV4GodMode:startDefend(uid)
+				if genv.__QuantumGodMode then
+					genv.__QuantumGodMode:startDefend(uid)
 				end
 			end
 		end))
@@ -13612,14 +13130,14 @@ local v9 = (function()
 		end
 	end
 
-	index.install = function(quantumV4AntiGuard)
-		if quantumV4AntiGuard.destroyed then
+	index.install = function(quantumAntiGuard)
+		if quantumAntiGuard.destroyed then
 			return false
 		end
-		getgenv().__QuantumV4AntiGuard = quantumV4AntiGuard
-		quantumV4AntiGuard:_installRagdollHooks()
-		quantumV4AntiGuard:_bindSignals()
-		quantumV4AntiGuard:_recoverBody()
+		getgenv().__QuantumAntiGuard = quantumAntiGuard
+		quantumAntiGuard:_installRagdollHooks()
+		quantumAntiGuard:_bindSignals()
+		quantumAntiGuard:_recoverBody()
 		return true
 	end
 
@@ -13647,8 +13165,8 @@ local v9 = (function()
 		if arg._forestGate then
 			pcall(rawset, arg._forestGate.comp, "_attackHandler", arg._forestGate.orig)
 
-			if genv.__QuantumV4ForestGate == arg._forestGate then
-				genv.__QuantumV4ForestGate = nil
+			if genv.__QuantumForestGate == arg._forestGate then
+				genv.__QuantumForestGate = nil
 			end
 
 			arg._forestGate = nil
@@ -13656,8 +13174,8 @@ local v9 = (function()
 
 		arg.eggRuntime = nil
 
-		if getgenv().__QuantumV4AntiGuard == arg then
-			getgenv().__QuantumV4AntiGuard = nil
+		if getgenv().__QuantumAntiGuard == arg then
+			getgenv().__QuantumAntiGuard = nil
 		end
 	end
 
@@ -13679,7 +13197,7 @@ local v10 = (function()
 	index.new = function(eggRuntime)
 		local obj = setmetatable({}, index)
 		obj.eggRuntime = eggRuntime
-		obj.enabled = quantumV4Config.GodMode == nil and true or quantumV4Config.GodMode == true
+		obj.enabled = quantumConfig.GodMode == nil and true or quantumConfig.GodMode == true
 		obj.active = false
 		obj.activeDroppedUid = nil
 		obj.swingSequence = 0
@@ -13700,12 +13218,12 @@ local v10 = (function()
 			return false
 		end
 
-		local quantumV4IsBatTool = genv.__QuantumV4IsBatTool
-		if quantumV4IsBatTool and quantumV4IsBatTool(arg2) then
+		local quantumIsBatTool = genv.__QuantumIsBatTool
+		if quantumIsBatTool and quantumIsBatTool(arg2) then
 			return true
 		end
 
-		if not quantumV4IsBatTool then
+		if not quantumIsBatTool then
 			if arg2:GetAttribute("IsBat") == true then
 				return true
 			elseif arg2:GetAttribute("GearName") == "Bat" then
@@ -13865,8 +13383,8 @@ local v10 = (function()
 		if activeDroppedUid and (arg.eggRuntime and arg.eggRuntime:isSkippedEgg(activeDroppedUid)) then
 			return
 		end
-		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-		if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
+		local quantumPlayerSteal = genv.__QuantumPlayerSteal
+		if quantumPlayerSteal and quantumPlayerSteal.running then
 			return
 		end
 		arg.active = true
@@ -13882,8 +13400,8 @@ local v10 = (function()
 				if arg.eggRuntime and (arg.eggRuntime.carry and arg.eggRuntime.carry.active) then
 					break
 				end
-				local quantumV4PlayerSteal2 = genv.__QuantumV4PlayerSteal
-				if quantumV4PlayerSteal2 and quantumV4PlayerSteal2.running then
+				local quantumPlayerSteal2 = genv.__QuantumPlayerSteal
+				if quantumPlayerSteal2 and quantumPlayerSteal2.running then
 					flag5 = true
 					break
 				end
@@ -13986,13 +13504,13 @@ local v11 = (function()
 	local n8 = 8
 
 	local function fn62()
-		local treadmill = quantumV4TaskLadder.blocker("treadmill")
+		local treadmill = quantumTaskLadder.blocker("treadmill")
 		if treadmill then
-			return "Yielding to " .. quantumV4TaskLadder.TITLES[treadmill]
+			return "Yielding to " .. quantumTaskLadder.TITLES[treadmill]
 		end
-		local treadmill2 = quantumV4TaskLadder.holder("treadmill")
+		local treadmill2 = quantumTaskLadder.holder("treadmill")
 		if treadmill2 then
-			return "Waiting for " .. quantumV4TaskLadder.TITLES[treadmill2]
+			return "Waiting for " .. quantumTaskLadder.TITLES[treadmill2]
 		end
 		return nil
 	end
@@ -14002,7 +13520,7 @@ local v11 = (function()
 	end
 
 	local function fn64()
-		return quantumV4TaskLadder.blocker("treadmill") == "auto_steal"
+		return quantumTaskLadder.blocker("treadmill") == "auto_steal"
 	end
 
 	local function fn65()
@@ -14119,11 +13637,11 @@ local v11 = (function()
 		if arg.busy and arg.config.disableDuringAutomation then
 			return true
 		end
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
-		if quantumV4EggRuntime and quantumV4EggRuntime._treadmillResetting then
+		local quantumEggRuntime = genv.__QuantumEggRuntime
+		if quantumEggRuntime and quantumEggRuntime._treadmillResetting then
 			return false
 		end
-		local ok, result = pcall(quantumV4TaskLadder.holder, "treadmill")
+		local ok, result = pcall(quantumTaskLadder.holder, "treadmill")
 		return ok and result ~= nil
 	end
 
@@ -14624,7 +14142,7 @@ local v11 = (function()
 						continue
 					end
 
-					if genv.__QuantumV4IsAutoSellEggBusy and genv.__QuantumV4IsAutoSellEggBusy() then
+					if genv.__QuantumIsAutoSellEggBusy and genv.__QuantumIsAutoSellEggBusy() then
 						now = os.clock()
 						arg:_setStatus("Idle", "Waiting for Auto Sell Egg")
 						task.wait(0.25)
@@ -14668,7 +14186,7 @@ local v11 = (function()
 					end
 
 					local travel2 = flag5 or arg.travel and arg.travel:travelAndWait(v11, {abort = function()
-						return arg.destroyed or arg.busy or not arg.config.idleFarm or idleGeneration ~= arg.idleGeneration or arg.coordinator and arg.coordinator:isBackgroundBusy() or genv.__QuantumV4IsAutoSellEggBusy and genv.__QuantumV4IsAutoSellEggBusy() or fn63()
+						return arg.destroyed or arg.busy or not arg.config.idleFarm or idleGeneration ~= arg.idleGeneration or arg.coordinator and arg.coordinator:isBackgroundBusy() or genv.__QuantumIsAutoSellEggBusy and genv.__QuantumIsAutoSellEggBusy() or fn63()
 					end})
 
 					arg.travelingToTreadmill = false
@@ -14684,8 +14202,8 @@ local v11 = (function()
 
 					if arg.busy or not arg.config.idleFarm or idleGeneration ~= arg.idleGeneration or arg.coordinator and arg.coordinator:isBackgroundBusy() then
 						continue
-					elseif genv.__QuantumV4IsAutoSellEggBusy then
-						if genv.__QuantumV4IsAutoSellEggBusy() then
+					elseif genv.__QuantumIsAutoSellEggBusy then
+						if genv.__QuantumIsAutoSellEggBusy() then
 							continue
 						elseif fn63() then
 							continue
@@ -14698,8 +14216,8 @@ local v11 = (function()
 
 					if arg.busy or not arg.config.idleFarm or idleGeneration ~= arg.idleGeneration or arg.coordinator and arg.coordinator:isBackgroundBusy() then
 						continue
-					elseif genv.__QuantumV4IsAutoSellEggBusy then
-						if genv.__QuantumV4IsAutoSellEggBusy() then
+					elseif genv.__QuantumIsAutoSellEggBusy then
+						if genv.__QuantumIsAutoSellEggBusy() then
 							continue
 						elseif fn63() then
 							continue
@@ -14737,7 +14255,7 @@ local v11 = (function()
 							break
 						end
 
-						if genv.__QuantumV4IsAutoSellEggBusy and genv.__QuantumV4IsAutoSellEggBusy() then
+						if genv.__QuantumIsAutoSellEggBusy and genv.__QuantumIsAutoSellEggBusy() then
 							arg:_cancelIdle(true)
 							arg:_setStatus("Idle", "Yielding to Auto Sell Egg")
 							break
@@ -14917,11 +14435,11 @@ end)()
 
 local v12 = v5.new()
 local v13 = v8.new(v6, v7, v12)
-genv.__QuantumV4EggRuntime = v13
+genv.__QuantumEggRuntime = v13
 local v14 = v11.new(v12, v13)
-genv.__QuantumV4TreadmillManager = v14
+genv.__QuantumTreadmillManager = v14
 
-quantumV4TaskLadder.register("treadmill", {wants = function()
+quantumTaskLadder.register("treadmill", {wants = function()
 	return v14.config.idleFarm == true and not v14.destroyed
 end, active = function()
 	local destroyed = v14.destroyed
@@ -14933,7 +14451,7 @@ end, status = function()
 	local str3 = tostring(stats.mode or "")
 	local str4 = tostring(stats.boost or "")
 	if str4 ~= "" and str4 ~= "Waiting" then
-		return str3 .. "  ·  " .. str4
+		return str3 .. "  \194\183  " .. str4
 	end
 	return str3
 end})
@@ -14941,15 +14459,15 @@ end})
 v13:setTreadmillManager(v14)
 v14:setDisableDuringAutomation(true)
 
-if quantumV4Config.AutoTreadmillIdle then
+if quantumConfig.AutoTreadmillIdle then
 	v14:setIdleFarm(true)
 end
 
-if quantumV4Config.AutoIndex then
+if quantumConfig.AutoIndex then
 	v13:setIndexObjective(true)
 end
 
-if quantumV4Config.AutoTreadmillUpgrade then
+if quantumConfig.AutoTreadmillUpgrade then
 	v14:setAutoUpgrade(true)
 end
 
@@ -15113,7 +14631,7 @@ genv.__QuantumV4Webhook = (function()
 		png.cache[match] = flag7
 		return flag7 or nil
 	end, post = function(arg, arg2, arg3)
-		local str4 = "Quantum" .. tostring(math.random(100000, 999999)) .. tostring(os.time())
+		local str4 = "QuantumHub" .. tostring(math.random(100000, 999999)) .. tostring(os.time())
 		local str5 = table.concat({"--" .. str4, "Content-Disposition: form-data; name=\"payload_json\"", "Content-Type: application/json", "", HttpService:JSONEncode(arg2), "--" .. str4, "Content-Disposition: form-data; name=\"files[0]\"; filename=\"egg.png\"", "Content-Type: image/png", "", arg3, "--" .. str4 .. "--", ""}, "\013\n")
 		local v15 = request_({Url = arg, Method = "POST", Headers = {["Content-Type"] = "multipart/form-data; boundary=" .. str4}, Body = str5})
 		local n8 = type(v15) == "table" and tonumber(v15.StatusCode or v15.status) or 0
@@ -15266,7 +14784,7 @@ genv.__QuantumV4Webhook = (function()
 		local tbl15 = {}
 		local flag7 = false
 
-		for i, v15 in ipairs(quantumV4Config.WebhookRarities or {}) do
+		for i, v15 in ipairs(quantumConfig.WebhookRarities or {}) do
 			if v15 ~= "None" and v15 ~= "" then
 				tbl15[v15] = true
 				flag7 = true
@@ -15276,7 +14794,7 @@ genv.__QuantumV4Webhook = (function()
 		if flag7 and not tbl15[arg2.rarity] then
 			return false
 		end
-		local n8 = tonumber(quantumV4Config.WebhookMinValue) or 0
+		local n8 = tonumber(quantumConfig.WebhookMinValue) or 0
 		if n8 > 0 and arg3 < n8 then
 			return false
 		end
@@ -15313,10 +14831,10 @@ genv.__QuantumV4Webhook = (function()
 	end
 
 	tbl12.stolen = function(arg, arg2, arg3)
-		if quantumV4Config.WebhookEnabled ~= true then
+		if quantumConfig.WebhookEnabled ~= true then
 			return
 		end
-		local webhookURL = quantumV4Config.WebhookURL
+		local webhookURL = quantumConfig.WebhookURL
 
 		if type(webhookURL) ~= "string" then
 			return
@@ -15357,7 +14875,7 @@ genv.__QuantumV4Webhook = (function()
 		end
 
 		local v16 = fn63()
-		local tbl18 = {title = "Egg Stolen", description = string.format("You've stolen a **%s** %s", tostring(tbl16.rarity), tostring(tbl16.name)), color = fn65(tbl16.rarityColor), timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"), author = {name = "Quantum | ID", icon_url = v16}, footer = {text = "Quantum | ID", icon_url = v16}, fields = tbl17}
+		local tbl18 = {title = "Egg Stolen", description = string.format("You've stolen a **%s** %s", tostring(tbl16.rarity), tostring(tbl16.name)), color = fn65(tbl16.rarityColor), timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"), author = {name = "Quantum Hub", icon_url = v16}, footer = {text = "discord.gg/quantumhub", icon_url = v16}, fields = tbl17}
 
 		if #tbl13 > 40 then
 			table.remove(tbl13, 1)
@@ -15379,7 +14897,7 @@ genv.__QuantumV4Webhook = (function()
 	end
 
 	tbl12.test = function()
-		local webhookURL = quantumV4Config.WebhookURL
+		local webhookURL = quantumConfig.WebhookURL
 
 		if type(webhookURL) ~= "string" then
 			return false
@@ -15388,7 +14906,7 @@ genv.__QuantumV4Webhook = (function()
 		end
 
 		local v15 = fn63()
-		local tbl16 = {title = "Webhook Test", description = string.format("Connection test for **%s**", localPlayer2.Name), color = 5814783, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"), author = {name = "Quantum | ID", icon_url = v15}, footer = {text = "Quantum | ID", icon_url = v15}, fields = {{name = "User", value = localPlayer2.Name, inline = true}, {name = "User ID", value = tostring(localPlayer2.UserId), inline = true}, {name = "Place ID", value = tostring(game.PlaceId), inline = true}, {name = "Status", value = "Connected", inline = true}}}
+		local tbl16 = {title = "Webhook Test", description = string.format("Connection test for **%s**", localPlayer2.Name), color = 5814783, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"), author = {name = "Quantum Hub", icon_url = v15}, footer = {text = "discord.gg/quantumhub", icon_url = v15}, fields = {{name = "User", value = localPlayer2.Name, inline = true}, {name = "User ID", value = tostring(localPlayer2.UserId), inline = true}, {name = "Place ID", value = tostring(game.PlaceId), inline = true}, {name = "Status", value = "Connected", inline = true}}}
 		local v16 = fn62(str3)
 
 		if v16 then
@@ -15414,10 +14932,10 @@ genv.__QuantumV4Webhook = (function()
 	end
 
 	tbl12.disconnected = function(arg)
-		if quantumV4Config.WebhookDisconnect ~= true then
+		if quantumConfig.WebhookDisconnect ~= true then
 			return
 		end
-		local webhookURL = quantumV4Config.WebhookURL
+		local webhookURL = quantumConfig.WebhookURL
 
 		if type(webhookURL) ~= "string" then
 			return
@@ -15439,7 +14957,7 @@ genv.__QuantumV4Webhook = (function()
 
 		v15 = arg
 		local v16 = fn63()
-		local tbl16 = {title = "Account Disconnected", description = string.format("**%s** was disconnected from Steal an Egg.", localPlayer2.Name), color = 15548997, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"), author = {name = "Quantum | ID", icon_url = v16}, footer = {text = "Quantum | ID", icon_url = v16}}
+		local tbl16 = {title = "Account Disconnected", description = string.format("**%s** was disconnected from Steal an Egg.", localPlayer2.Name), color = 15548997, timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"), author = {name = "Quantum Hub", icon_url = v16}, footer = {text = "discord.gg/quantumhub", icon_url = v16}}
 		tbl16.fields = {{name = "User", value = localPlayer2.Name, inline = true}, {name = "User ID", value = tostring(localPlayer2.UserId), inline = true}, {name = "Session", value = fn66(), inline = true}, {name = "Reason", value = arg:sub(1, 1000), inline = false}, {name = "Server", value = "`" .. tostring(game.JobId ~= "" and game.JobId or "unknown") .. "`", inline = false}}
 		local json = HttpService:JSONEncode({embeds = {tbl16}})
 
@@ -15455,13 +14973,13 @@ genv.__QuantumV4Webhook = (function()
 	end
 
 	pcall(function()
-		local quantumV4DisconnectConn = genv.__QuantumV4DisconnectConn
+		local quantumDisconnectConn = genv.__QuantumDisconnectConn
 
-		if typeof(quantumV4DisconnectConn) == "RBXScriptConnection" then
-			quantumV4DisconnectConn:Disconnect()
+		if typeof(quantumDisconnectConn) == "RBXScriptConnection" then
+			quantumDisconnectConn:Disconnect()
 		end
 
-		genv.__QuantumV4DisconnectConn = game:GetService("GuiService").ErrorMessageChanged:Connect(function(arg)
+		genv.__QuantumDisconnectConn = game:GetService("GuiService").ErrorMessageChanged:Connect(function(arg)
 			pcall(tbl12.disconnected, arg)
 		end)
 	end)
@@ -15559,7 +15077,7 @@ local walkSpeedMultiplier = (function()
 		local tbl13 = {}
 		local flag5 = false
 
-		for i, v16 in ipairs(quantumV4Config.StealPlayerRarities or {}) do
+		for i, v16 in ipairs(quantumConfig.StealPlayerRarities or {}) do
 			if v16 ~= "None" and v16 ~= "" then
 				tbl13[v16] = true
 				flag5 = true
@@ -15571,7 +15089,7 @@ local walkSpeedMultiplier = (function()
 				return false
 			end
 		else
-			for i, v16 in ipairs(quantumV4Config.StealRarities or {}) do
+			for i, v16 in ipairs(quantumConfig.StealRarities or {}) do
 				if v16 ~= "None" and v16 ~= "" then
 					tbl13[v16] = true
 					flag5 = true
@@ -15583,7 +15101,7 @@ local walkSpeedMultiplier = (function()
 			end
 		end
 
-		local n16 = tonumber(quantumV4Config.StealPlayerMinValue) or 0
+		local n16 = tonumber(quantumConfig.StealPlayerMinValue) or 0
 		if n16 > 0 and (genv.__QuantumV4Webhook and genv.__QuantumV4Webhook.rateOf(arg2) or 0) < n16 then
 			return false
 		end
@@ -15696,7 +15214,7 @@ local walkSpeedMultiplier = (function()
 	end
 
 	index._pick = function(arg)
-		local stealPlayerTarget, v15, v16 = quantumV4Config.StealPlayerTarget
+		local stealPlayerTarget, v15, v16 = quantumConfig.StealPlayerTarget
 
 		for i, v17 in ipairs(arg:carriers()) do
 			local flag5 = stealPlayerTarget == nil or stealPlayerTarget == "" or stealPlayerTarget == "Any Player" or v17.player.Name == stealPlayerTarget
@@ -15891,7 +15409,7 @@ local walkSpeedMultiplier = (function()
 		arg:_setStatus("Preparing steal")
 		local v15 = fn65(arg2)
 		if not v15 then
-			arg:_setStatus("Steal unavailable — retrying")
+			arg:_setStatus("Steal unavailable \226\128\148 retrying")
 			return false
 		end
 		local position = v15.BottomCFrame and v15.BottomCFrame.Position or v15.BoundsCFrame and v15.BoundsCFrame.Position or Vector3.new(596.6, 67.7, -325)
@@ -15957,7 +15475,7 @@ local walkSpeedMultiplier = (function()
 		end
 
 		if not flag5 then
-			arg:_setStatus("Steal unavailable — retrying")
+			arg:_setStatus("Steal unavailable \226\128\148 retrying")
 			fn63()
 			return false
 		end
@@ -16087,7 +15605,7 @@ local walkSpeedMultiplier = (function()
 		end
 
 		if not flag6 then
-			arg:_setStatus("Steal unavailable — retrying")
+			arg:_setStatus("Steal unavailable \226\128\148 retrying")
 			fn63()
 			return false, v15.Uid
 		end
@@ -16680,7 +16198,7 @@ local walkSpeedMultiplier = (function()
 		end
 
 		local function fn66()
-			if genv.ChloeX_Running == nil and genv.__QuantumV4PlayerSteal ~= arg then
+			if genv.ChloeX_Running == nil and genv.__QuantumPlayerSteal ~= arg then
 				for i, v15 in ipairs(arg.dropConns or {}) do
 					pcall(function()
 						v15:Disconnect()
@@ -16744,7 +16262,7 @@ local walkSpeedMultiplier = (function()
 			end
 
 			local eggRuntime = arg.eggRuntime
-			local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
+			local quantumButterflyRuntime = genv.__QuantumButterflyRuntime
 
 			if eggRuntime then
 				if eggRuntime.running then
@@ -16756,7 +16274,7 @@ local walkSpeedMultiplier = (function()
 				end
 			end
 
-			if quantumV4ButterflyRuntime ~= nil and quantumV4ButterflyRuntime.active == true then
+			if quantumButterflyRuntime ~= nil and quantumButterflyRuntime.active == true then
 				return
 			end
 			local position = arg2.BottomCFrame and arg2.BottomCFrame.Position
@@ -17021,7 +16539,7 @@ local walkSpeedMultiplier = (function()
 		arg.loop = task.spawn(function()
 			while true do
 				task.wait(0.4)
-				if genv.ChloeX_Running == nil and genv.__QuantumV4PlayerSteal ~= arg then
+				if genv.ChloeX_Running == nil and genv.__QuantumPlayerSteal ~= arg then
 					break
 				end
 
@@ -17032,9 +16550,9 @@ local walkSpeedMultiplier = (function()
 				end
 
 				local eggRuntime = arg.eggRuntime
-				local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
+				local quantumButterflyRuntime = genv.__QuantumButterflyRuntime
 				local running = eggRuntime and (eggRuntime.running or eggRuntime.carry and eggRuntime.carry.active)
-				local flag5 = quantumV4ButterflyRuntime ~= nil and quantumV4ButterflyRuntime.active == true
+				local flag5 = quantumButterflyRuntime ~= nil and quantumButterflyRuntime.active == true
 				local v15 = if arg.enabled then if arg.running then nil else if running then nil else arg:_pick() else nil
 				arg.wantsTarget = v15 ~= nil
 
@@ -17052,11 +16570,11 @@ end)()
 
 local v15 = v9.new(v13)
 v15:install()
-v15:setEnabled(quantumV4Config.AntiGuardKnockback == true)
-genv.__QuantumV4AntiGuard = v15
+v15:setEnabled(quantumConfig.AntiGuardKnockback == true)
+genv.__QuantumAntiGuard = v15
 local v16 = v10.new(v13)
-v16:setEnabled(quantumV4Config.GodMode == nil and true or quantumV4Config.GodMode == true)
-genv.__QuantumV4GodMode = v16
+v16:setEnabled(quantumConfig.GodMode == nil and true or quantumConfig.GodMode == true)
+genv.__QuantumGodMode = v16
 local v17 = walkSpeedMultiplier.new(v13, v16, v6)
 
 local v18 = (function()
@@ -17120,8 +16638,8 @@ local v18 = (function()
 	end
 
 	local function fn62()
-		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
-		return quantumV4TreadmillManager ~= nil and not quantumV4TreadmillManager.destroyed and quantumV4TreadmillManager.config ~= nil and quantumV4TreadmillManager.config.idleFarm == true
+		local quantumTreadmillManager = genv.__QuantumTreadmillManager
+		return quantumTreadmillManager ~= nil and not quantumTreadmillManager.destroyed and quantumTreadmillManager.config ~= nil and quantumTreadmillManager.config.idleFarm == true
 	end
 
 	local tbl12 = {at = 0, value = false}
@@ -17230,8 +16748,8 @@ local v18 = (function()
 
 			if running then
 			else
-				local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-				running = if quantumV4PlayerSteal then if quantumV4PlayerSteal.running then true else running else running
+				local quantumPlayerSteal = genv.__QuantumPlayerSteal
+				running = if quantumPlayerSteal then if quantumPlayerSteal.running then true else running else running
 			end
 
 			if running then
@@ -17569,8 +17087,8 @@ local v18 = (function()
 	end
 
 	index._applySpeedMultiplier = function(arg)
-		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
-		if quantumV4TreadmillManager and quantumV4TreadmillManager.activeTreadmill ~= nil then
+		local quantumTreadmillManager = genv.__QuantumTreadmillManager
+		if quantumTreadmillManager and quantumTreadmillManager.activeTreadmill ~= nil then
 			return
 		end
 		local v18 = arg:_humanoid()
@@ -17621,24 +17139,24 @@ local v18 = (function()
 	return index
 end)().new()
 
-genv.__QuantumV4MovementExtras = v18
+genv.__QuantumMovementExtras = v18
 
-if quantumV4Config.FlyForCapture then
+if quantumConfig.FlyForCapture then
 	v18:setFlyForCapture(true)
 end
 
-if quantumV4Config.InstantGrab then
+if quantumConfig.InstantGrab then
 	v18:setInstantGrab(true)
 end
 
-if quantumV4Config.InfiniteJump then
+if quantumConfig.InfiniteJump then
 	v18:setInfiniteJump(true)
 end
 
-walkSpeedMultiplier = quantumV4Config.WalkSpeedMultiplier
+walkSpeedMultiplier = quantumConfig.WalkSpeedMultiplier
 
 if walkSpeedMultiplier and walkSpeedMultiplier > 1 then
-	v18:setSpeedMultiplier(quantumV4Config.WalkSpeedMultiplier)
+	v18:setSpeedMultiplier(quantumConfig.WalkSpeedMultiplier)
 end
 
 v10 = (function()
@@ -17730,22 +17248,22 @@ v10 = (function()
 	end
 
 	index._skips = function(arg, arg2)
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+		local quantumEggRuntime = genv.__QuantumEggRuntime
 
-		if quantumV4EggRuntime then
-			if quantumV4EggRuntime.instantPhase == "priming" then
+		if quantumEggRuntime then
+			if quantumEggRuntime.instantPhase == "priming" then
 				return true
 			end
 
-			if quantumV4EggRuntime.enabled then
+			if quantumEggRuntime.enabled then
 				return true
-			elseif quantumV4EggRuntime.running then
+			elseif quantumEggRuntime.running then
 				return true
 			end
 		end
 
-		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-		if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
+		local quantumPlayerSteal = genv.__QuantumPlayerSteal
+		if quantumPlayerSteal and quantumPlayerSteal.running then
 			return true
 		end
 
@@ -18020,51 +17538,51 @@ v10 = (function()
 	return index
 end)().new()
 
-genv.__QuantumV4AntiHitGuard = v10
+genv.__QuantumAntiHitGuard = v10
 
-if quantumV4Config.AntiHitGuard then
+if quantumConfig.AntiHitGuard then
 	v10:setEnabled(true)
 end
 
-genv.__QuantumV4PlayerSteal = v17
+genv.__QuantumPlayerSteal = v17
 
 do
 	local tbl12 = {at = 0, value = false}
 
-	genv.__QuantumV4StealWantsCharacter = function()
-		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+	genv.__QuantumStealWantsCharacter = function()
+		local quantumPlayerSteal = genv.__QuantumPlayerSteal
 
-		if quantumV4PlayerSteal then
-			if quantumV4PlayerSteal.running then
+		if quantumPlayerSteal then
+			if quantumPlayerSteal.running then
 				return true
-			elseif quantumV4PlayerSteal.wantsTarget then
+			elseif quantumPlayerSteal.wantsTarget then
 				return true
 			end
 		end
 
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+		local quantumEggRuntime = genv.__QuantumEggRuntime
 
-		if quantumV4EggRuntime and quantumV4EggRuntime.enabled then
-			if quantumV4EggRuntime.destroyed then
+		if quantumEggRuntime and quantumEggRuntime.enabled then
+			if quantumEggRuntime.destroyed then
 				return false
 			end
 		else
 			return false
 		end
 
-		local flag5 = quantumV4EggRuntime.activeTween and not quantumV4EggRuntime.activeTween.sharedTravel
+		local flag5 = quantumEggRuntime.activeTween and not quantumEggRuntime.activeTween.sharedTravel
 
-		if quantumV4EggRuntime.running then
+		if quantumEggRuntime.running then
 			return true
 		elseif flag5 then
 			return true
-		elseif quantumV4EggRuntime.carry then
-			if quantumV4EggRuntime.carry.active then
+		elseif quantumEggRuntime.carry then
+			if quantumEggRuntime.carry.active then
 				return true
 			end
 		end
 
-		if type(quantumV4EggRuntime._eggInventoryFull) == "function" and quantumV4EggRuntime:_eggInventoryFull() then
+		if type(quantumEggRuntime._eggInventoryFull) == "function" and quantumEggRuntime:_eggInventoryFull() then
 			return false
 		end
 		local now = os.clock()
@@ -18074,65 +17592,65 @@ do
 		tbl12.at = now
 
 		local ok, result = pcall(function()
-			return quantumV4EggRuntime:_wallOpen() and quantumV4EggRuntime:_chooseTarget() or nil
+			return quantumEggRuntime:_wallOpen() and quantumEggRuntime:_chooseTarget() or nil
 		end)
 
 		tbl12.value = ok and result ~= nil
 		return tbl12.value
 	end
 
-	register = quantumV4TaskLadder.register
+	register = quantumTaskLadder.register
 	tbl = {}
-	tbl.wants = genv.__QuantumV4StealWantsCharacter
+	tbl.wants = genv.__QuantumStealWantsCharacter
 
 	tbl.active = function()
-		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-		if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
+		local quantumPlayerSteal = genv.__QuantumPlayerSteal
+		if quantumPlayerSteal and quantumPlayerSteal.running then
 			return true
 		end
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+		local quantumEggRuntime = genv.__QuantumEggRuntime
 
-		if quantumV4EggRuntime then
-			if quantumV4EggRuntime.destroyed then
+		if quantumEggRuntime then
+			if quantumEggRuntime.destroyed then
 				return false
 			end
 		else
 			return false
 		end
 
-		local flag5 = quantumV4EggRuntime.activeTween and not quantumV4EggRuntime.activeTween.sharedTravel
-		return quantumV4EggRuntime.running == true or flag5 == true or quantumV4EggRuntime.carry ~= nil and quantumV4EggRuntime.carry.active == true
+		local flag5 = quantumEggRuntime.activeTween and not quantumEggRuntime.activeTween.sharedTravel
+		return quantumEggRuntime.running == true or flag5 == true or quantumEggRuntime.carry ~= nil and quantumEggRuntime.carry.active == true
 	end
 
 	tbl.enabled = function()
-		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
-		return quantumV4EggRuntime ~= nil and quantumV4EggRuntime.enabled == true or quantumV4PlayerSteal ~= nil and quantumV4PlayerSteal.enabled == true
+		local quantumPlayerSteal = genv.__QuantumPlayerSteal
+		local quantumEggRuntime = genv.__QuantumEggRuntime
+		return quantumEggRuntime ~= nil and quantumEggRuntime.enabled == true or quantumPlayerSteal ~= nil and quantumPlayerSteal.enabled == true
 	end
 
 	tbl.status = function()
-		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-		if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
-			return tostring(quantumV4PlayerSteal.status or "Stealing from a player")
+		local quantumPlayerSteal = genv.__QuantumPlayerSteal
+		if quantumPlayerSteal and quantumPlayerSteal.running then
+			return tostring(quantumPlayerSteal.status or "Stealing from a player")
 		end
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
-		return quantumV4EggRuntime and quantumV4EggRuntime.stats and tostring(quantumV4EggRuntime.stats.status or "") or ""
+		local quantumEggRuntime = genv.__QuantumEggRuntime
+		return quantumEggRuntime and quantumEggRuntime.stats and tostring(quantumEggRuntime.stats.status or "") or ""
 	end
 
 	register("auto_steal", tbl)
 end
 
-v13:setStealMode(quantumV4Config.StealMode == "Semi Teleport" and "Instant" or quantumV4Config.StealMode)
-v13:setSpeed(quantumV4Config.TweenSpeedMultiplier or 60)
+v13:setStealMode(quantumConfig.StealMode == "Semi Teleport" and "Instant" or quantumConfig.StealMode)
+v13:setSpeed(quantumConfig.TweenSpeedMultiplier or 60)
 
-if quantumV4Config.StealMinValue and quantumV4Config.StealMinValue > 0 then
-	v13:setMinValuePerSec(quantumV4Config.StealMinValue)
+if quantumConfig.StealMinValue and quantumConfig.StealMinValue > 0 then
+	v13:setMinValuePerSec(quantumConfig.StealMinValue)
 end
 
-if quantumV4Config.StealAreas and not table.find(quantumV4Config.StealAreas, "None") and #quantumV4Config.StealAreas > 0 then
+if quantumConfig.StealAreas and not table.find(quantumConfig.StealAreas, "None") and #quantumConfig.StealAreas > 0 then
 	local tbl12 = {}
 
-	for i, stealArea in ipairs(quantumV4Config.StealAreas) do
+	for i, stealArea in ipairs(quantumConfig.StealAreas) do
 		if stealArea ~= "None" then
 			table.insert(tbl12, stealArea)
 		end
@@ -18142,10 +17660,10 @@ if quantumV4Config.StealAreas and not table.find(quantumV4Config.StealAreas, "No
 	v13:setFilterEnabled("area", #tbl12 > 0)
 end
 
-if quantumV4Config.StealRarities and not table.find(quantumV4Config.StealRarities, "None") and #quantumV4Config.StealRarities > 0 then
+if quantumConfig.StealRarities and not table.find(quantumConfig.StealRarities, "None") and #quantumConfig.StealRarities > 0 then
 	local tbl12 = {}
 
-	for i, stealRarity in ipairs(quantumV4Config.StealRarities) do
+	for i, stealRarity in ipairs(quantumConfig.StealRarities) do
 		if stealRarity ~= "None" then
 			table.insert(tbl12, stealRarity)
 		end
@@ -18155,10 +17673,10 @@ if quantumV4Config.StealRarities and not table.find(quantumV4Config.StealRaritie
 	v13:setFilterEnabled("rarity", #tbl12 > 0)
 end
 
-if quantumV4Config.StealNamesFilter and not table.find(quantumV4Config.StealNamesFilter, "None") and #quantumV4Config.StealNamesFilter > 0 then
+if quantumConfig.StealNamesFilter and not table.find(quantumConfig.StealNamesFilter, "None") and #quantumConfig.StealNamesFilter > 0 then
 	local tbl12 = {}
 
-	for i, v19 in ipairs(quantumV4Config.StealNamesFilter) do
+	for i, v19 in ipairs(quantumConfig.StealNamesFilter) do
 		if v19 ~= "None" then
 			table.insert(tbl12, v19)
 		end
@@ -18168,7 +17686,7 @@ if quantumV4Config.StealNamesFilter and not table.find(quantumV4Config.StealName
 	v13:setFilterEnabled("name", #tbl12 > 0)
 end
 
-genv.__QuantumV4EggRuntimeCleanup = function()
+genv.__QuantumEggRuntimeCleanup = function()
 	if v13 then
 		pcall(v13.destroy, v13)
 	end
@@ -18177,16 +17695,16 @@ genv.__QuantumV4EggRuntimeCleanup = function()
 		pcall(v14.destroy, v14)
 	end
 
-	if genv.__QuantumV4EggRuntime == v13 then
-		genv.__QuantumV4EggRuntime = nil
+	if genv.__QuantumEggRuntime == v13 then
+		genv.__QuantumEggRuntime = nil
 	end
 
-	if genv.__QuantumV4TreadmillManager == v14 then
-		genv.__QuantumV4TreadmillManager = nil
+	if genv.__QuantumTreadmillManager == v14 then
+		genv.__QuantumTreadmillManager = nil
 	end
 end
 
-genv.__QuantumV4AntiGuardCleanup = function()
+genv.__QuantumAntiGuardCleanup = function()
 	if v15 then
 		pcall(v15.destroy, v15)
 	end
@@ -18195,19 +17713,19 @@ genv.__QuantumV4AntiGuardCleanup = function()
 		pcall(v16.destroy, v16)
 	end
 
-	if genv.__QuantumV4AntiGuard == v15 then
-		genv.__QuantumV4AntiGuard = nil
+	if genv.__QuantumAntiGuard == v15 then
+		genv.__QuantumAntiGuard = nil
 	end
 
-	if genv.__QuantumV4GodMode == v16 then
-		genv.__QuantumV4GodMode = nil
+	if genv.__QuantumGodMode == v16 then
+		genv.__QuantumGodMode = nil
 	end
 end
 
 do
 	local str3 = "__FyyStealAnEggStartupProtectionLiteV2"
 	local n8 = 60
-	local quantumV4StartupProtection = {}
+	local quantumStartupProtection = {}
 
 	local function fn62()
 		return getgenv and getgenv() or _G
@@ -18261,7 +17779,7 @@ do
 		return true
 	end
 
-	quantumV4StartupProtection.install = function()
+	quantumStartupProtection.install = function()
 		local v19 = fn62()
 		local value = rawget(v19, str3)
 
@@ -18315,7 +17833,7 @@ do
 		return tbl12
 	end
 
-	quantumV4StartupProtection.uninstall = function()
+	quantumStartupProtection.uninstall = function()
 		local value = rawget(fn62(), str3)
 
 		if type(value) == "table" then
@@ -18335,27 +17853,27 @@ do
 
 	(function()
 		local genv2 = getgenv and getgenv() or _G
-		genv2.__QuantumV4AntiAfkGeneration = (genv2.__QuantumV4AntiAfkGeneration or 0) + 1
-		genv2.__QuantumV4AntiAfkEnabled = quantumV4Config.AntiAFK
-		genv2.__QuantumV4StartupProtection = quantumV4StartupProtection
+		genv2.__QuantumAntiAfkGeneration = (genv2.__QuantumAntiAfkGeneration or 0) + 1
+		genv2.__QuantumAntiAfkEnabled = quantumConfig.AntiAFK
+		genv2.__QuantumStartupProtection = quantumStartupProtection
 
-		genv2.__QuantumV4SetAntiAfkEnabled = function(arg)
-			genv2.__QuantumV4AntiAfkEnabled = arg == true
+		genv2.__QuantumSetAntiAfkEnabled = function(arg)
+			genv2.__QuantumAntiAfkEnabled = arg == true
 
 			if arg then
-				quantumV4StartupProtection.install()
+				quantumStartupProtection.install()
 			else
-				quantumV4StartupProtection.uninstall()
+				quantumStartupProtection.uninstall()
 			end
 		end
 
-		if quantumV4Config.AntiAFK then
-			genv2.__QuantumV4SetAntiAfkEnabled(true)
+		if quantumConfig.AntiAFK then
+			genv2.__QuantumSetAntiAfkEnabled(true)
 		end
 	end)()
 end
 
-local v19 = quantumV4Config
+local v19 = quantumConfig
 local tbl12 = {}
 tbl12.TeleportService = TeleportService or game:GetService("TeleportService")
 tbl12.LP = localPlayer or Players.LocalPlayer
@@ -18363,7 +17881,7 @@ tbl12.Players = Players
 local v20 = tbl12
 
 local function fn62()
-	local str3 = "if game:GetAttribute(\"QuantumBootQueued\") then return end\ngame:SetAttribute(\"QuantumBootQueued\", true)\nrepeat task.wait(0.5) until game:IsLoaded()\ntask.wait(1.5)\nif getgenv then getgenv().SNE_AutoExecute = true end\nloadstring(game:HttpGet(\"https://raw.githubusercontent.com/QuantumPH2/UI/refs/heads/main/NewEraUI.lua\"))()\n"
+	local str3 = "if game:GetAttribute(\"QuantumBootQueued\") then return end\ngame:SetAttribute(\"QuantumBootQueued\", true)\nrepeat task.wait(0.5) until game:IsLoaded()\ntask.wait(1.5)\nif getgenv then getgenv().SNE_AutoExecute = true end\nloadstring(game:HttpGet(\"https://quantumhub.xyz/raw/quantumv6\"))()\n"
 
 	pcall(function()
 		if writefile then
@@ -18488,7 +18006,7 @@ task.spawn(function()
 	end
 end)
 
-genv.__QuantumV4PetBarn = (function()
+genv.__QuantumPetBarn = (function()
 	local Remotes = require(ReplicatedStorage.Shared.Remotes)
 
 	local tbl13 = {equipBest = function()
@@ -18545,11 +18063,11 @@ genv.__QuantumV4PetBarn = (function()
 						local displayName = v25 and v25.Rarity and (v25.Rarity.DisplayName or v25.Rarity._id)
 						local flag6 = false
 
-						if quantumV4Config.FavMode == "Species" then
-							local favSpecies = quantumV4Config.FavSpecies or {}
+						if quantumConfig.FavMode == "Species" then
+							local favSpecies = quantumConfig.FavSpecies or {}
 							flag6 = if table.find(favSpecies, "All") then true else if table.find(favSpecies, v24.Category) then true else if v25 then if table.find(favSpecies, v25.DisplayName) then true else flag6 else flag6
 						else
-							local favRarities = quantumV4Config.FavRarities or {}
+							local favRarities = quantumConfig.FavRarities or {}
 							flag6 = if table.find(favRarities, "All") then true else if displayName then if table.find(favRarities, displayName) then true else flag6 else flag6
 						end
 
@@ -18669,7 +18187,7 @@ genv.__QuantumV4PetBarn = (function()
 		if v21.FusionLocked then
 			return false, "Fusion locked"
 		end
-		local v22 = fn65(quantumV4Config.FuseSelectedOnly, quantumV4Config.FuseSpecies, quantumV4Config.FuseRarities)
+		local v22 = fn65(quantumConfig.FuseSelectedOnly, quantumConfig.FuseSpecies, quantumConfig.FuseRarities)
 		if not v22 then
 			return false, "No eligible group of 3"
 		end
@@ -18721,20 +18239,20 @@ genv.__QuantumV4PetBarn = (function()
 		while fn2() do
 			local now = os.clock()
 
-			if quantumV4Config.AutoEquipBest and now - n8 > 6 then
+			if quantumConfig.AutoEquipBest and now - n8 > 6 then
 				pcall(tbl13.equipBest)
 				n8 = now
 			end
 
-			if quantumV4Config.AutoClaimOffline then
+			if quantumConfig.AutoClaimOffline then
 				pcall(tbl13.claimOffline)
 			end
 
-			if quantumV4Config.AutoFavorite then
+			if quantumConfig.AutoFavorite then
 				pcall(tbl13.favoriteSelected)
 			end
 
-			if quantumV4Config.AutoFusePets then
+			if quantumConfig.AutoFusePets then
 				pcall(tbl13.fuseOnePair)
 			end
 
@@ -18745,7 +18263,7 @@ genv.__QuantumV4PetBarn = (function()
 	return tbl13
 end)()
 
-genv.__QuantumV4Upgrades = (function()
+genv.__QuantumUpgrades = (function()
 	local Remotes = require(ReplicatedStorage.Shared.Remotes)
 
 	local tbl13 = {upgradeBase = function()
@@ -18779,11 +18297,11 @@ genv.__QuantumV4Upgrades = (function()
 
 	task.spawn(function()
 		while fn2() do
-			if quantumV4Config.AutoBaseUpgrade then
+			if quantumConfig.AutoBaseUpgrade then
 				pcall(tbl13.upgradeBase)
 			end
 
-			if quantumV4Config.AutoClaimAlmanac then
+			if quantumConfig.AutoClaimAlmanac then
 				pcall(tbl13.claimAlmanac)
 			end
 
@@ -18794,11 +18312,11 @@ genv.__QuantumV4Upgrades = (function()
 	return tbl13
 end)()
 
-genv.__QuantumV4Roaming = (function()
+genv.__QuantumRoaming = (function()
 	local tbl13
 
 	tbl13 = {noclipConn = nil, setNoclip = function(arg)
-		quantumV4Config.Noclip = arg == true
+		quantumConfig.Noclip = arg == true
 
 		if tbl13.noclipConn then
 			pcall(function()
@@ -18808,7 +18326,7 @@ genv.__QuantumV4Roaming = (function()
 			tbl13.noclipConn = nil
 		end
 
-		if not quantumV4Config.Noclip then
+		if not quantumConfig.Noclip then
 			local character = localPlayer.Character
 
 			if character then
@@ -18824,7 +18342,7 @@ genv.__QuantumV4Roaming = (function()
 		end
 
 		tbl13.noclipConn = RunService.Stepped:Connect(function()
-			if not quantumV4Config.Noclip then
+			if not quantumConfig.Noclip then
 				return
 			end
 			local character = localPlayer.Character
@@ -18920,18 +18438,18 @@ genv.__QuantumV4Roaming = (function()
 		humanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 		return true
 	end, setBottingMode = function(arg)
-		quantumV4Config.BottingMode = arg == true
-		local quantumV4BottingOverlay = genv.__QuantumV4BottingOverlay
+		quantumConfig.BottingMode = arg == true
+		local quantumBottingOverlay = genv.__QuantumBottingOverlay
 
-		if quantumV4BottingOverlay and quantumV4BottingOverlay.Parent then
+		if quantumBottingOverlay and quantumBottingOverlay.Parent then
 			pcall(function()
-				quantumV4BottingOverlay:Destroy()
+				quantumBottingOverlay:Destroy()
 			end)
 		end
 
-		genv.__QuantumV4BottingOverlay = nil
+		genv.__QuantumBottingOverlay = nil
 
-		if not quantumV4Config.BottingMode then
+		if not quantumConfig.BottingMode then
 			pcall(function()
 				RunService:Set3dRenderingEnabled(true)
 			end)
@@ -18966,12 +18484,12 @@ genv.__QuantumV4Roaming = (function()
 		frame.BorderSizePixel = 0
 		frame.Active = false
 		frame.Parent = screenGui
-		genv.__QuantumV4BottingOverlay = screenGui
+		genv.__QuantumBottingOverlay = screenGui
 	end}
 
 	task.spawn(function()
 		while fn2() do
-			if quantumV4Config.AntiCutscene then
+			if quantumConfig.AntiCutscene then
 				pcall(function()
 					local playerGui = localPlayer:FindFirstChild("PlayerGui")
 
@@ -19000,7 +18518,7 @@ genv.__QuantumV4Roaming = (function()
 	return tbl13
 end)()
 
-genv.__QuantumV4ScrambleRuntime = (function()
+genv.__QuantumScrambleRuntime = (function()
 	local tbl13 = {snapAt = 0, snap = nil, status = "Idle", lastBuy = 0, active = false, wantsCharacter = false}
 
 	local function fn65()
@@ -19039,7 +18557,7 @@ genv.__QuantumV4ScrambleRuntime = (function()
 	end
 
 	tbl13.buyTick = function()
-		local scrambleBuyList = quantumV4Config.ScrambleBuyList
+		local scrambleBuyList = quantumConfig.ScrambleBuyList
 
 		if scrambleBuyList then
 			if #scrambleBuyList == 0 then
@@ -19065,7 +18583,7 @@ genv.__QuantumV4ScrambleRuntime = (function()
 		local samples = v21.State.Samples or 0
 
 		for k, v22 in pairs(v21.Shop) do
-			if not quantumV4Config.ScrambleAutoBuy then
+			if not quantumConfig.ScrambleAutoBuy then
 				return
 			end
 			local str3 = tostring(v22.Label)
@@ -19104,7 +18622,7 @@ genv.__QuantumV4ScrambleRuntime = (function()
 
 	task.spawn(function()
 		while fn2() do
-			if quantumV4Config.ScrambleAutoBuy and not pcall(function()
+			if quantumConfig.ScrambleAutoBuy and not pcall(function()
 				if not tbl13.live() then
 					tbl13.status = "Event not active"
 					return
@@ -19122,7 +18640,7 @@ genv.__QuantumV4ScrambleRuntime = (function()
 end)()
 
 do
-	local quantumV4RaceRuntime = {status = "Idle", lastResult = "No race yet", active = false, dist = nil, speed = 0, stuns = 0, corrections = 0, mount = nil, path = nil, leftFor = nil, lastJoinTry = 0, lastClaim = 0, lastBuy = 0, startedAt = nil, JOIN_LATE_SECONDS = 10, FIELD_SETTLE_SECONDS = 10, DODGE_STUDS = 10, CATCHUP_SPEED = 200, FINISH_RELEASE_STUDS = 150, RIDE_SPEED = 140, INPUT_PULSE_SECONDS = 1.5, RELEASE_AT_FINISH = false, LEGIT = true, LEAD_START = 200, LEAD_RETAKE = 100, BOOST_MAX_SECONDS = 18}
+	local quantumRaceRuntime = {status = "Idle", lastResult = "No race yet", active = false, dist = nil, speed = 0, stuns = 0, corrections = 0, mount = nil, path = nil, leftFor = nil, lastJoinTry = 0, lastClaim = 0, lastBuy = 0, startedAt = nil, JOIN_LATE_SECONDS = 10, FIELD_SETTLE_SECONDS = 10, DODGE_STUDS = 10, CATCHUP_SPEED = 200, FINISH_RELEASE_STUDS = 150, RIDE_SPEED = 140, INPUT_PULSE_SECONDS = 1.5, RELEASE_AT_FINISH = false, LEGIT = true, LEAD_START = 200, LEAD_RETAKE = 100, BOOST_MAX_SECONDS = 18}
 
 	local function fn65(...)
 		local tbl13 = {...}
@@ -19140,8 +18658,8 @@ do
 	end
 
 	local function fn66()
-		if quantumV4RaceRuntime.m then
-			return quantumV4RaceRuntime.m
+		if quantumRaceRuntime.m then
+			return quantumRaceRuntime.m
 		end
 		local m = {Remotes = fn65("Shared", "Remotes"), Save = fn65("Shared", "Save"), RR = fn65("Data", "RaceRally"), MR = fn65("Data", "MountRace"), Path = fn65("Shared", "Modules", "RaceTrackPath"), Flags = fn65("Shared", "Flags", "MountRaceFlags"), Elig = fn65("Shared", "Util", "RaceRallyEligibility"), Power = fn65("Data", "RacePowerUps")}
 
@@ -19161,7 +18679,7 @@ do
 			return nil
 		end
 
-		quantumV4RaceRuntime.m = m
+		quantumRaceRuntime.m = m
 		return m
 	end
 
@@ -19174,12 +18692,12 @@ do
 		return ok and type(result) == "table" and result or nil
 	end
 
-	quantumV4RaceRuntime.inRace = function()
+	quantumRaceRuntime.inRace = function()
 		local v21 = fn66()
 		return v21 ~= nil and type(fn67(v21, "RaceId", "RaceId")) == "string"
 	end
 
-	quantumV4RaceRuntime.joinLeft = function()
+	quantumRaceRuntime.joinLeft = function()
 		local v21 = fn66()
 		if not v21 then
 			return 0
@@ -19191,25 +18709,25 @@ do
 		return math.max(0, attribute - Workspace:GetServerTimeNow())
 	end
 
-	quantumV4RaceRuntime.fieldSettling = function()
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+	quantumRaceRuntime.fieldSettling = function()
+		local quantumEggRuntime = genv.__QuantumEggRuntime
 
-		if quantumV4EggRuntime then
-			if quantumV4EggRuntime.destroyed then
+		if quantumEggRuntime then
+			if quantumEggRuntime.destroyed then
 				return nil
 			end
 		else
 			return nil
 		end
 
-		if quantumV4EggRuntime.resetBlocked then
+		if quantumEggRuntime.resetBlocked then
 			return 1 / 0
 		end
-		local n8 = os.clock() - (tonumber(quantumV4EggRuntime.gateOpenAt) or 0)
-		return n8 < quantumV4RaceRuntime.FIELD_SETTLE_SECONDS and quantumV4RaceRuntime.FIELD_SETTLE_SECONDS - n8 or nil
+		local n8 = os.clock() - (tonumber(quantumEggRuntime.gateOpenAt) or 0)
+		return n8 < quantumRaceRuntime.FIELD_SETTLE_SECONDS and quantumRaceRuntime.FIELD_SETTLE_SECONDS - n8 or nil
 	end
 
-	quantumV4RaceRuntime.roundId = function()
+	quantumRaceRuntime.roundId = function()
 		local ok, result = pcall(function()
 			return fn65("Shared", "Util", "RaceRallySchedule").Window(Workspace:GetServerTimeNow())
 		end)
@@ -19217,22 +18735,22 @@ do
 		return ok and result or nil
 	end
 
-	quantumV4RaceRuntime.racedThisRound = function()
-		local v21 = quantumV4RaceRuntime.roundId()
-		return v21 ~= nil and quantumV4RaceRuntime.racedRound == v21
+	quantumRaceRuntime.racedThisRound = function()
+		local v21 = quantumRaceRuntime.roundId()
+		return v21 ~= nil and quantumRaceRuntime.racedRound == v21
 	end
 
-	quantumV4RaceRuntime.wantsJoin = function()
-		local v21 = quantumV4RaceRuntime.joinLeft()
+	quantumRaceRuntime.wantsJoin = function()
+		local v21 = quantumRaceRuntime.joinLeft()
 		if v21 <= 0 then
 			return false
 		end
 
-		if quantumV4RaceRuntime.racedThisRound() then
+		if quantumRaceRuntime.racedThisRound() then
 			return false
 		end
 
-		if v21 > quantumV4RaceRuntime.JOIN_LATE_SECONDS and quantumV4RaceRuntime.fieldSettling() then
+		if v21 > quantumRaceRuntime.JOIN_LATE_SECONDS and quantumRaceRuntime.fieldSettling() then
 			return false
 		end
 		local v22 = fn66()
@@ -19240,8 +18758,8 @@ do
 			return false
 		end
 
-		if quantumV4RaceRuntime.eligibleAt and os.clock() - quantumV4RaceRuntime.eligibleAt < 10 then
-			return quantumV4RaceRuntime.eligible
+		if quantumRaceRuntime.eligibleAt and os.clock() - quantumRaceRuntime.eligibleAt < 10 then
+			return quantumRaceRuntime.eligible
 		end
 		local v23 = fn68(v22)
 
@@ -19249,31 +18767,31 @@ do
 			return v22.Elig == nil or v22.Elig.IsEligible(tonumber(v23 and v23.SpeedPower) or 0)
 		end)
 
-		quantumV4RaceRuntime.eligible, quantumV4RaceRuntime.eligibleAt = ok and result == true, os.clock()
-		return quantumV4RaceRuntime.eligible
+		quantumRaceRuntime.eligible, quantumRaceRuntime.eligibleAt = ok and result == true, os.clock()
+		return quantumRaceRuntime.eligible
 	end
 
-	quantumV4RaceRuntime.join = function(arg)
-		if os.clock() - quantumV4RaceRuntime.lastJoinTry < 2 then
+	quantumRaceRuntime.join = function(arg)
+		if os.clock() - quantumRaceRuntime.lastJoinTry < 2 then
 			return
 		end
-		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
+		local quantumTreadmillManager = genv.__QuantumTreadmillManager
 
 		local ok, result = pcall(function()
-			return quantumV4TreadmillManager and not quantumV4TreadmillManager.destroyed and quantumV4TreadmillManager:isEngaged() == true
+			return quantumTreadmillManager and not quantumTreadmillManager.destroyed and quantumTreadmillManager:isEngaged() == true
 		end)
 
 		if ok and result then
-			quantumV4RaceRuntime.status = "Leaving treadmill for the race"
+			quantumRaceRuntime.status = "Leaving treadmill for the race"
 			return
 		end
-		quantumV4RaceRuntime.lastJoinTry = os.clock()
+		quantumRaceRuntime.lastJoinTry = os.clock()
 		local v21 = fn68(arg)
 
 		if arg.Elig and v21 then
 			local ok2, result2 = pcall(arg.Elig.IsEligible, tonumber(v21.SpeedPower) or 0)
 			if ok2 and result2 ~= true then
-				quantumV4RaceRuntime.status = "Not eligible yet (need more speed)"
+				quantumRaceRuntime.status = "Not eligible yet (need more speed)"
 				return
 			end
 		end
@@ -19304,10 +18822,10 @@ do
 		end
 
 		ok = Workspace:GetAttribute(arg.RR.Attributes.JoinEndsAt)
-		quantumV4RaceRuntime.joinTries = (quantumV4RaceRuntime.joinWindow == ok and quantumV4RaceRuntime.joinTries or 0) + 1
-		quantumV4RaceRuntime.joinWindow = ok
+		quantumRaceRuntime.joinTries = (quantumRaceRuntime.joinWindow == ok and quantumRaceRuntime.joinTries or 0) + 1
+		quantumRaceRuntime.joinWindow = ok
 
-		if quantumV4RaceRuntime.joinTries > 2 and humanoid then
+		if quantumRaceRuntime.joinTries > 2 and humanoid then
 			local hitbox = raceRallyPortal:FindFirstChild("Hitbox")
 
 			arg, ok = pcall(function()
@@ -19315,33 +18833,33 @@ do
 			end)
 
 			if arg and (ok and (humanoidRootPart.Position - ok).Magnitude > 12) then
-				quantumV4RaceRuntime.status = "Going to the race portal"
+				quantumRaceRuntime.status = "Going to the race portal"
 
 				local function fn70()
 					local v22 = fn2()
-					return (if v22 then not quantumV4Config.RaceAuto else not v22) or quantumV4RaceRuntime.inRace() or quantumV4RaceRuntime.joinLeft() <= 0
+					return (if v22 then not quantumConfig.RaceAuto else not v22) or quantumRaceRuntime.inRace() or quantumRaceRuntime.joinLeft() <= 0
 				end
 
 				pcall(fn38, humanoidRootPart, humanoid, CFrame.new(ok + Vector3.new(0, 3, 0)), fn70, false, nil, false)
-				if quantumV4RaceRuntime.inRace() then
+				if quantumRaceRuntime.inRace() then
 					return
 				end
 			end
 		end
 
 		fn69()
-		quantumV4RaceRuntime.status = "Joining race"
+		quantumRaceRuntime.status = "Joining race"
 	end
 
-	quantumV4RaceRuntime.findControls = function()
-		if quantumV4RaceRuntime.controls then
-			return quantumV4RaceRuntime.controls
+	quantumRaceRuntime.findControls = function()
+		if quantumRaceRuntime.controls then
+			return quantumRaceRuntime.controls
 		end
 
-		if os.clock() - (quantumV4RaceRuntime.lastControlsSearch or 0) < 1 then
+		if os.clock() - (quantumRaceRuntime.lastControlsSearch or 0) < 1 then
 			return nil
 		end
-		quantumV4RaceRuntime.lastControlsSearch = os.clock()
+		quantumRaceRuntime.lastControlsSearch = os.clock()
 
 		if type(getgc) ~= "function" then
 			return nil
@@ -19363,7 +18881,7 @@ do
 							for i2 = 1, 6, 1 do
 								local ok3, controls_ = pcall(debug.getupvalue, v21, i2)
 								if ok3 and (type(controls_) == "table" and (rawget(controls_, "activeController") ~= nil and controls_.GetMoveVector ~= nil)) then
-									quantumV4RaceRuntime.controls = controls_
+									quantumRaceRuntime.controls = controls_
 									return
 								end
 							end
@@ -19371,28 +18889,28 @@ do
 					end
 				end
 			end
-		end) and quantumV4RaceRuntime.controls or nil
+		end) and quantumRaceRuntime.controls or nil
 	end
 
-	quantumV4RaceRuntime.releaseControls = function()
-		local controls_ = quantumV4RaceRuntime.controls
+	quantumRaceRuntime.releaseControls = function()
+		local controls_ = quantumRaceRuntime.controls
 
-		if controls_ and rawget(controls_, "GetMoveVector") == quantumV4RaceRuntime.finishMove then
+		if controls_ and rawget(controls_, "GetMoveVector") == quantumRaceRuntime.finishMove then
 			controls_.GetMoveVector = nil
 		end
 
 		local value = controls_ and rawget(controls_, "activeController")
 
-		if type(value) == "table" and value.moveVector == quantumV4RaceRuntime.finishInput then
+		if type(value) == "table" and value.moveVector == quantumRaceRuntime.finishInput then
 			value.moveVector = Vector3.new(0, 0, 0)
 		end
 
-		quantumV4RaceRuntime.finishMove = nil
-		quantumV4RaceRuntime.finishInput = nil
+		quantumRaceRuntime.finishMove = nil
+		quantumRaceRuntime.finishInput = nil
 	end
 
-	quantumV4RaceRuntime.rivalGap = function(arg)
-		local path = quantumV4RaceRuntime.path
+	quantumRaceRuntime.rivalGap = function(arg)
+		local path = quantumRaceRuntime.path
 
 		if arg then
 			if not path then
@@ -19404,9 +18922,9 @@ do
 
 		local length = path.Length
 		local now = os.clock()
-		local rivals = quantumV4RaceRuntime.rivals
+		local rivals = quantumRaceRuntime.rivals
 
-		if if rivals then now - (quantumV4RaceRuntime.rivalsAt or 0) > 2.5 else not rivals then
+		if if rivals then now - (quantumRaceRuntime.rivalsAt or 0) > 2.5 else not rivals then
 			local rivals2 = {}
 			local character = localPlayer.Character
 
@@ -19426,13 +18944,13 @@ do
 				end
 			end)
 
-			quantumV4RaceRuntime.rivals = rivals2
-			quantumV4RaceRuntime.rivalsAt = now
+			quantumRaceRuntime.rivals = rivals2
+			quantumRaceRuntime.rivalsAt = now
 		end
 
 		now, rivals = false
 
-		for i, rival in ipairs(quantumV4RaceRuntime.rivals) do
+		for i, rival in ipairs(quantumRaceRuntime.rivals) do
 			if rival.Parent then
 				local ok, result = pcall(path.Project, path, rival.Position, arg, 150, 150)
 
@@ -19457,31 +18975,31 @@ do
 		return rivals
 	end
 
-	quantumV4RaceRuntime.decideSpeed = function()
+	quantumRaceRuntime.decideSpeed = function()
 		local n8 = tonumber(localPlayer:GetAttribute("RacePlace")) or 1
-		local v21 = quantumV4RaceRuntime.rivalGap(quantumV4RaceRuntime.legitProg)
+		local v21 = quantumRaceRuntime.rivalGap(quantumRaceRuntime.legitProg)
 		local now = os.clock()
 
-		if quantumV4RaceRuntime.boosting then
-			quantumV4RaceRuntime.boostStartedAt = quantumV4RaceRuntime.boostStartedAt or now
+		if quantumRaceRuntime.boosting then
+			quantumRaceRuntime.boostStartedAt = quantumRaceRuntime.boostStartedAt or now
 
-			if n8 == 1 and v21 ~= nil and v21 >= (quantumV4RaceRuntime.leadTarget or quantumV4RaceRuntime.LEAD_START) or now - quantumV4RaceRuntime.boostStartedAt > quantumV4RaceRuntime.BOOST_MAX_SECONDS then
-				quantumV4RaceRuntime.boosting = false
-				quantumV4RaceRuntime.leadDone = true
-				quantumV4RaceRuntime.leadTarget = quantumV4RaceRuntime.LEAD_RETAKE
-				quantumV4RaceRuntime.boostStartedAt = nil
+			if n8 == 1 and v21 ~= nil and v21 >= (quantumRaceRuntime.leadTarget or quantumRaceRuntime.LEAD_START) or now - quantumRaceRuntime.boostStartedAt > quantumRaceRuntime.BOOST_MAX_SECONDS then
+				quantumRaceRuntime.boosting = false
+				quantumRaceRuntime.leadDone = true
+				quantumRaceRuntime.leadTarget = quantumRaceRuntime.LEAD_RETAKE
+				quantumRaceRuntime.boostStartedAt = nil
 			end
 		elseif n8 > 1 then
-			quantumV4RaceRuntime.boosting = true
-			quantumV4RaceRuntime.boostStartedAt = now
+			quantumRaceRuntime.boosting = true
+			quantumRaceRuntime.boostStartedAt = now
 		end
 
-		return quantumV4RaceRuntime.boosting and quantumV4RaceRuntime.CATCHUP_SPEED or quantumV4RaceRuntime.RIDE_SPEED
+		return quantumRaceRuntime.boosting and quantumRaceRuntime.CATCHUP_SPEED or quantumRaceRuntime.RIDE_SPEED
 	end
 
-	quantumV4RaceRuntime.legitStep = function(arg)
-		local v21 = quantumV4RaceRuntime.findControls()
-		local path = quantumV4RaceRuntime.path
+	quantumRaceRuntime.legitStep = function(arg)
+		local v21 = quantumRaceRuntime.findControls()
+		local path = quantumRaceRuntime.path
 		local character = localPlayer.Character
 		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
 
@@ -19501,10 +19019,10 @@ do
 			arg.Touch = true
 		end
 
-		local v22 = quantumV4RaceRuntime.decideSpeed()
+		local v22 = quantumRaceRuntime.decideSpeed()
 
-		if quantumV4RaceRuntime.flagsSet ~= v22 then
-			quantumV4RaceRuntime.flagsSet = v22
+		if quantumRaceRuntime.flagsSet ~= v22 then
+			quantumRaceRuntime.flagsSet = v22
 
 			pcall(function()
 				local MountRaceFlags = require(ReplicatedStorage.Shared.Flags.MountRaceFlags)
@@ -19521,25 +19039,25 @@ do
 
 		local position = humanoidRootPart.Position
 		local now = os.clock()
-		local legitProg = quantumV4RaceRuntime.legitProg
+		local legitProg = quantumRaceRuntime.legitProg
 
-		if if legitProg then now - (quantumV4RaceRuntime.legitFull or 0) > 0.5 else not legitProg then
+		if if legitProg then now - (quantumRaceRuntime.legitFull or 0) > 0.5 else not legitProg then
 			local ok, result = pcall(path.Project, path, position, 0, path.Length, path.Length)
 
 			if ok and type(result) == "number" then
-				quantumV4RaceRuntime.legitProg = result % path.Length
+				quantumRaceRuntime.legitProg = result % path.Length
 			end
 
-			quantumV4RaceRuntime.legitFull = now
+			quantumRaceRuntime.legitFull = now
 		else
-			local ok, result = pcall(path.Project, path, position, quantumV4RaceRuntime.legitProg, 40, 120)
+			local ok, result = pcall(path.Project, path, position, quantumRaceRuntime.legitProg, 40, 120)
 
 			if ok and type(result) == "number" then
-				quantumV4RaceRuntime.legitProg = result % path.Length
+				quantumRaceRuntime.legitProg = result % path.Length
 			end
 		end
 
-		local legitProg2 = quantumV4RaceRuntime.legitProg
+		local legitProg2 = quantumRaceRuntime.legitProg
 		if not legitProg2 then
 			return
 		end
@@ -19553,7 +19071,7 @@ do
 		humanoidRootPart = false
 		raceMount = 0
 
-		for i, v24 in ipairs(quantumV4RaceRuntime.hazards()) do
+		for i, v24 in ipairs(quantumRaceRuntime.hazards()) do
 			local ok, result = pcall(path.Project, path, v24.pos, legitProg2, 10, 110)
 
 			if ok and type(result) == "number" then
@@ -19593,40 +19111,40 @@ do
 			end
 		end
 
-		quantumV4RaceRuntime.legitSteer = (quantumV4RaceRuntime.legitSteer or 0) + (lookVector - (quantumV4RaceRuntime.legitSteer or 0)) * 0.35
-		local legitSteer = quantumV4RaceRuntime.legitSteer
-		quantumV4RaceRuntime.finishInput = Vector3.new(legitSteer, 0, raceMount)
+		quantumRaceRuntime.legitSteer = (quantumRaceRuntime.legitSteer or 0) + (lookVector - (quantumRaceRuntime.legitSteer or 0)) * 0.35
+		local legitSteer = quantumRaceRuntime.legitSteer
+		quantumRaceRuntime.finishInput = Vector3.new(legitSteer, 0, raceMount)
 
-		if rawget(v21, "GetMoveVector") ~= quantumV4RaceRuntime.finishMove then
-			function quantumV4RaceRuntime.finishMove()
-				return quantumV4RaceRuntime.finishInput or Vector3.new(0, 0, -1)
+		if rawget(v21, "GetMoveVector") ~= quantumRaceRuntime.finishMove then
+			function quantumRaceRuntime.finishMove()
+				return quantumRaceRuntime.finishInput or Vector3.new(0, 0, -1)
 			end
 
-			v21.GetMoveVector = quantumV4RaceRuntime.finishMove
+			v21.GetMoveVector = quantumRaceRuntime.finishMove
 		end
 
 		local value = rawget(v21, "activeController")
 
 		if type(value) == "table" then
-			value.moveVector = quantumV4RaceRuntime.finishInput
+			value.moveVector = quantumRaceRuntime.finishInput
 		end
 
 		if arg and type(arg.Jump) == "function" then
-			for i, v24 in ipairs(quantumV4RaceRuntime.jumpProgs or {}) do
-				if (v24 - legitProg2) % length <= 10 and (magnitude > 40 and (quantumV4RaceRuntime.jumpedAt[v24] or 0) < now - 3) then
-					quantumV4RaceRuntime.jumpedAt[v24] = now
+			for i, v24 in ipairs(quantumRaceRuntime.jumpProgs or {}) do
+				if (v24 - legitProg2) % length <= 10 and (magnitude > 40 and (quantumRaceRuntime.jumpedAt[v24] or 0) < now - 3) then
+					quantumRaceRuntime.jumpedAt[v24] = now
 					pcall(arg.Jump, arg)
 				end
 			end
 		end
 
-		quantumV4RaceRuntime.status = string.format("Racing (legit)  ·  Lap %s  ·  Place %s", tostring(localPlayer:GetAttribute("RaceLap") or "?"), tostring(localPlayer:GetAttribute("RacePlace") or "?"))
+		quantumRaceRuntime.status = string.format("Racing (legit)  \194\183  Lap %s  \194\183  Place %s", tostring(localPlayer:GetAttribute("RaceLap") or "?"), tostring(localPlayer:GetAttribute("RacePlace") or "?"))
 	end
 
-	quantumV4RaceRuntime.findJumps = function()
-		quantumV4RaceRuntime.jumpProgs = {}
-		quantumV4RaceRuntime.jumpedAt = {}
-		local path = quantumV4RaceRuntime.path
+	quantumRaceRuntime.findJumps = function()
+		quantumRaceRuntime.jumpProgs = {}
+		quantumRaceRuntime.jumpedAt = {}
+		local path = quantumRaceRuntime.path
 		local raceTrack = Workspace:FindFirstChild("RaceTrack")
 
 		if path then
@@ -19661,22 +19179,22 @@ do
 						end
 					end
 
-					quantumV4RaceRuntime.jumpProgs[#quantumV4RaceRuntime.jumpProgs + 1] = ((v21 or n8) - 8) % path.Length
+					quantumRaceRuntime.jumpProgs[#quantumRaceRuntime.jumpProgs + 1] = ((v21 or n8) - 8) % path.Length
 				end
 			end
 		end
 	end
 
-	quantumV4RaceRuntime.findMount = function()
-		local mount = quantumV4RaceRuntime.mount
+	quantumRaceRuntime.findMount = function()
+		local mount = quantumRaceRuntime.mount
 		if mount and (typeof(mount.Drive) == "Instance" and mount.Drive.Parent) then
 			return mount
 		end
-		quantumV4RaceRuntime.mount = nil
-		if os.clock() - (quantumV4RaceRuntime.lastMountSearch or 0) < 0.5 then
+		quantumRaceRuntime.mount = nil
+		if os.clock() - (quantumRaceRuntime.lastMountSearch or 0) < 0.5 then
 			return nil
 		end
-		quantumV4RaceRuntime.lastMountSearch = os.clock()
+		quantumRaceRuntime.lastMountSearch = os.clock()
 		mount = nil
 
 		if type(filtergc) == "function" then
@@ -19704,24 +19222,24 @@ do
 		end
 
 		if type(mount) ~= "table" then
-			quantumV4RaceRuntime.status = "Your executor can't ride the race (no filtergc/getgc)"
+			quantumRaceRuntime.status = "Your executor can't ride the race (no filtergc/getgc)"
 			return nil
 		end
 
 		for i, v21 in ipairs(mount) do
 			if typeof(v21.Drive) == "Instance" and v21.Drive.Parent then
-				quantumV4RaceRuntime.mount = v21
+				quantumRaceRuntime.mount = v21
 				break
 			end
 		end
 
-		return quantumV4RaceRuntime.mount
+		return quantumRaceRuntime.mount
 	end
 
-	quantumV4RaceRuntime.hazards = function()
+	quantumRaceRuntime.hazards = function()
 		local now = os.clock()
-		if quantumV4RaceRuntime.hazardCache and now - quantumV4RaceRuntime.hazardAt < 0.2 then
-			return quantumV4RaceRuntime.hazardCache
+		if quantumRaceRuntime.hazardCache and now - quantumRaceRuntime.hazardAt < 0.2 then
+			return quantumRaceRuntime.hazardCache
 		end
 		local hazardCache = {}
 		local racePowerUpFX = Workspace:FindFirstChild("RacePowerUpFX")
@@ -19753,17 +19271,17 @@ do
 			end
 		end
 
-		quantumV4RaceRuntime.hazardCache = hazardCache
-		quantumV4RaceRuntime.hazardAt = now
+		quantumRaceRuntime.hazardCache = hazardCache
+		quantumRaceRuntime.hazardAt = now
 		return hazardCache
 	end
 
-	quantumV4RaceRuntime.step = function(arg, arg2)
+	quantumRaceRuntime.step = function(arg, arg2)
 		local v21 = fn66()
 		local root = arg.Rig and arg.Rig.Root
 
 		if v21 then
-			if quantumV4RaceRuntime.path then
+			if quantumRaceRuntime.path then
 				if not root then
 					return
 				end
@@ -19775,71 +19293,71 @@ do
 		end
 
 		if arg:IsHeld() then
-			quantumV4RaceRuntime.dist = nil
+			quantumRaceRuntime.dist = nil
 			return
 		end
-		local path = quantumV4RaceRuntime.path
+		local path = quantumRaceRuntime.path
 		local topSpeed = v21.Flags and v21.Flags.TopSpeed and v21.Flags.TopSpeed:Get() or 135
 
-		if not quantumV4RaceRuntime.dist then
+		if not quantumRaceRuntime.dist then
 			local ok, result = pcall(path.Project, path, root.Position, 0, path.Length, path.Length)
-			quantumV4RaceRuntime.dist = ok and type(result) == "number" and result or 0
-			quantumV4RaceRuntime.speed = math.max(tonumber(arg.Speed) or 0, topSpeed * 0.5)
+			quantumRaceRuntime.dist = ok and type(result) == "number" and result or 0
+			quantumRaceRuntime.speed = math.max(tonumber(arg.Speed) or 0, topSpeed * 0.5)
 		end
 
-		if (path:FrameAt(quantumV4RaceRuntime.dist).Position - root.Position).Magnitude > 45 then
-			local ok, dist = pcall(path.Project, path, root.Position, quantumV4RaceRuntime.dist, 80, 220)
+		if (path:FrameAt(quantumRaceRuntime.dist).Position - root.Position).Magnitude > 45 then
+			local ok, dist = pcall(path.Project, path, root.Position, quantumRaceRuntime.dist, 80, 220)
 
 			if ok and type(dist) == "number" then
-				quantumV4RaceRuntime.dist = dist
+				quantumRaceRuntime.dist = dist
 			end
 		end
 
-		local scale = quantumV4RaceRuntime.scale or 1
-		quantumV4RaceRuntime.speed = quantumV4RaceRuntime.speed + (topSpeed * scale - quantumV4RaceRuntime.speed) * math.min(1, arg2 * 1.5)
-		quantumV4RaceRuntime.dist = quantumV4RaceRuntime.dist + quantumV4RaceRuntime.speed * arg2
-		local v22 = path:FrameAt(quantumV4RaceRuntime.dist)
-		local v23 = path:FrameAt(quantumV4RaceRuntime.dist + 20)
+		local scale = quantumRaceRuntime.scale or 1
+		quantumRaceRuntime.speed = quantumRaceRuntime.speed + (topSpeed * scale - quantumRaceRuntime.speed) * math.min(1, arg2 * 1.5)
+		quantumRaceRuntime.dist = quantumRaceRuntime.dist + quantumRaceRuntime.speed * arg2
+		local v22 = path:FrameAt(quantumRaceRuntime.dist)
+		local v23 = path:FrameAt(quantumRaceRuntime.dist + 20)
 		local upVector = v22.UpVector
 		local rightVector = v22.RightVector
 		local v24 = if rightVector.Magnitude < 0.001 then v22.LookVector:Cross(upVector) else rightVector
-		local n8, v25 = path:FrameAt(quantumV4RaceRuntime.dist + math.clamp(quantumV4RaceRuntime.speed * 0.6, 60, 200)).Position + upVector * 2.5
+		local n8, v25 = path:FrameAt(quantumRaceRuntime.dist + math.clamp(quantumRaceRuntime.speed * 0.6, 60, 200)).Position + upVector * 2.5
 
-		for i, v26 in ipairs(quantumV4RaceRuntime.hazards()) do
+		for i, v26 in ipairs(quantumRaceRuntime.hazards()) do
 			path = v26.pos - n8
 			local n9 = math.abs(path:Dot((v23.Position - v22.Position).Unit))
 			local v27 = path:Dot(v24)
 			v25 = if n9 < v26.radius + 30 then if math.abs(v27) < v26.radius + 10 then if v25 then if math.abs(v27) < math.abs(v25) then v27 else v25 else v27 else v25 else v25
 		end
 
-		local v26 = if v25 then v25 > 0 and -quantumV4RaceRuntime.DODGE_STUDS or quantumV4RaceRuntime.DODGE_STUDS else 0
-		quantumV4RaceRuntime.lateral = (quantumV4RaceRuntime.lateral or 0) + (v26 - (quantumV4RaceRuntime.lateral or 0)) * math.min(1, arg2 * 3)
+		local v26 = if v25 then v25 > 0 and -quantumRaceRuntime.DODGE_STUDS or quantumRaceRuntime.DODGE_STUDS else 0
+		quantumRaceRuntime.lateral = (quantumRaceRuntime.lateral or 0) + (v26 - (quantumRaceRuntime.lateral or 0)) * math.min(1, arg2 * 3)
 		local n9 = 2.5
 		local character = localPlayer.Character
 		local raceMount = character and character:FindFirstChild("RaceMount")
 		local hitbox = raceMount and raceMount:FindFirstChild("Hitbox") or arg.Rig and arg.Rig.Mount and arg.Rig.Mount:FindFirstChild("Hitbox")
 
 		local function fn69(arg3)
-			if not quantumV4RaceRuntime.roadParams then
+			if not quantumRaceRuntime.roadParams then
 				local raceTrack = Workspace:FindFirstChild("RaceTrack")
 				local raycastParams = RaycastParams.new()
 				raycastParams.FilterType = Enum.RaycastFilterType.Include
 				raycastParams.FilterDescendantsInstances = {raceTrack and raceTrack:FindFirstChild("Track")}
-				quantumV4RaceRuntime.roadParams = raycastParams
+				quantumRaceRuntime.roadParams = raycastParams
 			end
 
-			local hit = Workspace:Raycast(arg3 + upVector * 60, -upVector * 120, quantumV4RaceRuntime.roadParams)
+			local hit = Workspace:Raycast(arg3 + upVector * 60, -upVector * 120, quantumRaceRuntime.roadParams)
 			return hit and hit.Position or nil
 		end
 
-		local v27 = fn69(v22.Position + v24 * quantumV4RaceRuntime.lateral)
+		local v27 = fn69(v22.Position + v24 * quantumRaceRuntime.lateral)
 		local n10 = hitbox and (hitbox.Position - root.Position):Dot(upVector) or 0
 		local n11 = (hitbox and hitbox.Size.Y / 2 or 2) + 0.3 - n10
-		local n12 = v27 and v27 + upVector * n11 or v22.Position + upVector * n9 + v24 * quantumV4RaceRuntime.lateral
-		local v28 = fn69(v23.Position + v24 * quantumV4RaceRuntime.lateral)
-		local n13 = (v28 and v28 + upVector * n11 or v23.Position + upVector * n9 + v24 * quantumV4RaceRuntime.lateral) - n12
+		local n12 = v27 and v27 + upVector * n11 or v22.Position + upVector * n9 + v24 * quantumRaceRuntime.lateral
+		local v28 = fn69(v23.Position + v24 * quantumRaceRuntime.lateral)
+		local n13 = (v28 and v28 + upVector * n11 or v23.Position + upVector * n9 + v24 * quantumRaceRuntime.lateral) - n12
 		local unit = n13.Magnitude > 0.001 and n13.Unit or v22.LookVector
-		root.AssemblyLinearVelocity = unit * quantumV4RaceRuntime.speed + (n12 - root.Position) * 9
+		root.AssemblyLinearVelocity = unit * quantumRaceRuntime.speed + (n12 - root.Position) * 9
 		root.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 		arg.Drive.Enabled = false
 		arg.Push.Force = Vector3.new(0, 1, 0) * root.AssemblyMass * Workspace.Gravity
@@ -19848,51 +19366,51 @@ do
 		arg.Up = upVector
 		arg.Heading = unit
 		arg.TravelDirection = unit
-		arg.Speed = quantumV4RaceRuntime.speed
+		arg.Speed = quantumRaceRuntime.speed
 		arg.Grounded = v27 ~= nil
 		arg.AirSeconds = 0
 		arg.Launched = v27 == nil
 	end
 
-	quantumV4RaceRuntime.override = function(arg, arg2)
-		if not pcall(quantumV4RaceRuntime.step, arg, arg2) then
+	quantumRaceRuntime.override = function(arg, arg2)
+		if not pcall(quantumRaceRuntime.step, arg, arg2) then
 			arg.Override = nil
-			quantumV4RaceRuntime.dist = nil
+			quantumRaceRuntime.dist = nil
 		end
 	end
 
-	quantumV4RaceRuntime.drive = function(arg)
-		if quantumV4RaceRuntime.active then
+	quantumRaceRuntime.drive = function(arg)
+		if quantumRaceRuntime.active then
 			return
 		end
-		quantumV4RaceRuntime.active = true
-		quantumV4RaceRuntime.dist = nil
-		quantumV4RaceRuntime.mount = nil
-		quantumV4RaceRuntime.stuns = 0
-		quantumV4RaceRuntime.corrections = 0
-		quantumV4RaceRuntime.scale = 1
-		quantumV4RaceRuntime.startedAt = os.clock()
+		quantumRaceRuntime.active = true
+		quantumRaceRuntime.dist = nil
+		quantumRaceRuntime.mount = nil
+		quantumRaceRuntime.stuns = 0
+		quantumRaceRuntime.corrections = 0
+		quantumRaceRuntime.scale = 1
+		quantumRaceRuntime.startedAt = os.clock()
 
 		pcall(function()
 			local physics = settings().Physics
 
 			if physics.PhysicsEnvironmentalThrottle == Enum.EnviromentalPhysicsThrottle.Always then
-				quantumV4RaceRuntime.pausedThrottle = physics.PhysicsEnvironmentalThrottle
+				quantumRaceRuntime.pausedThrottle = physics.PhysicsEnvironmentalThrottle
 				physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.DefaultAuto
 			end
 		end)
 
 		local tbl13 = {}
-		quantumV4RaceRuntime.finishing = false
-		quantumV4RaceRuntime.released = false
-		quantumV4RaceRuntime.legitProg = nil
-		quantumV4RaceRuntime.jumpProgs = nil
-		quantumV4RaceRuntime.controls = nil
-		quantumV4RaceRuntime.boosting, quantumV4RaceRuntime.leadTarget = true, quantumV4RaceRuntime.LEAD_START
-		quantumV4RaceRuntime.leadDone = false
-		quantumV4RaceRuntime.rivals = nil
-		quantumV4RaceRuntime.rivalsAt = 0
-		quantumV4RaceRuntime.boostStartedAt = nil
+		quantumRaceRuntime.finishing = false
+		quantumRaceRuntime.released = false
+		quantumRaceRuntime.legitProg = nil
+		quantumRaceRuntime.jumpProgs = nil
+		quantumRaceRuntime.controls = nil
+		quantumRaceRuntime.boosting, quantumRaceRuntime.leadTarget = true, quantumRaceRuntime.LEAD_START
+		quantumRaceRuntime.leadDone = false
+		quantumRaceRuntime.rivals = nil
+		quantumRaceRuntime.rivalsAt = 0
+		quantumRaceRuntime.boostStartedAt = nil
 
 		local function fn69()
 			for k in pairs(tbl13) do
@@ -19907,9 +19425,9 @@ do
 		end
 
 		local connection6 = game:GetService("RunService").Stepped:Connect(function()
-			if quantumV4RaceRuntime.released then
+			if quantumRaceRuntime.released then
 				return
-			elseif quantumV4RaceRuntime.LEGIT then
+			elseif quantumRaceRuntime.LEGIT then
 				return
 			end
 
@@ -19930,44 +19448,44 @@ do
 
 		if arg.Path and (v21 and v21:FindFirstChild("AttachmentTrack")) then
 			local ok, result = pcall(arg.Path.new, v21.AttachmentTrack)
-			quantumV4RaceRuntime.path = ok and result or nil
+			quantumRaceRuntime.path = ok and result or nil
 		end
 
 		task.spawn(function()
-			while fn2() and quantumV4Config.RaceAuto and quantumV4RaceRuntime.inRace() and type(fn67(arg, "FinishPlace", "RaceFinishPlace")) ~= "number" do
+			while fn2() and quantumConfig.RaceAuto and quantumRaceRuntime.inRace() and type(fn67(arg, "FinishPlace", "RaceFinishPlace")) ~= "number" do
 				pcall(function()
 					local physics = settings().Physics
 
 					if physics.PhysicsEnvironmentalThrottle == Enum.EnviromentalPhysicsThrottle.Always then
-						quantumV4RaceRuntime.pausedThrottle = quantumV4RaceRuntime.pausedThrottle or physics.PhysicsEnvironmentalThrottle
+						quantumRaceRuntime.pausedThrottle = quantumRaceRuntime.pausedThrottle or physics.PhysicsEnvironmentalThrottle
 						physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.DefaultAuto
 					end
 				end)
 
-				local v22 = quantumV4RaceRuntime.findMount()
+				local v22 = quantumRaceRuntime.findMount()
 
-				if quantumV4RaceRuntime.LEGIT then
-					if not quantumV4RaceRuntime.jumpProgs then
-						quantumV4RaceRuntime.findJumps()
+				if quantumRaceRuntime.LEGIT then
+					if not quantumRaceRuntime.jumpProgs then
+						quantumRaceRuntime.findJumps()
 					end
 
-					pcall(quantumV4RaceRuntime.legitStep, v22)
+					pcall(quantumRaceRuntime.legitStep, v22)
 					task.wait()
 					continue
 				end
 
-				if v22 and not quantumV4RaceRuntime.finishing then
+				if v22 and not quantumRaceRuntime.finishing then
 					local n8 = tonumber(v21 and v21:GetAttribute("RaceLaps")) or 3
 					local num = tonumber(fn67(arg, "Lap", "RaceLap"))
 					local finishLine = v21 and v21:FindFirstChild("FinishLine")
 					local humanoidRootPart = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
-					local n9 = quantumV4RaceRuntime.path and quantumV4RaceRuntime.dist and quantumV4RaceRuntime.path.Length - quantumV4RaceRuntime.dist % quantumV4RaceRuntime.path.Length or 1 / 0
+					local n9 = quantumRaceRuntime.path and quantumRaceRuntime.dist and quantumRaceRuntime.path.Length - quantumRaceRuntime.dist % quantumRaceRuntime.path.Length or 1 / 0
 
-					if num and (num >= n8 and (finishLine and (finishLine:IsA("BasePart") and (humanoidRootPart and n9 < quantumV4RaceRuntime.FINISH_RELEASE_STUDS)))) then
-						quantumV4RaceRuntime.finishing = true
+					if num and (num >= n8 and (finishLine and (finishLine:IsA("BasePart") and (humanoidRootPart and n9 < quantumRaceRuntime.FINISH_RELEASE_STUDS)))) then
+						quantumRaceRuntime.finishing = true
 
-						if quantumV4RaceRuntime.RELEASE_AT_FINISH then
-							if v22.Override == quantumV4RaceRuntime.override then
+						if quantumRaceRuntime.RELEASE_AT_FINISH then
+							if v22.Override == quantumRaceRuntime.override then
 								v22.Override = nil
 							end
 
@@ -19975,7 +19493,7 @@ do
 								v22.Drive.Enabled = true
 							end)
 
-							quantumV4RaceRuntime.released = true
+							quantumRaceRuntime.released = true
 							fn69()
 						end
 					end
@@ -19983,33 +19501,33 @@ do
 
 				local now = os.clock()
 
-				if not quantumV4RaceRuntime.nextPulse then
-					quantumV4RaceRuntime.nextPulse = now + 5
+				if not quantumRaceRuntime.nextPulse then
+					quantumRaceRuntime.nextPulse = now + 5
 				end
 
-				if now >= quantumV4RaceRuntime.nextPulse then
-					quantumV4RaceRuntime.pulseUntil = now + quantumV4RaceRuntime.INPUT_PULSE_SECONDS
-					quantumV4RaceRuntime.nextPulse = now + 15 + math.random() * 8
+				if now >= quantumRaceRuntime.nextPulse then
+					quantumRaceRuntime.pulseUntil = now + quantumRaceRuntime.INPUT_PULSE_SECONDS
+					quantumRaceRuntime.nextPulse = now + 15 + math.random() * 8
 				end
 
-				local flag6 = now < (quantumV4RaceRuntime.pulseUntil or 0)
+				local flag6 = now < (quantumRaceRuntime.pulseUntil or 0)
 
-				if quantumV4RaceRuntime.finishing then
+				if quantumRaceRuntime.finishing then
 				elseif flag6 then
-				elseif quantumV4RaceRuntime.finishMove then
-					quantumV4RaceRuntime.releaseControls()
+				elseif quantumRaceRuntime.finishMove then
+					quantumRaceRuntime.releaseControls()
 				end
 
-				if quantumV4RaceRuntime.finishing or flag6 then
+				if quantumRaceRuntime.finishing or flag6 then
 					local finishLine = v21 and v21:FindFirstChild("FinishLine")
 					local humanoidRootPart = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
-					local v23 = quantumV4RaceRuntime.findControls()
+					local v23 = quantumRaceRuntime.findControls()
 
-					if v23 and humanoidRootPart and (finishLine or quantumV4RaceRuntime.path) then
+					if v23 and humanoidRootPart and (finishLine or quantumRaceRuntime.path) then
 						local hitbox = localPlayer.Character:FindFirstChild("RaceMount") and localPlayer.Character.RaceMount:FindFirstChild("Hitbox") or humanoidRootPart
 						local lookVector = hitbox.CFrame.LookVector
 						local upVector = hitbox.CFrame.UpVector
-						local n8 = (quantumV4RaceRuntime.finishing and finishLine and finishLine.Position or quantumV4RaceRuntime.path and quantumV4RaceRuntime.dist and quantumV4RaceRuntime.path:FrameAt((quantumV4RaceRuntime.dist + 40) % quantumV4RaceRuntime.path.Length).Position or humanoidRootPart.Position + lookVector * 40) - humanoidRootPart.Position
+						local n8 = (quantumRaceRuntime.finishing and finishLine and finishLine.Position or quantumRaceRuntime.path and quantumRaceRuntime.dist and quantumRaceRuntime.path:FrameAt((quantumRaceRuntime.dist + 40) % quantumRaceRuntime.path.Length).Position or humanoidRootPart.Position + lookVector * 40) - humanoidRootPart.Position
 						local n9 = lookVector - upVector * lookVector:Dot(upVector)
 						local n10 = n8 - upVector * n8:Dot(upVector)
 						local n11 = 0
@@ -20020,56 +19538,56 @@ do
 							n11 = math.clamp(-math.atan2(unit:Cross(unit2):Dot(upVector), unit:Dot(unit2)) * 2.5, -1, 1)
 						end
 
-						quantumV4RaceRuntime.finishInput = Vector3.new(n11, 0, -1)
+						quantumRaceRuntime.finishInput = Vector3.new(n11, 0, -1)
 
-						if rawget(v23, "GetMoveVector") ~= quantumV4RaceRuntime.finishMove then
-							function quantumV4RaceRuntime.finishMove()
-								return quantumV4RaceRuntime.finishInput or Vector3.new(0, 0, -1)
+						if rawget(v23, "GetMoveVector") ~= quantumRaceRuntime.finishMove then
+							function quantumRaceRuntime.finishMove()
+								return quantumRaceRuntime.finishInput or Vector3.new(0, 0, -1)
 							end
 
-							v23.GetMoveVector = quantumV4RaceRuntime.finishMove
+							v23.GetMoveVector = quantumRaceRuntime.finishMove
 						end
 					end
 
-					if quantumV4RaceRuntime.finishing and (finishLine and (humanoidRootPart and os.clock() - (quantumV4RaceRuntime.lastLineTouch or 0) > 0.25)) then
-						quantumV4RaceRuntime.lastLineTouch = os.clock()
+					if quantumRaceRuntime.finishing and (finishLine and (humanoidRootPart and os.clock() - (quantumRaceRuntime.lastLineTouch or 0) > 0.25)) then
+						quantumRaceRuntime.lastLineTouch = os.clock()
 						pcall(firetouchinterest, humanoidRootPart, finishLine, 0)
 						task.wait()
 						pcall(firetouchinterest, humanoidRootPart, finishLine, 1)
 					end
 				end
 
-				if v22 and quantumV4RaceRuntime.path and not quantumV4RaceRuntime.released then
+				if v22 and quantumRaceRuntime.path and not quantumRaceRuntime.released then
 					tonumber(fn67(arg, "Place", "RacePlace"))
 					local topSpeed = arg.Flags and arg.Flags.TopSpeed and arg.Flags.TopSpeed:Get() or 135
-					local scale = quantumV4RaceRuntime.RIDE_SPEED / topSpeed
+					local scale = quantumRaceRuntime.RIDE_SPEED / topSpeed
 
-					if quantumV4RaceRuntime.scale ~= scale and quantumV4RaceRuntime.corrections == 0 then
-						quantumV4RaceRuntime.scale = scale
+					if quantumRaceRuntime.scale ~= scale and quantumRaceRuntime.corrections == 0 then
+						quantumRaceRuntime.scale = scale
 					end
 
 					local override = v22.Override
 
-					if override ~= nil and override ~= quantumV4RaceRuntime.override then
+					if override ~= nil and override ~= quantumRaceRuntime.override then
 						v22.Override = nil
-						quantumV4RaceRuntime.dist = nil
-						quantumV4RaceRuntime.stuns = quantumV4RaceRuntime.stuns + 1
+						quantumRaceRuntime.dist = nil
+						quantumRaceRuntime.stuns = quantumRaceRuntime.stuns + 1
 					elseif override == nil then
 						if not v22:IsHeld() then
-							v22.Override = quantumV4RaceRuntime.override
+							v22.Override = quantumRaceRuntime.override
 						end
 					end
 
-					quantumV4RaceRuntime.status = string.format("Racing x%.2f  ·  Lap %s  ·  Place %s", quantumV4RaceRuntime.scale, tostring(fn67(arg, "Lap", "RaceLap") or "?"), tostring(fn67(arg, "Place", "RacePlace") or "?"))
+					quantumRaceRuntime.status = string.format("Racing x%.2f  \194\183  Lap %s  \194\183  Place %s", quantumRaceRuntime.scale, tostring(fn67(arg, "Lap", "RaceLap") or "?"), tostring(fn67(arg, "Place", "RacePlace") or "?"))
 				end
 
 				task.wait()
 			end
 
 			connection6:Disconnect()
-			quantumV4RaceRuntime.releaseControls()
-			quantumV4RaceRuntime.finishing = false
-			quantumV4RaceRuntime.released = false
+			quantumRaceRuntime.releaseControls()
+			quantumRaceRuntime.finishing = false
+			quantumRaceRuntime.released = false
 
 			for k in pairs(tbl13) do
 				if k.Parent then
@@ -20079,18 +19597,18 @@ do
 				end
 			end
 
-			if quantumV4RaceRuntime.pausedThrottle then
-				local pausedThrottle = quantumV4RaceRuntime.pausedThrottle
-				quantumV4RaceRuntime.pausedThrottle = nil
+			if quantumRaceRuntime.pausedThrottle then
+				local pausedThrottle = quantumRaceRuntime.pausedThrottle
+				quantumRaceRuntime.pausedThrottle = nil
 
 				pcall(function()
 					settings().Physics.PhysicsEnvironmentalThrottle = pausedThrottle
 				end)
 			end
 
-			local mount = quantumV4RaceRuntime.mount
+			local mount = quantumRaceRuntime.mount
 
-			if mount and mount.Override == quantumV4RaceRuntime.override then
+			if mount and mount.Override == quantumRaceRuntime.override then
 				mount.Override = nil
 			end
 
@@ -20098,19 +19616,19 @@ do
 			local finishTime = fn67(arg, "FinishTime", "RaceFinishTime")
 
 			if type(finishPlace) == "number" then
-				quantumV4RaceRuntime.lastResult = string.format("Place #%d in %s", finishPlace, type(finishTime) == "number" and string.format("%d:%02d", math.floor(finishTime / 60), math.floor(finishTime % 60)) or "?")
+				quantumRaceRuntime.lastResult = string.format("Place #%d in %s", finishPlace, type(finishTime) == "number" and string.format("%d:%02d", math.floor(finishTime / 60), math.floor(finishTime % 60)) or "?")
 			end
 
-			quantumV4RaceRuntime.active = false
-			quantumV4RaceRuntime.mount = nil
-			quantumV4RaceRuntime.path = nil
-			quantumV4RaceRuntime.dist = nil
+			quantumRaceRuntime.active = false
+			quantumRaceRuntime.mount = nil
+			quantumRaceRuntime.path = nil
+			quantumRaceRuntime.dist = nil
 		end)
 
 		task.spawn(function()
 			local attributes = arg.Power and arg.Power.Attributes or {}
 
-			while fn2() and quantumV4RaceRuntime.active do
+			while fn2() and quantumRaceRuntime.active do
 				pcall(function()
 					local serverTimeNow = Workspace:GetServerTimeNow()
 					local attribute = localPlayer:GetAttribute(attributes.Item or "RaceItem")
@@ -20126,7 +19644,7 @@ do
 						elseif flag7 then
 						elseif humanoidRootPart then
 							arg.Remotes.MountRace.PowerUp:FireServer("Use", humanoidRootPart.Position, humanoidRootPart.CFrame.LookVector)
-							quantumV4RaceRuntime.powerUps = (quantumV4RaceRuntime.powerUps or 0) + 1
+							quantumRaceRuntime.powerUps = (quantumRaceRuntime.powerUps or 0) + 1
 							task.wait(1)
 						end
 					end
@@ -20137,11 +19655,11 @@ do
 		end)
 	end
 
-	quantumV4RaceRuntime.claim = function(arg)
-		if os.clock() - quantumV4RaceRuntime.lastClaim < 10 then
+	quantumRaceRuntime.claim = function(arg)
+		if os.clock() - quantumRaceRuntime.lastClaim < 10 then
 			return
 		end
-		quantumV4RaceRuntime.lastClaim = os.clock()
+		quantumRaceRuntime.lastClaim = os.clock()
 		local n8 = fn68(arg)
 		local raceRally = n8 and n8.RaceRally
 		if type(raceRally) ~= "table" then
@@ -20190,8 +19708,8 @@ do
 		end
 	end
 
-	quantumV4RaceRuntime.buy = function(arg)
-		local raceBuyList = quantumV4Config.RaceBuyList
+	quantumRaceRuntime.buy = function(arg)
+		local raceBuyList = quantumConfig.RaceBuyList
 
 		if type(raceBuyList) ~= "table" then
 			return
@@ -20199,7 +19717,7 @@ do
 			return
 		end
 
-		if os.clock() - quantumV4RaceRuntime.lastBuy < 2 then
+		if os.clock() - quantumRaceRuntime.lastBuy < 2 then
 			return
 		end
 		local v21 = fn68(arg)
@@ -20216,7 +19734,7 @@ do
 				local n8, ok2, result2 = tonumber(v22.Config.Limit) or 0, pcall(arg.RR.PurchasedCount, raceRally, v22.Id)
 
 				if n8 == 0 or not ok2 or (tonumber(result2) or 0) < n8 then
-					quantumV4RaceRuntime.lastBuy = os.clock()
+					quantumRaceRuntime.lastBuy = os.clock()
 
 					pcall(function()
 						arg.Remotes.RaceRally.AskBuy:InvokeServer(v22.Id)
@@ -20229,7 +19747,7 @@ do
 	end
 
 	task.spawn(function()
-		local remotes = fn66() and quantumV4RaceRuntime.m.Remotes
+		local remotes = fn66() and quantumRaceRuntime.m.Remotes
 		local raise = remotes and remotes.Alerts and remotes.Alerts.Raise
 
 		if raise then
@@ -20242,7 +19760,7 @@ do
 				end
 
 				if (type(arg) == "table" and tostring(arg.Text or arg.Body or "") or tostring(arg)):lower():find("already raced", 1, true) then
-					quantumV4RaceRuntime.racedRound = quantumV4RaceRuntime.roundId() or quantumV4RaceRuntime.racedRound
+					quantumRaceRuntime.racedRound = quantumRaceRuntime.roundId() or quantumRaceRuntime.racedRound
 				end
 			end
 
@@ -20260,10 +19778,10 @@ do
 					return
 				end
 
-				if quantumV4RaceRuntime.active then
-					quantumV4RaceRuntime.corrections = quantumV4RaceRuntime.corrections + 1
-					quantumV4RaceRuntime.scale = math.max(1, (quantumV4RaceRuntime.scale or 3) - 0.15)
-					quantumV4RaceRuntime.dist = nil
+				if quantumRaceRuntime.active then
+					quantumRaceRuntime.corrections = quantumRaceRuntime.corrections + 1
+					quantumRaceRuntime.scale = math.max(1, (quantumRaceRuntime.scale or 3) - 0.15)
+					quantumRaceRuntime.dist = nil
 				end
 			end
 
@@ -20274,50 +19792,50 @@ do
 			pcall(function()
 				local v21 = fn66()
 				if not v21 then
-					quantumV4RaceRuntime.status = "Race data not loaded"
+					quantumRaceRuntime.status = "Race data not loaded"
 					return
 				end
 
-				if quantumV4Config.RaceAuto then
+				if quantumConfig.RaceAuto then
 					if type((fn67(v21, "RaceId", "RaceId"))) == "string" then
-						quantumV4RaceRuntime.racedRound = quantumV4RaceRuntime.roundId() or quantumV4RaceRuntime.racedRound
+						quantumRaceRuntime.racedRound = quantumRaceRuntime.roundId() or quantumRaceRuntime.racedRound
 						local finishPlace = fn67(v21, "FinishPlace", "RaceFinishPlace")
 
 						if type(finishPlace) == "number" then
-							if quantumV4RaceRuntime.leftFor ~= finishPlace and not quantumV4RaceRuntime.active then
-								quantumV4RaceRuntime.leftFor = finishPlace
+							if quantumRaceRuntime.leftFor ~= finishPlace and not quantumRaceRuntime.active then
+								quantumRaceRuntime.leftFor = finishPlace
 								task.wait(2)
 								v21.Remotes.MountRace.AskLeave:FireServer()
-								quantumV4RaceRuntime.status = "Finished, back to base"
+								quantumRaceRuntime.status = "Finished, back to base"
 							end
 						else
-							quantumV4RaceRuntime.leftFor = nil
-							quantumV4RaceRuntime.drive(v21)
+							quantumRaceRuntime.leftFor = nil
+							quantumRaceRuntime.drive(v21)
 						end
-					elseif quantumV4RaceRuntime.joinLeft() > 0 and quantumV4RaceRuntime.racedThisRound() then
-						quantumV4RaceRuntime.status = "Already raced this round, waiting for the next one"
-					elseif quantumV4RaceRuntime.joinLeft() > 0 then
-						local race = quantumV4TaskLadder.blocker("race")
-						local flag6 = quantumV4RaceRuntime.joinLeft() > quantumV4RaceRuntime.JOIN_LATE_SECONDS and quantumV4RaceRuntime.fieldSettling() or nil
+					elseif quantumRaceRuntime.joinLeft() > 0 and quantumRaceRuntime.racedThisRound() then
+						quantumRaceRuntime.status = "Already raced this round, waiting for the next one"
+					elseif quantumRaceRuntime.joinLeft() > 0 then
+						local race = quantumTaskLadder.blocker("race")
+						local flag6 = quantumRaceRuntime.joinLeft() > quantumRaceRuntime.JOIN_LATE_SECONDS and quantumRaceRuntime.fieldSettling() or nil
 
 						if flag6 then
-							quantumV4RaceRuntime.status = flag6 == 1 / 0 and "Race open, waiting for the field to reopen" or string.format("Race open, checking new eggs (%ds)", math.ceil(flag6))
+							quantumRaceRuntime.status = flag6 == 1 / 0 and "Race open, waiting for the field to reopen" or string.format("Race open, checking new eggs (%ds)", math.ceil(flag6))
 						elseif race then
-							quantumV4RaceRuntime.status = "Yielding to " .. tostring(quantumV4TaskLadder.TITLES[race] or race)
+							quantumRaceRuntime.status = "Yielding to " .. tostring(quantumTaskLadder.TITLES[race] or race)
 						else
-							quantumV4RaceRuntime.join(v21)
+							quantumRaceRuntime.join(v21)
 						end
 					else
-						quantumV4RaceRuntime.status = "Waiting for the next race"
+						quantumRaceRuntime.status = "Waiting for the next race"
 					end
 				end
 
-				if quantumV4Config.RaceClaim then
-					quantumV4RaceRuntime.claim(v21)
+				if quantumConfig.RaceClaim then
+					quantumRaceRuntime.claim(v21)
 				end
 
-				if quantumV4Config.RaceBuy then
-					quantumV4RaceRuntime.buy(v21)
+				if quantumConfig.RaceBuy then
+					quantumRaceRuntime.buy(v21)
 				end
 			end)
 
@@ -20325,21 +19843,21 @@ do
 		end
 	end)
 
-	genv.__QuantumV4RaceRuntime = quantumV4RaceRuntime
+	genv.__QuantumRaceRuntime = quantumRaceRuntime
 
-	quantumV4TaskLadder.register("race", {wants = function()
-		return quantumV4Config.RaceAuto == true and (quantumV4RaceRuntime.inRace() or quantumV4RaceRuntime.wantsJoin())
+	quantumTaskLadder.register("race", {wants = function()
+		return quantumConfig.RaceAuto == true and (quantumRaceRuntime.inRace() or quantumRaceRuntime.wantsJoin())
 	end, active = function()
-		return quantumV4RaceRuntime.active == true or quantumV4RaceRuntime.inRace()
+		return quantumRaceRuntime.active == true or quantumRaceRuntime.inRace()
 	end, enabled = function()
-		return quantumV4Config.RaceAuto == true
+		return quantumConfig.RaceAuto == true
 	end, status = function()
-		return tostring(quantumV4RaceRuntime.status)
+		return tostring(quantumRaceRuntime.status)
 	end})
 end
 
 do
-	local quantumV4StarRuntime = {status = "No star right now", lastResult = "No star caught yet", session = nil, busy = false, caught = 0}
+	local quantumStarRuntime = {status = "No star right now", lastResult = "No star caught yet", session = nil, busy = false, caught = 0}
 
 	local function fn65()
 		local ok, result = pcall(require, ReplicatedStorage.Shared.Remotes)
@@ -20350,7 +19868,7 @@ do
 		return Workspace:GetServerTimeNow()
 	end
 
-	quantumV4StarRuntime.position = function(arg)
+	quantumStarRuntime.position = function(arg)
 		local leg = arg.Leg
 
 		if type(leg) == "table" and (typeof(leg.From) == "Vector3" and typeof(leg.To) == "Vector3") then
@@ -20363,8 +19881,8 @@ do
 		return typeof(landing) == "CFrame" and landing.Position or landing
 	end
 
-	quantumV4StarRuntime.alert = function(arg)
-		if not quantumV4Config.StarAlert then
+	quantumStarRuntime.alert = function(arg)
+		if not quantumConfig.StarAlert then
 			return
 		end
 		local n8 = math.max(0, math.floor((tonumber(arg.Payload.ExpiresAt) or 0) - fn66()))
@@ -20374,7 +19892,7 @@ do
 		end)
 	end
 
-	quantumV4StarRuntime.begin = function(arg)
+	quantumStarRuntime.begin = function(arg)
 		if type(arg) ~= "table" then
 			return
 		elseif type(arg.Id) ~= "string" then
@@ -20384,21 +19902,21 @@ do
 		if (tonumber(arg.ExpiresAt) or 0) <= fn66() then
 			return
 		end
-		quantumV4StarRuntime.session = {Payload = arg, Leg = arg.Leg, Id = arg.Id}
-		quantumV4StarRuntime.status = "Star falling"
-		quantumV4StarRuntime.alert(quantumV4StarRuntime.session)
+		quantumStarRuntime.session = {Payload = arg, Leg = arg.Leg, Id = arg.Id}
+		quantumStarRuntime.status = "Star falling"
+		quantumStarRuntime.alert(quantumStarRuntime.session)
 	end
 
-	quantumV4StarRuntime.finish = function(arg, lastResult)
-		if quantumV4StarRuntime.session and quantumV4StarRuntime.session.Id == arg then
-			quantumV4StarRuntime.session = nil
-			quantumV4StarRuntime.busy = false
-			quantumV4StarRuntime.lastResult = lastResult
-			quantumV4StarRuntime.status = "No star right now"
+	quantumStarRuntime.finish = function(arg, lastResult)
+		if quantumStarRuntime.session and quantumStarRuntime.session.Id == arg then
+			quantumStarRuntime.session = nil
+			quantumStarRuntime.busy = false
+			quantumStarRuntime.lastResult = lastResult
+			quantumStarRuntime.status = "No star right now"
 		end
 	end
 
-	quantumV4StarRuntime.catch = function(arg)
+	quantumStarRuntime.catch = function(arg)
 		local v21 = fn65()
 		local character = localPlayer.Character
 		local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
@@ -20412,16 +19930,16 @@ do
 
 		local function fn67()
 			local v22 = fn2()
-			return (if v22 then not quantumV4Config.StarAutoCatch else not v22) or quantumV4StarRuntime.session ~= arg or quantumV4TaskLadder.blocker("star") ~= nil
+			return (if v22 then not quantumConfig.StarAutoCatch else not v22) or quantumStarRuntime.session ~= arg or quantumTaskLadder.blocker("star") ~= nil
 		end
 
 		local function fn68(arg2)
-			local v22 = quantumV4StarRuntime.position(arg)
+			local v22 = quantumStarRuntime.position(arg)
 			return v22 and (Vector3.new(v22.X, humanoidRootPart.Position.Y, v22.Z) - humanoidRootPart.Position).Magnitude <= arg2
 		end
 
 		local function fn69(arg2)
-			local v22 = quantumV4StarRuntime.position(arg)
+			local v22 = quantumStarRuntime.position(arg)
 			if not v22 then
 				return false
 			end
@@ -20431,25 +19949,25 @@ do
 			end
 
 			fn38(humanoidRootPart, humanoid, CFrame.new(v22 + Vector3.new(0, 3, 0)), function()
-				local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
-				return fn67() or quantumV4EggRuntime ~= nil and quantumV4EggRuntime.resetBlocked == true
+				local quantumEggRuntime = genv.__QuantumEggRuntime
+				return fn67() or quantumEggRuntime ~= nil and quantumEggRuntime.resetBlocked == true
 			end, false, nil, true)
 
 			return fn68(arg2)
 		end
 
-		quantumV4StarRuntime.status = "Going to the star"
+		quantumStarRuntime.status = "Going to the star"
 		character = 0
 
 		while true do
-			local quantumV4EggRuntime = fn67()
-			if not (if quantumV4EggRuntime then not quantumV4EggRuntime else character < 25) then
+			local quantumEggRuntime = fn67()
+			if not (if quantumEggRuntime then not quantumEggRuntime else character < 25) then
 				break
 			end
-			quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+			quantumEggRuntime = genv.__QuantumEggRuntime
 
-			if quantumV4EggRuntime and quantumV4EggRuntime.resetBlocked then
-				quantumV4StarRuntime.status = "Waiting for the field to reopen"
+			if quantumEggRuntime and quantumEggRuntime.resetBlocked then
+				quantumStarRuntime.status = "Waiting for the field to reopen"
 				task.wait(0.5)
 				continue
 			end
@@ -20457,15 +19975,15 @@ do
 			character += 1
 
 			if fn69(8) then
-				quantumV4StarRuntime.status = "Catching the star"
+				quantumStarRuntime.status = "Catching the star"
 				v21.Hold:FireServer(arg.Id, true)
 				local n8 = (tonumber(arg.Payload.HoldSeconds) or 1.6) + 0.15
 				local now = os.clock()
 				local flag6 = false
 
 				while os.clock() - now < n8 and not fn67() do
-					local quantumV4EggRuntime2 = genv.__QuantumV4EggRuntime
-					if quantumV4EggRuntime2 and quantumV4EggRuntime2.resetBlocked then
+					local quantumEggRuntime2 = genv.__QuantumEggRuntime
+					if quantumEggRuntime2 and quantumEggRuntime2.resetBlocked then
 						flag6 = true
 						break
 					end
@@ -20485,11 +20003,11 @@ do
 					v21.Catch:FireServer(arg.Id)
 					local n9 = os.clock() + 2
 
-					while quantumV4StarRuntime.session == arg and os.clock() < n9 do
+					while quantumStarRuntime.session == arg and os.clock() < n9 do
 						task.wait(0.1)
 					end
 
-					if quantumV4StarRuntime.session ~= arg then
+					if quantumStarRuntime.session ~= arg then
 						return
 					end
 				end
@@ -20524,29 +20042,29 @@ do
 			end
 		end
 
-		fn67(v21.Fall, quantumV4StarRuntime.begin)
+		fn67(v21.Fall, quantumStarRuntime.begin)
 
 		fn67(v21.Wander, function(arg, leg)
-			if quantumV4StarRuntime.session and (quantumV4StarRuntime.session.Id == arg and type(leg) == "table") then
-				quantumV4StarRuntime.session.Leg = leg
+			if quantumStarRuntime.session and (quantumStarRuntime.session.Id == arg and type(leg) == "table") then
+				quantumStarRuntime.session.Leg = leg
 			end
 		end)
 
 		fn67(v21.Slipped, function(arg)
-			if quantumV4StarRuntime.session and quantumV4StarRuntime.session.Id == arg then
-				quantumV4StarRuntime.status = "Star slipped away, trying again"
+			if quantumStarRuntime.session and quantumStarRuntime.session.Id == arg then
+				quantumStarRuntime.status = "Star slipped away, trying again"
 			end
 		end)
 
 		fn67(v21.Claimed, function(arg, arg2)
-			if quantumV4StarRuntime.session and quantumV4StarRuntime.session.Id == arg then
-				quantumV4StarRuntime.caught = quantumV4StarRuntime.caught + 1
-				quantumV4StarRuntime.finish(arg, string.format("Caught a star (+%s)", tostring(arg2 or 1)))
+			if quantumStarRuntime.session and quantumStarRuntime.session.Id == arg then
+				quantumStarRuntime.caught = quantumStarRuntime.caught + 1
+				quantumStarRuntime.finish(arg, string.format("Caught a star (+%s)", tostring(arg2 or 1)))
 			end
 		end)
 
 		fn67(v21.Expired, function(arg)
-			quantumV4StarRuntime.finish(arg, "Star went home before it was caught")
+			quantumStarRuntime.finish(arg, "Star went home before it was caught")
 		end)
 
 		task.spawn(function()
@@ -20554,35 +20072,35 @@ do
 				return v21.AskState:InvokeServer()
 			end)
 
-			if ok and (type(result) == "table" and quantumV4StarRuntime.session == nil) then
-				quantumV4StarRuntime.begin(result)
+			if ok and (type(result) == "table" and quantumStarRuntime.session == nil) then
+				quantumStarRuntime.begin(result)
 			end
 		end)
 	end
 
 	task.spawn(function()
 		while fn2() do
-			local session = quantumV4StarRuntime.session
+			local session = quantumStarRuntime.session
 
 			if session and (tonumber(session.Payload.ExpiresAt) or 0) <= fn66() then
-				quantumV4StarRuntime.finish(session.Id, "Star went home before it was caught")
-			elseif session and quantumV4Config.StarAutoCatch and not quantumV4StarRuntime.busy and fn66() >= (tonumber(session.Payload.LandAt) or 0) then
-				local star = quantumV4TaskLadder.blocker("star")
+				quantumStarRuntime.finish(session.Id, "Star went home before it was caught")
+			elseif session and quantumConfig.StarAutoCatch and not quantumStarRuntime.busy and fn66() >= (tonumber(session.Payload.LandAt) or 0) then
+				local star = quantumTaskLadder.blocker("star")
 
 				if star then
-					quantumV4StarRuntime.status = "Yielding to " .. tostring(quantumV4TaskLadder.TITLES[star] or star)
+					quantumStarRuntime.status = "Yielding to " .. tostring(quantumTaskLadder.TITLES[star] or star)
 				else
-					quantumV4StarRuntime.busy = true
-					pcall(quantumV4StarRuntime.catch, session)
-					quantumV4StarRuntime.busy = false
+					quantumStarRuntime.busy = true
+					pcall(quantumStarRuntime.catch, session)
+					quantumStarRuntime.busy = false
 
-					if quantumV4StarRuntime.session == session then
-						quantumV4StarRuntime.status = "Star still out, retrying"
+					if quantumStarRuntime.session == session then
+						quantumStarRuntime.status = "Star still out, retrying"
 					end
 				end
 			elseif session then
 				if fn66() < (tonumber(session.Payload.LandAt) or 0) then
-					quantumV4StarRuntime.status = string.format("Star lands in %ds", math.ceil((tonumber(session.Payload.LandAt) or 0) - fn66()))
+					quantumStarRuntime.status = string.format("Star lands in %ds", math.ceil((tonumber(session.Payload.LandAt) or 0) - fn66()))
 				end
 			end
 
@@ -20590,22 +20108,22 @@ do
 		end
 	end)
 
-	genv.__QuantumV4StarRuntime = quantumV4StarRuntime
+	genv.__QuantumStarRuntime = quantumStarRuntime
 
-	quantumV4TaskLadder.register("star", {wants = function()
-		local session = quantumV4StarRuntime.session
-		return quantumV4Config.StarAutoCatch == true and session ~= nil and fn66() >= (tonumber(session.Payload.LandAt) or 0)
+	quantumTaskLadder.register("star", {wants = function()
+		local session = quantumStarRuntime.session
+		return quantumConfig.StarAutoCatch == true and session ~= nil and fn66() >= (tonumber(session.Payload.LandAt) or 0)
 	end, active = function()
-		return quantumV4StarRuntime.busy == true
+		return quantumStarRuntime.busy == true
 	end, enabled = function()
-		return quantumV4Config.StarAutoCatch == true
+		return quantumConfig.StarAutoCatch == true
 	end, status = function()
-		return tostring(quantumV4StarRuntime.status)
+		return tostring(quantumStarRuntime.status)
 	end})
 end
 
 do
-	local quantumV4ButterflyRuntime = {status = "Idle", active = false, wantsCharacter = false, lastSwing = 0, retryAt = {}, cards = {}, snap = {}}
+	local quantumButterflyRuntime = {status = "Idle", active = false, wantsCharacter = false, lastSwing = 0, retryAt = {}, cards = {}, snap = {}}
 	local tbl13 = {"Green", "Blue", "Purple", "Golden"}
 	local tbl14 = {Green = 1, Blue = 2, Purple = 3, Golden = 4}
 	local n8 = 5
@@ -20703,11 +20221,11 @@ do
 	end
 
 	local function fn69(arg)
-		return (quantumV4ButterflyRuntime.retryAt[arg] or 0) <= os.clock()
+		return (quantumButterflyRuntime.retryAt[arg] or 0) <= os.clock()
 	end
 
 	local function fn70(arg)
-		quantumV4ButterflyRuntime.retryAt[arg] = os.clock() + n8
+		quantumButterflyRuntime.retryAt[arg] = os.clock() + n8
 	end
 
 	local function fn71()
@@ -20715,7 +20233,7 @@ do
 		return character and character:FindFirstChild("HumanoidRootPart") or nil
 	end
 
-	quantumV4ButterflyRuntime.bloomLeft = function()
+	quantumButterflyRuntime.bloomLeft = function()
 		local v22 = fn66()
 		local attribute = workspace:GetAttribute(v22 and v22.Catalog.EndsAtAttribute or "ButterflyBloomEndsAt")
 		if typeof(attribute) ~= "number" then
@@ -20724,7 +20242,7 @@ do
 		return math.max(0, attribute - workspace:GetServerTimeNow())
 	end
 
-	quantumV4ButterflyRuntime.nextBloom = function()
+	quantumButterflyRuntime.nextBloom = function()
 		local n10 = tonumber(fn67("IntervalSeconds", 1800)) or 1800
 		local n11 = tonumber(fn67("OffsetSeconds", 900)) or 900
 		local n12 = tonumber(fn67("DurationSeconds", 300)) or 300
@@ -20760,7 +20278,7 @@ do
 
 	local v22
 
-	quantumV4ButterflyRuntime.tiers = function()
+	quantumButterflyRuntime.tiers = function()
 		if v22 then
 			return v22
 		end
@@ -20779,17 +20297,17 @@ do
 		return tbl15
 	end
 
-	quantumV4ButterflyRuntime.snapshot = function()
+	quantumButterflyRuntime.snapshot = function()
 		local v23 = fn66()
-		local snap = quantumV4ButterflyRuntime.snap
+		local snap = quantumButterflyRuntime.snap
 		if not v23 then
 			return snap
 		end
-		snap.left = quantumV4ButterflyRuntime.bloomLeft()
+		snap.left = quantumButterflyRuntime.bloomLeft()
 		snap.active = snap.left > 0
 		snap.enabled = fn67("Enabled", true) ~= false
 		local active = snap.active
-		snap.nextIn = (if active then not active else quantumV4ButterflyRuntime.nextBloom()) or nil
+		snap.nextIn = (if active then not active else quantumButterflyRuntime.nextBloom()) or nil
 		local ok, result = pcall(v23.Save.Peek)
 		local v24 = ok and result or nil
 		local butterflies = v24 and v24.Butterflies
@@ -20834,8 +20352,8 @@ do
 		return snap
 	end
 
-	quantumV4ButterflyRuntime.smartNext = function(arg)
-		local v23 = quantumV4ButterflyRuntime.tiers()
+	quantumButterflyRuntime.smartNext = function(arg)
+		local v23 = quantumButterflyRuntime.tiers()
 
 		if v23 then
 			if not arg then
@@ -20857,9 +20375,9 @@ do
 		return nil
 	end
 
-	quantumV4ButterflyRuntime.canTrade = function()
-		local snap = quantumV4ButterflyRuntime.snap
-		local v23 = quantumV4ButterflyRuntime.tiers()
+	quantumButterflyRuntime.canTrade = function()
+		local snap = quantumButterflyRuntime.snap
+		local v23 = quantumButterflyRuntime.tiers()
 
 		if v23 then
 			if not snap.counts then
@@ -20869,9 +20387,9 @@ do
 			return false
 		end
 
-		local butterflyTradeRecipe = quantumV4Config.ButterflyTradeRecipe
+		local butterflyTradeRecipe = quantumConfig.ButterflyTradeRecipe
 		if butterflyTradeRecipe == "Smart" then
-			return quantumV4ButterflyRuntime.smartNext(snap.counts) ~= nil
+			return quantumButterflyRuntime.smartNext(snap.counts) ~= nil
 		end
 
 		for i = 1, 3, 1 do
@@ -20884,9 +20402,9 @@ do
 		return false
 	end
 
-	quantumV4ButterflyRuntime.canCraft = function()
-		local snap = quantumV4ButterflyRuntime.snap
-		local v23 = quantumV4ButterflyRuntime.tiers()
+	quantumButterflyRuntime.canCraft = function()
+		local snap = quantumButterflyRuntime.snap
+		local v23 = quantumButterflyRuntime.tiers()
 
 		if v23 then
 			if not snap.counts then
@@ -20906,7 +20424,7 @@ do
 	end
 
 	local function fn73()
-		local butterflyTiers = quantumV4Config.ButterflyTiers
+		local butterflyTiers = quantumConfig.ButterflyTiers
 
 		if type(butterflyTiers) ~= "table" then
 			return nil
@@ -21024,7 +20542,7 @@ do
 				return true
 			end
 
-			return quantumV4TaskLadder.blocker("butterfly") ~= nil
+			return quantumTaskLadder.blocker("butterfly") ~= nil
 		end
 
 		if v13 and (humanoidRootPart.Position.Y < 16000 and (arg.Y < 16000 and (humanoidRootPart.Position - arg).Magnitude > 600)) then
@@ -21033,10 +20551,10 @@ do
 				local v23 = v13:_resolveSafeCFrame(humanoidRootPart)
 
 				if v23 and (v23.Position - arg).Magnitude > 40 then
-					local status = quantumV4ButterflyRuntime.status
-					quantumV4ButterflyRuntime.status = "Heading to the safe zone first"
+					local status = quantumButterflyRuntime.status
+					quantumButterflyRuntime.status = "Heading to the safe zone first"
 					pcall(fn38, humanoidRootPart, humanoid, v23, fn79)
-					quantumV4ButterflyRuntime.status = status
+					quantumButterflyRuntime.status = status
 					local v24 = fn71()
 
 					if v24 then
@@ -21116,11 +20634,11 @@ do
 		if fn31() then
 			return "night - the forest is sealed"
 		end
-		quantumV4ButterflyRuntime.status = "Flying to the Enchanted Tree"
+		quantumButterflyRuntime.status = "Flying to the Enchanted Tree"
 		if not fn78(worldPosition + Vector3.new(0, 3, 0), 60) then
 			return "could not reach the tree entrance"
 		end
-		quantumV4ButterflyRuntime.status = "Entering the tree"
+		quantumButterflyRuntime.status = "Entering the tree"
 		fn80(enchantedTreePrompt)
 		local n10 = os.clock() + 8
 
@@ -21148,7 +20666,7 @@ do
 			return false
 		end
 
-		quantumV4ButterflyRuntime.status = "Leaving the tree"
+		quantumButterflyRuntime.status = "Leaving the tree"
 		local n10 = os.clock() + 6
 
 		while os.clock() < n10 and fn79() do
@@ -21183,7 +20701,7 @@ do
 		if v25 then
 			return false, v25
 		end
-		quantumV4ButterflyRuntime.status = "Walking to the " .. arg
+		quantumButterflyRuntime.status = "Walking to the " .. arg
 		if not fn78(v23 + Vector3.new(0, 3, 0), 15) then
 			return false, "could not reach the " .. arg
 		end
@@ -21221,21 +20739,21 @@ do
 	end
 
 	local function fn88()
-		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
+		local quantumTreadmillManager = genv.__QuantumTreadmillManager
 
-		if quantumV4TreadmillManager then
-			if not (quantumV4TreadmillManager.activeTreadmill ~= nil) then
+		if quantumTreadmillManager then
+			if not (quantumTreadmillManager.activeTreadmill ~= nil) then
 				return
 			end
 		else
 			return
 		end
 
-		quantumV4ButterflyRuntime.status = "Leaving the treadmill"
+		quantumButterflyRuntime.status = "Leaving the treadmill"
 		local n10 = os.clock() + 5
 
-		while quantumV4TreadmillManager.activeTreadmill ~= nil and os.clock() < n10 do
-			quantumV4TreadmillManager:_requestUnequip()
+		while quantumTreadmillManager.activeTreadmill ~= nil and os.clock() < n10 do
+			quantumTreadmillManager:_requestUnequip()
 			task.wait(0.3)
 		end
 
@@ -21249,19 +20767,19 @@ do
 	end
 
 	local function fn89()
-		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
+		local quantumTreadmillManager = genv.__QuantumTreadmillManager
 
-		if quantumV4TreadmillManager and not quantumV4TreadmillManager.destroyed then
-			if not quantumV4TreadmillManager.config.idleFarm then
+		if quantumTreadmillManager and not quantumTreadmillManager.destroyed then
+			if not quantumTreadmillManager.config.idleFarm then
 				return false
 			end
 		else
 			return false
 		end
 
-		if not quantumV4TreadmillManager.busy and not quantumV4TreadmillManager.idleRunning then
+		if not quantumTreadmillManager.busy and not quantumTreadmillManager.idleRunning then
 			task.defer(function()
-				quantumV4TreadmillManager:_startIdle()
+				quantumTreadmillManager:_startIdle()
 			end)
 		end
 
@@ -21295,17 +20813,17 @@ do
 		local v24 = v13:_resolveSafeCFrame(v23)
 
 		if v24 then
-			quantumV4ButterflyRuntime.status = "Back to the safe zone"
+			quantumButterflyRuntime.status = "Back to the safe zone"
 			fn78(v24.Position, 60)
 		end
 	end
 
-	quantumV4ButterflyRuntime.claimNet = function()
+	quantumButterflyRuntime.claimNet = function()
 		local NetStand, v23 = fn84("NetStand")
 		if not NetStand then
 			return false, v23
 		end
-		quantumV4ButterflyRuntime.status = "Claiming the net"
+		quantumButterflyRuntime.status = "Claiming the net"
 		NetStand, v23 = fn83("NetStand")
 		local proximityPrompt = v23 and v23:FindFirstChildWhichIsA("ProximityPrompt", true)
 
@@ -21314,7 +20832,7 @@ do
 			local n10 = os.clock() + 2
 
 			while os.clock() < n10 do
-				if quantumV4ButterflyRuntime.snapshot().net then
+				if quantumButterflyRuntime.snapshot().net then
 					return true
 				end
 				task.wait(0.1)
@@ -21325,27 +20843,27 @@ do
 		return proximityPrompt, v23
 	end
 
-	quantumV4ButterflyRuntime.tradeUp = function()
-		quantumV4ButterflyRuntime.snapshot()
-		if not quantumV4ButterflyRuntime.canTrade() then
+	quantumButterflyRuntime.tradeUp = function()
+		quantumButterflyRuntime.snapshot()
+		if not quantumButterflyRuntime.canTrade() then
 			return false, "nothing to trade up"
 		end
 		local ButterflyMachine, v23 = fn84("ButterflyMachine")
 		if not ButterflyMachine then
 			return false, v23
 		end
-		local v24, butterflyTradeRecipe, n10, v25 = quantumV4ButterflyRuntime.tiers(), quantumV4Config.ButterflyTradeRecipe, 0
+		local v24, butterflyTradeRecipe, n10, v25 = quantumButterflyRuntime.tiers(), quantumConfig.ButterflyTradeRecipe, 0
 
 		if butterflyTradeRecipe == "Smart" then
-			local v26 = table.clone(quantumV4ButterflyRuntime.snap.counts)
+			local v26 = table.clone(quantumButterflyRuntime.snap.counts)
 			v25 = n10
 
 			while v25 < 50 do
-				local v27 = quantumV4ButterflyRuntime.smartNext(v26)
+				local v27 = quantumButterflyRuntime.smartNext(v26)
 				if not v27 then
 					break
 				end
-				quantumV4ButterflyRuntime.status = "Trading up " .. v24[v27].name .. " for the essence"
+				quantumButterflyRuntime.status = "Trading up " .. v24[v27].name .. " for the essence"
 				local Butterflies, v28 = fn68("Butterflies", "AskTradeUp", v27)
 
 				if not Butterflies then
@@ -21371,11 +20889,11 @@ do
 			local v26 = tbl13[i]
 
 			if butterflyTradeRecipe == nil or butterflyTradeRecipe == "All" or butterflyTradeRecipe == v26 then
-				n10 = quantumV4ButterflyRuntime.snap.counts[v26] or 0
+				n10 = quantumButterflyRuntime.snap.counts[v26] or 0
 				local trade = v24[v26].trade
 
 				while trade > 0 and n10 >= trade do
-					quantumV4ButterflyRuntime.status = "Trading up " .. v24[v26].name
+					quantumButterflyRuntime.status = "Trading up " .. v24[v26].name
 					local Butterflies, v27 = fn68("Butterflies", "AskTradeUp", v26)
 
 					if not Butterflies then
@@ -21395,11 +20913,11 @@ do
 		return true, v25
 	end
 
-	quantumV4ButterflyRuntime.craft = function()
-		quantumV4ButterflyRuntime.snapshot()
-		local v23, MutationShrine = quantumV4ButterflyRuntime.canCraft()
+	quantumButterflyRuntime.craft = function()
+		quantumButterflyRuntime.snapshot()
+		local v23, MutationShrine = quantumButterflyRuntime.canCraft()
 		if not v23 then
-			local v24 = quantumV4ButterflyRuntime.tiers()
+			local v24 = quantumButterflyRuntime.tiers()
 			return false, "need more " .. tostring(v24 and v24[MutationShrine] and v24[MutationShrine].name or MutationShrine)
 		end
 		MutationShrine, v23 = fn84("MutationShrine")
@@ -21408,8 +20926,8 @@ do
 		end
 		MutationShrine = 0
 
-		while MutationShrine < 10 and quantumV4ButterflyRuntime.canCraft() do
-			quantumV4ButterflyRuntime.status = "Crafting Enchanted Essence"
+		while MutationShrine < 10 and quantumButterflyRuntime.canCraft() do
+			quantumButterflyRuntime.status = "Crafting Enchanted Essence"
 			local Butterflies, v24 = fn68("Butterflies", "AskCraftEssence")
 
 			if not Butterflies then
@@ -21421,13 +20939,13 @@ do
 
 			MutationShrine += 1
 			task.wait(0.2)
-			quantumV4ButterflyRuntime.snapshot()
+			quantumButterflyRuntime.snapshot()
 		end
 
 		return true, MutationShrine
 	end
 
-	quantumV4ButterflyRuntime.acceptWisp = function()
+	quantumButterflyRuntime.acceptWisp = function()
 		local world = fn65(workspace, "World", "Build", "EnchantedForestZone", "WispSpawn")
 
 		if world then
@@ -21441,7 +20959,7 @@ do
 		if fn31() then
 			return false, "night - the forest is sealed"
 		end
-		quantumV4ButterflyRuntime.status = "Flying to the Baby Wisp"
+		quantumButterflyRuntime.status = "Flying to the Baby Wisp"
 		if not fn78(world.Position + Vector3.new(0, 3, 6), 60) then
 			return false, "could not reach the Baby Wisp"
 		end
@@ -21455,9 +20973,9 @@ do
 		return WispCompanion, v23
 	end
 
-	quantumV4ButterflyRuntime.forestCategories = function()
-		if quantumV4ButterflyRuntime.forestCats then
-			return quantumV4ButterflyRuntime.forestCats
+	quantumButterflyRuntime.forestCategories = function()
+		if quantumButterflyRuntime.forestCats then
+			return quantumButterflyRuntime.forestCats
 		end
 		local forestCats = {}
 
@@ -21472,13 +20990,13 @@ do
 		end)
 
 		if next(forestCats) then
-			quantumV4ButterflyRuntime.forestCats = forestCats
+			quantumButterflyRuntime.forestCats = forestCats
 		end
 
 		return forestCats
 	end
 
-	quantumV4ButterflyRuntime.forestStock = function()
+	quantumButterflyRuntime.forestStock = function()
 		local v23 = fn66()
 
 		local ok, result = pcall(function()
@@ -21486,7 +21004,7 @@ do
 		end)
 
 		local v24 = ok and result or nil
-		local v25 = quantumV4ButterflyRuntime.forestCategories()
+		local v25 = quantumButterflyRuntime.forestCategories()
 		local tbl16 = {eggs = 0, pets = 0, group = nil, best = 0}
 		if not v24 then
 			return tbl16
@@ -21547,7 +21065,7 @@ do
 		return tbl16
 	end
 
-	quantumV4ButterflyRuntime.fuseForest = function(arg)
+	quantumButterflyRuntime.fuseForest = function(arg)
 		local ok = fn66()
 		local ok2, result = pcall(ok.Save.Peek)
 		if ok2 and (result and result.FusionLocked) then
@@ -21599,37 +21117,37 @@ do
 		return true
 	end
 
-	quantumV4ButterflyRuntime.questDrive = function(arg)
-		local quantumV4EggRuntime, tbl16, questNote = genv.__QuantumV4EggRuntime
-		local flag6 = quantumV4Config.WispAutoQuest and arg.accepted and not arg.unlocked and not arg.claimable and not arg.readyReturn and (arg.progress or 0) < (arg.target or 0)
+	quantumButterflyRuntime.questDrive = function(arg)
+		local quantumEggRuntime, tbl16, questNote = genv.__QuantumEggRuntime
+		local flag6 = quantumConfig.WispAutoQuest and arg.accepted and not arg.unlocked and not arg.claimable and not arg.readyReturn and (arg.progress or 0) < (arg.target or 0)
 
-		if quantumV4Config.WispAutoQuest and not arg.accepted and not arg.unlocked and (arg.speed or 0) < (arg.need or 0) then
+		if quantumConfig.WispAutoQuest and not arg.accepted and not arg.unlocked and (arg.speed or 0) < (arg.need or 0) then
 			questNote = ("Wisp needs %gB SpeedPower"):format(math.floor((arg.need or 0) / 100000000) / 10)
 		else
 			if flag6 and arg.questId == "forest_eggs" then
 				tbl16 = {area = "Enchanted Forest"}
-				questNote = ("Hunting Enchanted Forest eggs  ·  %d / %d"):format(arg.progress or 0, arg.target or 0)
+				questNote = ("Hunting Enchanted Forest eggs  \194\183  %d / %d"):format(arg.progress or 0, arg.target or 0)
 			else
 				if flag6 and arg.questId == "eternal_egg" then
 					tbl16 = {rarity = "Eternal"}
 					questNote = "Hunting any Eternal egg"
 				else
 					if flag6 and arg.questId == "forest_fusion" then
-						local v23 = quantumV4ButterflyRuntime.forestStock()
+						local v23 = quantumButterflyRuntime.forestStock()
 						local str3
 
 						if v23.group then
 							local str4 = "Fusing 3 Enchanted Forest pets"
 
 							if fn69("fuse") then
-								local v24, v25 = quantumV4ButterflyRuntime.fuseForest(v23.group)
+								local v24, v25 = quantumButterflyRuntime.fuseForest(v23.group)
 								questNote = v24 and "Fused an Enchanted Forest animal" or "Fuse: " .. tostring(v25)
 								fn70("fuse")
 							else
 								questNote = str4
 							end
 						else
-							tbl16, str3 = if v23.eggs < 3 then {area = "Enchanted Forest"} else tbl16, ("Need 3 of one Enchanted Forest pet (best %d)%s"):format(v23.best, quantumV4Config.AutoPlace and quantumV4Config.AutoHatch and "" or "  ·  turn on Auto Place + Auto Hatch")
+							tbl16, str3 = if v23.eggs < 3 then {area = "Enchanted Forest"} else tbl16, ("Need 3 of one Enchanted Forest pet (best %d)%s"):format(v23.best, quantumConfig.AutoPlace and quantumConfig.AutoHatch and "" or "  \194\183  turn on Auto Place + Auto Hatch")
 							questNote = str3
 						end
 					end
@@ -21637,14 +21155,14 @@ do
 			end
 		end
 
-		if quantumV4EggRuntime and quantumV4EggRuntime.setWispObjective then
-			quantumV4EggRuntime:setWispObjective(tbl16)
+		if quantumEggRuntime and quantumEggRuntime.setWispObjective then
+			quantumEggRuntime:setWispObjective(tbl16)
 		end
 
-		quantumV4ButterflyRuntime.questNote = questNote
+		quantumButterflyRuntime.questNote = questNote
 	end
 
-	quantumV4ButterflyRuntime.promptPoint = function(arg)
+	quantumButterflyRuntime.promptPoint = function(arg)
 		local parent = arg and arg.Parent
 		if not parent then
 			return nil
@@ -21664,7 +21182,7 @@ do
 		return nil
 	end
 
-	quantumV4ButterflyRuntime.banjoPrompt = function(arg)
+	quantumButterflyRuntime.banjoPrompt = function(arg)
 		local world = fn65(workspace, "World", "Build", "EnchantedTreeInterior", "Banjo Secret Room")
 		if not world then
 			return nil
@@ -21687,8 +21205,8 @@ do
 		return nil
 	end
 
-	quantumV4ButterflyRuntime.firePrompt = function(arg)
-		local v23 = quantumV4ButterflyRuntime.promptPoint(arg)
+	quantumButterflyRuntime.firePrompt = function(arg)
+		local v23 = quantumButterflyRuntime.promptPoint(arg)
 		if not v23 then
 			return false
 		end
@@ -21711,7 +21229,7 @@ do
 		return true
 	end
 
-	quantumV4ButterflyRuntime.solveBanjo = function()
+	quantumButterflyRuntime.solveBanjo = function()
 		local v23 = fn66()
 		local banjoCricket = v23.Remotes and v23.Remotes.BanjoCricket
 
@@ -21727,7 +21245,7 @@ do
 			return false, "Banjo remotes missing"
 		end
 
-		local BanjoCricketTalk = quantumV4ButterflyRuntime.banjoPrompt("BanjoCricketTalk") or quantumV4ButterflyRuntime.banjoPrompt("BanjoCricket")
+		local BanjoCricketTalk = quantumButterflyRuntime.banjoPrompt("BanjoCricketTalk") or quantumButterflyRuntime.banjoPrompt("BanjoCricket")
 		if not BanjoCricketTalk then
 			return false, "Banjo Cricket not found"
 		end
@@ -21762,19 +21280,19 @@ do
 		end
 
 		local connection6 = effect.OnClientEvent:Connect(fn91)
-		quantumV4ButterflyRuntime.status = "Talking to the Banjo Cricket"
-		quantumV4ButterflyRuntime.firePrompt(BanjoCricketTalk)
+		quantumButterflyRuntime.status = "Talking to the Banjo Cricket"
+		quantumButterflyRuntime.firePrompt(BanjoCricketTalk)
 		local n12 = os.clock() + 150
 		effect = os.clock()
 
-		while fn2() and quantumV4Config.BanjoAuto and os.clock() < n12 and not tbl16.solved do
-			if quantumV4ButterflyRuntime.manual then
+		while fn2() and quantumConfig.BanjoAuto and os.clock() < n12 and not tbl16.solved do
+			if quantumButterflyRuntime.manual then
 				break
-			elseif quantumV4TaskLadder.blocker("butterfly") ~= nil then
+			elseif quantumTaskLadder.blocker("butterfly") ~= nil then
 				break
 			end
 
-			if quantumV4ButterflyRuntime.snapshot().banjoSolved then
+			if quantumButterflyRuntime.snapshot().banjoSolved then
 				tbl16.solved = true
 				break
 			end
@@ -21782,7 +21300,7 @@ do
 
 			if notes then
 				tbl16.notes = nil
-				quantumV4ButterflyRuntime.status = ("Banjo Cricket  ·  stage %d  ·  %d notes"):format(tbl16.cleared + 1, #notes)
+				quantumButterflyRuntime.status = ("Banjo Cricket  \194\183  stage %d  \194\183  %d notes"):format(tbl16.cleared + 1, #notes)
 				task.wait(#notes * (n10 + n11) + 0.3)
 
 				for i, note in ipairs(notes) do
@@ -21790,7 +21308,7 @@ do
 						break
 					end
 
-					if not quantumV4ButterflyRuntime.hitMushroom(note, banjoCricket) then
+					if not quantumButterflyRuntime.hitMushroom(note, banjoCricket) then
 						tbl16.err = "equip a bat first (the mushrooms only take bat hits)"
 						break
 					end
@@ -21802,7 +21320,7 @@ do
 				effect = os.clock()
 			else
 				if os.clock() - effect > 8 then
-					quantumV4ButterflyRuntime.firePrompt(BanjoCricketTalk)
+					quantumButterflyRuntime.firePrompt(BanjoCricketTalk)
 					effect = os.clock()
 				end
 			end
@@ -21814,7 +21332,7 @@ do
 		return tbl16.solved, tbl16.solved and nil or (tbl16.err or "the cricket stopped playing")
 	end
 
-	quantumV4ButterflyRuntime.hitMushroom = function(arg, arg2)
+	quantumButterflyRuntime.hitMushroom = function(arg, arg2)
 		local v23 = fn71()
 		local character = localPlayer.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -21841,8 +21359,8 @@ do
 		if not v24 then
 			return false
 		end
-		local quantumV4GodMode = genv.__QuantumV4GodMode
-		local v25 = quantumV4GodMode and quantumV4GodMode:_equipBat()
+		local quantumGodMode = genv.__QuantumGodMode
+		local v25 = quantumGodMode and quantumGodMode:_equipBat()
 		if not v25 then
 			return false
 		end
@@ -21870,13 +21388,13 @@ do
 
 		while os.clock() < n12 do
 			local attribute = v25:GetAttribute("CooldownEndTime")
-			if not (v25:GetAttribute("CooldownActive") == true and typeof(attribute) == "number" and workspace:GetServerTimeNow() < attribute) and os.clock() - (quantumV4ButterflyRuntime.lastMushroomHit or 0) >= 0.75 then
+			if not (v25:GetAttribute("CooldownActive") == true and typeof(attribute) == "number" and workspace:GetServerTimeNow() < attribute) and os.clock() - (quantumButterflyRuntime.lastMushroomHit or 0) >= 0.75 then
 				break
 			end
 			task.wait(0.05)
 		end
 
-		quantumV4ButterflyRuntime.lastMushroomHit = os.clock()
+		quantumButterflyRuntime.lastMushroomHit = os.clock()
 
 		pcall(function()
 			v25:Activate()
@@ -21886,22 +21404,22 @@ do
 		return true
 	end
 
-	quantumV4ButterflyRuntime.claimBanjo = function()
-		local Jitterbug = quantumV4ButterflyRuntime.banjoPrompt("Jitterbug")
+	quantumButterflyRuntime.claimBanjo = function()
+		local Jitterbug = quantumButterflyRuntime.banjoPrompt("Jitterbug")
 
 		if Jitterbug then
-			quantumV4ButterflyRuntime.status = "Talking to Jitterbug"
-			quantumV4ButterflyRuntime.firePrompt(Jitterbug)
+			quantumButterflyRuntime.status = "Talking to Jitterbug"
+			quantumButterflyRuntime.firePrompt(Jitterbug)
 			task.wait(0.6)
 		end
 
 		local BanjoCricket, v23 = fn68("BanjoCricket", "AskClaim")
 		task.wait(0.4)
-		return BanjoCricket or quantumV4ButterflyRuntime.snapshot().banjoClaimed, v23
+		return BanjoCricket or quantumButterflyRuntime.snapshot().banjoClaimed, v23
 	end
 
-	quantumV4ButterflyRuntime.runBanjo = function()
-		local v23 = quantumV4ButterflyRuntime.snapshot()
+	quantumButterflyRuntime.runBanjo = function()
+		local v23 = quantumButterflyRuntime.snapshot()
 		if v23.banjoClaimed then
 			return true
 		end
@@ -21914,18 +21432,18 @@ do
 		end
 
 		if not v23.banjoSolved then
-			local v24, v25 = quantumV4ButterflyRuntime.solveBanjo()
+			local v24, v25 = quantumButterflyRuntime.solveBanjo()
 			if not v24 then
 				return false, v25
 			end
-			task.wait(quantumV4ButterflyRuntime.bridgeSeconds or 3.5)
+			task.wait(quantumButterflyRuntime.bridgeSeconds or 3.5)
 		end
 
-		return quantumV4ButterflyRuntime.claimBanjo()
+		return quantumButterflyRuntime.claimBanjo()
 	end
 
-	quantumV4ButterflyRuntime.returnWisp = function()
-		local v23 = quantumV4ButterflyRuntime.snapshot()
+	quantumButterflyRuntime.returnWisp = function()
+		local v23 = quantumButterflyRuntime.snapshot()
 		if v23.unlocked then
 			return true
 		end
@@ -21947,7 +21465,7 @@ do
 			local worldPosition = parent and (parent:IsA("Attachment") and parent.WorldPosition or parent:IsA("BasePart") and parent.Position)
 
 			if worldPosition then
-				quantumV4ButterflyRuntime.status = "Taking the wisp home"
+				quantumButterflyRuntime.status = "Taking the wisp home"
 
 				if fn78(worldPosition + Vector3.new(0, 3, 4), 60) then
 					local n10 = os.clock() + 2
@@ -21959,11 +21477,11 @@ do
 					fn80(world)
 					local n11 = os.clock() + 3
 
-					while os.clock() < n11 and not quantumV4ButterflyRuntime.snapshot().unlocked do
+					while os.clock() < n11 and not quantumButterflyRuntime.snapshot().unlocked do
 						task.wait(0.1)
 					end
 
-					if quantumV4ButterflyRuntime.snap.unlocked then
+					if quantumButterflyRuntime.snap.unlocked then
 						return true
 					end
 				end
@@ -21980,27 +21498,27 @@ do
 		if not worldPosition then
 			return false, "tree entrance not found"
 		end
-		quantumV4ButterflyRuntime.status = "Taking the wisp home"
+		quantumButterflyRuntime.status = "Taking the wisp home"
 		if not fn78(worldPosition + Vector3.new(0, 3, 0), 60) then
 			return false, "could not reach the tree entrance"
 		end
 		fn80(enchantedTreePrompt)
 		local n10 = os.clock() + 3
 
-		while os.clock() < n10 and not quantumV4ButterflyRuntime.snapshot().unlocked do
+		while os.clock() < n10 and not quantumButterflyRuntime.snapshot().unlocked do
 			task.wait(0.1)
 		end
 
-		if quantumV4ButterflyRuntime.snap.unlocked then
+		if quantumButterflyRuntime.snap.unlocked then
 			return true
 		end
 		local WispCompanion, v24 = fn68("WispCompanion", "Request", "Return")
 		task.wait(0.5)
-		return WispCompanion or quantumV4ButterflyRuntime.snapshot().unlocked, v24
+		return WispCompanion or quantumButterflyRuntime.snapshot().unlocked, v24
 	end
 
-	quantumV4ButterflyRuntime.tierOptions = function()
-		local v23 = quantumV4ButterflyRuntime.tiers()
+	quantumButterflyRuntime.tierOptions = function()
+		local v23 = quantumButterflyRuntime.tiers()
 		local tbl16 = {}
 
 		for i = #tbl13, 1, -1 do
@@ -22011,8 +21529,8 @@ do
 		return tbl16
 	end
 
-	quantumV4ButterflyRuntime.tierFromLabel = function(arg)
-		local v23 = quantumV4ButterflyRuntime.tiers()
+	quantumButterflyRuntime.tierFromLabel = function(arg)
+		local v23 = quantumButterflyRuntime.tiers()
 
 		for i, v24 in ipairs(tbl13) do
 			if arg == v24 then
@@ -22027,51 +21545,51 @@ do
 		return nil
 	end
 
-	quantumV4ButterflyRuntime.setTiers = function(arg)
+	quantumButterflyRuntime.setTiers = function(arg)
 		local butterflyTiers = {}
 
 		for i, v23 in ipairs(type(arg) == "table" and arg or {}) do
-			local v24 = quantumV4ButterflyRuntime.tierFromLabel(tostring(v23))
+			local v24 = quantumButterflyRuntime.tierFromLabel(tostring(v23))
 
 			if v24 then
 				butterflyTiers[#butterflyTiers + 1] = v24
 			end
 		end
 
-		quantumV4Config.ButterflyTiers = butterflyTiers
+		quantumConfig.ButterflyTiers = butterflyTiers
 	end
 
 	local tbl16 = {"All Recipes", "For Essence (shortfall only)", "Emerald to Sapphire", "Sapphire to Amethyst", "Amethyst to Radiant"}
 	local tbl17 = {["For Essence (shortfall only)"] = "Smart", ["Emerald to Sapphire"] = "Green", ["Sapphire to Amethyst"] = "Blue", ["Amethyst to Radiant"] = "Purple"}
 
-	quantumV4ButterflyRuntime.recipeOptions = function()
+	quantumButterflyRuntime.recipeOptions = function()
 		return tbl16
 	end
 
-	quantumV4ButterflyRuntime.setRecipe = function(arg)
-		quantumV4Config.ButterflyTradeRecipe = tbl17[tostring(arg)] or "All"
+	quantumButterflyRuntime.setRecipe = function(arg)
+		quantumConfig.ButterflyTradeRecipe = tbl17[tostring(arg)] or "All"
 	end
 
 	local tbl18 = {"Tween to Butterfly", "Stand", "Zigzag", "Circle"}
 	local tbl19 = {["Tween to Butterfly"] = "Tween", Stand = "Stand", Zigzag = "Zigzag", Circle = "Circle"}
 
-	quantumV4ButterflyRuntime.modeOptions = function()
+	quantumButterflyRuntime.modeOptions = function()
 		return tbl18
 	end
 
-	quantumV4ButterflyRuntime.setMode = function(arg)
-		quantumV4Config.ButterflyCatchMode = tbl19[tostring(arg)] or "Tween"
+	quantumButterflyRuntime.setMode = function(arg)
+		quantumConfig.ButterflyCatchMode = tbl19[tostring(arg)] or "Tween"
 	end
 
 	local folder
 
 	local function fn91()
-		for k, card in pairs(quantumV4ButterflyRuntime.cards) do
+		for k, card in pairs(quantumButterflyRuntime.cards) do
 			pcall(function()
 				card.part:Destroy()
 			end)
 
-			quantumV4ButterflyRuntime.cards[k] = nil
+			quantumButterflyRuntime.cards[k] = nil
 		end
 
 		if folder then
@@ -22095,14 +21613,14 @@ do
 			folder.Parent = currentCamera
 		end
 
-		local tbl20 = quantumV4ButterflyRuntime.tiers() or {}
+		local tbl20 = quantumButterflyRuntime.tiers() or {}
 		local v23 = fn71()
 		local tbl21 = {}
 
 		for i, v24 in ipairs(fn74()) do
 			local str3 = ("%d_%d_%d"):format(v24.pos.X, v24.pos.Y, v24.pos.Z)
 			tbl21[str3] = true
-			currentCamera = quantumV4ButterflyRuntime.cards[str3]
+			currentCamera = quantumButterflyRuntime.cards[str3]
 
 			if currentCamera and currentCamera.part.Parent then
 			else
@@ -22129,7 +21647,7 @@ do
 				textLabel.TextStrokeTransparency = 0.35
 				textLabel.Parent = billboardGui
 				currentCamera = {part = part, label = textLabel}
-				quantumV4ButterflyRuntime.cards[str3] = currentCamera
+				quantumButterflyRuntime.cards[str3] = currentCamera
 			end
 
 			currentCamera.part.CFrame = CFrame.new(v24.pos)
@@ -22138,13 +21656,13 @@ do
 			currentCamera.label.Text = v23 and ("%s  %dm"):format(v25 and v25.name or v24.tier, math.floor((v24.pos - v23.Position).Magnitude)) or (v25 and v25.name or v24.tier)
 		end
 
-		for k, card in pairs(quantumV4ButterflyRuntime.cards) do
+		for k, card in pairs(quantumButterflyRuntime.cards) do
 			if not tbl21[k] then
 				pcall(function()
 					card.part:Destroy()
 				end)
 
-				quantumV4ButterflyRuntime.cards[k] = nil
+				quantumButterflyRuntime.cards[k] = nil
 			end
 		end
 	end
@@ -22199,7 +21717,7 @@ do
 	tbl20.gain = function()
 		local ok, result = pcall(fn66().Save.Peek)
 		local num = ok and result and result.Butterflies and tonumber(result.Butterflies.TotalCaught)
-		return num and quantumV4ButterflyRuntime.bloomBase and math.max(0, num - quantumV4ButterflyRuntime.bloomBase) or 0
+		return num and quantumButterflyRuntime.bloomBase and math.max(0, num - quantumButterflyRuntime.bloomBase) or 0
 	end
 
 	tbl20.swing = function(arg, arg2)
@@ -22207,7 +21725,7 @@ do
 			return
 		end
 		local n10 = tonumber(fn67("SwingCooldownSeconds", 0.45)) or 0.45
-		if os.clock() - quantumV4ButterflyRuntime.lastSwing < n10 then
+		if os.clock() - quantumButterflyRuntime.lastSwing < n10 then
 			return
 		end
 		local v23 = fn66()
@@ -22233,7 +21751,7 @@ do
 		if flight.Tier ~= nil and tostring(flight.Tier) ~= arg.Name then
 			return
 		end
-		quantumV4ButterflyRuntime.lastSwing = os.clock()
+		quantumButterflyRuntime.lastSwing = os.clock()
 		tbl20.swinging = true
 
 		task.spawn(function()
@@ -22248,9 +21766,9 @@ do
 				tbl20.target = nil
 			end
 
-			local v26 = quantumV4ButterflyRuntime.tiers()
+			local v26 = quantumButterflyRuntime.tiers()
 			local name2 = v26 and v26[arg.Name] and v26[arg.Name].name or arg.Name
-			quantumV4ButterflyRuntime.status = ("%s %s  ·  +%d this Bloom"):format(v25 == "Caught" and "Caught" or "Chasing", name2, tbl20.gain())
+			quantumButterflyRuntime.status = ("%s %s  \194\183  +%d this Bloom"):format(v25 == "Caught" and "Caught" or "Chasing", name2, tbl20.gain())
 		end)
 	end
 
@@ -22290,8 +21808,8 @@ do
 
 	tbl20.keepGoing = function(arg, arg2, arg3)
 		if fn2() then
-			if quantumV4Config.ButterflyAutoCatch then
-				if quantumV4ButterflyRuntime.bloomLeft() > 0 then
+			if quantumConfig.ButterflyAutoCatch then
+				if quantumButterflyRuntime.bloomLeft() > 0 then
 					if arg.Parent then
 						if not (arg2.Health > 0) then
 							return false
@@ -22309,10 +21827,10 @@ do
 			return false
 		end
 
-		if (quantumV4Config.ButterflyCatchMode or "Tween") ~= arg3 then
+		if (quantumConfig.ButterflyCatchMode or "Tween") ~= arg3 then
 			return false
 		end
-		return not (quantumV4ButterflyRuntime.manual or fn79() or fn31() or quantumV4TaskLadder.blocker("butterfly") ~= nil)
+		return not (quantumButterflyRuntime.manual or fn79() or fn31() or quantumTaskLadder.blocker("butterfly") ~= nil)
 	end
 
 	tbl20.moveStep = function(arg, arg2, arg3, arg4, arg5, arg6, arg7)
@@ -22507,7 +22025,7 @@ do
 					if tbl20.swinging then
 					else
 						local n16 = now2 + 1
-						quantumV4ButterflyRuntime.status = ("%s  ·  +%d this Bloom"):format(v27, tbl20.gain())
+						quantumButterflyRuntime.status = ("%s  \194\183  +%d this Bloom"):format(v27, tbl20.gain())
 						n12 = n16
 					end
 				end
@@ -22547,8 +22065,8 @@ do
 				v27 = tbl20.pos(target)
 
 				if target then
-					local v28 = quantumV4ButterflyRuntime.tiers()
-					quantumV4ButterflyRuntime.status = ("Chasing %s  ·  +%d this Bloom"):format(v28 and v28[target.Name] and v28[target.Name].name or target.Name, tbl20.gain())
+					local v28 = quantumButterflyRuntime.tiers()
+					quantumButterflyRuntime.status = ("Chasing %s  \194\183  +%d this Bloom"):format(v28 and v28[target.Name] and v28[target.Name].name or target.Name, tbl20.gain())
 				end
 			end
 
@@ -22587,7 +22105,7 @@ do
 		if not fn86() then
 			fn76()
 			if fn31() then
-				quantumV4ButterflyRuntime.status = "Night - waiting to fly to the forest"
+				quantumButterflyRuntime.status = "Night - waiting to fly to the forest"
 				return
 			end
 
@@ -22597,36 +22115,36 @@ do
 			local v23 = fn87()
 
 			if not v23 then
-				quantumV4ButterflyRuntime.status = "Butterfly Bloom zone not found"
+				quantumButterflyRuntime.status = "Butterfly Bloom zone not found"
 				fn70("area")
 				return
 			end
 
-			quantumV4ButterflyRuntime.status = "Flying to the Butterfly Bloom"
+			quantumButterflyRuntime.status = "Flying to the Butterfly Bloom"
 
 			if not fn78(v23, 60) then
 				fn70("area")
-				quantumV4ButterflyRuntime.status = "Could not reach the Enchanted Forest"
+				quantumButterflyRuntime.status = "Could not reach the Enchanted Forest"
 			end
 
 			return
 		end
 
-		local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
+		local quantumTreadmillManager = genv.__QuantumTreadmillManager
 
-		if quantumV4TreadmillManager and quantumV4TreadmillManager.activeTreadmill ~= nil then
+		if quantumTreadmillManager and quantumTreadmillManager.activeTreadmill ~= nil then
 			fn88()
 		end
 
 		if not arg.holding and not fn75() then
-			quantumV4ButterflyRuntime.status = "Butterfly Net is not in your backpack"
+			quantumButterflyRuntime.status = "Butterfly Net is not in your backpack"
 			return
 		end
-		local butterflyCatchMode = quantumV4Config.ButterflyCatchMode or "Tween"
+		local butterflyCatchMode = quantumConfig.ButterflyCatchMode or "Tween"
 
 		if not (if butterflyCatchMode == "Tween" then tbl20.run() else tbl20.patrol(butterflyCatchMode)) then
 			fn77()
-			quantumV4ButterflyRuntime.status = ("Waiting for butterflies  ·  +%d this Bloom"):format(tbl20.gain())
+			quantumButterflyRuntime.status = ("Waiting for butterflies  \194\183  +%d this Bloom"):format(tbl20.gain())
 		end
 	end
 
@@ -22646,21 +22164,21 @@ do
 	end
 
 	local function fn95()
-		if quantumV4ButterflyRuntime.manual then
+		if quantumButterflyRuntime.manual then
 			return
 		end
-		local v23 = quantumV4ButterflyRuntime.snapshot()
+		local v23 = quantumButterflyRuntime.snapshot()
 
 		if v23.active then
-			quantumV4ButterflyRuntime.bloomBase = quantumV4ButterflyRuntime.bloomBase or v23.caught
+			quantumButterflyRuntime.bloomBase = quantumButterflyRuntime.bloomBase or v23.caught
 		else
-			quantumV4ButterflyRuntime.bloomBase = nil
+			quantumButterflyRuntime.bloomBase = nil
 		end
 
-		if quantumV4Config.ButterflyEsp and v23.active then
+		if quantumConfig.ButterflyEsp and v23.active then
 			fn92()
 		else
-			if next(quantumV4ButterflyRuntime.cards) then
+			if next(quantumButterflyRuntime.cards) then
 				fn91()
 			else
 				if folder then
@@ -22669,11 +22187,11 @@ do
 			end
 		end
 
-		pcall(quantumV4ButterflyRuntime.questDrive, v23)
+		pcall(quantumButterflyRuntime.questDrive, v23)
 
-		if quantumV4Config.WispAutoQuest and (v23.claimable and (v23.questId and fn69("quest"))) then
+		if quantumConfig.WispAutoQuest and (v23.claimable and (v23.questId and fn69("quest"))) then
 			local WispCompanion, v24 = fn68("WispCompanion", "Request", "Claim", v23.questId)
-			quantumV4ButterflyRuntime.status = WispCompanion and "Wisp quest claimed: " .. v23.quest or "Wisp claim: " .. tostring(v24 or "refused")
+			quantumButterflyRuntime.status = WispCompanion and "Wisp quest claimed: " .. v23.quest or "Wisp claim: " .. tostring(v24 or "refused")
 
 			if not WispCompanion then
 				fn70("quest")
@@ -22682,44 +22200,44 @@ do
 
 		local str3 = nil
 
-		if quantumV4Config.WispAutoQuest and not v23.accepted and not v23.unlocked and (v23.need or 0) > 0 and (v23.speed or 0) >= v23.need and fn69("accept") then
+		if quantumConfig.WispAutoQuest and not v23.accepted and not v23.unlocked and (v23.need or 0) > 0 and (v23.speed or 0) >= v23.need and fn69("accept") then
 			str3 = "accept"
 		else
-			if quantumV4Config.WispAutoQuest and not v23.unlocked and (v23.returning or v23.readyReturn) and fn69("wisp") then
+			if quantumConfig.WispAutoQuest and not v23.unlocked and (v23.returning or v23.readyReturn) and fn69("wisp") then
 				str3 = "wisp"
 			else
-				if quantumV4Config.ButterflyAutoNet and not v23.net and v23.treeUnlocked and fn69("net") then
+				if quantumConfig.ButterflyAutoNet and not v23.net and v23.treeUnlocked and fn69("net") then
 					str3 = "net"
 				else
-					if quantumV4Config.BanjoAuto and v23.treeUnlocked and not v23.banjoClaimed and not v23.active and fn69("banjo") then
+					if quantumConfig.BanjoAuto and v23.treeUnlocked and not v23.banjoClaimed and not v23.active and fn69("banjo") then
 						str3 = "banjo"
 					else
-						if quantumV4Config.ButterflyAutoCatch and v23.active and v23.net and not (v13 and v13.enabled and os.clock() - (tonumber(v13.gateOpenAt) or 0) < 3) then
+						if quantumConfig.ButterflyAutoCatch and v23.active and v23.net and not (v13 and v13.enabled and os.clock() - (tonumber(v13.gateOpenAt) or 0) < 3) then
 							str3 = "catch"
 						else
 							local active = v23.active
-							str3 = if (if active then not active else quantumV4Config.ButterflyAutoTrade) and v23.net and quantumV4ButterflyRuntime.canTrade() and fn69("trade") then "trade" else if v23.active then str3 else if quantumV4Config.ButterflyAutoCraft then if v23.net then if quantumV4ButterflyRuntime.canCraft() then if fn69("craft") then "craft" else str3 else str3 else str3 else str3
+							str3 = if (if active then not active else quantumConfig.ButterflyAutoTrade) and v23.net and quantumButterflyRuntime.canTrade() and fn69("trade") then "trade" else if v23.active then str3 else if quantumConfig.ButterflyAutoCraft then if v23.net then if quantumButterflyRuntime.canCraft() then if fn69("craft") then "craft" else str3 else str3 else str3 else str3
 						end
 					end
 				end
 			end
 		end
 
-		quantumV4ButterflyRuntime.wantsCharacter = str3 ~= nil
-		local butterfly = str3 and quantumV4TaskLadder.blocker("butterfly") or nil
-		local butterfly2 = str3 and not butterfly and quantumV4TaskLadder.holder("butterfly") or nil
-		local active = quantumV4ButterflyRuntime.active
-		quantumV4ButterflyRuntime.active = str3 ~= nil and butterfly == nil and butterfly2 == nil
+		quantumButterflyRuntime.wantsCharacter = str3 ~= nil
+		local butterfly = str3 and quantumTaskLadder.blocker("butterfly") or nil
+		local butterfly2 = str3 and not butterfly and quantumTaskLadder.holder("butterfly") or nil
+		local active = quantumButterflyRuntime.active
+		quantumButterflyRuntime.active = str3 ~= nil and butterfly == nil and butterfly2 == nil
 
-		if str3 and not quantumV4ButterflyRuntime.active then
+		if str3 and not quantumButterflyRuntime.active then
 			fn76()
 
 			if butterfly and fn79() then
-				quantumV4ButterflyRuntime.status = "Leaving the tree for " .. quantumV4TaskLadder.TITLES[butterfly]
+				quantumButterflyRuntime.status = "Leaving the tree for " .. quantumTaskLadder.TITLES[butterfly]
 				fn82()
 			end
 
-			quantumV4ButterflyRuntime.status = butterfly and "Yielding to " .. quantumV4TaskLadder.TITLES[butterfly] or "Waiting for " .. quantumV4TaskLadder.TITLES[butterfly2] .. " to hand over"
+			quantumButterflyRuntime.status = butterfly and "Yielding to " .. quantumTaskLadder.TITLES[butterfly] or "Waiting for " .. quantumTaskLadder.TITLES[butterfly2] .. " to hand over"
 			return
 		end
 
@@ -22729,7 +22247,7 @@ do
 			end
 
 			fn76()
-			quantumV4ButterflyRuntime.status = fn94(v23)
+			quantumButterflyRuntime.status = fn94(v23)
 			return
 		end
 
@@ -22738,22 +22256,22 @@ do
 		end
 
 		if str3 == "accept" then
-			butterfly, active = quantumV4ButterflyRuntime.acceptWisp()
-			quantumV4ButterflyRuntime.status = butterfly and "Wisp accepted - quests started" or "Wisp: " .. tostring(active or "refused")
+			butterfly, active = quantumButterflyRuntime.acceptWisp()
+			quantumButterflyRuntime.status = butterfly and "Wisp accepted - quests started" or "Wisp: " .. tostring(active or "refused")
 
 			if not butterfly then
 				fn70("accept")
 			end
 		elseif str3 == "wisp" then
-			local v24, v25 = quantumV4ButterflyRuntime.returnWisp()
-			quantumV4ButterflyRuntime.status = v24 and "Wisp returned - Enchanted Tree unlocked" or "Wisp: " .. tostring(v25 or "refused")
+			local v24, v25 = quantumButterflyRuntime.returnWisp()
+			quantumButterflyRuntime.status = v24 and "Wisp returned - Enchanted Tree unlocked" or "Wisp: " .. tostring(v25 or "refused")
 
 			if not v24 then
 				fn70("wisp")
 			end
 		elseif str3 == "banjo" then
-			local v24, v25 = quantumV4ButterflyRuntime.runBanjo()
-			quantumV4ButterflyRuntime.status = v24 and "Banjo Cricket secret claimed" or "Banjo: " .. tostring(v25 or "refused")
+			local v24, v25 = quantumButterflyRuntime.runBanjo()
+			quantumButterflyRuntime.status = v24 and "Banjo Cricket secret claimed" or "Banjo: " .. tostring(v25 or "refused")
 
 			if not v24 then
 				fn70("banjo")
@@ -22763,8 +22281,8 @@ do
 				fn82()
 			end
 		elseif str3 == "net" then
-			local v24, v25 = quantumV4ButterflyRuntime.claimNet()
-			quantumV4ButterflyRuntime.status = v24 and "Butterfly Net claimed" or "Net: " .. tostring(v25 or "refused")
+			local v24, v25 = quantumButterflyRuntime.claimNet()
+			quantumButterflyRuntime.status = v24 and "Butterfly Net claimed" or "Net: " .. tostring(v25 or "refused")
 
 			if not v24 then
 				fn70("net")
@@ -22772,12 +22290,12 @@ do
 		elseif str3 == "catch" then
 			fn93(v23)
 		elseif str3 == "trade" then
-			local v24, v25 = quantumV4ButterflyRuntime.tradeUp()
-			quantumV4ButterflyRuntime.status = v24 and ("Traded up %d time(s)"):format(tonumber(v25) or 0) or "Trade: " .. tostring(v25)
+			local v24, v25 = quantumButterflyRuntime.tradeUp()
+			quantumButterflyRuntime.status = v24 and ("Traded up %d time(s)"):format(tonumber(v25) or 0) or "Trade: " .. tostring(v25)
 			fn70("trade")
 		elseif str3 == "craft" then
-			local v24, v25 = quantumV4ButterflyRuntime.craft()
-			quantumV4ButterflyRuntime.status = v24 and ("Crafted %d Enchanted Essence"):format(tonumber(v25) or 0) or "Craft: " .. tostring(v25)
+			local v24, v25 = quantumButterflyRuntime.craft()
+			quantumButterflyRuntime.status = v24 and ("Crafted %d Enchanted Essence"):format(tonumber(v25) or 0) or "Craft: " .. tostring(v25)
 			fn70("craft")
 		end
 	end
@@ -22787,10 +22305,10 @@ do
 			local ok, result = pcall(fn95)
 
 			if not ok then
-				quantumV4ButterflyRuntime.active = false
-				quantumV4ButterflyRuntime.wantsCharacter = false
+				quantumButterflyRuntime.active = false
+				quantumButterflyRuntime.wantsCharacter = false
 				fn76()
-				quantumV4ButterflyRuntime.status = "Error: " .. tostring(result)
+				quantumButterflyRuntime.status = "Error: " .. tostring(result)
 				task.wait(1)
 			end
 
@@ -22801,17 +22319,17 @@ do
 		fn91()
 	end)
 
-	quantumV4TaskLadder.register("butterfly", {wants = function()
-		return quantumV4ButterflyRuntime.wantsCharacter == true
+	quantumTaskLadder.register("butterfly", {wants = function()
+		return quantumButterflyRuntime.wantsCharacter == true
 	end, active = function()
-		return quantumV4ButterflyRuntime.active == true
+		return quantumButterflyRuntime.active == true
 	end, enabled = function()
-		return quantumV4Config.ButterflyAutoCatch == true or quantumV4Config.ButterflyAutoNet == true or quantumV4Config.WispAutoQuest == true or quantumV4Config.BanjoAuto == true or quantumV4Config.ButterflyAutoTrade == true or quantumV4Config.ButterflyAutoCraft == true
+		return quantumConfig.ButterflyAutoCatch == true or quantumConfig.ButterflyAutoNet == true or quantumConfig.WispAutoQuest == true or quantumConfig.BanjoAuto == true or quantumConfig.ButterflyAutoTrade == true or quantumConfig.ButterflyAutoCraft == true
 	end, status = function()
-		return tostring(quantumV4ButterflyRuntime.status or "")
+		return tostring(quantumButterflyRuntime.status or "")
 	end})
 
-	genv.__QuantumV4ButterflyRuntime = quantumV4ButterflyRuntime
+	genv.__QuantumButterflyRuntime = quantumButterflyRuntime
 end
 
 do
@@ -22819,7 +22337,7 @@ do
 	local ReplicatedStorage2 = game:GetService("ReplicatedStorage")
 	local localPlayer2 = Players2.LocalPlayer
 	local str3 = "QUANTUMVIS_"
-	local quantumV4VisualSAE = {held = {}}
+	local quantumVisualSAE = {held = {}}
 
 	local function fn65()
 		local ok, result = pcall(require, ReplicatedStorage2.Shared.Save)
@@ -22838,7 +22356,7 @@ do
 		return str3 .. arg .. "_" .. tostring(math.floor(os.clock() * 1000)) .. "_" .. tostring(math.random(1, 1000000))
 	end
 
-	quantumV4VisualSAE.categories = function(arg)
+	quantumVisualSAE.categories = function(arg)
 		local v21 = fn66()
 		local tbl13 = {}
 		if not v21 then
@@ -22859,7 +22377,7 @@ do
 		return tbl13
 	end
 
-	quantumV4VisualSAE.spawnEgg = function(arg, arg2)
+	quantumVisualSAE.spawnEgg = function(arg, arg2)
 		local v21 = fn65()
 		local v22 = fn66()
 
@@ -22882,7 +22400,7 @@ do
 		return v23
 	end
 
-	quantumV4VisualSAE.spawnPet = function(arg, arg2)
+	quantumVisualSAE.spawnPet = function(arg, arg2)
 		local v21 = fn65()
 		local v22 = fn66()
 
@@ -22917,7 +22435,7 @@ do
 		return assetModels and assetModels:FindFirstChild(arg)
 	end
 
-	quantumV4VisualSAE.hold = function(arg, arg2, arg3)
+	quantumVisualSAE.hold = function(arg, arg2, arg3)
 		local character = localPlayer2.Character
 		if not character then
 			return false
@@ -23024,11 +22542,11 @@ do
 			end)
 		end
 
-		quantumV4VisualSAE.held[#quantumV4VisualSAE.held + 1] = tool
+		quantumVisualSAE.held[#quantumVisualSAE.held + 1] = tool
 		return true
 	end
 
-	quantumV4VisualSAE.spawn = function(arg, arg2, arg3, arg4)
+	quantumVisualSAE.spawn = function(arg, arg2, arg3, arg4)
 		if arg2 then
 			if arg2 == "None" then
 				return
@@ -23040,16 +22558,16 @@ do
 		local n8 = tonumber(arg3) or 50
 
 		if arg4 then
-			pcall(quantumV4VisualSAE.hold, arg2, arg ~= "Pet", n8)
+			pcall(quantumVisualSAE.hold, arg2, arg ~= "Pet", n8)
 		elseif arg == "Pet" then
 			local n9 = math.clamp(1 + n8 / 25, 1.2, 5) * (0.85 + math.random() * 0.4)
-			quantumV4VisualSAE.spawnPet(arg2, n9)
+			quantumVisualSAE.spawnPet(arg2, n9)
 		else
-			quantumV4VisualSAE.spawnEgg(arg2, n8 * (0.85 + math.random() * 0.5))
+			quantumVisualSAE.spawnEgg(arg2, n8 * (0.85 + math.random() * 0.5))
 		end
 	end
 
-	quantumV4VisualSAE.clear = function()
+	quantumVisualSAE.clear = function()
 		local v21 = fn65()
 
 		if v21 then
@@ -23086,13 +22604,13 @@ do
 			end)
 		end
 
-		for i, v22 in ipairs(quantumV4VisualSAE.held) do
+		for i, v22 in ipairs(quantumVisualSAE.held) do
 			pcall(function()
 				v22:Destroy()
 			end)
 		end
 
-		quantumV4VisualSAE.held = {}
+		quantumVisualSAE.held = {}
 
 		for i, v22 in ipairs({localPlayer2.Character, localPlayer2:FindFirstChild("Backpack")}) do
 			if v22 then
@@ -23107,7 +22625,7 @@ do
 		end
 	end
 
-	genv.__QuantumV4VisualSAE = quantumV4VisualSAE
+	genv.__QuantumVisualSAE = quantumVisualSAE
 end
 
 do
@@ -23130,9 +22648,9 @@ do
 	localPlayer:GetPropertyChangedSignal("CameraMaxZoomDistance"):Connect(fn66)
 end
 
-genv.__QuantumV4Visual = (function()
+genv.__QuantumVisual = (function()
 	local HttpService = game:GetService("HttpService")
-	local tbl13 = {base = "/visual/", manifest = nil, status = "Idle", spawned = {}, backs = {}, backRod = nil, remote = {}}
+	local tbl13 = {base = "https://quantumhub.xyz/api/visual/", manifest = nil, status = "Idle", spawned = {}, backs = {}, backRod = nil, remote = {}}
 	local str3 = "QuantumVisual/cache"
 	local unit = Vector3.new(0.3, 0.75, 0.6).Unit
 	local tbl14 = {RightShoulder = CFrame.Angles(0.6981317007977318, 0, 0.17453292519943295), RightElbow = CFrame.Angles(1.7453292519943295, 0, 0), RightWrist = CFrame.new(), LeftShoulder = CFrame.new(), LeftElbow = CFrame.new(), LeftWrist = CFrame.new()}
@@ -23371,7 +22889,7 @@ genv.__QuantumV4Visual = (function()
 		pcall(function()
 			if flag6 then
 				settings().Rendering.QualityLevel = Enum.QualityLevel.Level10
-			elseif quantumV4Config.StartupBoost then
+			elseif quantumConfig.StartupBoost then
 				settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 			end
 		end)
@@ -23956,7 +23474,7 @@ genv.__QuantumV4Visual = (function()
 				end
 
 				local quantumBackend = genv.QuantumBackend or {}
-				local api = quantumBackend.Api or ""
+				local api = quantumBackend.Api or "https://quantumhub.xyz/api"
 				local str4 = ""
 				local str5 = ""
 				local character = localPlayer.Character
@@ -23973,7 +23491,7 @@ genv.__QuantumV4Visual = (function()
 					str5 = if character:FindFirstChild("QuantumVisualBack") then if tbl13.backRod then "rods|" .. tbl13.backRod.Name else str5 else str5
 				end
 
-				local data = HttpService:JSONDecode(game:HttpGet(string.format("%s/vstate?key=%s&job=%s&uid=%d&held=%s&back=%s", api, HttpService:UrlEncode(quantumBackend.Key or "quantum_token_fixed"), HttpService:UrlEncode(game.JobId), localPlayer.UserId, HttpService:UrlEncode(str4), HttpService:UrlEncode(str5)), true))
+				local data = HttpService:JSONDecode(game:HttpGet(string.format("%s/vstate?key=%s&job=%s&uid=%d&held=%s&back=%s", api, HttpService:UrlEncode(quantumBackend.Key or "quantum_20VvixjHsd1OPPwgHYJAstpM"), HttpService:UrlEncode(game.JobId), localPlayer.UserId, HttpService:UrlEncode(str4), HttpService:UrlEncode(str5)), true))
 
 				if type(data) ~= "table" then
 					return
@@ -24116,7 +23634,7 @@ do
 	tbl13.privateStatus = "Pick a max player count, then Hop Server Now."
 
 	tbl13.privateMax = function()
-		return math.max(1, math.floor(tonumber(tostring(quantumV4Config.PrivateServerMax or "2"):match("%d+")) or 2))
+		return math.max(1, math.floor(tonumber(tostring(quantumConfig.PrivateServerMax or "2"):match("%d+")) or 2))
 	end
 
 	tbl13.findPrivateTargets = function()
@@ -24193,7 +23711,7 @@ do
 		tbl13.privateAutoRunning = true
 
 		task.spawn(function()
-			while fn2() and quantumV4Config.PrivateServerAuto do
+			while fn2() and quantumConfig.PrivateServerAuto do
 				local v21 = tbl13.privateMax()
 
 				if #Players:GetPlayers() <= v21 then
@@ -24207,32 +23725,32 @@ do
 
 			tbl13.privateAutoRunning = false
 
-			if not quantumV4Config.PrivateServerAuto then
+			if not quantumConfig.PrivateServerAuto then
 				tbl13.privateStatus = "Auto hop stopped."
 			end
 		end)
 	end
 
 	tbl13.hubBusy = function()
-		if quantumV4Config.IsPlacing then
+		if quantumConfig.IsPlacing then
 			return true
 		end
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+		local quantumEggRuntime = genv.__QuantumEggRuntime
 
-		if quantumV4EggRuntime then
-			if quantumV4EggRuntime.running then
+		if quantumEggRuntime then
+			if quantumEggRuntime.running then
 				return true
-			elseif quantumV4EggRuntime.travelBusy then
+			elseif quantumEggRuntime.travelBusy then
 				return true
-			elseif quantumV4EggRuntime.carry then
-				if quantumV4EggRuntime.carry.active then
+			elseif quantumEggRuntime.carry then
+				if quantumEggRuntime.carry.active then
 					return true
 				end
 			end
 		end
 
-		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-		if quantumV4PlayerSteal and quantumV4PlayerSteal.running then
+		local quantumPlayerSteal = genv.__QuantumPlayerSteal
+		if quantumPlayerSteal and quantumPlayerSteal.running then
 			return true
 		end
 		return false
@@ -24248,14 +23766,14 @@ do
 			while fn2() do
 				task.wait(2)
 
-				if quantumV4Config.HopNoMatch and not tbl13.hubBusy() then
-					local n8 = tonumber(quantumV4Config.HopCooldown) or 5
+				if quantumConfig.HopNoMatch and not tbl13.hubBusy() then
+					local n8 = tonumber(quantumConfig.HopCooldown) or 5
 
 					if os.clock() - tbl13.lastHopAt > n8 then
-						local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
-						local matching = quantumV4EggRuntime and quantumV4EggRuntime.stats and quantumV4EggRuntime.stats.matching or 0
+						local quantumEggRuntime = genv.__QuantumEggRuntime
+						local matching = quantumEggRuntime and quantumEggRuntime.stats and quantumEggRuntime.stats.matching or 0
 
-						if quantumV4Config.AutoSteal and (matching <= 0 and not fn31()) then
+						if quantumConfig.AutoSteal and (matching <= 0 and not fn31()) then
 							tbl13.lastHopAt = os.clock()
 							tbl13.hopEmptiest()
 						end
@@ -24275,13 +23793,13 @@ do
 
 		task.spawn(function()
 			while fn2() do
-				if quantumV4Config.AntiTreadmill then
-					local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
+				if quantumConfig.AntiTreadmill then
+					local quantumTreadmillManager = genv.__QuantumTreadmillManager
 
 					pcall(function()
-						if quantumV4TreadmillManager and quantumV4TreadmillManager.activeTreadmill ~= nil then
-							quantumV4TreadmillManager:_cancelIdle(true)
-							quantumV4TreadmillManager:_requestUnequip()
+						if quantumTreadmillManager and quantumTreadmillManager.activeTreadmill ~= nil then
+							quantumTreadmillManager:_cancelIdle(true)
+							quantumTreadmillManager:_requestUnequip()
 						end
 					end)
 
@@ -24303,7 +23821,7 @@ do
 	end
 
 	tbl13.setBackpackRates = function(arg)
-		quantumV4Config.BackpackRateEsp = arg == true
+		quantumConfig.BackpackRateEsp = arg == true
 		if tbl13.backpackRatesRunning then
 			return
 		end
@@ -24325,32 +23843,32 @@ do
 				end)
 
 				local quantumV4Webhook = genv.__QuantumV4Webhook
-				local quantumWatermark = scrollingFrame and scrollingFrame.Parent:FindFirstChild("QuantumWatermark")
+				local quantumDiscord = scrollingFrame and scrollingFrame.Parent:FindFirstChild("QuantumDiscord")
 
-				if scrollingFrame and quantumV4Config.BackpackRateEsp and not quantumWatermark then
+				if scrollingFrame and quantumConfig.BackpackRateEsp and not quantumDiscord then
 					local textLabel = Instance.new("TextLabel")
-					textLabel.Name = "QuantumWatermark"
+					textLabel.Name = "QuantumDiscord"
 					textLabel.BackgroundTransparency = 1
 					textLabel.Position = UDim2.new(0.34, 0, 0.017, 0)
 					textLabel.Size = UDim2.new(0.3, 0, 0.09, 0)
 					textLabel.Font = Enum.Font.GothamBlack
-					textLabel.Text = "Quantum | ID"
+					textLabel.Text = "discord.gg/quantumhub"
 					textLabel.TextScaled = true
 					textLabel.TextXAlignment = Enum.TextXAlignment.Left
 					textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 					textLabel.TextStrokeTransparency = 0
 					textLabel.ZIndex = 40
 					textLabel.Parent = scrollingFrame.Parent
-				elseif quantumWatermark then
-					if not quantumV4Config.BackpackRateEsp then
-						quantumWatermark:Destroy()
+				elseif quantumDiscord then
+					if not quantumConfig.BackpackRateEsp then
+						quantumDiscord:Destroy()
 					end
 				end
 
 				if scrollingFrame then
 					local tbl14 = {}
 
-					if quantumV4Config.BackpackRateEsp and EggRecords and Save and quantumV4Webhook then
+					if quantumConfig.BackpackRateEsp and EggRecords and Save and quantumV4Webhook then
 						local ok = (Save.Peek or Save.Get)()
 
 						for k, v21 in pairs(ok and ok.EggInventory or {}) do
@@ -24408,7 +23926,7 @@ do
 					end
 				end
 
-				if not quantumV4Config.BackpackRateEsp then
+				if not quantumConfig.BackpackRateEsp then
 					break
 				end
 				task.wait(1)
@@ -24420,7 +23938,7 @@ do
 end;
 
 (function()
-	local quantumV4ScrambleTradeIn, directory, AssetItems, AssetEarnings, Save = {status = "Disabled", banner = "Unknown", rotation = 0, pity = 0, pityMax = 100, free = 0, trades = 0, demands = "-", stock = "-", ready = 0, total = 3, missing = "None", cache = nil, cacheAt = 0, lastReroll = 0}
+	local quantumScrambleTradeIn, directory, AssetItems, AssetEarnings, Save = {status = "Disabled", banner = "Unknown", rotation = 0, pity = 0, pityMax = 100, free = 0, trades = 0, demands = "-", stock = "-", ready = 0, total = 3, missing = "None", cache = nil, cacheAt = 0, lastReroll = 0}
 
 	pcall(function()
 		directory = require(ReplicatedStorage.Data.Assets).Directory
@@ -24447,7 +23965,7 @@ end;
 	end
 
 	local function fn66()
-		return quantumV4Config.ScrambleTradeInTrade or quantumV4Config.ScrambleTradeInReroll
+		return quantumConfig.ScrambleTradeInTrade or quantumConfig.ScrambleTradeInReroll
 	end
 
 	local function fn67(arg)
@@ -24469,7 +23987,7 @@ end;
 		return v21 ~= "" and v21 == v22
 	end
 
-	quantumV4ScrambleTradeIn.matches = matches
+	quantumScrambleTradeIn.matches = matches
 
 	local function fn68(arg)
 		local v21 = directory and directory[arg]
@@ -24487,14 +24005,14 @@ end;
 		return table.concat(tbl14, arg2)
 	end
 
-	quantumV4ScrambleTradeIn.state = function(arg)
+	quantumScrambleTradeIn.state = function(arg)
 		local now = os.clock()
-		if not arg and (quantumV4ScrambleTradeIn.cache and now - quantumV4ScrambleTradeIn.cacheAt < 12) then
-			return quantumV4ScrambleTradeIn.cache
+		if not arg and (quantumScrambleTradeIn.cache and now - quantumScrambleTradeIn.cacheAt < 12) then
+			return quantumScrambleTradeIn.cache
 		end
 		local v21 = fn65()
 		if not (v21 and v21.AskState) then
-			return quantumV4ScrambleTradeIn.cache
+			return quantumScrambleTradeIn.cache
 		end
 
 		local ok, cache = pcall(function()
@@ -24502,15 +24020,15 @@ end;
 		end)
 
 		if ok and type(cache) == "table" then
-			quantumV4ScrambleTradeIn.cache = cache
-			quantumV4ScrambleTradeIn.cacheAt = now
+			quantumScrambleTradeIn.cache = cache
+			quantumScrambleTradeIn.cacheAt = now
 		end
 
-		return quantumV4ScrambleTradeIn.cache
+		return quantumScrambleTradeIn.cache
 	end
 
 	local function fn70(arg)
-		local scrambleTradeInBanners = quantumV4Config.ScrambleTradeInBanners
+		local scrambleTradeInBanners = quantumConfig.ScrambleTradeInBanners
 
 		if type(scrambleTradeInBanners) ~= "table" then
 			return true
@@ -24602,7 +24120,7 @@ end;
 		return tbl15, tbl16, v21
 	end
 
-	quantumV4ScrambleTradeIn.selectEggs = selectEggs
+	quantumScrambleTradeIn.selectEggs = selectEggs
 
 	local function fn74(arg, arg2, arg3)
 		local tbl14 = {}
@@ -24645,9 +24163,9 @@ end;
 		return true
 	end
 
-	quantumV4ScrambleTradeIn.teleport = teleport
+	quantumScrambleTradeIn.teleport = teleport
 
-	quantumV4ScrambleTradeIn.openUI = function()
+	quantumScrambleTradeIn.openUI = function()
 		return (pcall(function()
 			require(ReplicatedStorage.Client.Tabs).Activate("DrScrambleTradeIn")
 		end))
@@ -24668,7 +24186,7 @@ end;
 			tbl14[#tbl14 + 1] = v22.uid
 		end
 
-		quantumV4ScrambleTradeIn.status = "Placing eggs into Dr Scramble's Lab"
+		quantumScrambleTradeIn.status = "Placing eggs into Dr Scramble's Lab"
 
 		arg2, arg = pcall(function()
 			return v21.AskTradeIn:InvokeServer(tbl14)
@@ -24692,13 +24210,13 @@ end;
 			end
 		end)
 
-		quantumV4ScrambleTradeIn.trades = quantumV4ScrambleTradeIn.trades + 1
-		quantumV4ScrambleTradeIn.state(true)
+		quantumScrambleTradeIn.trades = quantumScrambleTradeIn.trades + 1
+		quantumScrambleTradeIn.state(true)
 		return true
 	end
 
-	quantumV4ScrambleTradeIn.tradeOnce = function()
-		local v21 = fn71(quantumV4ScrambleTradeIn.state(true))
+	quantumScrambleTradeIn.tradeOnce = function()
+		local v21 = fn71(quantumScrambleTradeIn.state(true))
 		if #v21 < 3 then
 			return false, "Cannot read the recipe"
 		end
@@ -24709,8 +24227,8 @@ end;
 		return fn75(v21, v22)
 	end
 
-	quantumV4ScrambleTradeIn.reroll = function()
-		local v21 = quantumV4ScrambleTradeIn.state(false)
+	quantumScrambleTradeIn.reroll = function()
+		local v21 = quantumScrambleTradeIn.state(false)
 		local num = tonumber(v21 and v21.FreeRefreshesRemaining)
 
 		if num then
@@ -24731,15 +24249,15 @@ end;
 		end) then
 			return false, "Reroll failed"
 		end
-		quantumV4ScrambleTradeIn.state(true)
+		quantumScrambleTradeIn.state(true)
 		return true
 	end
 
 	local function fn76(arg)
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+		local quantumEggRuntime = genv.__QuantumEggRuntime
 
-		if quantumV4EggRuntime and type(quantumV4EggRuntime.setScrambleWants) == "function" then
-			pcall(quantumV4EggRuntime.setScrambleWants, quantumV4EggRuntime, arg or {}, false)
+		if quantumEggRuntime and type(quantumEggRuntime.setScrambleWants) == "function" then
+			pcall(quantumEggRuntime.setScrambleWants, quantumEggRuntime, arg or {}, false)
 		end
 	end
 
@@ -24747,31 +24265,31 @@ end;
 		fn76({})
 	end
 
-	quantumV4ScrambleTradeIn.clearSteal = clearSteal
+	quantumScrambleTradeIn.clearSteal = clearSteal
 
-	quantumV4ScrambleTradeIn.tick = function()
-		local v21 = quantumV4ScrambleTradeIn.state(true)
+	quantumScrambleTradeIn.tick = function()
+		local v21 = quantumScrambleTradeIn.state(true)
 
 		if not v21 then
-			quantumV4ScrambleTradeIn.status = "Trade-In state unavailable"
+			quantumScrambleTradeIn.status = "Trade-In state unavailable"
 			clearSteal()
 			return
 		end
 
 		if v21.Unlocked == false then
-			quantumV4ScrambleTradeIn.status = "Dr Scramble Trade-In is locked"
+			quantumScrambleTradeIn.status = "Dr Scramble Trade-In is locked"
 			clearSteal()
 			return
 		end
 
-		quantumV4ScrambleTradeIn.banner = tostring(v21.BannerDisplayName or v21.BannerId or "Unknown")
-		quantumV4ScrambleTradeIn.rotation = math.max(0, math.floor(tonumber(v21.SecondsUntilRotation) or 0))
-		quantumV4ScrambleTradeIn.pity = tonumber(v21.PityCount) or 0
-		quantumV4ScrambleTradeIn.pityMax = tonumber(v21.PityThreshold) or 100
-		quantumV4ScrambleTradeIn.free = tonumber(v21.FreeRefreshesRemaining) or 0
+		quantumScrambleTradeIn.banner = tostring(v21.BannerDisplayName or v21.BannerId or "Unknown")
+		quantumScrambleTradeIn.rotation = math.max(0, math.floor(tonumber(v21.SecondsUntilRotation) or 0))
+		quantumScrambleTradeIn.pity = tonumber(v21.PityCount) or 0
+		quantumScrambleTradeIn.pityMax = tonumber(v21.PityThreshold) or 100
+		quantumScrambleTradeIn.free = tonumber(v21.FreeRefreshesRemaining) or 0
 
 		if v21.PendingReward then
-			quantumV4ScrambleTradeIn.status = "Finishing reward"
+			quantumScrambleTradeIn.status = "Finishing reward"
 			local v22 = fn65()
 
 			pcall(function()
@@ -24780,16 +24298,16 @@ end;
 				end
 			end)
 
-			quantumV4ScrambleTradeIn.cache = nil
+			quantumScrambleTradeIn.cache = nil
 			return
 		end
 
 		if not fn70(v21) then
-			quantumV4ScrambleTradeIn.status = "Waiting for banner (now: " .. quantumV4ScrambleTradeIn.banner .. ")"
-			quantumV4ScrambleTradeIn.demands = "-"
-			quantumV4ScrambleTradeIn.stock = "-"
-			quantumV4ScrambleTradeIn.ready = 0
-			quantumV4ScrambleTradeIn.missing = "None"
+			quantumScrambleTradeIn.status = "Waiting for banner (now: " .. quantumScrambleTradeIn.banner .. ")"
+			quantumScrambleTradeIn.demands = "-"
+			quantumScrambleTradeIn.stock = "-"
+			quantumScrambleTradeIn.ready = 0
+			quantumScrambleTradeIn.missing = "None"
 			clearSteal()
 			return
 		end
@@ -24797,67 +24315,67 @@ end;
 		local v22 = fn71(v21)
 		local recipeSig = tostring(v21.BannerId or "?") .. "|" .. table.concat(v22, ",")
 
-		if recipeSig ~= quantumV4ScrambleTradeIn.recipeSig then
-			quantumV4ScrambleTradeIn.recipeSig = recipeSig
+		if recipeSig ~= quantumScrambleTradeIn.recipeSig then
+			quantumScrambleTradeIn.recipeSig = recipeSig
 			clearSteal()
 		end
 
-		quantumV4ScrambleTradeIn.total = #v22
-		quantumV4ScrambleTradeIn.demands = #v22 > 0 and fn69(v22, " / ") or "-"
+		quantumScrambleTradeIn.total = #v22
+		quantumScrambleTradeIn.demands = #v22 > 0 and fn69(v22, " / ") or "-"
 
 		if #v22 < 3 then
-			quantumV4ScrambleTradeIn.status = "Waiting for requirements"
+			quantumScrambleTradeIn.status = "Waiting for requirements"
 			clearSteal()
 			return
 		end
 
 		local v23 = fn72()
 		local v24, v25, v26 = selectEggs(v22, v23)
-		quantumV4ScrambleTradeIn.stock = fn74(v22, v23, v26)
-		quantumV4ScrambleTradeIn.ready = #v22 - #v25
-		quantumV4ScrambleTradeIn.missing = #v25 > 0 and fn69(v25, ", ") or "None"
+		quantumScrambleTradeIn.stock = fn74(v22, v23, v26)
+		quantumScrambleTradeIn.ready = #v22 - #v25
+		quantumScrambleTradeIn.missing = #v25 > 0 and fn69(v25, ", ") or "None"
 
 		if #v25 == 0 then
 			clearSteal()
 
-			if quantumV4Config.ScrambleTradeInTrade then
-				quantumV4ScrambleTradeIn.status = "Requirements complete, placing + trading"
+			if quantumConfig.ScrambleTradeInTrade then
+				quantumScrambleTradeIn.status = "Requirements complete, placing + trading"
 				recipeSig, v26 = fn75(v22, v24)
-				quantumV4ScrambleTradeIn.status = recipeSig and "Trade complete" or "Trade: " .. tostring(v26)
+				quantumScrambleTradeIn.status = recipeSig and "Trade complete" or "Trade: " .. tostring(v26)
 			else
-				quantumV4ScrambleTradeIn.status = "Ready to trade (Auto Trade-In is off)"
+				quantumScrambleTradeIn.status = "Ready to trade (Auto Trade-In is off)"
 			end
 
 			return
 		end
 
-		if quantumV4Config.ScrambleTradeInTrade then
+		if quantumConfig.ScrambleTradeInTrade then
 			fn76(v25)
 		else
 			clearSteal()
 		end
 
-		if quantumV4Config.ScrambleTradeInReroll and (quantumV4ScrambleTradeIn.free > 0 and os.clock() - quantumV4ScrambleTradeIn.lastReroll > 3) then
-			quantumV4ScrambleTradeIn.lastReroll = os.clock()
-			quantumV4ScrambleTradeIn.status = "Rerolling the recipe"
-			quantumV4ScrambleTradeIn.reroll()
+		if quantumConfig.ScrambleTradeInReroll and (quantumScrambleTradeIn.free > 0 and os.clock() - quantumScrambleTradeIn.lastReroll > 3) then
+			quantumScrambleTradeIn.lastReroll = os.clock()
+			quantumScrambleTradeIn.status = "Rerolling the recipe"
+			quantumScrambleTradeIn.reroll()
 			return
 		end
 
-		quantumV4ScrambleTradeIn.status = "Stealing required eggs: " .. quantumV4ScrambleTradeIn.missing
+		quantumScrambleTradeIn.status = "Stealing required eggs: " .. quantumScrambleTradeIn.missing
 	end
 
 	task.spawn(function()
 		while fn2() do
 			if fn66() then
-				local ok, result = pcall(quantumV4ScrambleTradeIn.tick)
+				local ok, result = pcall(quantumScrambleTradeIn.tick)
 
 				if not ok then
-					quantumV4ScrambleTradeIn.status = "Trade-In error: " .. tostring(result)
+					quantumScrambleTradeIn.status = "Trade-In error: " .. tostring(result)
 				end
 			else
-				if quantumV4ScrambleTradeIn.status ~= "Disabled" then
-					quantumV4ScrambleTradeIn.status = "Disabled"
+				if quantumScrambleTradeIn.status ~= "Disabled" then
+					quantumScrambleTradeIn.status = "Disabled"
 				end
 
 				clearSteal()
@@ -24867,7 +24385,7 @@ end;
 		end
 	end)
 
-	genv.__QuantumV4ScrambleTradeIn = quantumV4ScrambleTradeIn
+	genv.__QuantumScrambleTradeIn = quantumScrambleTradeIn
 end)();
 
 (function()
@@ -24987,7 +24505,7 @@ end)();
 		end
 	end)()
 
-	genv.__QuantumV4IsBatTool = v21
+	genv.__QuantumIsBatTool = v21
 
 	local function fn67(arg, arg2)
 		if arg then
@@ -26079,18 +25597,18 @@ end)();
 				return n9
 			end
 
-			local mechBoss = quantumV4TaskLadder.blocker("mech_boss")
+			local mechBoss = quantumTaskLadder.blocker("mech_boss")
 
 			if mechBoss then
 				arg.noMatchSince = nil
 				arg:_holdPortal(false)
 				arg:_releaseOperation()
 				arg:_restoreCharacterControl()
-				arg:_setStatus("Yielding to " .. quantumV4TaskLadder.TITLES[mechBoss])
+				arg:_setStatus("Yielding to " .. quantumTaskLadder.TITLES[mechBoss])
 				return n9
 			end
 
-			if quantumV4Config.AutoSteal and quantumV4TaskLadder.rank("auto_steal") < quantumV4TaskLadder.rank("mech_boss") then
+			if quantumConfig.AutoSteal and quantumTaskLadder.rank("auto_steal") < quantumTaskLadder.rank("mech_boss") then
 				arg.noMatchSince = arg.noMatchSince or os.clock()
 				local n27 = os.clock() - arg.noMatchSince
 
@@ -26227,49 +25745,49 @@ end)();
 	end
 
 	pcall(function()
-		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
+		local quantumScrambleBoss = genv.__QuantumScrambleBoss
 
-		if quantumV4ScrambleBoss and type(quantumV4ScrambleBoss.destroy) == "function" and quantumV4ScrambleBoss ~= nil and getmetatable(quantumV4ScrambleBoss) == index then
-			quantumV4ScrambleBoss:destroy()
-		elseif type(quantumV4ScrambleBoss) == "table" then
-			if type(quantumV4ScrambleBoss.destroy) == "function" then
-				quantumV4ScrambleBoss:destroy()
+		if quantumScrambleBoss and type(quantumScrambleBoss.destroy) == "function" and quantumScrambleBoss ~= nil and getmetatable(quantumScrambleBoss) == index then
+			quantumScrambleBoss:destroy()
+		elseif type(quantumScrambleBoss) == "table" then
+			if type(quantumScrambleBoss.destroy) == "function" then
+				quantumScrambleBoss:destroy()
 			end
 		end
 	end)
 
-	genv.__QuantumV4ScrambleBoss = index.new(v12, v13)
+	genv.__QuantumScrambleBoss = index.new(v12, v13)
 
-	quantumV4TaskLadder.register("mech_boss", {wants = function()
-		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
-		return quantumV4ScrambleBoss ~= nil and quantumV4ScrambleBoss:wantsCharacter()
+	quantumTaskLadder.register("mech_boss", {wants = function()
+		local quantumScrambleBoss = genv.__QuantumScrambleBoss
+		return quantumScrambleBoss ~= nil and quantumScrambleBoss:wantsCharacter()
 	end, active = function()
-		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
+		local quantumScrambleBoss = genv.__QuantumScrambleBoss
 
-		if quantumV4ScrambleBoss then
-			if quantumV4ScrambleBoss.destroyed then
+		if quantumScrambleBoss then
+			if quantumScrambleBoss.destroyed then
 				return false
 			end
 		else
 			return false
 		end
 
-		local operationToken = quantumV4ScrambleBoss.operationToken
-		return quantumV4ScrambleBoss:_inArena() or operationToken ~= nil and not operationToken.released
+		local operationToken = quantumScrambleBoss.operationToken
+		return quantumScrambleBoss:_inArena() or operationToken ~= nil and not operationToken.released
 	end, enabled = function()
-		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
-		return quantumV4ScrambleBoss ~= nil and quantumV4ScrambleBoss.enabled == true
+		local quantumScrambleBoss = genv.__QuantumScrambleBoss
+		return quantumScrambleBoss ~= nil and quantumScrambleBoss.enabled == true
 	end, status = function()
-		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
-		return quantumV4ScrambleBoss and tostring(quantumV4ScrambleBoss.status or "") or ""
+		local quantumScrambleBoss = genv.__QuantumScrambleBoss
+		return quantumScrambleBoss and tostring(quantumScrambleBoss.status or "") or ""
 	end})
 
 	task.spawn(function()
 		while fn2() do
-			local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
-			local flag6 = quantumV4Config.ScrambleBossAuto == true or quantumV4ScrambleBoss ~= nil and quantumV4ScrambleBoss.enabled == true
+			local quantumScrambleBoss = genv.__QuantumScrambleBoss
+			local flag6 = quantumConfig.ScrambleBossAuto == true or quantumScrambleBoss ~= nil and quantumScrambleBoss.enabled == true
 
-			if quantumV4Config.AutoSteal and not flag6 and localPlayer2:GetAttribute("InScrambleArena") == true then
+			if quantumConfig.AutoSteal and not flag6 and localPlayer2:GetAttribute("InScrambleArena") == true then
 				local v22 = Workspace2:FindFirstChild(str4)
 				local leaveTeleport = v22 and v22:FindFirstChild("LeaveTeleport")
 				local v23 = leaveTeleport and fn68(leaveTeleport)
@@ -26317,15 +25835,15 @@ local function fn65()
 	local tbl14 = {strokeCol = Color3.fromRGB(36, 36, 42), accent = Color3.fromRGB(26, 147, 250), accentA = Color3.fromRGB(19, 96, 250), accentB = Color3.fromRGB(33, 198, 250), surface = Color3.fromRGB(22, 22, 27), surfaceHi = Color3.fromRGB(28, 28, 34), text = Color3.fromRGB(235, 236, 245), btnText = Color3.fromRGB(186, 184, 198), muted = Color3.fromRGB(156, 154, 170), shadow = Color3.fromRGB(4, 4, 8), obsTop = Color3.fromRGB(18, 18, 24), obsMid = Color3.fromRGB(12, 12, 16), obsLow = Color3.fromRGB(10, 14, 26), btnBg = Color3.fromRGB(30, 30, 36), btnHover = Color3.fromRGB(44, 44, 52), inputBg = Color3.fromRGB(14, 14, 18), switchOff = Color3.fromRGB(42, 42, 48), good = Color3.fromRGB(163, 230, 53)}
 	local v21 = tbl14
 	local image = "rbxassetid://96240498384290"
-	local text = "Quantum | ID"
+	local text = "discord.gg/quantumhub"
 
 	local function fn67()
 		pcall(function()
 			if type(setthreadidentity) == "function" then
 				setthreadidentity(8)
 			elseif genv then
-				if type(genv.__QuantumV4IdentitySetter) == "function" then
-					genv.__QuantumV4IdentitySetter(8)
+				if type(genv.__QuantumIdentitySetter) == "function" then
+					genv.__QuantumIdentitySetter(8)
 				end
 			end
 		end)
@@ -26482,7 +26000,7 @@ local function fn65()
 		local n8 = 0
 
 		pcall(function()
-			n8 = quantumV4Config:getAreaEggValue(arg) or 0
+			n8 = quantumConfig:getAreaEggValue(arg) or 0
 		end)
 
 		if n8 > 0 then
@@ -26588,7 +26106,7 @@ local function fn65()
 			if type(chloeX) == "table" and type(chloeX.ApplyIcon) == "function" then
 				return (pcall(chloeX.ApplyIcon, arg, arg2, 48))
 			end
-			local quantumLucideIcons = genv.quantumLucideIcons
+			local quantumLucideIcons = genv.QuantumLucideIcons
 			local n48px = type(quantumLucideIcons) == "table" and (quantumLucideIcons["48px"] or quantumLucideIcons["256px"]) or nil
 			local v22 = n48px and n48px[arg2]
 
@@ -27098,35 +26616,35 @@ local function fn65()
 		end
 	end
 
-	local tbl22 = {sort = "rarity", list = nil, total = nil, empty = nil}
+	local espList22 = {sort = "rarity", list = nil, total = nil, empty = nil}
 
 	fn80 = function()
 		fn67()
-		if not tbl22.list then
+		if not espList22.list then
 			return
 		end
-		local tbl23 = {}
+		local itemList23 = {}
 		local v22 = tbl18
 		local n8 = 0
 
 		for k, v23 in pairs(v22) do
-			table.insert(tbl23, v23)
+			table.insert(itemList23, v23)
 			n8 += v23.count
 		end
 
-		if tbl22.sort == "count" then
-			table.sort(tbl23, function(arg, arg2)
+		if espList22.sort == "count" then
+			table.sort(itemList23, function(arg, arg2)
 				if arg.count == arg2.count then
 					return (arg.rnum or 0) > (arg2.rnum or 0)
 				end
 				return arg.count > arg2.count
 			end)
-		elseif tbl22.sort == "name" then
-			table.sort(tbl23, function(arg, arg2)
+		elseif espList22.sort == "name" then
+			table.sort(itemList23, function(arg, arg2)
 				return tostring(arg.name) < tostring(arg2.name)
 			end)
 		else
-			table.sort(tbl23, function(arg, arg2)
+			table.sort(itemList23, function(arg, arg2)
 				if arg.rnum == arg2.rnum then
 					return arg.count > arg2.count
 				end
@@ -27134,16 +26652,16 @@ local function fn65()
 			end)
 		end
 
-		tbl22.list.setData(tbl23)
-		tbl22.empty.Visible = #tbl23 == 0
-		tbl22.total.Text = string.format("%d egg%s seen", n8, n8 == 1 and "" or "s")
+		espList22.list.setData(itemList23)
+		espList22.empty.Visible = #itemList23 == 0
+		espList22.total.Text = string.format("%d egg%s seen", n8, n8 == 1 and "" or "s")
 	end
 
 	local function fn85(arg)
-		tbl22.total = tbl17.text(arg, {style = "meta", color = v21.muted, align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 0), pos = UDim2.new(1, -14, 0, 6), size = UDim2.fromOffset(140, 20)})
+		espList22.total = tbl17.text(arg, {style = "meta", color = v21.muted, align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 0), pos = UDim2.new(1, -14, 0, 6), size = UDim2.fromOffset(140, 20)})
 
-		local v22 = tbl17.segmented(arg, {options = {{"rarity", "Rarity"}, {"count", "Amount"}, {"name", "Name"}}, value = tbl22.sort, pos = UDim2.fromOffset(14, 2), size = UDim2.new(1, -170, 0, 28), onChange = function(sort)
-			tbl22.sort = sort
+		local v22 = tbl17.segmented(arg, {options = {{"rarity", "Rarity"}, {"count", "Amount"}, {"name", "Name"}}, value = espList22.sort, pos = UDim2.fromOffset(14, 2), size = UDim2.new(1, -170, 0, 28), onChange = function(sort)
+			espList22.sort = sort
 			fn80()
 		end})
 
@@ -27156,9 +26674,9 @@ local function fn65()
 		v23.inst.Position = UDim2.new(1, -14, 0, 30)
 		tbl17.text(arg, {text = "Egg", style = "label", color = v21.muted, pos = UDim2.fromOffset(16, 40), size = UDim2.fromOffset(120, 14)})
 		local v24 = tbl17.scroller(arg, UDim2.fromOffset(14, 60), UDim2.new(1, -28, 1, -68))
-		tbl22.empty = tbl17.empty(v24, "No eggs seen yet. Eggs that spawn on the field show up here.")
+		espList22.empty = tbl17.empty(v24, "No eggs seen yet. Eggs that spawn on the field show up here.")
 
-		tbl22.list = tbl17.list({build = function()
+		espList22.list = tbl17.list({build = function()
 			return tbl17.assetrow(v24, 70, function(arg2)
 				arg2.count = tbl17.text(arg2.right, {style = "value", textsize = 14, color = v21.accent, align = Enum.TextXAlignment.Right, size = UDim2.fromScale(1, 1)})
 			end)
@@ -27167,16 +26685,16 @@ local function fn65()
 			arg2.count.Text = "x" .. tostring(arg3.count)
 		end})
 
-		v22.set(tbl22.sort, false)
+		v22.set(espList22.sort, false)
 		fn80()
 	end
 
-	local tbl23 = {filter = "All", list = nil, total = nil, status = nil, empty = nil}
+	local itemList23 = {filter = "All", list = nil, total = nil, status = nil, empty = nil}
 	local tbl24 = {}
 
 	fn81 = function()
 		fn67()
-		if not tbl23.list then
+		if not itemList23.list then
 			return
 		end
 
@@ -27185,8 +26703,8 @@ local function fn65()
 		end)
 
 		if if ok then type(result) ~= "table" else not ok then
-			tbl23.list.setData({})
-			tbl23.total.Text = "0 waiting"
+			itemList23.list.setData({})
+			itemList23.total.Text = "0 waiting"
 			return
 		end
 
@@ -27197,7 +26715,7 @@ local function fn65()
 			if v22.Placement == nil and tostring(k):sub(1, 8) ~= "QUANTUMVIS_" then
 				local v23, v24, v25 = fn71(v22.AssetCategory)
 
-				if tbl23.filter == "All" or v24 == tbl23.filter then
+				if itemList23.filter == "All" or v24 == itemList23.filter then
 					local flag6 = tbl24[k] ~= false
 					n8 = if flag6 then n8 + 1 else n8
 					local directory = Assets.Directory and Assets.Directory[v22.AssetCategory]
@@ -27213,17 +26731,17 @@ local function fn65()
 			return (arg.rnum or 0) > (arg2.rnum or 0)
 		end)
 
-		tbl23.list.setData(tbl25)
-		tbl23.empty.Visible = #tbl25 == 0
-		tbl23.total.Text = string.format("%d waiting  ·  %d on", #tbl25, n8)
+		itemList23.list.setData(tbl25)
+		itemList23.empty.Visible = #tbl25 == 0
+		itemList23.total.Text = string.format("%d waiting  \194\183  %d on", #tbl25, n8)
 		result, ok, tbl25 = fn77()
 
 		if ok <= 0 then
-			tbl23.status.Text = string.format("Plot full: %d/50 placed, %d waiting", result, tbl25)
-			tbl23.status.TextColor3 = Color3.fromRGB(245, 196, 81)
+			itemList23.status.Text = string.format("Plot full: %d/50 placed, %d waiting", result, tbl25)
+			itemList23.status.TextColor3 = Color3.fromRGB(245, 196, 81)
 		else
-			tbl23.status.Text = string.format("Plot %d/50  ·  room for %d more  ·  %d waiting", result, ok, tbl25)
-			tbl23.status.TextColor3 = v21.muted
+			itemList23.status.Text = string.format("Plot %d/50  \194\183  room for %d more  \194\183  %d waiting", result, ok, tbl25)
+			itemList23.status.TextColor3 = v21.muted
 		end
 	end
 
@@ -27234,17 +26752,17 @@ local function fn65()
 			tbl25[#tbl25 + 1] = {v22, v22}
 		end
 
-		tbl17.segmented(parent, {options = tbl25, value = tbl23.filter, pos = UDim2.fromOffset(14, 2), size = UDim2.new(1, -28, 0, 28), onChange = function(filter)
-			tbl23.filter = filter
+		tbl17.segmented(parent, {options = tbl25, value = itemList23.filter, pos = UDim2.fromOffset(14, 2), size = UDim2.new(1, -28, 0, 28), onChange = function(filter)
+			itemList23.filter = filter
 			fn81()
 		end})
 
 		tbl17.text(parent, {text = "Egg", style = "label", color = v21.muted, pos = UDim2.fromOffset(16, 38), size = UDim2.fromOffset(120, 14)})
 		tbl17.text(parent, {text = "Place", style = "label", color = v21.muted, align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 0), pos = UDim2.new(1, -18, 0, 38), size = UDim2.fromOffset(60, 14)})
 		local v22 = tbl17.scroller(parent, UDim2.fromOffset(14, 56), UDim2.new(1, -28, 1, -124))
-		tbl23.empty = tbl17.empty(v22, "No eggs waiting to be placed.")
+		itemList23.empty = tbl17.empty(v22, "No eggs waiting to be placed.")
 
-		tbl23.list = tbl17.list({build = function()
+		itemList23.list = tbl17.list({build = function()
 			return tbl17.assetrow(v22, 64, function(arg)
 				arg.toggle = tbl17.button(arg.right, {text = "ON", h = 24, minw = 52, onClick = function()
 					local uid = arg.uid
@@ -27322,15 +26840,15 @@ local function fn65()
 				applyAutoPlace(true)
 			elseif type(tbl10) == "table" then
 				if type(tbl10.AutoPlaceLoop) == "function" then
-					quantumV4Config.AutoPlace = true
+					quantumConfig.AutoPlace = true
 					task.spawn(tbl10.AutoPlaceLoop)
 				end
 			end
 		end})
 
-		tbl23.total = tbl17.text(frame, {style = "meta", color = v21.muted, align = Enum.TextXAlignment.Right, order = 3, size = UDim2.new(1, -250, 1, 0)})
-		tbl23.total.LayoutOrder = 3
-		tbl23.status = tbl17.text(parent, {style = "meta", color = v21.muted, pos = UDim2.new(0, 16, 1, -28), size = UDim2.new(1, -32, 0, 18)})
+		itemList23.total = tbl17.text(frame, {style = "meta", color = v21.muted, align = Enum.TextXAlignment.Right, order = 3, size = UDim2.new(1, -250, 1, 0)})
+		itemList23.total.LayoutOrder = 3
+		itemList23.status = tbl17.text(parent, {style = "meta", color = v21.muted, pos = UDim2.new(0, 16, 1, -28), size = UDim2.new(1, -32, 0, 18)})
 		fn81()
 	end
 
@@ -27386,7 +26904,7 @@ local function fn65()
 
 		for k, button in pairs(tbl25.sortbar.buttons) do
 			local v22 = tbl26[k]
-			local v23 = if k == tbl25.sort then v22 .. (tbl25.asc and "  ↑" or "  ↓") else v22
+			local v23 = if k == tbl25.sort then v22 .. (tbl25.asc and "  \226\134\145" or "  \226\134\147") else v22
 			button.setText(v23)
 		end
 	end
@@ -27414,7 +26932,7 @@ local function fn65()
 		tbl25.empty.Visible = #v22 == 0
 
 		if tbl25.view == "inplot" then
-			tbl25.total.Text = string.format("%d placed  ·  %s/s", #v22, fn70(v23))
+			tbl25.total.Text = string.format("%d placed  \194\183  %s/s", #v22, fn70(v23))
 		else
 			tbl25.total.Text = string.format("%d pet%s", #v22, #v22 == 1 and "" or "s")
 		end
@@ -27441,7 +26959,7 @@ local function fn65()
 		end})
 
 		tbl17.text(arg, {text = "Pet", style = "label", color = v21.muted, pos = UDim2.fromOffset(16, 68), size = UDim2.fromOffset(120, 14)})
-		tbl17.text(arg, {text = "Money/s  ·  Kg", style = "label", color = v21.muted, align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 0), pos = UDim2.new(1, -18, 0, 68), size = UDim2.fromOffset(140, 14)})
+		tbl17.text(arg, {text = "Money/s  \194\183  Kg", style = "label", color = v21.muted, align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 0), pos = UDim2.new(1, -18, 0, 68), size = UDim2.fromOffset(140, 14)})
 		local v22 = tbl17.scroller(arg, UDim2.fromOffset(14, 86), UDim2.new(1, -28, 1, -94))
 		tbl25.empty = tbl17.empty(v22, "No pets here yet.")
 
@@ -27510,12 +27028,12 @@ local function fn65()
 			return
 		end
 		local tbl30 = (Save.Peek or Save.Get)() or {}
-		local quantumV4TaskLadder2 = genv.__QuantumV4TaskLadder
-		local n8 = quantumV4TaskLadder2 and quantumV4TaskLadder2.current() or nil
+		local quantumTaskLadder2 = genv.__QuantumTaskLadder
+		local n8 = quantumTaskLadder2 and quantumTaskLadder2.current() or nil
 
 		if n8 then
-			local v22 = quantumV4TaskLadder2.describe(n8)
-			tbl27.nowTask.Text = quantumV4TaskLadder2.TITLES[n8] or tostring(n8)
+			local v22 = quantumTaskLadder2.describe(n8)
+			tbl27.nowTask.Text = quantumTaskLadder2.TITLES[n8] or tostring(n8)
 			tbl27.nowStatus.Text = tostring(v22 or "")
 			tbl27.nowDot.BackgroundColor3 = v21.good
 		else
@@ -27530,27 +27048,27 @@ local function fn65()
 			n9 = math.floor((localPlayer:GetNetworkPing() or 0) * 2000 + 0.5)
 		end)
 
-		tbl27.nowMeta.Text = string.format("%s  ·  %d ms  ·  %d fps", fn90(os.clock() - now), n9, math.floor((tonumber(fn3()) or 0) + 0.5))
-		quantumV4TaskLadder2, n8 = collectPets("inplot")
+		tbl27.nowMeta.Text = string.format("%s  \194\183  %d ms  \194\183  %d fps", fn90(os.clock() - now), n9, math.floor((tonumber(fn3()) or 0) + 0.5))
+		quantumTaskLadder2, n8 = collectPets("inplot")
 		local n10 = tonumber(tbl30.Money) or 0
 		tbl27.tiles.money.set(fn70(n10), "+" .. fn70(n8 * 3600) .. " per hour", v21.good)
-		tbl27.tiles.income.set(fn70(n8) .. "/s", #quantumV4TaskLadder2 .. " pet" .. (#quantumV4TaskLadder2 == 1 and "" or "s") .. " placed")
+		tbl27.tiles.income.set(fn70(n8) .. "/s", #quantumTaskLadder2 .. " pet" .. (#quantumTaskLadder2 == 1 and "" or "s") .. " placed")
 		local num
 		local str3 = ""
 
 		pcall(function()
-			local quantumV4MovementExtras = genv.__QuantumV4MovementExtras
+			local quantumMovementExtras = genv.__QuantumMovementExtras
 
-			if quantumV4MovementExtras then
-				num = tonumber(quantumV4MovementExtras:_gameWalkSpeed())
+			if quantumMovementExtras then
+				num = tonumber(quantumMovementExtras:_gameWalkSpeed())
 			end
 		end)
 
 		pcall(function()
-			local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
+			local quantumTreadmillManager = genv.__QuantumTreadmillManager
 
-			if quantumV4TreadmillManager then
-				local v22, v23, v24 = quantumV4TreadmillManager:_readUpgradeState()
+			if quantumTreadmillManager then
+				local v22, v23, v24 = quantumTreadmillManager:_readUpgradeState()
 
 				if v24 then
 					str3 = "Next: " .. tostring(v24.DisplayName or v24._id or "tier") .. "  " .. fn70(tonumber(v24.Price) or 0)
@@ -27561,9 +27079,9 @@ local function fn65()
 		end)
 
 		tbl27.tiles.speed.set(num and string.format("%.0f", num) or "--", str3)
-		local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
-		local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-		n8 = (quantumV4EggRuntime and quantumV4EggRuntime.stats and tonumber(quantumV4EggRuntime.stats.delivered) or 0) + (quantumV4PlayerSteal and tonumber(quantumV4PlayerSteal.taken) or 0)
+		local quantumEggRuntime = genv.__QuantumEggRuntime
+		local quantumPlayerSteal = genv.__QuantumPlayerSteal
+		n8 = (quantumEggRuntime and quantumEggRuntime.stats and tonumber(quantumEggRuntime.stats.delivered) or 0) + (quantumPlayerSteal and tonumber(quantumPlayerSteal.taken) or 0)
 		tbl27.tiles.stolen.set(tostring(n8), tbl28 and "Best: " .. tbl28.name .. "  " .. fn70(tbl28.rate) .. "/s" or "No steal yet this session")
 		n10 = 0
 
@@ -27572,18 +27090,18 @@ local function fn65()
 		end
 
 		local v22, v23, v24 = fn77()
-		tbl27.tiles.collection.set(n10 .. " pets", string.format("Eggs %d/50 placed  ·  %d waiting", v22, v24))
+		tbl27.tiles.collection.set(n10 .. " pets", string.format("Eggs %d/50 placed  \194\183  %d waiting", v22, v24))
 		local flag6 = false
 
 		pcall(function()
-			flag6 = quantumV4EggRuntime ~= nil and quantumV4EggRuntime:getSnapshot().wallClosed == true
+			flag6 = quantumEggRuntime ~= nil and quantumEggRuntime:getSnapshot().wallClosed == true
 		end)
 
 		tbl27.tiles.world.set(flag6 and "Night" or "Day", #Players:GetPlayers() .. " players in this server", flag6 and Color3.fromRGB(245, 196, 81) or v21.muted)
-		local quantumV4ScrambleBoss, v25 = genv.__QuantumV4ScrambleBoss
+		local quantumScrambleBoss, v25 = genv.__QuantumScrambleBoss
 
 		pcall(function()
-			v25 = quantumV4ScrambleBoss and quantumV4ScrambleBoss:_snapshot()
+			v25 = quantumScrambleBoss and quantumScrambleBoss:_snapshot()
 		end)
 
 		local eventActive = v25 ~= nil and (v25.eventActive or v25.portalOpen or v25.inArena)
@@ -27591,7 +27109,7 @@ local function fn65()
 
 		if eventActive then
 			if v25.inArena then
-				tbl27.scrambleLine1.Text = string.format("Fighting  ·  %s  ·  HP %d / %d", tostring(v25.phase), v25.health or 0, v25.maxHealth or 0)
+				tbl27.scrambleLine1.Text = string.format("Fighting  \194\183  %s  \194\183  HP %d / %d", tostring(v25.phase), v25.health or 0, v25.maxHealth or 0)
 			else
 				if v25.portalOpen then
 					tbl27.scrambleLine1.Text = "Boss portal is open"
@@ -27600,17 +27118,17 @@ local function fn65()
 				end
 			end
 
-			tbl27.scrambleLine2.Text = string.format("Mastery %s  ·  Samples %s  ·  Last reward: %s", tostring(v25.mastery or 0), tostring(v25.samples or 0), tostring(v25.reward or "--"))
+			tbl27.scrambleLine2.Text = string.format("Mastery %s  \194\183  Samples %s  \194\183  Last reward: %s", tostring(v25.mastery or 0), tostring(v25.samples or 0), tostring(v25.reward or "--"))
 		end
 
-		table.sort(quantumV4TaskLadder2, function(arg, arg2)
+		table.sort(quantumTaskLadder2, function(arg, arg2)
 			return (arg.moneys or 0) > (arg2.moneys or 0)
 		end)
 
 		local tbl31 = {}
 
-		for i = 1, math.min(5, #quantumV4TaskLadder2), 1 do
-			tbl31[i] = quantumV4TaskLadder2[i]
+		for i = 1, math.min(5, #quantumTaskLadder2), 1 do
+			tbl31[i] = quantumTaskLadder2[i]
 		end
 
 		tbl27.top.setData(tbl31)
@@ -27994,7 +27512,7 @@ local function fn65()
 			return v24
 		end, bind = function(arg, arg2)
 			arg.uid = arg2.uid
-			tbl17.bindasset(arg, arg2.icon, arg2.color, arg2.name, string.format("%s  ·  %s%s  ·  <b>x%.2f</b>", tostring(arg2.rarity or "?"), tostring(arg2.area), arg2.kg and "  ·  <b>" .. tbl20.fmtKg(arg2.kg) .. "</b>" or "", arg2.scale or 1))
+			tbl17.bindasset(arg, arg2.icon, arg2.color, arg2.name, string.format("%s  \194\183  %s%s  \194\183  <b>x%.2f</b>", tostring(arg2.rarity or "?"), tostring(arg2.area), arg2.kg and "  \194\183  <b>" .. tbl20.fmtKg(arg2.kg) .. "</b>" or "", arg2.scale or 1))
 			arg.name.TextSize = 15
 			arg.sub.TextSize = 13
 			arg.rate.Text = fn69(arg2.rate) .. "/s"
@@ -28036,10 +27554,10 @@ local function fn65()
 				return
 			end
 
-			local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
+			local quantumEggRuntime = genv.__QuantumEggRuntime
 
-			if quantumV4EggRuntime and type(quantumV4EggRuntime.queueManual) == "function" then
-				local v24 = quantumV4EggRuntime:queueManual(tbl33)
+			if quantumEggRuntime and type(quantumEggRuntime.queueManual) == "function" then
+				local v24 = quantumEggRuntime:queueManual(tbl33)
 				tbl20.picked = {}
 				tbl20.statusBtn.setText("Queued " .. tostring(v24))
 
@@ -28486,7 +28004,7 @@ local function fn65()
 
 		task.spawn(function()
 			local quantumBackend = getgenv and getgenv().QuantumBackend or {}
-			local api = quantumBackend.Api or ""
+			local api = quantumBackend.Api or "https://quantumhub.xyz/api"
 			local str3 = quantumBackend.Key or ""
 			local str4 = localPlayer and tostring(localPlayer.UserId) or "0"
 			local v22 = fn99({Url = api .. "/egg/latest?key=" .. tostring(str3) .. "&uid=" .. tostring(str4) .. "&t=" .. tostring(now2), Method = "GET"})
@@ -29009,7 +28527,7 @@ local function fn65()
 			tbl21.paint()
 		end})
 
-		tbl21.statusLbl = tbl17.text(frame4, {text = "● Online synced", style = "meta", color = Color3.fromRGB(0, 255, 136), align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 0), pos = UDim2.fromScale(1, 0), size = UDim2.new(0.5, -4, 1, 0)})
+		tbl21.statusLbl = tbl17.text(frame4, {text = "\226\151\143 Online synced", style = "meta", color = Color3.fromRGB(0, 255, 136), align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 0), pos = UDim2.fromScale(1, 0), size = UDim2.new(0.5, -4, 1, 0)})
 
 		if not tbl21.bound then
 			tbl21.bound = true
@@ -29510,17 +29028,17 @@ local function fn65()
 		local TweenService = game:GetService("TweenService")
 		local GuiService = game:GetService("GuiService")
 		local UserInputService = game:GetService("UserInputService")
-		local n8 = 240
-		local n9 = 56
-		local n10 = 8
-		local n11 = 36
-		local n12 = 8
+		local n8 = 380
+		local n9 = 108
+		local n10 = 12
+		local n11 = 48
+		local n12 = 12
 		local vector2 = Vector3.new(542.93, 71.5, -405.58)
 		local color2 = Color3.fromRGB(110, 231, 140)
 		local color3 = Color3.fromRGB(248, 113, 113)
 		local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-		local quantumV4StealCardToken = {}
-		genv.__QuantumV4StealCardToken = quantumV4StealCardToken
+		local quantumStealCardToken = {}
+		genv.__QuantumStealCardToken = quantumStealCardToken
 		local tbl36 = {{"carried by another", "Another player took it"}, {"taken by another", "Another player took it"}, {"someone else grabbed", "Another player took it"}, {"no longer available", "The egg is gone"}, {"target unavailable", "The egg is gone"}, {"target changed", "The egg is gone"}, {"reset countdown", "Eggs are resetting"}, {"egg reset", "The egg reset"}, {"wall closed", "Night started"}, {"character unavailable", "You were knocked out"}, {"character died", "You were knocked out"}, {"they banked", "They banked it first"}, {"could not catch", "Could not catch them"}, {"lost sight", "Could not catch them"}, {"bank not confirmed", "Deposit not confirmed"}, {"delivery failed", "Deposit not confirmed"}, {"not banked", "Deposit not confirmed"}, {"carry", "Could not pick it up"}, {"stopped", "Stopped"}, {"mode changed", "Stopped"}}
 
 		local function fn107(arg)
@@ -29532,7 +29050,7 @@ local function fn65()
 				end
 			end
 
-			return "Steal interrupted — retrying"
+			return "Steal interrupted \226\128\148 retrying"
 		end
 
 		local tbl37 = {"retrying", "could not reach", "destination unavailable", "steal unavailable", "target destination", "no target", "steal error", "preparing", "searching", "target changed", "next egg"}
@@ -29588,129 +29106,99 @@ local function fn65()
 			local v22 = fn109()
 
 			pcall(function()
-				local oldHUD = v22:FindFirstChild("QuantumStatusHUD") or v22:FindFirstChild("QuantumStatusHUD")
-				if oldHUD then
-					oldHUD:Destroy()
+				local quantumStealCard = v22:FindFirstChild("QuantumStealCard")
+
+				if quantumStealCard then
+					quantumStealCard:Destroy()
 				end
 			end)
 
 			local screenGui = Instance.new("ScreenGui")
-			screenGui.Name = "QuantumStatusHUD"
+			screenGui.Name = "QuantumStealCard"
 			screenGui.ResetOnSpawn = false
 			screenGui.IgnoreGuiInset = true
-			screenGui.DisplayOrder = 10
+			screenGui.DisplayOrder = -1
 			screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
 			local frame = Instance.new("Frame")
 			frame.Name = "Card"
-			frame.AnchorPoint = Vector2.new(0, 0)
-			frame.Position = UDim2.new(0, -n8 - 30, 0, 68)
+			frame.AnchorPoint = Vector2.new(0.5, 0)
+			frame.Position = UDim2.new(0.5, 0, 0, -n9 - 24)
 			frame.Size = UDim2.fromOffset(n8, n9)
-			frame.BackgroundColor3 = Color3.fromRGB(16, 17, 20)
-			frame.BackgroundTransparency = 0.05
+			frame.BackgroundColor3 = tbl14.surface
 			frame.BorderSizePixel = 0
 			frame.Visible = false
-			frame.ClipsDescendants = true
 			frame.Parent = screenGui
-
-			local uiCorner = Instance.new("UICorner")
-			uiCorner.CornerRadius = UDim.new(0, 7)
-			uiCorner.Parent = frame
-
+			fn110(frame)
 			local uiStroke = Instance.new("UIStroke")
-			uiStroke.Color = Color3.fromRGB(38, 40, 48)
+			uiStroke.Color = tbl14.strokeCol
 			uiStroke.Thickness = 1
 			uiStroke.Parent = frame
-
-			local iconFrame = Instance.new("Frame")
-			iconFrame.Position = UDim2.fromOffset(8, 8)
-			iconFrame.Size = UDim2.fromOffset(36, 36)
-			iconFrame.BackgroundColor3 = Color3.fromRGB(24, 25, 30)
-			iconFrame.BorderSizePixel = 0
-			iconFrame.Parent = frame
-
-			local iconCorner = Instance.new("UICorner")
-			iconCorner.CornerRadius = UDim.new(0, 6)
-			iconCorner.Parent = iconFrame
-
-			tbl39.img = Instance.new("ImageLabel")
-			tbl39.img.BackgroundTransparency = 1
-			tbl39.img.Position = UDim2.fromOffset(3, 3)
-			tbl39.img.Size = UDim2.new(1, -6, 1, -6)
-			tbl39.img.ScaleType = Enum.ScaleType.Fit
-			tbl39.img.Parent = iconFrame
-
-			tbl39.head = tbl17.text(frame, {style = "label", text = "STEALING", color = Color3.fromRGB(130, 135, 150), pos = UDim2.fromOffset(50, 7), size = UDim2.new(1, -110, 0, 12)})
-			tbl39.head.Font = Enum.Font.GothamBold
-			tbl39.head.TextSize = 10
-
+			local uiGradient = Instance.new("UIGradient")
+			uiGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, tbl14.obsTop), ColorSequenceKeypoint.new(0.55, tbl14.obsMid), ColorSequenceKeypoint.new(1, tbl14.obsLow)})
+			uiGradient.Rotation = 16
+			uiGradient.Parent = frame
+			local n13 = -(n10 * 2 + n11 + 12)
+			tbl39.head = tbl17.text(frame, {style = "label", text = "Stealing", color = tbl14.muted, pos = UDim2.fromOffset(n10, 10), size = UDim2.new(1, -(n10 * 2 + 124), 0, 14)})
 			local frame2 = Instance.new("Frame")
 			frame2.Name = "Chip"
 			frame2.AnchorPoint = Vector2.new(1, 0)
-			frame2.Position = UDim2.new(1, -8, 0, 6)
-			frame2.Size = UDim2.fromOffset(0, 14)
+			frame2.Position = UDim2.new(1, -n10, 0, 8)
+			frame2.Size = UDim2.fromOffset(0, 18)
 			frame2.AutomaticSize = Enum.AutomaticSize.X
-			frame2.BackgroundColor3 = Color3.fromRGB(26, 28, 34)
+			frame2.BackgroundColor3 = tbl14.btnBg
 			frame2.BorderSizePixel = 0
 			frame2.Parent = frame
-
-			local chipCorner = Instance.new("UICorner")
-			chipCorner.CornerRadius = UDim.new(0, 4)
-			chipCorner.Parent = frame2
-
+			fn110(frame2, UDim.new(1, 0))
 			local uiPadding = Instance.new("UIPadding")
-			uiPadding.PaddingLeft = UDim.new(0, 5)
-			uiPadding.PaddingRight = UDim.new(0, 5)
+			uiPadding.PaddingLeft = UDim.new(0, 7)
+			uiPadding.PaddingRight = UDim.new(0, 8)
 			uiPadding.Parent = frame2
-
 			local uiListLayout = Instance.new("UIListLayout")
 			uiListLayout.FillDirection = Enum.FillDirection.Horizontal
 			uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-			uiListLayout.Padding = UDim.new(0, 3)
+			uiListLayout.Padding = UDim.new(0, 4)
 			uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 			uiListLayout.Parent = frame2
-
 			tbl39.chipIcon = Instance.new("ImageLabel")
 			tbl39.chipIcon.BackgroundTransparency = 1
-			tbl39.chipIcon.Size = UDim2.fromOffset(10, 10)
+			tbl39.chipIcon.Size = UDim2.fromOffset(12, 12)
 			tbl39.chipIcon.LayoutOrder = 1
 			tbl39.chipIcon.Parent = frame2
-
-			tbl39.chipText = tbl17.text(frame2, {style = "label", text = "", order = 2, size = UDim2.fromOffset(0, 12)})
+			tbl39.chipText = tbl17.text(frame2, {style = "label", text = "", order = 2, size = UDim2.fromOffset(0, 14)})
 			tbl39.chipText.AutomaticSize = Enum.AutomaticSize.X
-			tbl39.chipText.TextSize = 10
-
-			tbl39.title = tbl17.text(frame, {style = "title", pos = UDim2.fromOffset(50, 19), size = UDim2.new(1, -58, 0, 15)})
-			tbl39.title.Font = Enum.Font.GothamBold
-			tbl39.title.TextSize = 12
-
-			tbl39.stats = tbl17.text(frame, {style = "meta", color = Color3.fromRGB(150, 155, 170), pos = UDim2.fromOffset(50, 34), size = UDim2.new(1, -58, 0, 12)})
-			tbl39.stats.TextSize = 10
-
+			tbl39.chipText.TextTruncate = Enum.TextTruncate.None
+			local frame3 = Instance.new("Frame")
+			frame3.Position = UDim2.fromOffset(n10, 32)
+			frame3.Size = UDim2.fromOffset(n11, n11)
+			frame3.BackgroundColor3 = tbl14.surfaceHi
+			frame3.BorderSizePixel = 0
+			frame3.Parent = frame
+			fn110(frame3, UDim.new(0, 8))
+			tbl39.img = Instance.new("ImageLabel")
+			tbl39.img.BackgroundTransparency = 1
+			tbl39.img.Position = UDim2.fromOffset(4, 4)
+			tbl39.img.Size = UDim2.new(1, -8, 1, -8)
+			tbl39.img.ScaleType = Enum.ScaleType.Fit
+			tbl39.img.Parent = frame3
+			tbl39.title = tbl17.text(frame, {style = "title", pos = UDim2.fromOffset(n10 + n11 + 12, 31), size = UDim2.new(1, n13, 0, 18)})
+			tbl39.rarity = tbl17.text(frame, {style = "body", pos = UDim2.fromOffset(n10 + n11 + 12, 50), size = UDim2.new(1, n13, 0, 16)})
+			tbl39.stats = tbl17.text(frame, {style = "meta", color = tbl14.muted, pos = UDim2.fromOffset(n10 + n11 + 12, 66), size = UDim2.new(1, n13, 0, 15)})
 			tbl39.barBack = Instance.new("Frame")
-			tbl39.barBack.Position = UDim2.new(0, 0, 1, -2)
-			tbl39.barBack.Size = UDim2.new(1, 0, 0, 2)
-			tbl39.barBack.BackgroundColor3 = Color3.fromRGB(26, 28, 34)
+			tbl39.barBack.Position = UDim2.fromOffset(n10, 91)
+			tbl39.barBack.Size = UDim2.new(1, -(n10 * 2 + 84), 0, 6)
+			tbl39.barBack.BackgroundColor3 = tbl14.btnBg
 			tbl39.barBack.BorderSizePixel = 0
 			tbl39.barBack.Parent = frame
-
+			fn110(tbl39.barBack, UDim.new(1, 0))
 			tbl39.barFill = Instance.new("Frame")
 			tbl39.barFill.Size = UDim2.fromScale(0, 1)
-			tbl39.barFill.BackgroundColor3 = Color3.fromRGB(56, 189, 248)
+			tbl39.barFill.BackgroundColor3 = tbl14.accent
 			tbl39.barFill.BorderSizePixel = 0
 			tbl39.barFill.Parent = tbl39.barBack
-
-			tbl39.rarity = Instance.new("TextLabel")
-			tbl39.rarity.Visible = false
-			tbl39.rarity.Parent = frame
-
-			tbl39.eta = tbl17.text(frame, {style = "meta", color = Color3.fromRGB(130, 135, 150), align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 1), pos = UDim2.new(1, -8, 1, -5), size = UDim2.fromOffset(60, 12)})
-			tbl39.eta.TextSize = 9
-
-			tbl39.reason = tbl17.text(frame, {style = "body", color = color3, pos = UDim2.fromOffset(50, 34), size = UDim2.new(1, -58, 0, 12)})
+			fn110(tbl39.barFill, UDim.new(1, 0))
+			tbl39.eta = tbl17.text(frame, {style = "meta", color = tbl14.muted, align = Enum.TextXAlignment.Right, anchor = Vector2.new(1, 0), pos = UDim2.new(1, -n10, 0, 86), size = UDim2.fromOffset(80, 16)})
+			tbl39.reason = tbl17.text(frame, {style = "body", color = color3, pos = UDim2.fromOffset(n10, 86), size = UDim2.new(1, -n10 * 2, 0, 16)})
 			tbl39.reason.Visible = false
-			tbl39.reason.TextSize = 10
-
 			tbl39.scale = Instance.new("UIScale")
 			tbl39.scale.Parent = frame
 			screenGui.Parent = v22
@@ -29791,8 +29279,9 @@ local function fn65()
 			end
 			n13 = arg
 			local card = tbl39.card
-			local targetY = math.clamp(arg, 60, 120)
-			TweenService:Create(card, tweenInfo, {Position = UDim2.new(0, 20, 0, targetY)}):Play()
+			local tbl41 = {}
+			tbl41.Position = UDim2.new(0.5, 0, 0, arg)
+			TweenService:Create(card, tweenInfo, tbl41):Play()
 		end
 
 		local function fn117(arg)
@@ -29803,16 +29292,15 @@ local function fn65()
 
 			if arg then
 				n13 = nil
-				tbl39.card.Position = UDim2.new(0, -n8 - 30, 0, 68)
+				tbl39.card.Position = UDim2.new(0.5, 0, 0, -n9 - 24)
 				tbl39.card.Visible = true
 				local v23 = fn115()
 				tbl39.scale.Scale = v23 * 0.94
 				tween = TweenService:Create(tbl39.scale, tweenInfo, {Scale = v23})
 				tween:Play()
-				TweenService:Create(tbl39.card, tweenInfo, {Position = UDim2.new(0, 20, 0, 68)}):Play()
 			else
-				n13 = -n8 - 30
-				local tween2 = TweenService:Create(tbl39.card, tweenInfo, {Position = UDim2.new(0, -n8 - 30, 0, 68)})
+				n13 = -n9 - 24
+				local tween2 = TweenService:Create(tbl39.card, tweenInfo, {Position = UDim2.new(0.5, 0, 0, n13)})
 
 				tween2.Completed:Connect(function()
 					if not flag6 then
@@ -29984,7 +29472,7 @@ local function fn65()
 				tbl42[#tbl42 + 1] = table.concat(tbl43, ", ")
 			end
 
-			fn113(tbl39.stats, "Text", table.concat(tbl42, "  ·  "))
+			fn113(tbl39.stats, "Text", table.concat(tbl42, "  \194\183  "))
 			local v29 = fn72(assetCategory)
 
 			if not v29 then
@@ -30022,11 +29510,11 @@ local function fn65()
 			if result == "fail" then
 				tbl39.barBack.Visible, tbl39.eta.Visible, tbl39.reason.Visible = false, false, true
 				fn113(tbl39.reason, "TextColor3", color3)
-				fn113(tbl39.reason, "Text", arg or "Steal interrupted — retrying")
+				fn113(tbl39.reason, "Text", arg or "Steal interrupted \226\128\148 retrying")
 			elseif result == "retry" then
 				tbl39.barBack.Visible, tbl39.eta.Visible, tbl39.reason.Visible = false, false, true
 				fn113(tbl39.reason, "TextColor3", tbl14.muted)
-				fn113(tbl39.reason, "Text", arg or "Retrying…")
+				fn113(tbl39.reason, "Text", arg or "Retrying\226\128\166")
 			else
 				fn113(tbl39.barFill, "BackgroundColor3", color2)
 				local barFill = tbl39.barFill
@@ -30148,24 +29636,24 @@ local function fn65()
 		local now2
 
 		local function fn128()
-			local quantumV4EggRuntime = genv.__QuantumV4EggRuntime
-			local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
-			fn125(quantumV4EggRuntime)
+			local quantumEggRuntime = genv.__QuantumEggRuntime
+			local quantumPlayerSteal = genv.__QuantumPlayerSteal
+			fn125(quantumEggRuntime)
 			local str3, status
 			local flag7, player, v23, v24 = false
 
-			if quantumV4PlayerSteal and quantumV4PlayerSteal.running and type(quantumV4PlayerSteal.cardTarget) == "table" then
-				local uid = quantumV4PlayerSteal.cardTarget.uid
-				status = quantumV4PlayerSteal.status
-				player = quantumV4PlayerSteal.cardTarget.player
-				flag7 = quantumV4EggRuntime ~= nil and quantumV4EggRuntime._externalDeliver == true
+			if quantumPlayerSteal and quantumPlayerSteal.running and type(quantumPlayerSteal.cardTarget) == "table" then
+				local uid = quantumPlayerSteal.cardTarget.uid
+				status = quantumPlayerSteal.status
+				player = quantumPlayerSteal.cardTarget.player
+				flag7 = quantumEggRuntime ~= nil and quantumEggRuntime._externalDeliver == true
 				str3, v24 = "ps", uid
 			else
-				local v25 = fn126(quantumV4EggRuntime)
+				local v25 = fn126(quantumEggRuntime)
 
 				if v25 then
-					status = quantumV4EggRuntime.stats and quantumV4EggRuntime.stats.status
-					flag7 = quantumV4EggRuntime.carry and quantumV4EggRuntime.carry.active and quantumV4EggRuntime.carry.uid == v25
+					status = quantumEggRuntime.stats and quantumEggRuntime.stats.status
+					flag7 = quantumEggRuntime.carry and quantumEggRuntime.carry.active and quantumEggRuntime.carry.uid == v25
 					str3 = "auto"
 				end
 
@@ -30177,7 +29665,7 @@ local function fn65()
 
 				if v24 ~= nil or os.clock() - now2 >= 0.4 then
 					if v22.kind == "ps" then
-						local history = quantumV4PlayerSteal and quantumV4PlayerSteal.history and quantumV4PlayerSteal.history[1]
+						local history = quantumPlayerSteal and quantumPlayerSteal.history and quantumPlayerSteal.history[1]
 						local str4 = history and tostring(history.outcome) or ""
 
 						if str4 == "taken" then
@@ -30188,7 +29676,7 @@ local function fn65()
 							fn124("fail", fn107(str4))
 						end
 					else
-						fn124(fn127(quantumV4EggRuntime))
+						fn124(fn127(quantumEggRuntime))
 					end
 				end
 			else
@@ -30215,7 +29703,7 @@ local function fn65()
 				local flag8, record = str3 == "ps"
 
 				if flag8 then
-					record = quantumV4PlayerSteal.cardTarget.record
+					record = quantumPlayerSteal.cardTarget.record
 				else
 					record = v25
 				end
@@ -30224,10 +29712,10 @@ local function fn65()
 					record = record or EggState2.ReadFieldEgg(v24)
 				end)
 
-				record = record or quantumV4EggRuntime and quantumV4EggRuntime.records and quantumV4EggRuntime.records[v24]
+				record = record or quantumEggRuntime and quantumEggRuntime.records and quantumEggRuntime.records[v24]
 
 				if type(record) == "table" then
-					fn123(str3, v24, record, quantumV4EggRuntime, player)
+					fn123(str3, v24, record, quantumEggRuntime, player)
 				end
 			end
 
@@ -30239,15 +29727,15 @@ local function fn65()
 				return
 			end
 
-			quantumV4EggRuntime, quantumV4PlayerSteal = fn112()
+			quantumEggRuntime, quantumPlayerSteal = fn112()
 			local v25 = fn115()
 
 			if not (tween and tween.PlaybackState == Enum.PlaybackState.Playing) then
 				fn113(tbl39.scale, "Scale", v25)
 			end
 
-			fn113(tbl39.card, "Size", UDim2.fromOffset(n8, n9))
-			fn116(math.floor(math.max(quantumV4PlayerSteal + n12, quantumV4EggRuntime + n12)))
+			fn113(tbl39.card, "Size", UDim2.fromOffset(math.floor(math.min(n8, (fn114().X - 32) / v25)), n9))
+			fn116(math.floor(math.max(quantumPlayerSteal + n12, quantumEggRuntime + n12)))
 			if v22.endedAt then
 				return
 			end
@@ -30255,10 +29743,10 @@ local function fn65()
 			if os.clock() >= (v22.netAt or 0) then
 				v22.netAt = os.clock() + 1
 				local v26 = fn3()
-				local v27 = genv.__QuantumV4NetPing()
+				local v27 = genv.__QuantumNetPing()
 				str4 = v26 > 0 and v26 < 20 and "LOW FPS" or nil
 				str4 = if v27 > 250 then str4 and str4 .. " + HIGH PING" or "HIGH PING" else str4
-				fn113(tbl39.head, "Text", str4 and str4 .. "  ·  MAY TAKE LONGER" or v22.headBase)
+				fn113(tbl39.head, "Text", str4 and str4 .. "  \194\183  MAY TAKE LONGER" or v22.headBase)
 				fn113(tbl39.head, "TextColor3", str4 and Color3.fromRGB(245, 196, 81) or tbl14.muted)
 			end
 
@@ -30278,17 +29766,17 @@ local function fn65()
 
 			fn118(v25)
 			local n16 = os.clock() - v22.startedAt
-			quantumV4PlayerSteal = fn122(v22, v25, status)
+			quantumPlayerSteal = fn122(v22, v25, status)
 			local v26 = tbl40[v22.key]
 
 			if v26 then
 				local n17 = v26 - n16
-				quantumV4PlayerSteal = quantumV4PlayerSteal and (quantumV4PlayerSteal + n17) / 2 or n17
+				quantumPlayerSteal = quantumPlayerSteal and (quantumPlayerSteal + n17) / 2 or n17
 			end
 
-			if quantumV4PlayerSteal then
-				v22.progress = math.max(v22.progress, math.min(n16 / math.max(n16 + math.max(quantumV4PlayerSteal, 0), 0.1), 0.96))
-				fn113(tbl39.eta, "Text", quantumV4PlayerSteal >= 1 and string.format("~%ds left", math.ceil(quantumV4PlayerSteal)) or "Almost done")
+			if quantumPlayerSteal then
+				v22.progress = math.max(v22.progress, math.min(n16 / math.max(n16 + math.max(quantumPlayerSteal, 0), 0.1), 0.96))
+				fn113(tbl39.eta, "Text", quantumPlayerSteal >= 1 and string.format("~%ds left", math.ceil(quantumPlayerSteal)) or "Almost done")
 			else
 				v22.progress = math.max(v22.progress, math.min(n16 / (n16 + 12), 0.6))
 				fn113(tbl39.eta, "Text", string.format("%ds", math.floor(n16)))
@@ -30298,7 +29786,7 @@ local function fn65()
 		end
 
 		task.spawn(function()
-			while genv.__QuantumV4StealCardToken == quantumV4StealCardToken do
+			while genv.__QuantumStealCardToken == quantumStealCardToken do
 				task.wait(0.1)
 				fn67()
 				local ok, result = pcall(fn128)
@@ -30369,15 +29857,15 @@ fn65()
 do
 	local HttpService = game:GetService("HttpService")
 	local ReplicatedStorage2 = game:GetService("ReplicatedStorage")
-	local hopHunt = {file = "QuantumID/SaeHopHunt.json", state = nil, status = "Checking this server...", watch = {}, gone = {}, revealed = nil, gui = nil, busy = false, prompting = false}
+	local hopHunt = {file = "QuantumHub/SaeHopHunt.json", state = nil, status = "Checking this server...", watch = {}, gone = {}, revealed = nil, gui = nil, busy = false, prompting = false}
 	tbl13.hopHunt = hopHunt
-	hopHunt.bootCode = "if game:GetAttribute(\"QuantumBootQueued\") then return end\ngame:SetAttribute(\"QuantumBootQueued\", true)\nrepeat task.wait(0.5) until game:IsLoaded()\ntask.wait(1.5)\nloadstring(game:HttpGet(\"https://raw.githubusercontent.com/QuantumPH2/UI/refs/heads/main/NewEraUI.lua\"))()\n"
+	hopHunt.bootCode = "if game:GetAttribute(\"QuantumBootQueued\") then return end\ngame:SetAttribute(\"QuantumBootQueued\", true)\nrepeat task.wait(0.5) until game:IsLoaded()\ntask.wait(1.5)\nloadstring(game:HttpGet(\"https://quantumhub.xyz/raw/quantumv6\"))()\n"
 
 	hopHunt.elevate = function()
-		local quantumV4IdentitySetter2 = genv.__QuantumV4IdentitySetter
+		local quantumIdentitySetter2 = genv.__QuantumIdentitySetter
 
-		if type(quantumV4IdentitySetter2) == "function" then
-			pcall(quantumV4IdentitySetter2, genv.__QuantumV4UICapabilityIdentity or 8)
+		if type(quantumIdentitySetter2) == "function" then
+			pcall(quantumIdentitySetter2, genv.__QuantumUICapabilityIdentity or 8)
 		end
 	end
 
@@ -30426,8 +29914,8 @@ do
 
 	hopHunt.save = function()
 		pcall(function()
-			if makefolder and (isfolder and not isfolder("QuantumID")) then
-				makefolder("QuantumID")
+			if makefolder and (isfolder and not isfolder("QuantumHub")) then
+				makefolder("QuantumHub")
 			end
 
 			if writefile then
@@ -31008,7 +30496,7 @@ do
 				end
 
 				local flag8 = os.clock() - now > 6
-				local flag9 = quantumV4Config.IsStealing == true or quantumV4Config.IsPlacing == true
+				local flag9 = quantumConfig.IsStealing == true or quantumConfig.IsPlacing == true
 
 				if not hopHunt.busy then
 					if hopHunt.prompting then
@@ -31126,73 +30614,14 @@ do
 end
 
 local function fn66()
-	local Fluent
-	if getgenv and type(getgenv) == "function" and getgenv().__NewEraUI then
-		Fluent = getgenv().__NewEraUI
-	end
+		local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
 
-	if not Fluent and isfile and readfile and type(isfile) == "function" and type(readfile) == "function" then
-		local ok, fileContent = pcall(function()
-			if isfile("scratch/NewEraUI.lua") then
-				return readfile("scratch/NewEraUI.lua")
-			end
-		end)
-		if ok and type(fileContent) == "string" and #fileContent > 0 then
-			local chunk = loadstring(fileContent)
-			if chunk then
-				local runOk, result = pcall(chunk)
-				if runOk and type(result) == "table" then
-					Fluent = result
-				end
-			end
-		end
-	end
-
-	if not Fluent and game and game.HttpGet then
-		local ok, httpContent = pcall(function()
-			return game:HttpGet("https://raw.githubusercontent.com/QuantumPH2/UI/refs/heads/main/NewEraUI.lua")
-		end)
-		if ok and type(httpContent) == "string" and #httpContent > 0 then
-			local chunk = loadstring(httpContent)
-			if chunk then
-				local runOk, result = pcall(chunk)
-				if runOk and type(result) == "table" then
-					Fluent = result
-				end
-			end
-		end
-	end
-
-	if not Fluent then
-		warn("[Quantum] UI library failed to load")
-		return
-	end
-
-	if getgenv and type(getgenv) == "function" then
-		getgenv().__NewEraUI = Fluent
-	end
-
-	if Fluent and Fluent.Elements and type(Fluent.Elements.AddDropdown) == "function" then
-		local origAddDropdown = Fluent.Elements.AddDropdown
-		Fluent.Elements.AddDropdown = function(self, id, config)
-			local cfg = type(id) == "table" and id or config
-			if type(cfg) == "table" and cfg.Multi and cfg.Default == nil then
-				cfg.Default = {}
-			end
-			return origAddDropdown(self, id, config)
-		end
-	end
-
-	local flag6 = Fluent
-	local function fn67(arg)
+local function fn67(arg)
 		local tbl14 = {}
 
-		if type(arg) == "table" then
-			for k, v21 in pairs(arg) do
-				local val = type(k) == "number" and v21 or (v21 == true and k or nil)
-				if val and val ~= "None" and val ~= "" then
-					tbl14[#tbl14 + 1] = val
-				end
+		for i, v21 in ipairs(type(arg) == "table" and arg or {}) do
+			if v21 ~= "None" and v21 ~= "" then
+				tbl14[#tbl14 + 1] = v21
 			end
 		end
 
@@ -31345,7 +30774,7 @@ local function fn66()
 	end
 
 	local function fn71(arg)
-		local placeRarities = quantumV4Config.PlaceRarities or {}
+		local placeRarities = quantumConfig.PlaceRarities or {}
 
 		if #placeRarities == 0 then
 			return true
@@ -31365,11 +30794,11 @@ local function fn66()
 	local tbl17 = {at = 0, value = false}
 
 	local function fn73()
-		if not quantumV4Config.AutoPlace then
+		if not quantumConfig.AutoPlace then
 			return false
 		end
 
-		if quantumV4Config.IsPlacing then
+		if quantumConfig.IsPlacing then
 			return true
 		end
 		local now = os.clock()
@@ -31406,12 +30835,12 @@ local function fn66()
 	end
 
 	function tbl10.AutoPlaceLoop()
-		if quantumV4Config.IsAutoPlaceWorkerRunning then
+		if quantumConfig.IsAutoPlaceWorkerRunning then
 			return
 		end
-		quantumV4Config.IsAutoPlaceWorkerRunning = true
+		quantumConfig.IsAutoPlaceWorkerRunning = true
 
-		while quantumV4Config.AutoPlace and fn2() do
+		while quantumConfig.AutoPlace and fn2() do
 			task.wait(1.5)
 
 			local ok2, result = pcall(function()
@@ -31496,28 +30925,28 @@ local function fn66()
 				end
 
 				local function fn74()
-					return quantumV4TaskLadder.blocker("auto_place") ~= nil
+					return quantumTaskLadder.blocker("auto_place") ~= nil
 				end
 
 				if fn74() then
-					str3 = quantumV4TaskLadder.yieldLabel("auto_place") or ""
+					str3 = quantumTaskLadder.yieldLabel("auto_place") or ""
 					return
 				end
-				Assets = quantumV4TaskLadder.holder("auto_place")
+				Assets = quantumTaskLadder.holder("auto_place")
 				if Assets then
-					str3 = "Waiting for " .. quantumV4TaskLadder.TITLES[Assets] .. " to hand over"
+					str3 = "Waiting for " .. quantumTaskLadder.TITLES[Assets] .. " to hand over"
 					return
 				end
-				quantumV4Config.IsPlacing = true
+				quantumConfig.IsPlacing = true
 				str3 = string.format("Placing %d egg%s", #tbl18, #tbl18 == 1 and "" or "s")
-				local quantumV4TreadmillManager = genv.__QuantumV4TreadmillManager
+				local quantumTreadmillManager = genv.__QuantumTreadmillManager
 
-				if quantumV4TreadmillManager and quantumV4TreadmillManager.activeTreadmill ~= nil then
+				if quantumTreadmillManager and quantumTreadmillManager.activeTreadmill ~= nil then
 					Assets = os.clock() + 5
 
-					while quantumV4TreadmillManager.activeTreadmill ~= nil and os.clock() < Assets and not fn74() do
+					while quantumTreadmillManager.activeTreadmill ~= nil and os.clock() < Assets and not fn74() do
 						pcall(function()
-							quantumV4TreadmillManager:_requestUnequip()
+							quantumTreadmillManager:_requestUnequip()
 						end)
 
 						task.wait(0.3)
@@ -31543,7 +30972,7 @@ local function fn66()
 				local v21 = if humanoidRootPart then humanoidRootPart.CFrame else nil
 
 				local function fn75()
-					local autoPlace = quantumV4Config.AutoPlace
+					local autoPlace = quantumConfig.AutoPlace
 					return if autoPlace then fn74() else not autoPlace
 				end
 
@@ -31589,7 +31018,7 @@ local function fn66()
 				local n9 = 0
 
 				for i, v22 in ipairs(tbl18) do
-					if quantumV4Config.AutoPlace then
+					if quantumConfig.AutoPlace then
 						if flag7 then
 							break
 						end
@@ -31677,8 +31106,8 @@ local function fn66()
 								local str4 = v27 and string.lower(tostring(v27)) or ""
 
 								if string.find(str4, "full") or string.find(str4, "limit") or string.find(str4, "capacity") or string.find(str4, "maximum") then
-									if quantumV4Config.AutoPlace then
-										quantumV4Config.AutoPlace = false
+									if quantumConfig.AutoPlace then
+										quantumConfig.AutoPlace = false
 									end
 
 									flag7 = true
@@ -31708,11 +31137,11 @@ local function fn66()
 				end
 			end)
 
-			if quantumV4Config.IsPlacing then
+			if quantumConfig.IsPlacing then
 				str3 = ""
 			end
 
-			quantumV4Config.IsPlacing = false
+			quantumConfig.IsPlacing = false
 
 			if not ok2 then
 				str3 = "Error, retrying"
@@ -31720,27 +31149,27 @@ local function fn66()
 			end
 		end
 
-		quantumV4Config.IsAutoPlaceWorkerRunning = false
+		quantumConfig.IsAutoPlaceWorkerRunning = false
 	end
 
-	quantumV4TaskLadder.register("auto_place", {wants = fn73, active = function()
-		return quantumV4Config.IsPlacing == true
+	quantumTaskLadder.register("auto_place", {wants = fn73, active = function()
+		return quantumConfig.IsPlacing == true
 	end, enabled = function()
-		return quantumV4Config.AutoPlace == true
+		return quantumConfig.AutoPlace == true
 	end, status = function()
 		return str3
 	end})
 
 	function tbl10.AutoHatchLoop()
-		if quantumV4Config.IsAutoHatchWorkerRunning then
+		if quantumConfig.IsAutoHatchWorkerRunning then
 			return
 		end
-		quantumV4Config.IsAutoHatchWorkerRunning = true
+		quantumConfig.IsAutoHatchWorkerRunning = true
 
 		task.spawn(function()
 			local tbl18 = {}
 
-			while quantumV4Config.AutoHatch and fn2() do
+			while quantumConfig.AutoHatch and fn2() do
 				task.wait(1.5)
 
 				pcall(function()
@@ -31760,7 +31189,7 @@ local function fn66()
 					local now = os.time()
 
 					for i, v22 in ipairs(tbl19) do
-						if not quantumV4Config.AutoHatch then
+						if not quantumConfig.AutoHatch then
 							break
 						end
 
@@ -31788,7 +31217,7 @@ local function fn66()
 				end)
 			end
 
-			quantumV4Config.IsAutoHatchWorkerRunning = false
+			quantumConfig.IsAutoHatchWorkerRunning = false
 		end)
 	end
 
@@ -31820,16 +31249,16 @@ local function fn66()
 		end
 
 		local function fn77()
-			return quantumV4TaskLadder.blocker("use_scrambled") ~= nil
+			return quantumTaskLadder.blocker("use_scrambled") ~= nil
 		end
 
-		local str4 = ({Fractured = "Boss", Enchanted = "Enchanted"})[quantumV4Config.MutationChoice] or "Scrambled"
+		local str4 = ({Fractured = "Boss", Enchanted = "Enchanted"})[quantumConfig.MutationChoice] or "Scrambled"
 
 		local function fn78(arg)
 			local tbl19 = {AssetCategory = arg.AssetCategory or arg.Category, AssetScale = arg.AssetScale or arg.Scale or 1, Mutations = arg.Mutations or {}, BaseMutation = arg.BaseMutation, AssetEyeColor = arg.AssetEyeColor, AssetColorSeed = arg.AssetColorSeed, AssetColorIndex = arg.AssetColorIndex, Gender = arg.Gender, Personality = arg.Personality, HasBeenFirstPlaced = arg.HasBeenFirstPlaced}
 
 			local ok2, result = pcall(function()
-				return quantumV4Config:getAreaEggValue(tbl19)
+				return quantumConfig:getAreaEggValue(tbl19)
 			end)
 
 			return ok2 and tonumber(result) or 0
@@ -31876,11 +31305,11 @@ local function fn66()
 			return tostring(mutations):find(str4) ~= nil
 		end
 
-		local mutationSpecies = quantumV4Config.MutationSpecies
+		local mutationSpecies = quantumConfig.MutationSpecies
 		local flag8 = type(mutationSpecies) == "table" and #mutationSpecies > 0
-		local mutationRarities = quantumV4Config.MutationRarities
+		local mutationRarities = quantumConfig.MutationRarities
 		local flag9 = type(mutationRarities) == "table" and #mutationRarities > 0
-		local n8 = tonumber(quantumV4Config.MutationMinRate) or 0
+		local n8 = tonumber(quantumConfig.MutationMinRate) or 0
 
 		local function fn81(arg)
 			if type(arg) ~= "table" then
@@ -31947,10 +31376,10 @@ local function fn66()
 		tbl18.wants = wants
 
 		if not v21 then
-			tbl18.status = "No " .. tostring(quantumV4Config.MutationChoice or "Scrambled") .. " item in your bag"
+			tbl18.status = "No " .. tostring(quantumConfig.MutationChoice or "Scrambled") .. " item in your bag"
 
 			if not flag7 then
-				warn("[AutoMutation] no " .. tostring(quantumV4Config.MutationChoice or "Scrambled") .. " consumable in the inventory, round skipped.")
+				warn("[AutoMutation] no " .. tostring(quantumConfig.MutationChoice or "Scrambled") .. " consumable in the inventory, round skipped.")
 				flag7 = true
 			end
 
@@ -31964,12 +31393,12 @@ local function fn66()
 		end
 
 		if fn77() then
-			tbl18.status = quantumV4TaskLadder.yieldLabel("use_scrambled") or ""
+			tbl18.status = quantumTaskLadder.yieldLabel("use_scrambled") or ""
 			return
 		end
-		local useScrambled = quantumV4TaskLadder.holder("use_scrambled")
+		local useScrambled = quantumTaskLadder.holder("use_scrambled")
 		if useScrambled then
-			tbl18.status = "Waiting for " .. quantumV4TaskLadder.TITLES[useScrambled] .. " to hand over"
+			tbl18.status = "Waiting for " .. quantumTaskLadder.TITLES[useScrambled] .. " to hand over"
 			return
 		end
 		local character = localPlayer.Character
@@ -31978,7 +31407,7 @@ local function fn66()
 			return
 		end
 		tbl18.busy = true
-		tbl18.status = "Applying " .. tostring(quantumV4Config.MutationChoice or "Scrambled")
+		tbl18.status = "Applying " .. tostring(quantumConfig.MutationChoice or "Scrambled")
 
 		if not character:FindFirstChild(v21.Name) then
 			pcall(function()
@@ -32020,7 +31449,7 @@ local function fn66()
 						local vector2 = Vector3.new(humanoidRootPart.Position.X - position.X, 0, humanoidRootPart.Position.Z - position.Z)
 						local n9 = position + (vector2.Magnitude > 0.1 and vector2.Unit or Vector3.new(1, 0, 0)) * 10 + Vector3.new(0, 3, 0)
 						pcall(fn38, humanoidRootPart, humanoid, CFrame.new(n9), fn77)
-						tbl18.status = "Applying " .. tostring(quantumV4Config.MutationChoice or "Scrambled")
+						tbl18.status = "Applying " .. tostring(quantumConfig.MutationChoice or "Scrambled")
 					end
 				end
 
@@ -32065,7 +31494,7 @@ local function fn66()
 					end
 
 					task.wait(0.25)
-				until flag10 or not quantumV4Config.MutationRetry or n9 >= 40
+				until flag10 or not quantumConfig.MutationRetry or n9 >= 40
 			end
 		end
 
@@ -32082,37 +31511,37 @@ local function fn66()
 		end
 	end
 
-	quantumV4TaskLadder.register("use_scrambled", {wants = function()
-		return quantumV4Config.AutoMutation == true and tbl18.wants == true
+	quantumTaskLadder.register("use_scrambled", {wants = function()
+		return quantumConfig.AutoMutation == true and tbl18.wants == true
 	end, active = function()
 		return tbl18.busy == true
 	end, enabled = function()
-		return quantumV4Config.AutoMutation == true
+		return quantumConfig.AutoMutation == true
 	end, status = function()
 		return tbl18.status
 	end})
 
 	function tbl10.AutoMutationLoop()
-		if quantumV4Config.IsAutoMutationWorkerRunning then
+		if quantumConfig.IsAutoMutationWorkerRunning then
 			return
 		end
-		quantumV4Config.IsAutoMutationWorkerRunning = true
+		quantumConfig.IsAutoMutationWorkerRunning = true
 
 		task.spawn(function()
-			while quantumV4Config.AutoMutation and fn2() do
+			while quantumConfig.AutoMutation and fn2() do
 				task.wait(1)
 				pcall(tbl10.mutationSweep)
 			end
 
-			quantumV4Config.IsAutoMutationWorkerRunning = false
+			quantumConfig.IsAutoMutationWorkerRunning = false
 		end)
 	end
 
 	function tbl10.RingEventLoop()
-		if quantumV4Config.IsRingEventRunning then
+		if quantumConfig.IsRingEventRunning then
 			return
 		end
-		quantumV4Config.IsRingEventRunning = true
+		quantumConfig.IsRingEventRunning = true
 
 		task.spawn(function()
 			local cframe = CFrame.new(542.93, 71.5, -405.58)
@@ -32120,7 +31549,7 @@ local function fn66()
 			local cframe3 = CFrame.new(5573, 70.77, -363)
 
 			local function fn75()
-				local autoRingEvent = quantumV4Config.AutoRingEvent
+				local autoRingEvent = quantumConfig.AutoRingEvent
 				return if autoRingEvent then not fn2() else not autoRingEvent
 			end
 
@@ -32157,7 +31586,7 @@ local function fn66()
 				end
 			end
 
-			quantumV4Config.IsRingEventRunning = false
+			quantumConfig.IsRingEventRunning = false
 		end)
 	end
 
@@ -32250,7 +31679,7 @@ local function fn66()
 			end
 
 			local function fn77(arg, arg2)
-				if not quantumV4Config.AutoSell then
+				if not quantumConfig.AutoSell then
 					return false, "toggle Auto Sell Pet udah OFF", "global"
 				end
 
@@ -32284,7 +31713,7 @@ local function fn66()
 				if inventory == nil then
 					return false, "pet ini udah gak ada di inventory", "pet"
 				end
-				local sellPetMaxRate = quantumV4Config.SellPetMaxRate or 0
+				local sellPetMaxRate = quantumConfig.SellPetMaxRate or 0
 				if sellPetMaxRate > 0 and rateOf({Category = inventory.Category or inventory.AssetCategory, Scale = inventory.Scale or inventory.AssetScale or 1, Mutations = inventory.Mutations or {}}) > sellPetMaxRate then
 					return false, "money/s pet ini di atas batas value", "pet"
 				end
@@ -32303,10 +31732,10 @@ local function fn66()
 				return true
 			end
 
-			while quantumV4Config.AutoSell and fn2() do
+			while quantumConfig.AutoSell and fn2() do
 				local ok2, result = pcall(function()
 					if not fn32() then
-						tbl19.status = quantumV4TaskLadder.yieldLabel("auto_sell") or ""
+						tbl19.status = quantumTaskLadder.yieldLabel("auto_sell") or ""
 						return
 					end
 					local v24 = fn33(v21)
@@ -32338,7 +31767,7 @@ local function fn66()
 
 							if n8 % 250 == 0 then
 								RunService.Heartbeat:Wait()
-								if not quantumV4Config.AutoSell then
+								if not quantumConfig.AutoSell then
 									return
 								end
 							end
@@ -32354,7 +31783,7 @@ local function fn66()
 								local rarity = v29 and v29.Rarity
 								local displayName2 = rarity and (rarity.DisplayName or rarity._id or rarity.Name) or "Unknown"
 								local v30 = fn34(displayName, displayName2, v24, v25)
-								local sellPetMaxRate = quantumV4Config.SellPetMaxRate or 0
+								local sellPetMaxRate = quantumConfig.SellPetMaxRate or 0
 								local v31 = if sellPetMaxRate > 0 then rateOf({Category = category, Scale = v28.Scale or v28.AssetScale or 1, Mutations = v28.Mutations or {}}) <= sellPetMaxRate else true
 
 								if v30 and v31 then
@@ -32458,7 +31887,7 @@ local function fn66()
 	local flag10 = false
 
 	local function fn76()
-		if not quantumV4Config.AutoSellEgg then
+		if not quantumConfig.AutoSellEgg then
 			return false
 		end
 		local v24 = fn33(v23)
@@ -32505,7 +31934,7 @@ local function fn66()
 		for k, v26 in pairs(eggInventory) do
 			local flag11 = type(v26) == "table" and directory[v26.AssetCategory]
 			local displayName = flag11 and flag11.Rarity and (flag11.Rarity.DisplayName or flag11.Rarity._id)
-			local sellEggMaxRate = quantumV4Config.SellEggMaxRate or 0
+			local sellEggMaxRate = quantumConfig.SellEggMaxRate or 0
 			local v27 = if sellEggMaxRate > 0 then if type(v26) == "table" then rateOf({Category = v26.AssetCategory, Scale = v26.AssetScale or 1, Mutations = v26.Mutations or {}}) <= sellEggMaxRate else true else true
 			if v26.Placement == nil and (v27 and fn35(displayName or "Unknown", v24)) then
 				return true
@@ -32515,7 +31944,7 @@ local function fn66()
 		return false
 	end
 
-	genv.__QuantumV4IsAutoSellEggBusy = function()
+	genv.__QuantumIsAutoSellEggBusy = function()
 		return flag10 or fn76()
 	end
 
@@ -32532,12 +31961,12 @@ local function fn66()
 		return tbl20.value
 	end
 
-	quantumV4TaskLadder.register("auto_sell", {wants = function()
-		return quantumV4Config.AutoSell == true and tbl19.petPending == true or quantumV4Config.AutoSellEgg == true and fn77()
+	quantumTaskLadder.register("auto_sell", {wants = function()
+		return quantumConfig.AutoSell == true and tbl19.petPending == true or quantumConfig.AutoSellEgg == true and fn77()
 	end, active = function()
 		return tbl19.petBusy == true or flag10 == true
 	end, enabled = function()
-		return quantumV4Config.AutoSell == true or quantumV4Config.AutoSellEgg == true
+		return quantumConfig.AutoSell == true or quantumConfig.AutoSellEgg == true
 	end, status = function()
 		if flag10 then
 			return "Selling eggs"
@@ -32558,14 +31987,14 @@ local function fn66()
 			local Remotes = require(ReplicatedStorage2.Shared.Remotes)
 			local Save = require(ReplicatedStorage2.Shared.Save)
 
-			while quantumV4Config.AutoSellEgg and fn2() do
+			while quantumConfig.AutoSellEgg and fn2() do
 				local v24 = fn33(v23)
 				local v25 = (Save.Peek or Save.Get)()
 				local eggInventory = v25 and v25.EggInventory
 
 				if v24 and type(eggInventory) == "table" and fn32() then
 					for k, v26 in pairs(eggInventory) do
-						if quantumV4Config.AutoSellEgg then
+						if quantumConfig.AutoSellEgg then
 							if not fn32() then
 								break
 							end
@@ -32575,7 +32004,7 @@ local function fn66()
 
 						local flag11 = type(v26) == "table" and directory[v26.AssetCategory]
 						local displayName = flag11 and flag11.Rarity and (flag11.Rarity.DisplayName or flag11.Rarity._id)
-						local sellEggMaxRate = quantumV4Config.SellEggMaxRate or 0
+						local sellEggMaxRate = quantumConfig.SellEggMaxRate or 0
 						local v27 = if sellEggMaxRate > 0 then if type(v26) == "table" then rateOf({Category = v26.AssetCategory, Scale = v26.AssetScale or 1, Mutations = v26.Mutations or {}}) <= sellEggMaxRate else true else true
 
 						if v26.Placement == nil and (v27 and fn35(displayName or "Unknown", v24)) then
@@ -32584,8 +32013,8 @@ local function fn66()
 							end
 							flag10 = true
 
-							if genv.__QuantumV4TreadmillManager and genv.__QuantumV4TreadmillManager.activeTreadmill ~= nil then
-								genv.__QuantumV4TreadmillManager:_cancelIdle(true)
+							if genv.__QuantumTreadmillManager and genv.__QuantumTreadmillManager.activeTreadmill ~= nil then
+								genv.__QuantumTreadmillManager:_cancelIdle(true)
 								task.wait(0.25)
 							end
 
@@ -32617,14 +32046,14 @@ local function fn66()
 	local tbl21 = {"None", "All"}
 
 	pcall(function()
-		local tbl22 = {}
+		local espList22 = {}
 
 		for k, v24 in pairs(require(game:GetService("ReplicatedStorage").Data.Assets).Directory) do
 			if type(v24) == "table" and (v24.DisplayName or v24._id or v24.Name) then
 				local displayName = v24.DisplayName or v24._id or v24.Name
 
-				if not tbl22[displayName] then
-					tbl22[displayName] = true
+				if not espList22[displayName] then
+					espList22[displayName] = true
 					table.insert(tbl21, displayName)
 				end
 			end
@@ -32651,93 +32080,92 @@ local function fn66()
 	end)
 
 	local v24 = fn67(tbl15)
-	local v25_area = fn67(tbl16)
-	local v25 = v25_area
+	local v25 = fn67(tbl16)
 	local v26 = fn68()
 	fn73 = fn69((fn67(tbl21)))
 
 	local function fn78(arg)
-		quantumV4Config.AutoSteal = arg == true
+		quantumConfig.AutoSteal = arg == true
 
 		if v13 then
-			v13:setEnabled(quantumV4Config.AutoSteal)
+			v13:setEnabled(quantumConfig.AutoSteal)
 		end
 
-		if type(genv.__QuantumV4SetStealDeclutter) == "function" then
-			pcall(genv.__QuantumV4SetStealDeclutter, quantumV4Config.AutoSteal)
+		if type(genv.__QuantumSetStealDeclutter) == "function" then
+			pcall(genv.__QuantumSetStealDeclutter, quantumConfig.AutoSteal)
 		end
 	end
 
 	local function fn79(arg)
-		quantumV4Config.StealHoldSeconds = math.clamp(math.floor((tonumber(arg) or 5) + 0.5), 1, 10)
+		quantumConfig.StealHoldSeconds = math.clamp(math.floor((tonumber(arg) or 5) + 0.5), 1, 10)
 	end
 
 	local function fn80(arg)
-		quantumV4Config.GodMode = arg == true
+		quantumConfig.GodMode = arg == true
 
 		if v16 then
-			v16:setEnabled(quantumV4Config.GodMode)
+			v16:setEnabled(quantumConfig.GodMode)
 		end
 	end
 
 	local function fn81()
-		return genv.__QuantumV4TreadmillManager
+		return genv.__QuantumTreadmillManager
 	end
 
 	local function fn82(arg)
-		quantumV4Config.AutoTreadmillIdle = arg == true
+		quantumConfig.AutoTreadmillIdle = arg == true
 		local v27 = fn81()
 
 		if v27 then
-			v27:setIdleFarm(quantumV4Config.AutoTreadmillIdle and not quantumV4Config.AntiTreadmill)
+			v27:setIdleFarm(quantumConfig.AutoTreadmillIdle and not quantumConfig.AntiTreadmill)
 		end
 	end
 
 	local function fn83(arg)
-		quantumV4Config.AntiTreadmill = arg == true
+		quantumConfig.AntiTreadmill = arg == true
 		local v27 = fn81()
 
-		if quantumV4Config.AntiTreadmill then
+		if quantumConfig.AntiTreadmill then
 			if v27 then
 				v27:setIdleFarm(false)
 			end
 
 			tbl13.startAntiTreadmillLoop()
 		elseif v27 then
-			v27:setIdleFarm(quantumV4Config.AutoTreadmillIdle)
+			v27:setIdleFarm(quantumConfig.AutoTreadmillIdle)
 		end
 	end
 
 	local function fn84(arg)
-		quantumV4Config.HopNoMatch = arg == true
+		quantumConfig.HopNoMatch = arg == true
 
-		if quantumV4Config.HopNoMatch then
+		if quantumConfig.HopNoMatch then
 			tbl13.startHopLoop()
 		end
 	end
 
 	local function fn85(arg)
-		quantumV4Config.PrivateServerMax = tostring((if type(arg) == "table" then arg[1] else arg) or "2")
+		quantumConfig.PrivateServerMax = tostring((if type(arg) == "table" then arg[1] else arg) or "2")
 	end
 
 	local function fn86(arg)
-		quantumV4Config.PrivateServerAuto = arg == true
+		quantumConfig.PrivateServerAuto = arg == true
 
-		if quantumV4Config.PrivateServerAuto then
+		if quantumConfig.PrivateServerAuto then
 			tbl13.startPrivateAutoHop()
 		end
 	end
 
 	local function fn87(arg)
-		quantumV4Config.HopCooldown = math.max(1, math.floor(tonumber(arg) or 5))
+		quantumConfig.HopCooldown = math.max(1, math.floor(tonumber(arg) or 5))
 	end
 
 	local function fn88(arg)
-		quantumV4Config.AutoTreadmillUpgrade = arg == true
+		quantumConfig.AutoTreadmillUpgrade = arg == true
 		local v27 = fn81()
 
 		if v27 then
-			v27:setAutoUpgrade(quantumV4Config.AutoTreadmillUpgrade)
+			v27:setAutoUpgrade(quantumConfig.AutoTreadmillUpgrade)
 		end
 	end
 
@@ -32745,19 +32173,12 @@ local function fn66()
 		local str4 = type(arg) == "string" and arg or ""
 		local str5 = str4:lower()
 		local flag11 = str5:find("zig") ~= nil
-		local stealMode
-		if str4:find("Instant") or str4:find("Teleport") or str4:find("Low") then
-			stealMode = "Instant"
-		elseif str4:find("Fly") or str4:find("High") or flag11 then
-			stealMode = "Fly"
-		else
-			stealMode = "Instant"
-		end
-		local flyAerial = stealMode == "Fly" and not flag11 and (str5:find("fly") ~= nil or str5:find("aerial") ~= nil)
+		local stealMode = (str4:find("Fly") or str4:find("High") or flag11) and "Fly" or "Instant"
+		local flyAerial = stealMode == "Fly" and not flag11 and (str4:find("%(Fly%)") ~= nil or str5:find("aerial") ~= nil)
 		local flyZigzag = flag11 and stealMode == "Fly"
-		quantumV4Config.StealMode = stealMode
-		quantumV4Config.FlyAerial = flyAerial
-		quantumV4Config.FlyZigzag = flyZigzag
+		quantumConfig.StealMode = stealMode
+		quantumConfig.FlyAerial = flyAerial
+		quantumConfig.FlyZigzag = flyZigzag
 
 		if v13 and v13.captureObjectiveEnabled then
 			v13._modeBeforeCapture = {stealMode, flyAerial, flyZigzag}
@@ -32778,53 +32199,42 @@ local function fn66()
 
 	local function fn91(arg, arg2, arg3)
 		local v27 = fn67(arg3)
-		local hasAll = table.find(v27, "All") ~= nil
-
-		if hasAll then
-			v27 = {}
-		end
 
 		if arg == "names" then
-			quantumV4Config.StealNamesFilter = v27
+			quantumConfig.StealNamesFilter = v27
 		elseif arg == "areas" then
-			quantumV4Config.StealAreas = v27
+			quantumConfig.StealAreas = v27
 		elseif arg == "rarities" then
-			quantumV4Config.StealRarities = v27
+			quantumConfig.StealRarities = v27
 		end
 
 		if v13 then
 			v13:setFilter(arg, v27)
-			v13:setFilterEnabled(arg2, (not hasAll) and (#v27 > 0))
+			v13:setFilterEnabled(arg2, #v27 > 0)
 		end
 	end
 
 	local function fn92(arg)
-		quantumV4Config:applyStealValueInput(arg)
+		quantumConfig:applyStealValueInput(arg)
 
 		if v13 then
-			v13:setMinValuePerSec(quantumV4Config.StealMinValue or 0)
+			v13:setMinValuePerSec(quantumConfig.StealMinValue or 0)
 		end
 	end
 
 	local function fn93(arg)
 		local v27 = fn67(arg)
-		local hasAll = table.find(v27, "All") ~= nil
-
-		if hasAll then
-			v27 = {}
-		end
-
-		quantumV4Config.StealMutations = v27
+		quantumConfig.StealMutations = v27
 
 		if v13 then
 			v13:setFilter("mutations", v27)
-			v13:setFilterEnabled("mutation", (not hasAll) and (#v27 > 0))
+			v13:setFilterEnabled("mutation", #v27 > 0)
 		end
 	end
 
 	local function fn94(arg)
 		local stealMinWeight = tonumber((tostring(arg or ""):gsub("[^%d%.]", ""))) or 0
-		quantumV4Config.StealMinWeight = stealMinWeight
+		quantumConfig.StealMinWeight = stealMinWeight
 
 		if v13 then
 			v13:setMinWeightKg(stealMinWeight)
@@ -32832,62 +32242,62 @@ local function fn66()
 	end
 
 	local function fn95(arg)
-		quantumV4Config.StealPriority = tostring(arg or "Rarity")
+		quantumConfig.StealPriority = tostring(arg or "Rarity")
 
 		if v13 then
-			v13:setHighestValueFirst(quantumV4Config.StealPriority == "Highest Value")
-			v13:setHeaviestFirst(quantumV4Config.StealPriority == "Heaviest")
+			v13:setHighestValueFirst(quantumConfig.StealPriority == "Highest Value")
+			v13:setHeaviestFirst(quantumConfig.StealPriority == "Heaviest")
 		end
 	end
 
 	local function fn96(arg)
-		quantumV4Config.EggESP = arg == true
+		quantumConfig.EggESP = arg == true
 
 		if v13 then
-			v13:setEggEsp(quantumV4Config.EggESP)
+			v13:setEggEsp(quantumConfig.EggESP)
 		end
 	end
 
 	local function fn97(arg)
 		local v27 = fn67(arg)
-		quantumV4Config.EspDetails = v27
+		quantumConfig.EspDetails = v27
 		if not v13 then
 			return
 		end
-		local tbl22 = {}
+		local espList22 = {}
 
 		for i, v28 in ipairs(v27) do
-			tbl22[v28] = true
+			espList22[v28] = true
 		end
 
-		v13:setEspOption("name", tbl22.Name == true)
-		v13:setEspOption("rarity", tbl22.Rarity == true)
-		v13:setEspOption("value", tbl22.Value == true)
-		v13:setEspOption("kg", tbl22.Weight == true)
-		v13:setEspOption("mutation", tbl22.Mutation == true)
-		v13:setEspOption("placed", tbl22["Placed Eggs"] == true)
-		v13:setEspOption("icon", tbl22.Icon == true)
+		v13:setEspOption("name", espList22.Name == true)
+		v13:setEspOption("rarity", espList22.Rarity == true)
+		v13:setEspOption("value", espList22.Value == true)
+		v13:setEspOption("kg", espList22.Weight == true)
+		v13:setEspOption("mutation", espList22.Mutation == true)
+		v13:setEspOption("placed", espList22["Placed Eggs"] == true)
+		v13:setEspOption("icon", espList22.Icon == true)
 	end
 
 	function tbl10.applyEspMinRarity(arg)
 		local flag11 = type(arg) == "table" and arg[1] or arg
-		quantumV4Config.EspMinRarity = type(flag11) == "string" and flag11 ~= "Any" and flag11 or nil
+		quantumConfig.EspMinRarity = type(flag11) == "string" and flag11 ~= "Any" and flag11 or nil
 
 		if v13 then
-			v13:setEspMinRank(quantumV4Config.EspMinRarity and v6.rarityRank(quantumV4Config.EspMinRarity) or 0)
+			v13:setEspMinRank(quantumConfig.EspMinRarity and v6.rarityRank(quantumConfig.EspMinRarity) or 0)
 		end
 	end
 
 	function tbl10.applyEspMinValue(arg)
-		quantumV4Config.EspMinValue = fn61(arg) or 0
+		quantumConfig.EspMinValue = fn61(arg) or 0
 
 		if v13 then
-			v13:setEspMinValue(quantumV4Config.EspMinValue)
+			v13:setEspMinValue(quantumConfig.EspMinValue)
 		end
 	end
 
 	local function fn98(arg)
-		quantumV4Config.ScrambleTradeInBanners = fn67(arg)
+		quantumConfig.ScrambleTradeInBanners = fn67(arg)
 	end
 
 	local function fn99(arg)
@@ -32895,95 +32305,95 @@ local function fn66()
 	end
 
 	local function fn100(arg)
-		quantumV4Config.AntiGuardKnockback = arg == true
-		local quantumV4AntiGuard = genv.__QuantumV4AntiGuard
+		quantumConfig.AntiGuardKnockback = arg == true
+		local quantumAntiGuard = genv.__QuantumAntiGuard
 
-		if quantumV4AntiGuard and type(quantumV4AntiGuard.setEnabled) == "function" then
-			pcall(quantumV4AntiGuard.setEnabled, quantumV4AntiGuard, quantumV4Config.AntiGuardKnockback)
+		if quantumAntiGuard and type(quantumAntiGuard.setEnabled) == "function" then
+			pcall(quantumAntiGuard.setEnabled, quantumAntiGuard, quantumConfig.AntiGuardKnockback)
 		end
 	end
 
 	local function fn101(arg)
-		quantumV4Config.AutoFavorite = arg == true
+		quantumConfig.AutoFavorite = arg == true
 	end
 
 	local function fn102(arg)
-		quantumV4Config.FavMode = arg == "Species" and "Species" or "Rarity"
+		quantumConfig.FavMode = arg == "Species" and "Species" or "Rarity"
 	end
 
 	local function fn103(arg)
-		quantumV4Config.FavRarities = fn67(arg)
+		quantumConfig.FavRarities = fn67(arg)
 	end
 
 	local function fn104(arg)
-		quantumV4Config.FavSpecies = fn67(arg)
+		quantumConfig.FavSpecies = fn67(arg)
 	end
 
 	local function fn105(arg)
-		quantumV4Config.AutoEquipBest = arg == true
+		quantumConfig.AutoEquipBest = arg == true
 	end
 
 	local function fn106(arg)
-		quantumV4Config.AutoClaimOffline = arg == true
+		quantumConfig.AutoClaimOffline = arg == true
 	end
 
 	local function fn107(arg)
-		quantumV4Config.AutoBaseUpgrade = arg == true
+		quantumConfig.AutoBaseUpgrade = arg == true
 	end
 
 	local function fn108(arg)
-		quantumV4Config.AutoClaimAlmanac = arg == true
+		quantumConfig.AutoClaimAlmanac = arg == true
 	end
 
 	local function fn109(arg)
-		quantumV4Config.AutoFusePets = arg == true
+		quantumConfig.AutoFusePets = arg == true
 	end
 
 	local function fn110(arg)
-		quantumV4Config.FuseSelectedOnly = arg == "Selected Species"
+		quantumConfig.FuseSelectedOnly = arg == "Selected Species"
 	end
 
 	local function fn111(arg)
-		quantumV4Config.FuseRarities = fn67(arg)
+		quantumConfig.FuseRarities = fn67(arg)
 	end
 
 	local function fn112(arg)
-		quantumV4Config.FuseSpecies = fn67(arg)
+		quantumConfig.FuseSpecies = fn67(arg)
 	end
 
 	local function fn113(arg)
-		local quantumV4Roaming = genv.__QuantumV4Roaming
+		local quantumRoaming = genv.__QuantumRoaming
 
-		if quantumV4Roaming and type(quantumV4Roaming.setNoclip) == "function" then
-			pcall(quantumV4Roaming.setNoclip, arg == true)
+		if quantumRoaming and type(quantumRoaming.setNoclip) == "function" then
+			pcall(quantumRoaming.setNoclip, arg == true)
 		end
 	end
 
 	local function fn114(arg)
-		local quantumV4Roaming = genv.__QuantumV4Roaming
+		local quantumRoaming = genv.__QuantumRoaming
 
-		if quantumV4Roaming and type(quantumV4Roaming.setBottingMode) == "function" then
-			pcall(quantumV4Roaming.setBottingMode, arg == true)
+		if quantumRoaming and type(quantumRoaming.setBottingMode) == "function" then
+			pcall(quantumRoaming.setBottingMode, arg == true)
 		end
 	end
 
 	local function fn115(arg)
-		quantumV4Config.AntiCutscene = arg == true
+		quantumConfig.AntiCutscene = arg == true
 	end
 
 	local function runOnce(arg, arg2, arg3)
-		local v27 = quantumV4Config[arg]
-		quantumV4Config[arg] = true
+		local v27 = quantumConfig[arg]
+		quantumConfig[arg] = true
 		task.spawn(arg2)
 
 		task.delay(2.4, function()
 			local n8 = os.clock() + 30
 
-			while quantumV4Config.IsPlacing and os.clock() < n8 do
+			while quantumConfig.IsPlacing and os.clock() < n8 do
 				task.wait(0.25)
 			end
 
-			quantumV4Config[arg] = v27
+			quantumConfig[arg] = v27
 
 			if arg3 then
 				pcall(arg3)
@@ -32994,118 +32404,118 @@ local function fn66()
 	tbl10.runOnce = runOnce
 
 	local function fn116(arg)
-		quantumV4Config.ScrambleAutoBuy = arg == true
+		quantumConfig.ScrambleAutoBuy = arg == true
 	end
 
 	local function fn117(arg)
-		quantumV4Config.ScrambleBuyList = fn67(arg)
+		quantumConfig.ScrambleBuyList = fn67(arg)
 	end
 
 	local function fn118(arg)
-		quantumV4Config.AutoPlace = arg == true
+		quantumConfig.AutoPlace = arg == true
 
-		if quantumV4Config.AutoPlace then
+		if quantumConfig.AutoPlace then
 			task.spawn(tbl10.AutoPlaceLoop)
 		end
 	end
 
 	local function fn119(arg)
-		quantumV4Config.AutoHatch = arg == true
+		quantumConfig.AutoHatch = arg == true
 
-		if quantumV4Config.AutoHatch then
+		if quantumConfig.AutoHatch then
 			task.spawn(tbl10.AutoHatchLoop)
 		end
 	end
 
 	local function fn120(arg)
-		quantumV4Config.AutoMutation = arg == true
+		quantumConfig.AutoMutation = arg == true
 
-		if quantumV4Config.AutoMutation then
+		if quantumConfig.AutoMutation then
 			task.spawn(tbl10.AutoMutationLoop)
 		end
 	end
 
 	local function fn121(arg)
-		quantumV4Config.AutoRingEvent = arg == true
+		quantumConfig.AutoRingEvent = arg == true
 
-		if quantumV4Config.AutoRingEvent then
+		if quantumConfig.AutoRingEvent then
 			tbl10.RingEventLoop()
 		end
 	end
 
 	local function fn122(arg)
-		quantumV4Config.MutationChoice = (arg == "Fractured" or arg == "Enchanted") and arg or "Scrambled"
+		quantumConfig.MutationChoice = (arg == "Fractured" or arg == "Enchanted") and arg or "Scrambled"
 	end
 
 	local function fn123(arg)
-		quantumV4Config.MutationSpecies = fn67(arg)
+		quantumConfig.MutationSpecies = fn67(arg)
 	end
 
 	local function fn124(arg)
-		quantumV4Config.MutationRarities = fn67(arg)
+		quantumConfig.MutationRarities = fn67(arg)
 	end
 
 	local function fn125(arg)
-		quantumV4Config.MutationMinRate = fn75(arg)
+		quantumConfig.MutationMinRate = fn75(arg)
 	end
 
 	local function fn126(arg)
-		quantumV4Config.MutationRetry = arg == true
+		quantumConfig.MutationRetry = arg == true
 	end
 
 	local function fn127(arg)
-		quantumV4Config.AutoSell = arg == true
+		quantumConfig.AutoSell = arg == true
 
-		if quantumV4Config.AutoSell then
+		if quantumConfig.AutoSell then
 			tbl10.startAutoSellLoop()
 		end
 	end
 
 	local function fn128(arg)
-		quantumV4Config.AutoSellEgg = arg == true
+		quantumConfig.AutoSellEgg = arg == true
 
-		if quantumV4Config.AutoSellEgg then
+		if quantumConfig.AutoSellEgg then
 			tbl10.startAutoSellEggLoop()
 		end
 	end
 
 	local function fn129(arg)
-		quantumV4Config.SellPetMaxRate = fn75(arg)
+		quantumConfig.SellPetMaxRate = fn75(arg)
 	end
 
 	local function fn130(arg)
-		quantumV4Config.SellEggMaxRate = fn75(arg)
+		quantumConfig.SellEggMaxRate = fn75(arg)
 	end
 
 	local flag11 = false
 
 	local function fn131(arg)
-		local flag12 = quantumV4Config.StartupBoost == true
-		quantumV4Config.StartupBoost = arg == true
+		local flag12 = quantumConfig.StartupBoost == true
+		quantumConfig.StartupBoost = arg == true
 
-		if not quantumV4Config.StartupBoost then
+		if not quantumConfig.StartupBoost then
 			flag11 = false
 
-			if flag12 or quantumV4DecomBoostUndo.snapshot then
-				task.spawn(quantumV4DecomBoostUndo.revert)
+			if flag12 or quantumDecomBoostUndo.snapshot then
+				task.spawn(quantumDecomBoostUndo.revert)
 			end
 
 			return
 		end
 
-		if quantumV4Config.StartupBoost and not flag11 then
+		if quantumConfig.StartupBoost and not flag11 then
 			flag11 = true
 
 			task.spawn(function()
 				task.wait(1.5)
 
-				if fn2() and quantumV4Config.StartupBoost then
+				if fn2() and quantumConfig.StartupBoost then
 					fn46()
 				end
 
 				task.wait(4)
 
-				if fn2() and quantumV4Config.StartupBoost then
+				if fn2() and quantumConfig.StartupBoost then
 					fn46()
 				end
 			end)
@@ -33119,44 +32529,44 @@ local function fn66()
 	end
 
 	local function fn133(arg)
-		local quantumV4SetCapFps = genv.__QuantumV4SetCapFps
+		local quantumSetCapFps = genv.__QuantumSetCapFps
 
-		if type(quantumV4SetCapFps) == "function" then
-			quantumV4SetCapFps(arg == true and 1000 or 60)
+		if type(quantumSetCapFps) == "function" then
+			quantumSetCapFps(arg == true and 1000 or 60)
 		end
 	end
 
 	local function fn134()
-		return genv.__QuantumV4MovementExtras
+		return genv.__QuantumMovementExtras
 	end
 
 	local function fn135(arg)
-		quantumV4Config.FlyForCapture = arg == true
+		quantumConfig.FlyForCapture = arg == true
 		local v27 = fn134()
 
 		if v27 then
-			v27:setFlyForCapture(quantumV4Config.FlyForCapture)
+			v27:setFlyForCapture(quantumConfig.FlyForCapture)
 		end
 	end
 
 	local function fn136(arg)
-		quantumV4Config.InstantGrab = arg == true
+		quantumConfig.InstantGrab = arg == true
 		local v27 = fn134()
 
 		if v27 then
-			v27:setInstantGrab(quantumV4Config.InstantGrab)
+			v27:setInstantGrab(quantumConfig.InstantGrab)
 		end
 	end
 
 	local function fn137(arg)
-		genv.__QuantumV4AdminBoost = arg == true
+		genv.__QuantumAdminBoost = arg == true
 
 		if v13 then
-			v13:setSpeed(quantumV4Config.TweenSpeedMultiplier or 60)
+			v13:setSpeed(quantumConfig.TweenSpeedMultiplier or 60)
 		end
 
-		genv.__QuantumV4AdminBoostSpeedGen = (genv.__QuantumV4AdminBoostSpeedGen or 0) + 1
-		local quantumV4AdminBoostSpeedGen = genv.__QuantumV4AdminBoostSpeedGen
+		genv.__QuantumAdminBoostSpeedGen = (genv.__QuantumAdminBoostSpeedGen or 0) + 1
+		local quantumAdminBoostSpeedGen = genv.__QuantumAdminBoostSpeedGen
 
 		if arg == true then
 			task.spawn(function()
@@ -33164,7 +32574,7 @@ local function fn66()
 				local walkSpeed
 				local v27
 
-				while genv.__QuantumV4AdminBoostSpeedGen == quantumV4AdminBoostSpeedGen and fn2() do
+				while genv.__QuantumAdminBoostSpeedGen == quantumAdminBoostSpeedGen and fn2() do
 					local character = localPlayer.Character
 					local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 
@@ -33201,55 +32611,55 @@ local function fn66()
 	end
 
 	local function fn138(arg)
-		quantumV4Config.AutoStealCapture = arg == true
+		quantumConfig.AutoStealCapture = arg == true
 
 		if v13 then
-			v13:setCaptureObjective(quantumV4Config.AutoStealCapture)
+			v13:setCaptureObjective(quantumConfig.AutoStealCapture)
 		end
 	end
 
 	local function fn139(arg)
-		quantumV4Config.InfiniteJump = arg == true
+		quantumConfig.InfiniteJump = arg == true
 		local v27 = fn134()
 
 		if v27 then
-			v27:setInfiniteJump(quantumV4Config.InfiniteJump)
+			v27:setInfiniteJump(quantumConfig.InfiniteJump)
 		end
 	end
 
 	local function fn140(arg)
-		quantumV4Config.AntiHitGuard = arg == true
-		local quantumV4AntiHitGuard = genv.__QuantumV4AntiHitGuard
+		quantumConfig.AntiHitGuard = arg == true
+		local quantumAntiHitGuard = genv.__QuantumAntiHitGuard
 
-		if quantumV4AntiHitGuard then
-			quantumV4AntiHitGuard:setEnabled(quantumV4Config.AntiHitGuard)
+		if quantumAntiHitGuard then
+			quantumAntiHitGuard:setEnabled(quantumConfig.AntiHitGuard)
 		end
 	end
 
 	local function fn141(arg)
-		quantumV4Config.AntiAFK = arg == true
-		genv.__QuantumV4AntiAfkEnabled = quantumV4Config.AntiAFK
+		quantumConfig.AntiAFK = arg == true
+		genv.__QuantumAntiAfkEnabled = quantumConfig.AntiAFK
 
-		if type(genv.__QuantumV4SetAntiAfkEnabled) == "function" then
-			genv.__QuantumV4SetAntiAfkEnabled(quantumV4Config.AntiAFK)
+		if type(genv.__QuantumSetAntiAfkEnabled) == "function" then
+			genv.__QuantumSetAntiAfkEnabled(quantumConfig.AntiAFK)
 		end
 	end
 
 	local function fn142(arg)
-		quantumV4Config.AutoReconnect = arg == true
-		v19.autoReconnect = quantumV4Config.AutoReconnect
+		quantumConfig.AutoReconnect = arg == true
+		v19.autoReconnect = quantumConfig.AutoReconnect
 
 		if getgenv then
-			getgenv().SNE_AutoReconnect = quantumV4Config.AutoReconnect
+			getgenv().SNE_AutoReconnect = quantumConfig.AutoReconnect
 		end
 	end
 
 	local function fn143(arg)
-		quantumV4Config.AutoExecute = arg == true
-		v19.autoExecute = quantumV4Config.AutoExecute
+		quantumConfig.AutoExecute = arg == true
+		v19.autoExecute = quantumConfig.AutoExecute
 
 		if getgenv then
-			getgenv().SNE_AutoExecute = quantumV4Config.AutoExecute
+			getgenv().SNE_AutoExecute = quantumConfig.AutoExecute
 		end
 
 		if arg then
@@ -33260,56 +32670,38 @@ local function fn66()
 	end
 
 	local v27 = (function()
-		local quantumV4IdentitySetter2 = genv.__QuantumV4IdentitySetter or type(setthreadidentity) == "function" and setthreadidentity or type(set_thread_identity) == "function" and set_thread_identity or type(setidentity) == "function" and setidentity or type(syn) == "table" and type(syn.set_thread_identity) == "function" and syn.set_thread_identity
-		local quantumV4UICapabilityIdentity = genv.__QuantumV4UICapabilityIdentity or 8
+		local quantumIdentitySetter2 = genv.__QuantumIdentitySetter or type(setthreadidentity) == "function" and setthreadidentity or type(set_thread_identity) == "function" and set_thread_identity or type(setidentity) == "function" and setidentity or type(syn) == "table" and type(syn.set_thread_identity) == "function" and syn.set_thread_identity
+		local quantumUICapabilityIdentity = genv.__QuantumUICapabilityIdentity or 8
 
 		return function()
-			if type(quantumV4IdentitySetter2) == "function" then
-				pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
+			if type(quantumIdentitySetter2) == "function" then
+				pcall(quantumIdentitySetter2, quantumUICapabilityIdentity)
 			end
 		end
 	end)()
 
-	local flag12 = true
-
-	local function fn144(arg)
-		return function(arg2)
-			if type(v27) == "function" then
-				v27()
-			end
-
-			if flag12 then
-				return
-			end
-
-			if type(arg) == "function" then
-				arg(arg2)
-			end
-		end
-	end
-
-	local quantumV4PlayerSteal = genv.__QuantumV4PlayerSteal
+	local quantumPlayerSteal = genv.__QuantumPlayerSteal
 
 	local function fn145(arg)
-		quantumV4Config.StealPlayers = arg == true
+		quantumConfig.StealPlayers = arg == true
 
-		if quantumV4PlayerSteal then
-			quantumV4PlayerSteal:setEnabled(quantumV4Config.StealPlayers)
+		if quantumPlayerSteal then
+			quantumPlayerSteal:setEnabled(quantumConfig.StealPlayers)
 		end
 
-		if quantumV4Config.StealPlayers and not quantumV4Config.GodMode then
+		if quantumConfig.StealPlayers and not quantumConfig.GodMode then
 			fn80(true)
 
 			if controls.godMode then
 				pcall(function()
-					controls.godMode:SetValue(true)
+					controls.godMode:Set(true)
 				end)
 			end
 		end
 	end
 
 	local function fn146(arg)
-		quantumV4Config.StealPlayerRarities = fn67(arg)
+		quantumConfig.StealPlayerRarities = fn67(arg)
 	end
 
 	local function fn147(arg)
@@ -33338,141 +32730,38 @@ local function fn66()
 	end
 
 	local function fn148(arg)
-		quantumV4Config.StealPlayerMinValue = fn147(arg)
+		quantumConfig.StealPlayerMinValue = fn147(arg)
 	end
 
 	local function fn149(arg)
-		quantumV4Config.AutoIndex = arg == true
+		quantumConfig.AutoIndex = arg == true
 
 		if v13 then
-			v13:setIndexObjective(quantumV4Config.AutoIndex)
+			v13:setIndexObjective(quantumConfig.AutoIndex)
 		end
 	end
 
 	local function fn150(arg)
-		quantumV4Config.WebhookEnabled = arg == true
+		quantumConfig.WebhookEnabled = arg == true
 	end
 
 	local function fn151(arg)
-		quantumV4Config.WebhookURL = type(arg) == "string" and arg:gsub("^%s+", ""):gsub("%s+$", "") or ""
+		quantumConfig.WebhookURL = type(arg) == "string" and arg:gsub("^%s+", ""):gsub("%s+$", "") or ""
 	end
 
 	local function fn152(arg)
-		quantumV4Config.WebhookRarities = fn67(arg)
+		quantumConfig.WebhookRarities = fn67(arg)
 	end
 
 	local function fn153(arg)
-		quantumV4Config.WebhookMinValue = fn147(arg)
+		quantumConfig.WebhookMinValue = fn147(arg)
 	end
 
-	local tbl22 = {"Set", "SetValue", "LoadValue", "ResetValue", "SetContent", "SetTitle", "SetOptions", "Update", "Refresh", "Lock", "Unlock", "SetVisible", "SetStatus", "GetValue", "SetSubTitle", "SetBadge"}
+		local tbl25 = {"Respawn Point"}
+	local quantumRoaming = genv.__QuantumRoaming
 
-	local function fn154(arg)
-		if type(arg) ~= "table" then
-			return arg
-		end
-
-		if rawget(arg, "__quantumElevated") then
-			return arg
-		end
-
-		for i, v28 in ipairs(tbl22) do
-			local value = rawget(arg, v28)
-
-			if type(value) == "function" then
-				rawset(arg, v28, function(...)
-					v27()
-					return value(...)
-				end)
-			end
-		end
-
-		rawset(arg, "__quantumElevated", true)
-		return arg
-	end
-
-	local tbl23 = {"AddToggle", "AddSlider", "AddDropdown", "AddInput", "AddButton", "AddParagraph", "AddKeybind", "AddColorPicker", "AddActionList", "AddPriorityList", "AddLiveChat", "AddSupportCard", "AddSubSection", "AddSection", "AddTab", "AddForum"}
-
-	local function fn155(arg)
-		if type(arg) ~= "table" then
-			return arg
-		end
-		fn154(arg)
-		if rawget(arg, "__quantumFactoryGuarded") then
-			return arg
-		end
-
-		for i, v28 in ipairs(tbl23) do
-			local value = rawget(arg, v28)
-
-			if type(value) == "function" then
-				rawset(arg, v28, function(...)
-					v27()
-					local v29 = table.pack(value(...))
-
-					if v29.n > 0 then
-						v29[1] = fn155(v29[1])
-					end
-
-					return table.unpack(v29, 1, v29.n)
-				end)
-			end
-		end
-
-		rawset(arg, "__quantumFactoryGuarded", true)
-		return arg
-	end
-
-	v27()
-	local Window = Fluent:CreateWindow({
-		Title = "Quantum | ID",
-		TitleIcon = "lucide/atom",
-		SubTitle = "versi 1.0.4.0 Steal An Egg",
-		MinWindowSize = Vector2.new(440, 250),
-		Size = UDim2.fromOffset(580, 460),
-		Acrylic = false,
-		Theme = "Cloudy",
-		MinimizeKey = Enum.KeyCode.LeftControl,
-		MinimizeIcon = "rbxassetid://10734950309"
-	})
-
-	pcall(function()
-		if Window.SetMinimizeIcon then
-			Window:SetMinimizeIcon("rbxassetid://10734950309")
-		elseif Window.SetFloatingIcon then
-			Window:SetFloatingIcon("rbxassetid://10734950309")
-		end
-	end)
-
-	pcall(function()
-		if Window.TitleBar and Window.TitleBar.CloseButton then
-			if type(Window.TitleBar.CloseButton.SetCallback) == "function" then
-				Window.TitleBar.CloseButton.SetCallback(function()
-					Window:Minimize()
-				end)
-			end
-			if Window.TitleBar.CloseButton.Frame then
-				pcall(function()
-					if getconnections then
-						for _, conn in ipairs(getconnections(Window.TitleBar.CloseButton.Frame.MouseButton1Click)) do
-							conn:Disable()
-						end
-					end
-				end)
-				Window.TitleBar.CloseButton.Frame.MouseButton1Click:Connect(function()
-					Window:Minimize()
-				end)
-			end
-		end
-	end)
-
-	local v28 = Window
-	local tbl24 = {}
-	local tbl25 = {"Respawn Point"}
-	local quantumV4Roaming = genv.__QuantumV4Roaming
-
-	if quantumV4Roaming and type(quantumV4Roaming.waypointList) == "function" then
-		local ok2, result = pcall(quantumV4Roaming.waypointList)
+	if quantumRoaming and type(quantumRoaming.waypointList) == "function" then
+		local ok2, result = pcall(quantumRoaming.waypointList)
 		tbl25 = if ok2 then if type(result) == "table" then if #result > 0 then result else tbl25 else tbl25 else tbl25
 	end
 
@@ -33480,11 +32769,11 @@ local function fn66()
 	local tbl26 = {}
 
 	do
-		local quantumV4ScrambleRuntime = genv.__QuantumV4ScrambleRuntime
+		local quantumScrambleRuntime = genv.__QuantumScrambleRuntime
 
-		if quantumV4ScrambleRuntime and type(quantumV4ScrambleRuntime.snapshot) == "function" then
+		if quantumScrambleRuntime and type(quantumScrambleRuntime.snapshot) == "function" then
 			pcall(function()
-				local v30 = quantumV4ScrambleRuntime.snapshot()
+				local v30 = quantumScrambleRuntime.snapshot()
 
 				if v30 and type(v30.Shop) == "table" then
 					for k, v31 in pairs(v30.Shop) do
@@ -33497,1704 +32786,1385 @@ local function fn66()
 		end
 	end
 
-	tbl24.iconCache = {}
+	local Window = Fluent:CreateWindow({
+		Title = "Quantum | ID",
+		TitleIcon = "lucide/atom",
+		SubTitle = "Steal An Egg",
+		MinWindowSize = Vector2.new(440, 250),
+		Size = UDim2.fromOffset(580, 380),
+		Acrylic = false,
+		Theme = "Cloudy",
+		MinimizeKey = Enum.KeyCode.LeftControl,
+		MinimizeIcon = "rbxassetid://109388426525855"
+	})
 
-	tbl24.gameIcon = function(arg, ...)
-		local tbl27 = {...}
-		local str4 = arg .. "/" .. table.concat(tbl27, "/")
-		local v30 = tbl24.iconCache[str4]
-		if v30 ~= nil then
-			return v30 or nil
-		end
+	local FarmTab = Window:AddTab({ Title = "Farm", Icon = "solar/fire-bold" })
+	local PlayerTab = Window:AddTab({ Title = "Player", Icon = "solar/user-bold" })
+	local PredictorTab = Window:AddTab({ Title = "Predictor", Icon = "solar/eye-bold" })
+	local ProgressTab = Window:AddTab({ Title = "Progress", Icon = "solar/crown-star-bold" })
+	local ServerTab = Window:AddTab({ Title = "Server", Icon = "solar/server-bold" })
+	local MiscTab = Window:AddTab({ Title = "Misc", Icon = "solar/settings-minimalistic-bold" })
+	local DiscordTab = Window:AddTab({ Title = "Discord", Icon = "solar/share-bold" })
+	local ConfigTab = Window:AddTab({ Title = "Configuration", Icon = "solar/settings-bold" })
 
-		local ok2, result = pcall(function()
-			local module = require(ReplicatedStorage:FindFirstChild("Data") and ReplicatedStorage.Data:FindFirstChild(arg) or ReplicatedStorage:FindFirstChild(arg, true))
+	local SecDrScramble = FarmTab:AddSection("Dr Scramble Event")
+	local SecAutoSteal = FarmTab:AddSection("Auto Steal")
+	local SecAutoPlace = FarmTab:AddSection("Auto Place Egg")
+	local SecAutoTreadmill = FarmTab:AddSection("Auto Treadmill")
+	local SecAutoHatch = FarmTab:AddSection("Auto Hatch & Equip")
+	local SecAutoSell = FarmTab:AddSection("Auto Sell")
+	local SecAutoFuse = FarmTab:AddSection("Auto Fuse Machine")
+	local SecAutoFav = FarmTab:AddSection("Auto Favorite")
+	local SecAutoRift = FarmTab:AddSection("Auto Rift & Boss")
 
-			for i, v31 in ipairs(tbl27) do
-				module = module[v31]
-			end
-
-			return module
-		end)
-
-		local pos = ok2 and type(result) == "string" and result:find("rbxassetid://") and result or false
-		tbl24.iconCache[str4] = pos
-		return pos or nil
-	end
-
-	local lucideIcons = {
-		["Informasi Script"] = "lucide/info",
-		["Auto Steal"] = "lucide/target",
-		["Egg Filter"] = "lucide/filter",
-		["Player Steal"] = "lucide/swords",
-		["Specific Player"] = "lucide/user-check",
-		["Steal History"] = "lucide/history",
-		["Steal Webhook"] = "lucide/webhook",
-		["Capture The Egg"] = "lucide/flag",
-		["Wisp Event"] = "lucide/sparkles",
-		["Butterfly Bloom"] = "lucide/flower-2",
-		["Race Rally"] = "lucide/trophy",
-		["Shooting Star"] = "lucide/star",
-		["Dr Scramble Event"] = "lucide/flask-conical",
-		["Egg Automation"] = "lucide/sparkles",
-		["Placed Eggs"] = "lucide/layout-grid",
-		["Egg Selling"] = "lucide/coins",
-		["Pet Selling"] = "lucide/badge-dollar-sign",
-		["Equip & Base"] = "lucide/gem",
-		["Pet Favorite"] = "lucide/star",
-		["Pet Fusion"] = "lucide/combine",
-		["Movement"] = "lucide/gauge",
-		["Treadmill"] = "lucide/footprints",
-		["Ring Event"] = "lucide/flame",
-		["Guard Defense"] = "lucide/shield-check",
-		["Waypoints & Events"] = "lucide/compass",
-		["Egg ESP"] = "lucide/eye",
-		["Visual Spawner"] = "lucide/sparkle",
-		["Server Hop"] = "lucide/server",
-		["Private Server Finder"] = "lucide/lock",
-		["Player Safety"] = "lucide/user-check",
-		["Performance"] = "lucide/cpu",
-		["Quick Actions"] = "lucide/play",
-		["Panels & Logs"] = "lucide/layout-dashboard",
-		["Settings"] = "lucide/sliders"
-	}
-
-	local function withAll(list)
-		local result = {"All"}
-		if type(list) == "table" then
-			for _, v in ipairs(list) do
-				if v ~= "All" and v ~= "None" then
-					result[#result + 1] = v
-				end
+	SecDrScramble:AddToggle("ScrambleBossAuto", {
+		Title = "Auto Boss",
+		Description = "Fights the mech boss automatically during Dr. Scramble events",
+		Default = quantumConfig.ScrambleBossAuto or false,
+		Callback = function(v)
+			quantumConfig.ScrambleBossAuto = v == true
+			local s = genv.__QuantumScrambleBoss
+			if s and type(s.setEnabled) == "function" then
+				pcall(s.setEnabled, s, v == true)
 			end
 		end
-		return result
-	end
+	})
 
-	tbl24.allDropdown = function(tabOrSection, name, config, originalList, callback)
-		local allItems = withAll(originalList)
-		config.Values = allItems
-		config.Multi = true
-		if config.Default == nil then
-			config.Default = {}
+	SecDrScramble:AddToggle("ScrambleBuy", {
+		Title = "Auto Buy Shop",
+		Description = "Automatically purchases selected items from the event vendor",
+		Default = quantumConfig.ScrambleAutoBuy or false,
+		Callback = function(v)
+			fn116(v)
 		end
+	})
 
-		local isUpdating = false
-		local hadAll = false
-		local ddObj = nil
-
-		config.Callback = fn144(function(selected)
-			if isUpdating then return end
-			local raw = fn67(selected)
-			local hasAll = table.find(raw, "All") ~= nil
-
-			if hasAll and not hadAll then
-				hadAll = true
-				local full = {}
-				for _, v in ipairs(allItems) do
-					full[v] = true
-				end
-				isUpdating = true
-				if ddObj and ddObj.SetValue then
-					pcall(ddObj.SetValue, ddObj, full)
-				end
-				isUpdating = false
-				callback(full)
-				return
-			elseif not hasAll and hadAll then
-				hadAll = false
-				isUpdating = true
-				if ddObj and ddObj.SetValue then
-					pcall(ddObj.SetValue, ddObj, {})
-				end
-				isUpdating = false
-				callback({})
-				return
-			elseif hasAll and #raw < #allItems then
-				hadAll = false
-				local partial = {}
-				for _, v in ipairs(raw) do
-					if v ~= "All" then
-						partial[v] = true
-					end
-				end
-				isUpdating = true
-				if ddObj and ddObj.SetValue then
-					pcall(ddObj.SetValue, ddObj, partial)
-				end
-				isUpdating = false
-				callback(partial)
-				return
-			end
-
-			hadAll = hasAll
-			callback(selected)
-		end)
-
-		ddObj = tabOrSection:AddDropdown(name, config)
-		return ddObj
-	end
-
-	tbl24.section = function(arg, arg2, arg3)
-		local title = type(arg2) == "table" and arg2.Title or tostring(arg2)
-		local icon = lucideIcons[title] or (type(arg2) == "table" and arg2.Icon) or arg3 or "lucide/folder"
-		local sec
-		if type(arg2) == "table" then
-			arg2.Icon = icon
-			arg2.Open = true
-			arg2.AlwaysOpen = true
-			sec = arg:AddSection(arg2)
-		else
-			sec = arg:AddSection({ Title = title, Icon = icon, Open = true, AlwaysOpen = true })
+	SecDrScramble:AddDropdown("ScrambleBuyList", {
+		Title = "Shop Buy List",
+		Description = "Select items to automatically purchase from the event shop",
+		Values = tbl26,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn117(v)
 		end
-		if sec and not sec.AddSubSection then
-			sec.AddSubSection = function(self, subTitle)
-				return self:AddParagraph({ Title = tostring(subTitle), Content = "" })
+	})
+
+	SecDrScramble:AddToggle("ScrambleTradeInTrade", {
+		Title = "Auto Trade-In",
+		Description = "Submits matching pets for banner trade-in rewards",
+		Default = quantumConfig.ScrambleTradeInTrade or false,
+		Callback = function(v)
+			quantumConfig.ScrambleTradeInTrade = v == true
+		end
+	})
+
+	SecDrScramble:AddToggle("ScrambleTradeInReroll", {
+		Title = "Auto Free Reroll",
+		Description = "Claims free trade-in banner rerolls automatically",
+		Default = quantumConfig.ScrambleTradeInReroll or false,
+		Callback = function(v)
+			quantumConfig.ScrambleTradeInReroll = v == true
+		end
+	})
+
+	SecDrScramble:AddDropdown("ScrambleTradeInBanners", {
+		Title = "Target Banners",
+		Description = "Filter target banners for trade-in",
+		Values = {"Biohazard Pets", "Experimental Pets", "Unstable DNA"},
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn98(v)
+		end
+	})
+
+	SecDrScramble:AddButton({
+		Title = "Trade-In Once",
+		Description = "Executes a single trade-in attempt immediately",
+		Callback = function()
+			local s = genv.__QuantumScrambleTradeIn
+			if s and type(s.tradeOnce) == "function" then
+				pcall(s.tradeOnce, s)
 			end
 		end
-		return sec
-	end
+	})
 
-
-	local InfoTab = Window:AddTab({ Title = "Info", Icon = "lucide/info" })
-	local Section_Info_1 = InfoTab:AddSection("Informasi Script")
-	Section_Info_1:AddParagraph({ Title = "Quantum | ID", Content = "versi 1.0.4.0 Steal An Egg" })
-	Section_Info_1:AddParagraph({ Title = "Toggle LeftControl untuk Show/Hide UI", Content = "" })
-	Section_Info_1:AddParagraph({ Title = "Script FREE - Jangan diperjualbelikan!", Content = "" })
-
-	local v30 = Window:AddTab({ Title = "Home", Icon = "lucide/home" })
-	local v31 = Window:AddTab({ Title = "Windows", Icon = "lucide/layout-grid" })
-	local v32 = Window:AddTab({ Title = "Steal", Icon = "lucide/target" })
-	local v33 = Window:AddTab({ Title = "Eggs & Plot", Icon = "lucide/egg" })
-	local v34 = Window:AddTab({ Title = "Pets", Icon = "lucide/paw-print" })
-	local v35 = Window:AddTab({ Title = "Events", Icon = "lucide/flame" })
-	local v36 = Window:AddTab({ Title = "Farm", Icon = "lucide/sprout" })
-	local v37 = Window:AddTab({ Title = "Server", Icon = "lucide/server" })
-	tbl24.privateTab = v37
-	local v38 = Window:AddTab({ Title = "Settings", Icon = "lucide/settings" })
-	tbl24.autoStealCapture = tbl24.section(v35, "Capture The Egg", tbl24.gameIcon("CaptureTheEgg", "BroadcastIconImage")):AddToggle("Toggle_AutoStealCapture", {Title = "Auto Steal Capture", Description = "For the Capture The Egg event. Steals the event egg the Low Speed User way, then holds it high up so your time keeps going. Re-steals it if you lose it.", Default = false, Callback = fn144(fn138)})
-	local v39 = tbl24.section(v35, "Movement", tbl24.gameIcon("Gears", "Directory", "GravityDisruptor", "Icon"))
-	tbl24.adminBoost = v39:AddToggle("Toggle_AdminAbuseBoost", {Title = "Admin Abuse Boost", Description = "Only works during Admin Abuse: Auto Steal goes straight to each egg and straight home, at full speed. Do not use it when there is no Admin Abuse.", Default = false, Callback = fn144(fn137)})
-	tbl24.flyForCapture = v39:AddToggle("Toggle_FlyForCapture", {Title = "Fly For Capture", Description = "For the Capture The Egg event. After you pick up an egg, you fly up and stay still in the air so nobody can take it.", Default = false, Callback = fn144(fn135)})
-	tbl24.instantGrab = v39:AddToggle("Toggle_InstantGrab", {Title = "Instant Grab", Description = "Picking up an egg only needs a quick tap instead of a long hold.", Default = false, Callback = fn144(fn136)})
-	tbl24.infiniteJump = v39:AddToggle("Toggle_InfiniteJump", {Title = "Infinite Jump", Description = "Jump again in mid-air, as often as you like.", Default = false, Callback = fn144(fn139)})
-	tbl24.noclip = v39:AddToggle("Toggle_Noclip", {Title = "Noclip", Description = "Walk through walls and doors.", Default = false, Callback = fn144(fn113)})
-	tbl24.autoRingEvent = tbl24.section(v35, "Ring Event", tbl24.gameIcon("FallenPowerUp", "Kinds", "x2Rings", "Icon")):AddToggle("Toggle_AutoRingEvent", {Title = "Auto Ring Event", Description = "Starts at the safe zone, then glides Forest -> Angels & Demons -> back to Forest on a loop. Turn off Auto Steal while using this.", Default = false, Callback = fn144(fn121)})
-	local v40 = tbl24.section(v32, "Auto Steal", tbl24.gameIcon("Assets", "Directory", "Dog", "Egg", "Icon"))
-	tbl24.autoSteal = v40:AddToggle("Toggle_AutoSteal", {Title = "Auto Steal", Description = "Steals eggs that match your filters and brings them home.", Default = false, Callback = fn144(fn78)})
-
-	v40:AddButton({Title = "Open Hop UI", Description = "Opens the Rare Egg Hop panel. Pick Divine, Eternal or Secret, and it hops to fresh servers until one is still in the field.", Callback = fn144(function()
-		local hopHunt = tbl13.hopHunt
-
-		if hopHunt then
-			task.spawn(function()
-				pcall(hopHunt.open)
-			end)
-		end
-	end)})
-
-	tbl24.helpFriend = v40:AddToggle("Toggle_HelpFriend", {Title = "Help Friend", Description = "Instead of banking a stolen egg, drops it just before the safe zone line so a friend can pick it up.", Default = false, Callback = fn144(function(arg)
-		quantumV4Config.HelpFriend = arg == true
-	end)})
-
-	tbl24.godMode = v40:AddToggle("Toggle_AuraBat", {Title = "Aura Bat", Description = "", Default = false, Callback = fn144(fn80)})
-
-	tbl24.stealMode = v40:AddDropdown("Dropdown_StealMode", {Title = "Steal Mode", Description = "Metode Auto Steal (Instant Teleport direkomendasikan)", Values = {"Instant Teleport", "High Speed User Normal", "High Speed User (Fly)", "Zig-Zag High Speed User", "Low Speed User"}, MaxVisible = 5, Default = "Instant Teleport", Multi = false, Callback = fn144(function(arg)
-		fn89(arg)
-
-		if type(quantumPanels.syncStealMode) == "function" then
-			quantumPanels.syncStealMode()
-		end
-	end)})
-
-	function quantumPanels.getStealMode()
-		local value = tbl24.stealMode and tbl24.stealMode.Value
-		return if type(value) == "table" then value[1] else value
-	end
-
-	function quantumPanels.setStealMode(arg)
-		if tbl24.stealMode then
-			tbl24.stealMode:SetValue(arg)
-		end
-	end
-
-	local v41 = v40:AddParagraph({Title = "Speed Advice", Content = "Reading your speed..."})
-
-	task.spawn(function()
-		while fn2() do
-			if v13 and type(v13.lowSpeedStatus) == "function" then
-				pcall(function()
-					local v42 = v13:lowSpeedStatus()
-					local str4 = v42.safe == v42.fast and tostring(v42.fast) or v42.safe .. "–" .. v42.fast
-					local str5 = ("Current Speed: %s (WS %d)\nRecommended Low Speed Multiplier: %s  ·  yours: %d"):format(v42.speedText, v42.walkSpeed, str4, v42.level)
-					local advice = v42.advice
-
-					if advice then
-						str5 ..= ("\nSteals keep failing (%d of the last %d) - lower it to %d."):format(advice.fails, advice.total, advice.to)
-
-						if advice.fresh then
-							advice.fresh = false
-							flag6:Notify({Title = "Low Speed User", Content = ("Steals keep failing at %d - lower the Low Speed Multiplier to %d."):format(advice.from, advice.to), Duration = 6})
-						end
-					else
-						str5 = if v42.level > v42.fast then str5 .. "\nAbove the recommendation - lower it if steals start failing." else str5
-					end
-
-					v41:SetContent(str5)
-				end)
+	SecDrScramble:AddButton({
+		Title = "Use Free Reroll",
+		Description = "Consumes available free trade-in reroll",
+		Callback = function()
+			local s = genv.__QuantumScrambleTradeIn
+			if s and type(s.rerollOnce) == "function" then
+				pcall(s.rerollOnce, s)
 			end
-
-			task.wait(2)
 		end
-	end)
+	})
 
-	tbl24.stealHold = v40:AddSlider("Slider_LowSpeedMultiplier", {Title = "Low Speed Multiplier", Description = "For Low Speed User mode. Higher = faster grab (shorter hold), lower = safer (longer). Raise it if your account speed is high; lower it if your speed is low.", Min = 1, Max = 10, Default = 5, Rounding = 0, Callback = fn144(fn79)})
-
-	tbl24.lowSpeedBoost = v40:AddToggle("Toggle_BoostforModeLowSpeed", {Title = "Boost for Mode Low Speed", Description = "Faster steals for Low Speed User on every area except Forest (about 6 s per egg). Keep it on when you use Low Speed User.", Default = true, Locked2 = true, Callback = fn144(function(arg)
-		quantumV4Config.LowSpeedBoost = arg == true
-	end)})
-
-	local v42 = tbl24.section(v32, "Egg Filter", tbl24.gameIcon("Assets", "Directory", "Unicorn", "Egg", "Icon"))
-	v42:AddParagraph({Title = "• Egg", Content = ""})
-
-	tbl24.names = v42:AddDropdown("Dropdown_FilterByEggName", {Title = "Filter By Egg Name", Description = "Only steal these eggs. Leave empty for any egg.", Values = v24, Multi = true, Default = {}, Callback = fn144(function(arg)
-		fn91("names", "name", arg)
-	end)})
-
-	tbl24.rarities = v42:AddDropdown("Dropdown_FilterByRarity", {Title = "Filter By Rarity", Description = "Only steal these rarities. Leave empty for any rarity.", Values = v26, Multi = true, Default = {}, Callback = fn144(function(arg)
-		fn91("rarities", "rarity", arg)
-	end)})
-
-	v42:AddParagraph({Title = "• Area & Value", Content = ""})
-
-	tbl24.areas = v42:AddDropdown("Dropdown_SelectArea", {Title = "Select Area", Description = "Only steal from these areas. Leave empty for every area.", Values = v25, Multi = true, Default = {}, Callback = fn144(function(arg)
-		fn91("areas", "area", arg)
-	end)})
-
-	tbl24.value = v42:AddInput("Input_StealByValue", {Title = "Steal By Value", Description = "Minimum money per second. Supports k, m and b.", Placeholder = "e.g. 500k, 2m, 1b", Default = "", Callback = fn144(fn92)})
-	tbl24.mutations = v42:AddDropdown("Dropdown_FilterByMutation", {Title = "Filter By Mutation", Description = "Only steal eggs carrying one of these mutations. Leave empty for any egg.", Values = tbl14, Multi = true, Default = {}, Callback = fn144(fn93)})
-	tbl24.weight = v42:AddInput("Input_StealByWeight", {Title = "Steal By Weight", Description = "Minimum egg weight in kilograms. 0 accepts any weight.", Placeholder = "e.g. 12000", Default = "", Callback = fn144(fn94)})
-	tbl24.priority = v42:AddDropdown("Dropdown_StealPriority", {Title = "Steal Priority", Description = "Which egg to go for first when more than one passes the filters.", Values = {"Rarity", "Highest Value", "Heaviest"}, Default = "Rarity", Callback = fn144(fn95)})
-	tbl24.autoIndex = v42:AddToggle("Toggle_AutoIndex", {Title = "Auto Index", Description = "Also steal eggs whose pet is still missing from your Pet Index, in any area, on top of the filters above. An egg you already hold counts as covered until it hatches.", Default = false, Callback = fn144(fn149)})
-	local v43 = tbl24.section(v32, "Egg ESP", tbl24.gameIcon("Assets", "Directory", "Kitsune", "Egg", "Icon"))
-	tbl24.eggEsp = v43:AddToggle("Toggle_EggESP", {Title = "Egg ESP", Description = "Draws a label over every egg on the field so you can read it from across the map.", Default = false, Callback = fn144(fn96)})
-	tbl24.espDetails = v43:AddDropdown("Dropdown_ESPDetails", {Title = "ESP Details", Description = "What each label shows. Placed Eggs also labels the eggs on your plot, Icon adds the animal picture to those labels.", Values = {"Name", "Rarity", "Value", "Weight", "Mutation", "Placed Eggs", "Icon"}, Multi = true, Default = {"Name", "Rarity", "Value", "Icon"}, Callback = fn144(fn97)})
-
-	tbl24.espMinRarity = v43:AddDropdown("Dropdown_ESPMinRarity", {Title = "ESP Min Rarity", Description = "Only label eggs of this rarity or rarer. Any labels every egg.", Values = (function()
-		local tbl27 = {"Any"}
-
-		for i, v44 in ipairs(v26) do
-			tbl27[#tbl27 + 1] = v44
+	SecDrScramble:AddButton({
+		Title = "Open Trade-In UI",
+		Description = "Opens the in-game event trade-in dialog",
+		Callback = function()
+			local s = genv.__QuantumScrambleTradeIn
+			if s and type(s.openUI) == "function" then
+				pcall(s.openUI, s)
+			end
 		end
+	})
 
-		return tbl27
-	end)(), Multi = false, Default = "Any", Callback = fn144(tbl10.applyEspMinRarity)})
+	SecDrScramble:AddParagraph({
+		Title = "Event Telemetry",
+		Content = "Dr. Scramble event monitor active. Autonomous boss combat, overheating exploit, and sample collection ready."
+	})
 
-	tbl24.espMinValue = v43:AddInput("Input_ESPMinValue", {Title = "ESP Min Value", Description = "Only label eggs making at least this much per second. Supports k, m and b.", Placeholder = "e.g. 500k, 2m, 1b", Default = "", Callback = fn144(tbl10.applyEspMinValue)})
-	tbl24.backpackRates = v43:AddToggle("Toggle_BackpackValues", {Title = "Backpack Value/s", Description = "Shows how much money per second each egg in your backpack makes, right on its slot.", Default = false, Callback = fn144(fn99)})
-	local v44 = tbl24.section(v32, "Steal Webhook", "bell")
-	tbl24.webhookEnabled = v44:AddToggle("Toggle_StealWebhook", {Title = "Steal Webhook", Description = "Posts a Discord embed the moment a stolen egg is banked, with its rarity, size, weight and cash per second.", Default = false, Callback = fn144(fn150)})
-	tbl24.webhookUrl = v44:AddInput("Input_WebhookURL", {Title = "Webhook URL", Description = "Paste the Discord webhook URL for the channel you want.", Placeholder = "https://discord.com/api/webhooks/...", Default = "", Callback = fn144(fn151)})
-
-	tbl24.webhookDisconnect = v44:AddToggle("Toggle_DisconnectAlert", {Title = "Disconnect Alert", Description = "Posts to the same webhook when this account gets disconnected or kicked, with the reason.", Default = false, Callback = fn144(function(arg)
-		quantumV4Config.WebhookDisconnect = arg == true
-	end)})
-
-	v44:AddParagraph({Title = "• Filter", Content = ""})
-	tbl24.webhookRarities = v44:AddDropdown("Dropdown_NotifyRarities", {Title = "Notify Rarities", Description = "Only post these rarities. Empty = every egg you steal.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn152)})
-	tbl24.webhookValue = v44:AddInput("Input_NotifyMinimumValue", {Title = "Notify Minimum Value", Description = "Only post eggs worth at least this per second. Supports k, m and b.", Placeholder = "e.g. 500k, 2m, 1b", Default = "", Callback = fn144(fn153)})
-
-	v44:AddButton({Title = "Test Webhook", Description = "Sends one test embed so you can confirm the URL works.", Callback = fn144(function()
-		local quantumV4Webhook = (genv.__QuantumV4Webhook or genv.__SenaV4Webhook)
-		local value = tbl24.webhookUrl and tbl24.webhookUrl.Value
-
-		if type(value) == "string" and value ~= "" then
-			fn151(value)
+	SecAutoSteal:AddToggle("AutoSteal", {
+		Title = "Auto Steal",
+		Description = "Steals eggs that match your filter and brings them home",
+		Default = quantumConfig.AutoSteal or false,
+		Callback = function(v)
+			fn78(v)
 		end
+	})
 
-		if if quantumV4Webhook then not quantumV4Webhook.test() else not quantumV4Webhook then
-			flag6:Notify({Title = "Steal Webhook", Content = "Enter a webhook URL first", Duration = 3})
-			return
+	SecAutoSteal:AddDropdown("StealMode", {
+		Title = "Steal Mode",
+		Description = "Select movement traversal mode for egg stealing",
+		Values = {"Low Speed User", "High Speed User Normal", "High Speed User (Fly)", "Zig-Zag High Speed User"},
+		Default = "High Speed User Normal",
+		Multi = false,
+		Callback = function(v)
+			fn89(v)
 		end
-		flag6:Notify({Title = "Steal Webhook", Content = "Test embed sent", Duration = 3})
-	end)})
+	})
 
-	fn68 = v30:AddSection("Task Order")
-	local tbl27 = {auto_steal = "hand", race = "flag", star = "star", mech_boss = "swords", butterfly = "flower", auto_place = "egg", use_scrambled = "flask-conical", auto_sell = "coins", treadmill = "activity"}
-	local tbl28 = {}
+	SecAutoSteal:AddSlider("StealHold", {
+		Title = "Low Speed Multiplier",
+		Description = "Hold multiplier for Low Speed User mode",
+		Min = 1,
+		Max = 10,
+		Default = 5,
+		Rounding = 0,
+		Callback = function(v)
+			fn79(v)
+		end
+	})
 
-	for i, v45 in ipairs(quantumV4TaskLadder.DEFAULT) do
-		local n8 = #tbl28 + 1
-		local tbl29 = {Id = v45, Title = quantumV4TaskLadder.TITLES[v45], Icon = tbl27[v45], Pinned = quantumV4TaskLadder.PINNED[v45] == true}
-		tbl29.Sub, tbl28[n8] = quantumV4TaskLadder.PINNED[v45] and "Runs when every other task is idle" or nil, tbl29
-	end
+	SecAutoSteal:AddToggle("LowSpeedBoost", {
+		Title = "Boost for Mode Low Speed",
+		Description = "Faster movement when using Low Speed mode",
+		Default = quantumConfig.LowSpeedBoost or false,
+		Callback = function(v)
+			quantumConfig.LowSpeedBoost = v == true
+		end
+	})
 
-	local function fn156(arg)
-		quantumV4Config.TaskOrder = quantumV4TaskLadder.sanitize(arg)
-	end
+	SecAutoSteal:AddDropdown("StealEggNames", {
+		Title = "Filter By Egg Name",
+		Description = "Only steal these eggs. Leave empty for all eggs.",
+		Values = v24,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			quantumConfig.StealNamesFilter = fn67(v)
+		end
+	})
 
-	if type(fn68.AddPriorityList) == "function" then
-		tbl24.taskOrder = fn68:AddPriorityList({Title = "Task Order", Content = "Higher rows get the character first. An egg you are carrying is always delivered first, and a boss fight that has started is never left.", Flag = "TaskOrder", Items = tbl28, Default = quantumV4TaskLadder.DEFAULT, EmptyText = "Turn on Auto Steal, Auto Place or another feature to order it here.", Callback = fn144(fn156)})
-	else
-		fn68:AddParagraph({Title = "Task Order", Content = "Update the Sena library to reorder tasks. Using the default order: Auto Steal, Race Rally, Shooting Star, Mech Boss, Farm Drones, Auto Place, Use Scrambled, Auto Sell, Treadmill."})
-	end
+	SecAutoSteal:AddDropdown("StealRarities", {
+		Title = "Filter By Rarity",
+		Description = "Only steal these rarities. Leave empty for all.",
+		Values = v26,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			quantumConfig.StealRarities = fn67(v)
+		end
+	})
 
-	v25 = tbl24.section(v33, "Egg Automation", tbl24.gameIcon("Assets", "Directory", "Dragon", "Egg", "Icon"))
-	v25:AddParagraph({Title = "• Place", Content = ""})
-	tbl24.autoPlace = v25:AddToggle("Toggle_AutoPlaceEgg", {Title = "Auto Place Egg", Description = "Places eggs from your inventory on your plot.", Default = false, Callback = fn144(fn118)})
+	SecAutoSteal:AddDropdown("StealAreas", {
+		Title = "Select Area",
+		Description = "Only steal from selected areas. Leave empty for all.",
+		Values = v25,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			quantumConfig.StealAreas = fn67(v)
+		end
+	})
 
-	tbl24.placeRarity = v25:AddDropdown("Dropdown_PlaceEggRarity", {Title = "Place Egg Rarity", Description = "Only place these rarities. Leave empty for all.", Values = v26, Multi = true, Default = {}, Callback = fn144(function(arg)
-		quantumV4Config.PlaceRarities = fn67(arg)
-	end)})
+	SecAutoSteal:AddInput("StealMinValue", {
+		Title = "Steal By Value",
+		Description = "Minimum money per second (e.g. 10k, 5m)",
+		Default = "",
+		Placeholder = "0",
+		Callback = function(v)
+			fn92(v)
+		end
+	})
 
-	v25:AddParagraph({Title = "• Hatch", Content = ""})
-	tbl24.autoHatch = v25:AddToggle("Toggle_AutoHatchEgg", {Title = "Auto Hatch Egg", Description = "Hatches your placed eggs when they are ready.", Default = false, Callback = fn144(fn119)})
-	v25:AddParagraph({Title = "• Mutate", Content = ""})
-	tbl24.mutationChoice = v25:AddDropdown("Dropdown_SelectMutation", {Title = "Select Mutation", Description = "Which mutation to apply to your placed eggs. Enchanted uses the Enchanted Essence from the Butterfly Bloom shrine.", Values = {"Scrambled", "Fractured", "Enchanted"}, Multi = false, Default = "Scrambled", Callback = fn144(fn122)})
-	tbl24.mutationSpecies = v25:AddDropdown("Dropdown_MutateEggName", {Title = "Mutate Egg Name", Description = "Only mutate these eggs by name. Leave empty for every placed egg.", Values = v24, Multi = true, Default = {}, Callback = fn144(fn123)})
-	tbl24.mutationRarity = v25:AddDropdown("Dropdown_MutateEggRarity", {Title = "Mutate Egg Rarity", Description = "Only mutate placed eggs of these rarities. Leave empty for every rarity.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn124)})
-	tbl24.mutationMinValue = v25:AddInput("Input_MutateMinValuemoneys", {Flag = "mutationMinValue", Title = "Mutate Min Value (money/s)", Description = "Only mutate placed eggs whose money per second is this or higher. Blank = no value limit. Supports k, m, b.", Placeholder = "e.g. 100k, 2m", Default = "", Callback = fn144(fn125)})
-	tbl24.mutationRetry = v25:AddToggle("Toggle_RetryUntilMutated", {Title = "Retry Until Mutated", Description = "Keep applying to one egg until it mutates or charges run out (10% per use).", Default = true, Callback = fn144(fn126)})
-	tbl24.autoMutation = v25:AddToggle("Toggle_AutoApplyMutation", {Title = "Auto Apply Mutation", Description = "Equips the selected mutation consumable and applies it to your placed eggs.", Default = false, Callback = fn144(fn120)})
+	SecAutoSteal:AddDropdown("StealMutations", {
+		Title = "Filter By Mutation",
+		Description = "Only steal eggs carrying one of these mutations",
+		Values = tbl14,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn93(v)
+		end
+	})
 
-	v25:AddButton({Title = "Apply Mutation Now", Description = "Run one mutation pass over your placed eggs right now.", Callback = fn144(function()
-		task.spawn(function()
-			pcall(tbl10.mutationSweep)
-		end)
-	end)})
+	SecAutoSteal:AddInput("StealMinWeight", {
+		Title = "Steal By Weight",
+		Description = "Minimum egg weight in kg",
+		Default = "",
+		Placeholder = "0",
+		Callback = function(v)
+			fn94(v)
+		end
+	})
 
-	do
-		fn68 = v33:AddSection({Title = "Placed Eggs", AlwaysOpen = true, Icon = tbl24.gameIcon("Assets", "Directory", "Dragon", "Egg", "Icon")})
-		local addActionList = fn68.AddActionList and fn68:AddActionList({Title = "Your placed eggs", EmptyText = "No eggs placed on your plot.", VisibleRows = 6, ButtonWidth = 64})
+	SecAutoSteal:AddDropdown("StealPriority", {
+		Title = "Steal Priority",
+		Description = "Which egg to prioritize first when multiple targets pass filters",
+		Values = {"Rarity", "Highest Value", "Heaviest"},
+		Default = "Rarity",
+		Multi = false,
+		Callback = function(v)
+			fn95(v)
+		end
+	})
 
-		if addActionList then
-			local ReplicatedStorage2 = game:GetService("ReplicatedStorage")
-			local quantumV4IdentitySetter2 = (genv.__QuantumV4IdentitySetter or genv.__SenaV4IdentitySetter)
-			local quantumV4UICapabilityIdentity, Mutations, PlacedEggGrowthPresentationPolicy = (genv.__QuantumV4UICapabilityIdentity or genv.__SenaV4UICapabilityIdentity) or 8
+	SecAutoSteal:AddToggle("AutoIndex", {
+		Title = "Auto Index",
+		Description = "Prioritizes stealing uncollected eggs needed for player index",
+		Default = quantumConfig.AutoIndex or false,
+		Callback = function(v)
+			fn149(v)
+		end
+	})
 
-			pcall(function()
-				Mutations = require(ReplicatedStorage2.Shared.Modules.Mutations)
-			end)
+	SecAutoSteal:AddToggle("HelpFriend", {
+		Title = "Help Friend",
+		Description = "Drops carried eggs right outside safe line for friends to pick up",
+		Default = quantumConfig.HelpFriend or false,
+		Callback = function(v)
+			quantumConfig.HelpFriend = v == true
+		end
+	})
 
-			pcall(function()
-				PlacedEggGrowthPresentationPolicy = require(ReplicatedStorage2.Shared.Eggs.PlacedEggGrowthPresentationPolicy)
-			end)
+	SecAutoSteal:AddToggle("StealPlayers", {
+		Title = "Auto Steal From Players",
+		Description = "Chases and intercepts other players carrying eggs",
+		Default = quantumConfig.StealPlayers or false,
+		Callback = function(v)
+			fn145(v)
+		end
+	})
 
-			local function fn157(arg)
-				if typeof(arg) ~= "Color3" then
-					return "E8E8EE"
-				end
-				return string.format("%02X%02X%02X", math.floor(arg.R * 255 + 0.5), math.floor(arg.G * 255 + 0.5), math.floor(arg.B * 255 + 0.5))
-			end
+	SecAutoSteal:AddDropdown("StealPlayerRarities", {
+		Title = "Player Rarity Filter",
+		Description = "Rarities to steal from players. Empty = uses general filter.",
+		Values = v26,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn146(v)
+		end
+	})
 
-			local tbl29 = {Scrambled = true, Boss = true, Enchanted = true}
+	SecAutoSteal:AddInput("StealPlayerValue", {
+		Title = "Player Minimum Value",
+		Description = "Minimum money/s required to steal from players",
+		Default = "",
+		Placeholder = "0",
+		Callback = function(v)
+			fn148(v)
+		end
+	})
 
-			local function fn158(arg)
-				if arg == "Scrambled" then
-					return "Scrambled"
-				end
+	SecAutoSteal:AddToggle("AntiGuardKnockback", {
+		Title = "Anti Guard Knockback",
+		Description = "Prevents NPC guard hits from pushing character around",
+		Default = true,
+		Callback = function(v)
+			fn100(v)
+		end
+	})
 
-				local ok2, result = pcall(function()
-					return Mutations.LabelOf(arg)
-				end)
+	SecAutoSteal:AddToggle("AntiHitGuard", {
+		Title = "Anti Hit Guard",
+		Description = "Suppresses damage from guard strikes",
+		Default = false,
+		Callback = function(v)
+			fn140(v)
+		end
+	})
 
-				return ok2 and type(result) == "string" and result ~= "" and result or tostring(arg)
-			end
-
-			local function fn159(arg)
-				local n8 = math.max(0, math.floor(arg))
-				local n9 = math.floor(n8 / 3600)
-				local n10 = math.floor(n8 % 3600 / 60)
-				local n11 = n8 % 60
-				if n9 > 0 then
-					return string.format("%dh %02dm", n9, n10)
-				end
-				return string.format("%dm %02ds", n10, n11)
-			end
-
-			local function fn160(arg)
-				local placedEggRenders = workspace:FindFirstChild("PlacedEggRenders")
-				return placedEggRenders and placedEggRenders:FindFirstChild(tostring(localPlayer.UserId) .. "_" .. tostring(arg))
-			end
-
-			local function fn161(arg)
-				local v45 = fn160(arg)
-				if not v45 then
-					return false
-				end
-				local highlight = Instance.new("Highlight")
-				highlight.FillColor = Color3.fromRGB(232, 232, 238)
-				highlight.FillTransparency = 0.55
-				highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-				highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-				highlight.Parent = v45
-
-				task.delay(5, function()
-					pcall(function()
-						highlight:Destroy()
-					end)
-				end)
-
-				return true
-			end
-
-			local function fn162()
-				local tbl30, ok2, result = {}, pcall(function()
-					return require(ReplicatedStorage2.Client.EggState).ReadOwnerEggs(localPlayer.UserId)
-				end)
-
-				if ok2 then
-					if type(result) ~= "table" then
-						return tbl30
-					end
-				else
-					return tbl30
-				end
-
-				local serverTimeNow = workspace:GetServerTimeNow()
-
-				for k, v45 in pairs(result) do
-					if type(v45) == "table" and v45.Placement then
-						local v46 = v6.resolve(v45)
-						local baseMutation = v45.BaseMutation
-						local tbl31 = {}
-						local tbl32 = {}
-						local tbl33 = {}
-
-						for k2, v47 in pairs(type(v45.Mutations) == "table" and v45.Mutations or {}) do
-							if not tbl33[v47] then
-								tbl33[v47] = true
-
-								if v47 ~= baseMutation or tbl29[v47] then
-									tbl31[#tbl31 + 1] = fn158(v47)
-								else
-									tbl32[#tbl32 + 1] = fn158(v47)
-								end
-							end
-						end
-
-						if baseMutation and (tbl29[baseMutation] and not tbl33[baseMutation]) then
-							tbl31[#tbl31 + 1] = fn158(baseMutation)
-						end
-
-						tbl33 = 0
-
-						if PlacedEggGrowthPresentationPolicy then
-							local ok3, result2 = pcall(PlacedEggGrowthPresentationPolicy.GetRemainingGrowthSeconds, v45, serverTimeNow)
-							tbl33 = ok3 and tonumber(result2) or 0
-						end
-
-						local str4 = tbl33 > 0 and "Hatches in " .. fn159(tbl33) or "<font color=\"#4ADE80\">Ready to hatch</font>"
-						local placedAt = v45.Placement.PlacedAt and os.date("%d %b %H:%M", math.floor(v45.Placement.PlacedAt)) or "?"
-						local str5 = #tbl31 > 0 and "<font color=\"#4ADE80\">Mutated: " .. table.concat(tbl31, ", ") .. "</font>" or "<font color=\"#74747F\">Not mutated</font>"
-						local v47 = if #tbl32 > 0 then str5 .. "  <font color=\"#A2A2AE\">[" .. table.concat(tbl32, ", ") .. "]</font>" else str5
-
-						tbl30[#tbl30 + 1] = {id = tostring(k), name = string.format("<font color=\"#%s\">%s</font>", fn157(v46.rarityColor), tostring(v46.name)), sub = string.format("<font color=\"#%s\">%s</font>", fn157(v46.rarityColor), tostring(v46.rarity)), status = v47, statusSub = str4 .. "  -  Placed " .. placedAt, button = "Find", buttonColor = "accent", rank = v46.rarityRank or 0, mutated = #tbl31 > 0, onClick = function(arg, arg2)
-							local v48 = fn161(k)
-							arg2(v48 and "Found" or "Far", v48 and "green" or "red")
-
-							task.delay(1.6, function()
-								pcall(arg2, "Find", "accent")
-							end)
-						end}
-					end
-				end
-
-				table.sort(tbl30, function(arg, arg2)
-					if arg.rank ~= arg2.rank then
-						return arg.rank > arg2.rank
-					end
-
-					if arg.mutated ~= arg2.mutated then
-						return not arg.mutated
-					end
-					return arg.id < arg2.id
-				end)
-
-				return tbl30
-			end
-
-			local v45
-			local n8, connection6 = 0
-
-			connection6 = game:GetService("RunService").Heartbeat:Connect(function()
-				if not addActionList:Alive() then
-					connection6:Disconnect()
-					return
-				end
-				local now = os.clock()
-				if v45 and now - v45 < 5 then
-					return
-				end
-
-				if now - n8 < 1 then
-					return
-				end
-				n8 = now
-				local v46 = now
-				v45 = v46
-
+	SecAutoSteal:AddButton({
+		Title = "Open Hop UI",
+		Description = "Opens the Rare Egg Hop panel to search for Divine, Eternal, or Secret eggs",
+		Callback = function()
+			local hopHunt = tbl13.hopHunt
+			if hopHunt then
 				task.spawn(function()
-					local ok2, result = pcall(function()
-						if quantumV4IdentitySetter2 then
-							pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
-						end
-
-						local v47 = fn162()
-
-						if quantumV4IdentitySetter2 then
-							pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
-						end
-
-						if addActionList:Alive() then
-							addActionList:Update(v47)
-						end
-					end)
-
-					if not ok2 then
-						warn("[Quantum] Placed eggs list error:", result)
-					end
-
-					if v45 == v46 then
-						v45 = nil
-					end
+					pcall(hopHunt.open)
 				end)
-			end)
+			end
 		end
-	end
+	})
 
-	local v45 = tbl24.section(v34, "Pet Selling", tbl24.gameIcon("Currency", "Directory", "Money", "Icon"))
-	tbl24.autoSell = v45:AddToggle("Toggle_AutoSellPet", {Title = "Auto Sell Pet", Description = "Sells pets that match a filter below. Favorite, placed and equipped pets are kept.", Default = false, Callback = fn144(fn127)})
-	v45:AddParagraph({Title = "• Filter", Content = ""})
-
-	v21 = v45:AddDropdown("Dropdown_PetNameFilter", {Title = "Pet Name Filter", Description = "Pets to sell by name. Pick All for every name.", Values = fn73, Multi = true, Default = {}, Callback = fn144(function(arg)
-		quantumV4Config.SellNames = fn67(arg)
-	end)})
-
-	v22 = v45:AddDropdown("Dropdown_PetRarityFilter", {Title = "Pet Rarity Filter", Description = "Pets to sell by rarity. Pick All for every rarity.", Values = fn69(v26), Multi = true, Default = {}, Callback = fn144(function(arg)
-		quantumV4Config.SellRarities = fn67(arg)
-	end)})
-
-	tbl24.sellPetValue = v45:AddInput("Input_SellByValuemaxmoneys", {Flag = "sellPetValue", Title = "Sell By Value (max money/s)", Description = "Only sell pets whose money per second is this or lower. Blank = no value limit. Supports k, m, b.", Placeholder = "e.g. 100k, 2m", Default = "", Callback = fn144(fn129)})
-	local v46 = tbl24.section(v33, "Egg Selling", tbl24.gameIcon("Currency", "Directory", "Money", "Icon"))
-	tbl24.autoSellEgg = v46:AddToggle("Toggle_AutoSellEgg", {Title = "Auto Sell Egg", Description = "Sells unplaced eggs of the rarities below.", Default = false, Callback = fn144(fn128)})
-
-	v23 = v46:AddDropdown("Dropdown_EggRarityFilter", {Title = "Egg Rarity Filter", Description = "Egg rarities to sell. Pick All for every rarity.", Values = fn69(v26), Multi = true, Default = {}, Callback = fn144(function(arg)
-		quantumV4Config.SellEggRarities = fn67(arg)
-	end)})
-
-	tbl24.sellEggValue = v46:AddInput("Input_SellByValuemaxmoneys_2", {Flag = "sellEggValue", Title = "Sell By Value (max money/s)", Description = "Only sell eggs whose money per second is this or lower. Blank = no value limit. Supports k, m, b.", Placeholder = "e.g. 100k, 2m", Default = "", Callback = fn144(fn130)})
-	fn68 = tbl24.section(v34, "Pet Favorite", tbl24.gameIcon("Assets", "Directory", "Unicorn", "Icon"))
-	tbl24.autoFavorite = fn68:AddToggle("Toggle_AutoFavorite", {Title = "Auto Favorite", Description = "Marks every pet that matches the rule below as a favorite, so Auto Sell and Auto Fuse leave it alone.", Default = false, Callback = fn144(fn101)})
-	tbl24.favoriteRule = fn68:AddDropdown("Dropdown_FavoriteRule", {Title = "Favorite Rule", Description = "Match pets by rarity or by species.", Values = {"Rarity", "Species"}, Default = "Rarity", Callback = fn144(fn102)})
-	fn68:AddParagraph({Title = "• Only when Rule = Rarity", Content = ""})
-	tbl24.favoriteRarities = fn68:AddDropdown("Dropdown_RaritiestoKeep", {Title = "Rarities to Keep", Description = "Pets of these rarities get favorited.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn103)})
-	fn68:AddParagraph({Title = "• Only when Rule = Species", Content = ""})
-	tbl24.favoriteSpecies = fn68:AddDropdown("Dropdown_SpeciestoKeep", {Title = "Species to Keep", Description = "Pets of these species get favorited.", Values = v24, Multi = true, Default = {}, Callback = fn144(fn104)})
-
-	tbl24.unfavoriteAll = fn68:AddButton({Title = "Unfavorite Everything", Description = "Clears the favorite flag on every pet you own.", Callback = fn144(function()
-		local quantumV4PetBarn = (genv.__QuantumV4PetBarn or genv.__SenaV4PetBarn)
-		flag6:Notify({Title = "Pet Favorite", Content = (if quantumV4PetBarn then if type(quantumV4PetBarn.unfavoriteAll) == "function" then quantumV4PetBarn.unfavoriteAll() or 0 else 0 else 0) .. " pets unfavorited", Duration = 3})
-	end)})
-
-	local v47 = tbl24.section(v34, "Pet Fusion", tbl24.gameIcon("FallenPowerUp", "Kinds", "Fusion", "Icon"))
-	tbl24.autoFuse = v47:AddToggle("Toggle_AutoFuse", {Title = "Auto Fuse", Description = "Feeds three matching pets into the Fusion machine over and over. Favorited and equipped pets are never used.", Default = false, Callback = fn144(fn109)})
-	tbl24.fuseRule = v47:AddDropdown("Dropdown_FusionRule", {Title = "Fusion Rule", Description = "Fuse anything that passes the rarity filter, or only the species you pick below.", Values = {"Any Species", "Selected Species"}, Default = "Any Species", Callback = fn144(fn110)})
-	tbl24.fuseRarities = v47:AddDropdown("Dropdown_RaritiestoFuse", {Title = "Rarities to Fuse", Description = "Only fuse pets of these rarities. Leave empty for any rarity.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn111)})
-	v47:AddParagraph({Title = "• Only when Rule = Selected Species", Content = ""})
-	tbl24.fuseSpecies = v47:AddDropdown("Dropdown_SpeciestoFuse", {Title = "Species to Fuse", Description = "Only these species go into the machine.", Values = v24, Multi = true, Default = {}, Callback = fn144(fn112)})
-	local v48 = tbl24.section(v33, "Equip & Collect", tbl24.gameIcon("Assets", "Directory", "Dog", "Icon"))
-	tbl24.autoEquipBest = v48:AddToggle("Toggle_AutoEquipBest", {Title = "Auto Equip Best", Description = "Keeps your strongest pets equipped as better ones hatch.", Default = false, Callback = fn144(fn105)})
-	tbl24.autoClaimOffline = v48:AddToggle("Toggle_CollectOfflineIncome", {Title = "Collect Offline Income", Description = "Claims the money your base earned while you were away, as soon as there is any.", Default = false, Callback = fn144(fn106)})
-	tbl24.autoBaseUpgrade = v48:AddToggle("Toggle_AutoUpgradeBase", {Title = "Auto Upgrade Base", Description = "Buys the next base tier the moment you can afford it.", Default = false, Callback = fn144(fn107)})
-	tbl24.autoClaimAlmanac = v48:AddToggle("Toggle_AutoClaimAlmanac", {Title = "Auto Claim Almanac", Description = "Redeems every Pet Index reward that is ready. This is the reward claim, not the steal objective.", Default = false, Callback = fn144(fn108)})
-
-	tbl24.upgradeBaseOnce = v48:AddButton({Title = "Upgrade Base Now", Description = "Buys one base tier right away.", Callback = fn144(function()
-		local quantumV4Upgrades = (genv.__QuantumV4Upgrades or genv.__SenaV4Upgrades)
-		local flag14 = false
-		local str4 = "Upgrades not ready"
-
-		if quantumV4Upgrades and type(quantumV4Upgrades.upgradeBase) == "function" then
-			flag14, str4 = quantumV4Upgrades.upgradeBase()
+	SecAutoPlace:AddToggle("AutoPlace", {
+		Title = "Auto Place Egg",
+		Description = "Places eggs from inventory onto base pens automatically",
+		Default = quantumConfig.AutoPlace or false,
+		Callback = function(v)
+			fn118(v)
 		end
+	})
 
-		flag6:Notify({Title = "Base", Content = flag14 and "Base upgraded" or tostring(str4 or "Could not upgrade"), Duration = 3})
-	end)})
+	SecAutoPlace:AddDropdown("PlaceEggRarity", {
+		Title = "Place Egg Rarity",
+		Description = "Only place eggs of these rarities. Empty = all rarities.",
+		Values = v26,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			quantumConfig.PlaceRarities = fn67(v)
+		end
+	})
+
+	SecAutoPlace:AddButton({
+		Title = "Place Everything Now",
+		Description = "Places every egg currently held in inventory onto available pens",
+		Callback = function()
+			fn123()
+		end
+	})
+
+	SecAutoTreadmill:AddToggle("AutoTreadmill", {
+		Title = "Auto Treadmill",
+		Description = "Walks onto base treadmill when idle to build speed and earn gems",
+		Default = quantumConfig.AutoTreadmillIdle or false,
+		Callback = function(v)
+			fn82(v)
+		end
+	})
+
+	SecAutoTreadmill:AddToggle("TreadmillUpgrade", {
+		Title = "Auto Upgrade Treadmill",
+		Description = "Upgrades treadmill whenever player can afford it",
+		Default = quantumConfig.AutoTreadmillUpgrade or false,
+		Callback = function(v)
+			fn88(v)
+		end
+	})
+
+	SecAutoTreadmill:AddToggle("AntiTreadmill", {
+		Title = "Anti Treadmill",
+		Description = "Dismounts character immediately if trapped or nudged onto treadmill",
+		Default = quantumConfig.AntiTreadmill or false,
+		Callback = function(v)
+			fn83(v)
+		end
+	})
+
+	SecAutoHatch:AddToggle("AutoHatch", {
+		Title = "Auto Hatch Egg",
+		Description = "Automatically hatches incubated eggs on your base as soon as ready",
+		Default = quantumConfig.AutoHatch or false,
+		Callback = function(v)
+			fn119(v)
+		end
+	})
+
+	SecAutoHatch:AddToggle("EquipBest", {
+		Title = "Equip Best",
+		Description = "Equips top multiplier pets automatically",
+		Default = quantumConfig.AutoEquipBest or false,
+		Callback = function(v)
+			fn105(v)
+		end
+	})
+
+	SecAutoHatch:AddButton({
+		Title = "Hatch Everything Ready",
+		Description = "Hatches all ready eggs across all base pens instantly",
+		Callback = function()
+			fn124()
+		end
+	})
+
+	SecAutoSell:AddToggle("AutoSellPet", {
+		Title = "Auto Sell Pet",
+		Description = "Continuously liquidates pets matching filter criteria",
+		Default = quantumConfig.AutoSell or false,
+		Callback = function(v)
+			fn127(v)
+		end
+	})
+
+	SecAutoSell:AddDropdown("SellPetNames", {
+		Title = "Pet Name Filter",
+		Description = "Filter specific pet species to sell. Leave empty for all.",
+		Values = fn73,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			quantumConfig.SellNames = fn67(v)
+		end
+	})
+
+	SecAutoSell:AddDropdown("SellPetRarities", {
+		Title = "Pet Rarity Filter",
+		Description = "Filter pet rarities to sell",
+		Values = fn69(v26),
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			quantumConfig.SellRarities = fn67(v)
+		end
+	})
+
+	SecAutoSell:AddInput("SellPetValue", {
+		Title = "Sell Pet By Value",
+		Description = "Sells pets earning less than this value (money/s)",
+		Default = "",
+		Placeholder = "0",
+		Callback = function(v)
+			fn129(v)
+		end
+	})
+
+	SecAutoSell:AddButton({
+		Title = "Sell Pets Now",
+		Description = "Runs an immediate batch sell across all matching pets",
+		Callback = function()
+			fn125()
+		end
+	})
+
+	SecAutoSell:AddToggle("AutoSellEgg", {
+		Title = "Auto Sell Egg",
+		Description = "Automatically liquidates low-value or surplus eggs",
+		Default = quantumConfig.AutoSellEgg or false,
+		Callback = function(v)
+			fn128(v)
+		end
+	})
+
+	SecAutoSell:AddDropdown("SellEggRarities", {
+		Title = "Egg Rarity Filter",
+		Description = "Filter egg rarities to sell",
+		Values = fn69(v26),
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			quantumConfig.SellEggRarities = fn67(v)
+		end
+	})
+
+	SecAutoSell:AddInput("SellEggValue", {
+		Title = "Sell Egg By Value",
+		Description = "Sells eggs worth less than this value (money/s)",
+		Default = "",
+		Placeholder = "0",
+		Callback = function(v)
+			fn130(v)
+		end
+	})
+
+	SecAutoSell:AddButton({
+		Title = "Sell Eggs Now",
+		Description = "Runs an immediate batch sell across all matching eggs",
+		Callback = function()
+			fn126()
+		end
+	})
+
+	SecAutoFuse:AddToggle("AutoFuse", {
+		Title = "Auto Fuse",
+		Description = "Automatically feeds eligible pets into fusion cauldrons",
+		Default = quantumConfig.AutoFusePets or false,
+		Callback = function(v)
+			fn109(v)
+		end
+	})
+
+	SecAutoFuse:AddDropdown("FuseRule", {
+		Title = "Fusion Rule",
+		Description = "Fuse anything passing rarity filter or only chosen species",
+		Values = {"Any Species", "Selected Species"},
+		Default = "Any Species",
+		Multi = false,
+		Callback = function(v)
+			fn110(v)
+		end
+	})
+
+	SecAutoFuse:AddDropdown("FuseRarities", {
+		Title = "Rarities to Fuse",
+		Description = "Only fuse pets of these rarities",
+		Values = v26,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn111(v)
+		end
+	})
+
+	SecAutoFuse:AddDropdown("FuseSpecies", {
+		Title = "Species to Fuse",
+		Description = "Only these species will be inserted into the machine",
+		Values = v24,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn112(v)
+		end
+	})
+
+	SecAutoFav:AddToggle("AutoFavorite", {
+		Title = "Auto Favorite",
+		Description = "Protects high-value pets from accidental sale or fusion",
+		Default = quantumConfig.AutoFavorite or false,
+		Callback = function(v)
+			fn101(v)
+		end
+	})
+
+	SecAutoFav:AddDropdown("FavoriteRule", {
+		Title = "Favorite Rule",
+		Description = "Match pets to lock by rarity or by species",
+		Values = {"Rarity", "Species"},
+		Default = "Rarity",
+		Multi = false,
+		Callback = function(v)
+			fn102(v)
+		end
+	})
+
+	SecAutoFav:AddDropdown("FavoriteRarities", {
+		Title = "Rarities to Keep",
+		Description = "Pets of these rarities will be favorited",
+		Values = v26,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn103(v)
+		end
+	})
+
+	SecAutoFav:AddDropdown("FavoriteSpecies", {
+		Title = "Species to Keep",
+		Description = "Pets of these species will be favorited",
+		Values = v24,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn104(v)
+		end
+	})
+
+	SecAutoFav:AddButton({
+		Title = "Unfavorite Everything",
+		Description = "Removes favorite lock from all pets in inventory",
+		Callback = function()
+			local p = genv.__QuantumPetBarn
+			if p and type(p.unfavoriteAll) == "function" then
+				pcall(p.unfavoriteAll, p)
+			end
+		end
+	})
+
+	SecAutoRift:AddToggle("AuraBat", {
+		Title = "Aura Bat",
+		Description = "Automatically strikes nearby hostile entities with Bat",
+		Default = quantumConfig.GodMode or false,
+		Callback = function(v)
+			fn80(v)
+		end
+	})
+
+	SecAutoRift:AddDropdown("MutationChoice", {
+		Title = "Select Mutation",
+		Description = "Which mutation to apply to placed eggs",
+		Values = {"Scrambled", "Fractured", "Enchanted"},
+		Default = "Scrambled",
+		Multi = false,
+		Callback = function(v)
+			fn122(v)
+		end
+	})
+
+	SecAutoRift:AddDropdown("MutationSpecies", {
+		Title = "Mutate Egg Name",
+		Description = "Only mutate placed eggs of these names",
+		Values = v24,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn123(v)
+		end
+	})
+
+	SecAutoRift:AddDropdown("MutationRarity", {
+		Title = "Mutate Egg Rarity",
+		Description = "Only mutate placed eggs of these rarities",
+		Values = v26,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn124(v)
+		end
+	})
+
+	SecAutoRift:AddInput("MutationMinValue", {
+		Title = "Mutate Min Value",
+		Description = "Minimum value before mutation is applied",
+		Default = "",
+		Placeholder = "0",
+		Callback = function(v)
+			fn125(v)
+		end
+	})
+
+	SecAutoRift:AddToggle("MutationRetry", {
+		Title = "Retry Until Mutated",
+		Description = "Re-applies mutation items until target is successfully mutated",
+		Default = quantumConfig.MutationRetry or false,
+		Callback = function(v)
+			fn126(v)
+		end
+	})
+
+	SecAutoRift:AddToggle("AutoMutation", {
+		Title = "Auto Apply Mutation",
+		Description = "Continuously feeds mutation items to matching plot eggs",
+		Default = quantumConfig.AutoMutation or false,
+		Callback = function(v)
+			fn120(v)
+		end
+	})
+
+	SecAutoRift:AddButton({
+		Title = "Apply Mutation Now",
+		Description = "Attempts a single mutation pass on matching plot eggs",
+		Callback = function()
+			if type(tbl10.mutationSweep) == "function" then
+				task.spawn(tbl10.mutationSweep)
+			end
+		end
+	})
+
+	local SecESP = PlayerTab:AddSection("ESP")
+	local SecMovement = PlayerTab:AddSection("Movement")
+	local SecCharacter = PlayerTab:AddSection("Character")
+
+	SecESP:AddToggle("EggESP", {
+		Title = "Egg ESP",
+		Description = "Draws billboard labels over spawned eggs in the world",
+		Default = quantumConfig.EggESP or false,
+		Callback = function(v)
+			fn96(v)
+		end
+	})
+
+	SecESP:AddDropdown("ESPDetails", {
+		Title = "ESP Details",
+		Description = "Configure information displayed on billboard labels",
+		Values = {"Name", "Rarity", "Value", "Weight", "Mutation", "Placed Eggs", "Icon"},
+		Multi = true,
+		Default = {"Name", "Rarity", "Value", "Icon"},
+		Callback = function(v)
+			fn97(v)
+		end
+	})
+
+	SecESP:AddDropdown("ESPMinRarity", {
+		Title = "ESP Min Rarity",
+		Description = "Only render ESP for eggs of this rarity or rarer",
+		Values = (function()
+			local r = {"Any"}
+			for _, x in ipairs(v26) do r[#r + 1] = x end
+			return r
+		end)(),
+		Default = "Any",
+		Multi = false,
+		Callback = function(v)
+			tbl10.applyEspMinRarity(v)
+		end
+	})
+
+	SecESP:AddInput("ESPMinValue", {
+		Title = "ESP Min Value",
+		Description = "Only render ESP for eggs worth at least this amount",
+		Default = "",
+		Placeholder = "0",
+		Callback = function(v)
+			tbl10.applyEspMinValue(v)
+		end
+	})
+
+	SecESP:AddToggle("BackpackRates", {
+		Title = "Backpack Value/s",
+		Description = "Displays rate earnings directly over inventory items",
+		Default = quantumConfig.BackpackRateEsp or false,
+		Callback = function(v)
+			fn99(v)
+		end
+	})
+
+	SecMovement:AddToggle("AdminBoost", {
+		Title = "Admin Abuse Boost",
+		Description = "High-speed traversal mode specifically calibrated for Admin Abuse events",
+		Default = false,
+		Callback = function(v)
+			fn137(v)
+		end
+	})
+
+	SecMovement:AddToggle("FlyForCapture", {
+		Title = "Fly For Capture",
+		Description = "Ascends to safe ceiling altitude after grabbing event egg",
+		Default = false,
+		Callback = function(v)
+			fn135(v)
+		end
+	})
+
+	SecMovement:AddToggle("InfiniteJump", {
+		Title = "Infinite Jump",
+		Description = "Allows continuous jumping mid-air via JumpRequest impulse",
+		Default = false,
+		Callback = function(v)
+			fn139(v)
+		end
+	})
+
+	SecMovement:AddToggle("Noclip", {
+		Title = "Noclip",
+		Description = "Disables limb collisions to walk through doors and walls",
+		Default = false,
+		Callback = function(v)
+			fn113(v)
+		end
+	})
+
+	SecMovement:AddDropdown("Waypoint", {
+		Title = "Waypoint",
+		Description = "Select a saved map location to teleport to",
+		Values = tbl25,
+		Default = tbl25[1],
+		Multi = false,
+		Callback = function(v)
+			v29 = v
+		end
+	})
+
+	SecMovement:AddButton({
+		Title = "Teleport To Waypoint",
+		Description = "Teleports character to selected waypoint position",
+		Callback = function()
+			local roaming = genv.__QuantumRoaming
+			if roaming and type(roaming.teleport) == "function" then
+				pcall(roaming.teleport, roaming, v29)
+			end
+		end
+	})
+
+	SecCharacter:AddToggle("InstantGrab", {
+		Title = "Instant Grab",
+		Description = "Bypasses egg interaction hold timers for immediate pickup",
+		Default = false,
+		Callback = function(v)
+			fn136(v)
+		end
+	})
+
+	SecCharacter:AddToggle("AntiAFK", {
+		Title = "Anti AFK",
+		Description = "Simulates user input to prevent 20-minute idle disconnects",
+		Default = true,
+		Callback = function(v)
+			fn141(v)
+		end
+	})
+
+	SecCharacter:AddToggle("AntiCutscene", {
+		Title = "Anti Cutscene",
+		Description = "Skips camera animations and cinematic lockouts",
+		Default = false,
+		Callback = function(v)
+			fn115(v)
+		end
+	})
+
+	local SecWebhook = PredictorTab:AddSection("Discord Webhook")
+	local SecEggPred = PredictorTab:AddSection("Egg Predictor")
+	local SecRiftPred = PredictorTab:AddSection("Rift Predictor")
+	local SecFusePred = PredictorTab:AddSection("Fuse Predictor")
+
+	SecWebhook:AddToggle("WebhookEnabled", {
+		Title = "Steal Webhook",
+		Description = "Dispatches Discord webhook embeds when rare eggs are secured",
+		Default = quantumConfig.WebhookEnabled or false,
+		Callback = function(v)
+			fn150(v)
+		end
+	})
+
+	SecWebhook:AddInput("WebhookUrl", {
+		Title = "Webhook URL",
+		Description = "Destination Discord webhook URL",
+		Default = quantumConfig.WebhookURL or "",
+		Placeholder = "https://discord.com/api/webhooks/...",
+		Callback = function(v)
+			fn151(v)
+		end
+	})
+
+	SecWebhook:AddToggle("WebhookDisconnect", {
+		Title = "Disconnect Alert",
+		Description = "Posts an alert embed if client gets disconnected or kicked",
+		Default = quantumConfig.WebhookDisconnect or false,
+		Callback = function(v)
+			quantumConfig.WebhookDisconnect = v == true
+		end
+	})
+
+	SecWebhook:AddDropdown("WebhookRarities", {
+		Title = "Notify Rarities",
+		Description = "Only send notifications for eggs of these rarities",
+		Values = v26,
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			fn152(v)
+		end
+	})
+
+	SecWebhook:AddInput("WebhookValue", {
+		Title = "Notify Minimum Value",
+		Description = "Minimum value required before dispatching webhook notification",
+		Default = "",
+		Placeholder = "0",
+		Callback = function(v)
+			fn153(v)
+		end
+	})
+
+	SecWebhook:AddButton({
+		Title = "Test Webhook",
+		Description = "Sends a test notification embed to verify webhook connectivity",
+		Callback = function()
+			local wh = genv.__QuantumWebhook
+			if wh and type(wh.test) == "function" then
+				pcall(wh.test, wh, quantumConfig.WebhookURL)
+			end
+		end
+	})
+
+	SecEggPred:AddToggle("EggPredictUI", {
+		Title = "Egg Predictor Preview",
+		Description = "Renders preview card of upcoming eggs in active hatch queue",
+		Default = quantumConfig.EggPredictUI or false,
+		Callback = function(v)
+			quantumConfig.EggPredictUI = v == true
+		end
+	})
+
+	SecEggPred:AddParagraph({
+		Title = "Hatch Queue Status",
+		Content = "Egg queue telemetry active. Decodes upcoming egg seed iterations and rarity tiers."
+	})
+
+	SecRiftPred:AddParagraph({
+		Title = "Rift Machine Decoder",
+		Content = "Decodes active Rift requirements and pre-calculates upcoming recipe components."
+	})
+
+	SecFusePred:AddParagraph({
+		Title = "Fusion Machine Calculator",
+		Content = "Calculates exact mutation roll probabilities and species output odds."
+	})
+
+	local SecProgression = ProgressTab:AddSection("Auto Progression")
+
+	SecProgression:AddToggle("BaseUpgrade", {
+		Title = "Auto Base Upgrade",
+		Description = "Upgrades plot capacity and slots whenever affordable",
+		Default = false,
+		Callback = function(v)
+			fn107(v)
+		end
+	})
+
+	SecProgression:AddToggle("ClaimAlmanac", {
+		Title = "Claim Almanac",
+		Description = "Claims pet collection milestone rewards automatically",
+		Default = false,
+		Callback = function(v)
+			fn108(v)
+		end
+	})
+
+	SecProgression:AddToggle("ClaimOffline", {
+		Title = "Claim Offline",
+		Description = "Claims accrued offline earnings upon reconnect",
+		Default = false,
+		Callback = function(v)
+			fn106(v)
+		end
+	})
+
+	SecProgression:AddToggle("AutoRace", {
+		Title = "Auto Race",
+		Description = "Enters and steers through race course waypoints automatically",
+		Default = false,
+		Callback = function(v)
+			quantumConfig.RaceAuto = v == true
+		end
+	})
+
+	SecProgression:AddToggle("RaceClaim", {
+		Title = "Auto Claim Race",
+		Description = "Claims race completion trophies and rewards",
+		Default = false,
+		Callback = function(v)
+			quantumConfig.RaceClaim = v == true
+		end
+	})
+
+	SecProgression:AddToggle("RaceBuy", {
+		Title = "Auto Buy Race Shop",
+		Description = "Purchases items from the race shop automatically",
+		Default = false,
+		Callback = function(v)
+			quantumConfig.RaceBuy = v == true
+		end
+	})
+
+	SecProgression:AddDropdown("RaceBuyList", {
+		Title = "Shop Buy List",
+		Description = "Select race items to purchase",
+		Values = {"CashBooster", "SpeedBoost", "TreadmillBoost", "MutationToken", "RacingBat"},
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			quantumConfig.RaceBuyList = fn67(v)
+		end
+	})
+
+	SecProgression:AddToggle("StarAlert", {
+		Title = "Star Alert",
+		Description = "Alerts when a shooting star event begins",
+		Default = true,
+		Callback = function(v)
+			quantumConfig.StarAlert = v == true
+		end
+	})
+
+	SecProgression:AddToggle("StarAutoCatch", {
+		Title = "Auto Catch Star",
+		Description = "Navigates to falling star landing point and loots it",
+		Default = false,
+		Callback = function(v)
+			quantumConfig.StarAutoCatch = v == true
+		end
+	})
+
+	SecProgression:AddToggle("WispAutoQuest", {
+		Title = "Auto Wisp Quests",
+		Description = "Automates wisp quests and progression tasks",
+		Default = false,
+		Callback = function(v)
+			quantumConfig.WispAutoQuest = v == true
+		end
+	})
+
+	SecProgression:AddToggle("AutoRingEvent", {
+		Title = "Auto Ring Event",
+		Description = "Continuous glide loop: Forest -> Angels & Demons -> Forest",
+		Default = false,
+		Callback = function(v)
+			fn121(v)
+		end
+	})
+
+	SecProgression:AddToggle("BloomCatch", {
+		Title = "Auto Catch Butterfly",
+		Description = "Swings net to catch butterflies in Butterfly Bloom event",
+		Default = false,
+		Callback = function(v)
+			quantumConfig.ButterflyAutoCatch = v == true
+		end
+	})
+
+	SecProgression:AddToggle("BloomNet", {
+		Title = "Auto Net Butterfly",
+		Description = "Equips and readies butterfly net automatically",
+		Default = false,
+		Callback = function(v)
+			quantumConfig.ButterflyAutoNet = v == true
+		end
+	})
+
+	SecProgression:AddToggle("BloomCraft", {
+		Title = "Auto Craft Best Net",
+		Description = "Crafts next tier net as soon as materials are available",
+		Default = false,
+		Callback = function(v)
+			quantumConfig.ButterflyAutoCraft = v == true
+		end
+	})
+
+	SecProgression:AddToggle("BloomTrade", {
+		Title = "Auto Trade Butterfly",
+		Description = "Trades duplicate butterflies for essence recipes",
+		Default = false,
+		Callback = function(v)
+			quantumConfig.ButterflyAutoTrade = v == true
+		end
+	})
+
+	SecProgression:AddDropdown("BloomMode", {
+		Title = "Catch Mode",
+		Description = "Butterfly pursuit mode",
+		Values = {"Tween", "Stand", "Zigzag", "Circle"},
+		Default = "Tween",
+		Multi = false,
+		Callback = function(v)
+			quantumConfig.ButterflyCatchMode = v
+		end
+	})
+
+	SecProgression:AddDropdown("BloomTiers", {
+		Title = "Catch Tiers",
+		Description = "Filter butterfly tiers to catch",
+		Values = {"Radiant", "Amethyst", "Sapphire", "Emerald"},
+		Multi = true,
+		Default = {},
+		Callback = function(v)
+			quantumConfig.ButterflyTiers = fn67(v)
+		end
+	})
+
+	SecProgression:AddDropdown("BloomRecipe", {
+		Title = "Trade Recipe",
+		Description = "Which trade recipe to prioritize",
+		Values = {"All", "Essence Only"},
+		Default = "All",
+		Multi = false,
+		Callback = function(v)
+			quantumConfig.ButterflyTradeRecipe = v
+		end
+	})
+
+	SecProgression:AddToggle("BloomESP", {
+		Title = "Butterfly ESP",
+		Description = "Highlights active butterflies across the map",
+		Default = false,
+		Callback = function(v)
+			quantumConfig.ButterflyEsp = v == true
+		end
+	})
+
+	SecProgression:AddParagraph({
+		Title = "Task Priority Ladder",
+		Content = "Deterministic scheduler order: Steal > Race > Star > Mech Boss > Butterfly > Place > Mutation > Sell > Treadmill."
+	})
+
+	local SecServer = ServerTab:AddSection("Server")
+
+	SecServer:AddToggle("HopNoMatch", {
+		Title = "Hop When Nothing Matches",
+		Description = "Automatically hops server if no eggs pass current filters",
+		Default = false,
+		Callback = function(v)
+			fn84(v)
+		end
+	})
+
+	SecServer:AddSlider("HopCooldown", {
+		Title = "Hop Cooldown (s)",
+		Description = "Seconds to wait on a server before hopping again",
+		Min = 1,
+		Max = 30,
+		Default = 5,
+		Rounding = 0,
+		Callback = function(v)
+			fn87(v)
+		end
+	})
+
+	SecServer:AddDropdown("PrivateServerMax", {
+		Title = "Max Players (Private Hop)",
+		Description = "Target maximum player count for private hop",
+		Values = {"1", "2", "3", "4", "5"},
+		Default = "2",
+		Multi = false,
+		Callback = function(v)
+			fn85(v)
+		end
+	})
+
+	SecServer:AddToggle("PrivateServerAuto", {
+		Title = "Auto Hop (Low Players)",
+		Description = "Searches for and joins low-population public servers",
+		Default = false,
+		Callback = function(v)
+			fn86(v)
+		end
+	})
+
+	SecServer:AddButton({
+		Title = "Hop Server Now",
+		Description = "Finds and joins a low-player server immediately",
+		Callback = function()
+			if type(tbl13.startPrivateAutoHop) == "function" then
+				tbl13.startPrivateAutoHop()
+			end
+		end
+	})
+
+	SecServer:AddButton({
+		Title = "Rejoin This Server",
+		Description = "Reconnects to the exact same server instance",
+		Callback = function()
+			fn134()
+		end
+	})
+
+	SecServer:AddToggle("AutoReconnect", {
+		Title = "Auto Reconnect",
+		Description = "Reconnects automatically upon disconnection or kick",
+		Default = true,
+		Callback = function(v)
+			fn142(v)
+		end
+	})
+
+	SecServer:AddToggle("AutoExecute", {
+		Title = "Auto Execute (Rejoin)",
+		Description = "Queues auto-execute payload to re-run script upon rejoin",
+		Default = false,
+		Callback = function(v)
+			fn143(v)
+		end
+	})
+
+	SecServer:AddButton({
+		Title = "Stop & Unload",
+		Description = "Shuts down background workers and unloads the script cleanly",
+		Callback = function()
+			if genv.__QuantumHubShutdown then
+				genv.__QuantumHubShutdown()
+			end
+		end
+	})
+
+	local SecPerformance = MiscTab:AddSection("Performance")
+	local SecUtility = MiscTab:AddSection("Utility")
+
+	SecPerformance:AddToggle("StartupBoost", {
+		Title = "Startup Boost",
+		Description = "Boosts performance optimizations on load",
+		Default = false,
+		Callback = function(v)
+			fn131(v)
+		end
+	})
+
+	SecPerformance:AddToggle("BoostFPS", {
+		Title = "Boost FPS",
+		Description = "Lowers decorative rendering to increase frame rate",
+		Default = false,
+		Callback = function(v)
+			fn132(v)
+		end
+	})
+
+	SecPerformance:AddToggle("UncapFPS", {
+		Title = "Uncap FPS",
+		Description = "Removes default 60 FPS cap",
+		Default = false,
+		Callback = function(v)
+			fn133(v)
+		end
+	})
+
+	SecPerformance:AddToggle("BottingMode", {
+		Title = "Botting Mode",
+		Description = "Enables minimalist dark telemetry overlay for headless running",
+		Default = false,
+		Callback = function(v)
+			fn114(v)
+		end
+	})
+
+	SecUtility:AddButton({
+		Title = "Egg Logs",
+		Description = "Opens recent egg discovery and steal activity log",
+		Callback = function()
+			local p = genv.QuantumPanels
+			if p and type(p.openLogs) == "function" then p.openLogs() end
+		end
+	})
+
+	SecUtility:AddButton({
+		Title = "Egg Board",
+		Description = "Opens live server egg leaderboard",
+		Callback = function()
+			local p = genv.QuantumPanels
+			if p and type(p.openBoard) == "function" then p.openBoard() end
+		end
+	})
+
+	SecUtility:AddButton({
+		Title = "Inventory & Base",
+		Description = "Inspects base plots and backpack capacity",
+		Callback = function()
+			local p = genv.QuantumPanels
+			if p and type(p.openInventory) == "function" then p.openInventory() end
+		end
+	})
+
+	SecUtility:AddButton({
+		Title = "Egg Checker",
+		Description = "Inspects field egg rarity rates and values",
+		Callback = function()
+			local p = genv.QuantumPanels
+			if p and type(p.openChecker) == "function" then p.openChecker() end
+		end
+	})
+
+	SecUtility:AddButton({
+		Title = "Egg Data & History",
+		Description = "Historical analytics and steal stats",
+		Callback = function()
+			local p = genv.QuantumPanels
+			if p and type(p.openAnalyst) == "function" then p.openAnalyst() end
+		end
+	})
+
+	SecUtility:AddButton({
+		Title = "Farm Stats",
+		Description = "Total stolen eggs, session time, and rate telemetry",
+		Callback = function()
+			local p = genv.QuantumPanels
+			if p and type(p.openStats) == "function" then p.openStats() end
+		end
+	})
+
+	SecUtility:AddButton({
+		Title = "Open All Windows",
+		Description = "Opens all telemetry panels simultaneously",
+		Callback = function()
+			local p = genv.QuantumPanels
+			if p and type(p.openAll) == "function" then p.openAll() end
+		end
+	})
 
 	do
-		local quantumV4ButterflyRuntime = (genv.__QuantumV4ButterflyRuntime or genv.__SenaV4ButterflyRuntime)
-		v25 = tbl24.section(v35, "Wisp Event", tbl24.gameIcon("WispQuests", "List", 1, "Icon"))
-		local v49 = v25:AddParagraph({Title = "Wisp Companion", Content = "Reading your wisp progress..."})
+		local quantumVisual = genv.__QuantumVisual
+		local visualItems = {rods = nil, fish = nil}
 
-		tbl24.wispAutoQuest = v25:AddToggle("Toggle_AutoWispQuest", {Title = "Auto Wisp Quest", Description = "Meets the Baby Wisp, hunts the quest eggs (Enchanted Forest eggs, an Eternal), fuses an Enchanted Forest animal, claims every reward and flies the wisp home to unlock the Enchanted Tree. Needs 50B SpeedPower.", Default = false, Callback = fn144(function(arg)
-			quantumV4Config.WispAutoQuest = arg == true
-		end)})
-
-		tbl24.banjoAuto = v25:AddToggle("Toggle_AutoBanjoCricket", {Title = "Auto Banjo Cricket", Description = "Goes into the Enchanted Tree, plays the Banjo Cricket's mushroom song back for all 5 stages, then claims the secret from Jitterbug. Needs the tree unlocked.", Default = false, Callback = fn144(function(arg)
-			quantumV4Config.BanjoAuto = arg == true
-		end)})
-
-		local v50 = tbl24.section(v35, "Butterfly Bloom", tbl24.gameIcon("ButterflyCatalog", "Icons", "Net"))
-		local v51 = v50:AddParagraph({Title = "Bloom Status", Content = "Reading the Bloom schedule..."})
-		local addIconGrid, v52 = v50.AddIconGrid and v50:AddIconGrid({Title = "Butterflies Caught", Note = "", Columns = 4})
-		local tbl29 = {}
-
-		tbl24.bloomAutoNet = v50:AddToggle("Toggle_AutoClaimNet", {Title = "Auto Claim Net", Description = "Goes into the Enchanted Tree and claims your free Butterfly Net once.", Default = false, Callback = fn144(function(arg)
-			quantumV4Config.ButterflyAutoNet = arg == true
-		end)})
-
-		tbl24.bloomAutoCatch = v50:AddToggle("Toggle_AutoCatch", {Title = "Auto Catch", Description = "During every Bloom (every 30 min, 5 min long) flies to the Enchanted Forest, equips the net and catches with the Catch Mode below.", Default = false, Callback = fn144(function(arg)
-			quantumV4Config.ButterflyAutoCatch = arg == true
-		end)})
-
-		fn68 = quantumV4ButterflyRuntime and quantumV4ButterflyRuntime.modeOptions() or {"Tween to Butterfly"}
-
-		tbl24.bloomMode = v50:AddDropdown("Dropdown_CatchMode", {Title = "Catch Mode", Description = "Tween to Butterfly chases one butterfly at a time. Stand waits in the thickest part of the swarm, Zigzag sweeps back and forth across the forest, Circle loops around the swarm.", Values = fn68, Multi = false, Default = fn68[1], Callback = fn144(function(arg)
-			if quantumV4ButterflyRuntime then
-				quantumV4ButterflyRuntime.setMode(arg)
-			end
-		end)})
-
-		tbl24.bloomTiers = v50:AddDropdown("Dropdown_CatchTiers", {Title = "Catch Tiers", Description = "Only swing at these butterflies. Leave empty to catch every tier.", Values = quantumV4ButterflyRuntime and quantumV4ButterflyRuntime.tierOptions() or {"Radiant", "Amethyst", "Sapphire", "Emerald"}, Multi = true, Default = {}, Callback = fn144(function(arg)
-			if quantumV4ButterflyRuntime then
-				quantumV4ButterflyRuntime.setTiers(fn67(arg))
-			end
-		end)})
-
-		tbl24.bloomEsp = v50:AddToggle("Toggle_ButterflyESP", {Title = "Butterfly ESP", Description = "Shows every butterfly's tier and distance while a Bloom is live.", Default = false, Callback = fn144(function(arg)
-			quantumV4Config.ButterflyEsp = arg == true
-		end)})
-
-	v50:AddParagraph({Title = "• Trade & Craft", Content = ""})
-
-		tbl24.bloomAutoTrade = v50:AddToggle("Toggle_AutoTradeUp", {Title = "Auto Trade Up", Description = "After each Bloom, trades your butterflies up at the machine inside the Enchanted Tree.", Default = false, Callback = fn144(function(arg)
-			quantumV4Config.ButterflyAutoTrade = arg == true
-		end)})
-
-		fn73 = quantumV4ButterflyRuntime and quantumV4ButterflyRuntime.recipeOptions() or {"All Recipes"}
-
-		tbl24.bloomRecipe = v50:AddDropdown("Dropdown_TradeRecipe", {Title = "Trade Recipe", Description = "Which trade Auto Trade Up runs. For Essence only trades up what the essence recipe is still short of.", Values = fn73, Multi = false, Default = fn73[1], Callback = fn144(function(arg)
-			if quantumV4ButterflyRuntime then
-				quantumV4ButterflyRuntime.setRecipe(arg)
-			end
-		end)})
-
-		tbl24.bloomAutoCraft = v50:AddToggle("Toggle_AutoCraftEssence", {Title = "Auto Craft Essence", Description = "After each Bloom, crafts Enchanted Essence at the shrine once you hold the full recipe.", Default = false, Callback = fn144(function(arg)
-			quantumV4Config.ButterflyAutoCraft = arg == true
-		end)})
-
-		local function fn157(arg, arg2, arg3, arg4)
-			v50:AddButton({Title = arg, Description = arg2, Callback = fn144(function()
-				if not quantumV4ButterflyRuntime then
-					return
-				end
-
-				task.spawn(function()
-					quantumV4ButterflyRuntime.manual = true
-					local ok2, result, result2 = pcall(arg3)
-					quantumV4ButterflyRuntime.manual = false
-
-					if ok2 then
-					else
-						result, result2 = false, result
-					end
-
-					flag6:Notify({Title = "Butterfly Bloom", Content = result and arg4(result2) or tostring(result2 or "Could not do that"), Duration = 4})
-				end)
-			end)})
-		end
-
-		fn157("Claim Net Now", "Claims the Butterfly Net right now.", function()
-			return quantumV4ButterflyRuntime.claimNet()
-		end, function()
-			return "Butterfly Net claimed"
-		end)
-
-		fn157("Trade Up Now", "Runs the trade recipe once, even with Auto Trade Up off.", function()
-			return quantumV4ButterflyRuntime.tradeUp()
-		end, function(arg)
-			return ("Traded up %d time(s)"):format(tonumber(arg) or 0)
-		end)
-
-		fn157("Craft Essence Now", "Crafts Enchanted Essence right now if you hold the full recipe.", function()
-			return quantumV4ButterflyRuntime.craft()
-		end, function(arg)
-			return ("Crafted %d Enchanted Essence"):format(tonumber(arg) or 0)
-		end)
-
-		local function fn158(arg)
-			local n8 = tonumber(arg) or 0
-			if n8 >= 1000000000000 then
-				return ("%.2fT"):format(n8 / 1000000000000)
-			end
-
-			if n8 >= 1000000000 then
-				return ("%.2fB"):format(n8 / 1000000000)
-			end
-
-			if n8 >= 1000000 then
-				return ("%.2fM"):format(n8 / 1000000)
-			end
-
-			if n8 >= 1000 then
-				return ("%.1fK"):format(n8 / 1000)
-			end
-			return tostring(math.floor(n8))
-		end
-
-		task.spawn(function()
-			while fn2() do
-				if quantumV4ButterflyRuntime then
-					local function fn159()
-						local snap = quantumV4ButterflyRuntime.snap
-						local tbl30 = quantumV4ButterflyRuntime.tiers() or {}
-
-						if snap.unlocked then
-							v49:SetContent("Complete - the Enchanted Tree is unlocked.")
-						elseif snap.accepted then
-							v49:SetContent(("Stage %d / %d  ·  %s  (%d / %d)%s"):format(snap.stage or 1, snap.stages or 4, tostring(snap.quest), snap.progress or 0, snap.target or 0, snap.readyReturn and "\nAll quests done - return the wisp to unlock the tree." or (snap.claimable and "\nReady to claim." or (quantumV4ButterflyRuntime.questNote and "\n" .. quantumV4ButterflyRuntime.questNote or ""))))
-						elseif (snap.speed or 0) < (snap.need or 0) then
-							v49:SetContent(("Not eligible yet: SpeedPower %s of %s."):format(fn158(snap.speed), fn158(snap.need)))
-						else
-							v49:SetContent(("Eligible (SpeedPower %s). The Baby Wisp waits in the Enchanted Forest."):format(fn158(snap.speed)))
-						end
-
-						local str4
-
-						if snap.active then
-							local n8 = math.floor(snap.left or 0)
-							str4 = ("LIVE - ends in %dm %02ds"):format(math.floor(n8 / 60), n8 % 60)
-						else
-							if snap.enabled == false then
-								str4 = "Disabled on this server"
-							else
-								if snap.nextIn then
-									local n8 = math.floor(snap.nextIn)
-									str4 = ("Next in %dm %02ds"):format(math.floor(n8 / 60), n8 % 60)
-								else
-									str4 = "Not running"
-								end
-							end
-						end
-
-						local tbl31 = {}
-
-						for i, v53 in ipairs({"Golden", "Purple", "Blue", "Green"}) do
-							tbl31[#tbl31 + 1] = ("%s %d"):format(tbl30[v53] and tbl30[v53].name or v53, snap.counts and snap.counts[v53] or 0)
-						end
-
-						if addIconGrid then
-							local tbl32 = {}
-
-							for i, v53 in ipairs({"Green", "Blue", "Purple", "Golden"}) do
-								local counts = snap.counts and snap.counts[v53] or 0
-
-								if v52 and counts > (v52[v53] or 0) then
-									tbl29[v53] = (tbl29[v53] or 0) + counts - v52[v53]
-								end
-
-								local tbl33 = tbl30[v53] or {}
-								local n8 = tbl29[v53] or 0
-								tbl32[#tbl32 + 1] = {Name = tbl33.name or v53, Icon = tbl33.icon, Color = tbl33.color, Value = fn158(counts), Sub = n8 > 0 and ("+%d session"):format(n8) or (tbl33.rarity or ""), SubColor = n8 > 0 and Color3.fromRGB(74, 222, 128) or nil}
-							end
-
-							v52 = table.clone(snap.counts or {})
-							addIconGrid:SetItems(tbl32)
-							addIconGrid:SetNote(("Total %s  ·  Essence %d"):format(fn158(snap.caught), snap.essence or 0))
-							tbl31 = {}
-						end
-
-						v51:SetContent((("%s\n%s  ·  Essence %d  ·  Caught %d\n%s\n%s"):format(str4, snap.net and (snap.holding and "Net equipped" or "Net owned") or "No Butterfly Net", snap.essence or 0, snap.caught or 0, table.concat(tbl31, "  ·  "), tostring(quantumV4ButterflyRuntime.status or "Idle")):gsub("\n\n", "\n")))
-					end
-
-					pcall(fn159)
-				end
-
-				task.wait(1)
-			end
-		end)
-	end
-
-	local v49 = tbl24.section(v35, "Race Rally", tbl24.gameIcon("FallenPowerUp", "Kinds", "x2Rings", "Icon"))
-	v49:AddParagraph({Title = "About This Event", Content = "Race Rally opens every 30 minutes for 60 seconds. Auto Race joins from anywhere, rides the track for you and brings you back to base after the finish."})
-
-	tbl24.raceAuto = v49:AddToggle("Toggle_AutoRace", {Title = "Auto Race", Description = "Joins every race, rides the track, uses power-ups and returns to base. Auto Steal pauses while you race.", Default = false, Callback = fn144(function(arg)
-		quantumV4Config.RaceAuto = arg == true
-	end)})
-
-	tbl24.raceClaim = v49:AddToggle("Toggle_AutoClaimEquipBestRacer", {Title = "Auto Claim & Equip Best Racer", Description = "Claims every win milestone you reached and equips the best racer you own.", Default = false, Callback = fn144(function(arg)
-		quantumV4Config.RaceClaim = arg == true
-	end)})
-
-	tbl24.raceBuy = v49:AddToggle("Toggle_AutoBuyShop", {Title = "Auto Buy Shop", Description = "Spends race tokens on the items you pick below.", Default = false, Callback = fn144(function(arg)
-		quantumV4Config.RaceBuy = arg == true
-	end)})
-
-	tbl24.raceBuyList = v49:AddDropdown("Dropdown_ShopBuyList", {Title = "Shop Buy List", Description = "Which race shop items Auto Buy should purchase.", Values = {"CashBooster", "SpeedBoost", "TreadmillBoost", "MutationToken", "RacingBat"}, Multi = true, Default = {}, Callback = fn144(function(arg)
-		quantumV4Config.RaceBuyList = fn67(arg)
-	end)})
-
-	local v50 = v49:AddParagraph({Title = "Race Status", Content = "Waiting for the next race."})
-
-	task.spawn(function()
-		while fn2() do
-			local senaV4RaceRuntime = (genv.__QuantumV4RaceRuntime or genv.__SenaV4RaceRuntime)
-
-			if senaV4RaceRuntime then
+		local function updateVisualStatus()
+			if visualStatusParagraph and quantumVisual then
 				pcall(function()
-					local v51 = senaV4RaceRuntime.joinLeft()
-					local str4 = v51 > 0 and string.format("  ·  Join open %ds", math.floor(v51)) or ""
-					v50:SetContent(tostring(senaV4RaceRuntime.status) .. str4 .. "\nLast: " .. tostring(senaV4RaceRuntime.lastResult))
+					visualStatusParagraph:SetContent(quantumVisual.status)
 				end)
 			end
-
-			task.wait(1)
-		end
-	end)
-
-	local v51 = tbl24.section(v35, "Shooting Star", "rbxassetid://92160802930122")
-	v51:AddParagraph({Title = "About This Event", Content = "Sometimes a little star falls near you and runs around for a few minutes. Hold next to it to catch it."})
-
-	tbl24.starAlert = v51:AddToggle("Toggle_StarAlert", {Title = "Star Alert", Description = "Shows a notification the moment a star starts falling.", Default = true, Callback = fn144(function(arg)
-		quantumV4Config.StarAlert = arg == true
-	end)})
-
-	tbl24.starAutoCatch = v51:AddToggle("Toggle_AutoCatchStar", {Title = "Auto Catch Star", Description = "Goes to the star when it lands and catches it. Other tasks pause until it is caught.", Default = false, Callback = fn144(function(arg)
-		quantumV4Config.StarAutoCatch = arg == true
-	end)})
-
-	local v52 = v51:AddParagraph({Title = "Star Status", Content = "No star right now."})
-
-	task.spawn(function()
-		while fn2() do
-			local senaV4StarRuntime = (genv.__QuantumV4StarRuntime or genv.__SenaV4StarRuntime)
-
-			if senaV4StarRuntime then
-				pcall(function()
-					v52:SetContent(tostring(senaV4StarRuntime.status) .. "\nLast: " .. tostring(senaV4StarRuntime.lastResult))
-				end)
-			end
-
-			task.wait(1)
-		end
-	end)
-
-	local v53 = tbl24.section(v35, "Dr Scramble Event", tbl24.gameIcon("Gears", "Directory", "The Scrambler", "Icon"))
-	v53:AddParagraph({Title = "About This Event", Content = "Dr Scramble only runs during the live event. The shop, trade-in and boss fight are still up; the rest of the time these toggles sit idle."})
-	tbl24.scrambleBuy = v53:AddToggle("Toggle_AutoBuyShop_2", {Title = "Auto Buy Shop", Description = "Spends samples on the shop items you pick below, as soon as you can afford them.", Default = false, Callback = fn144(fn116)})
-	tbl24.scrambleBuyList = v53:AddDropdown("Dropdown_ShopBuyList_2", {Title = "Shop Buy List", Description = "Which shop items Auto Buy should purchase. This list fills in once the event shop is open.", Values = tbl26, Multi = true, Default = {}, Callback = fn144(fn117)})
-	local v54 = v53:AddParagraph({Title = "Scramble Telemetry", Content = "Waiting for the event to start."})
-
-	task.spawn(function()
-		while fn2() do
-			local senaV4ScrambleRuntime = (genv.__QuantumV4ScrambleRuntime or genv.__SenaV4ScrambleRuntime)
-
-			if senaV4ScrambleRuntime and type(senaV4ScrambleRuntime.samples) == "function" then
-				local ok2, result = pcall(senaV4ScrambleRuntime.samples)
-
-				if ok2 then
-					pcall(function()
-						v54:SetContent(string.format("Samples %d  ·  %s", result or 0, senaV4ScrambleRuntime.status or "Idle"))
-					end)
-				end
-			end
-
-			task.wait(2)
-		end
-	end)
-
-	v53:AddParagraph({Title = "• Trade-In (Experimental Pets)", Content = ""})
-
-	tbl24.scrambleTradeInTrade = v53:AddToggle("Toggle_AutoTradeIn", {Title = "Auto Trade-In", Description = "Auto-completes the recipe: uses the required eggs you already have, and auto-adds any you're missing to the Auto Steal hunt (works even with Auto Steal off) so they get stolen off the field, then combines once all three are ready. Favorited / placed eggs are never spent.", Default = false, Callback = fn144(function(arg)
-		quantumV4Config.ScrambleTradeInTrade = arg == true
-	end)})
-
-	tbl24.scrambleTradeInReroll = v53:AddToggle("Toggle_AutoFreeReroll", {Title = "Auto Free Reroll", Description = "When pets are missing and a free reroll is left, rerolls the recipe instead of waiting.", Default = false, Callback = fn144(function(arg)
-		quantumV4Config.ScrambleTradeInReroll = arg == true
-	end)})
-
-	tbl24.scrambleTradeInBanners = v53:AddDropdown("Dropdown_TargetBanners", {Title = "Target Banners", Description = "Only work the trade-in while one of these banners is up. Leave empty to accept any banner.", Values = {"Biohazard Pets", "Experimental Pets", "Unstable DNA"}, Multi = true, Default = {}, Callback = fn144(fn98)})
-
-	v53:AddButton({Title = "Trade-In Once", Description = "Runs one sacrifice right now, even with Auto Trade-In off.", Callback = fn144(function()
-		local quantumV4ScrambleTradeIn = (genv.__QuantumV4ScrambleTradeIn or genv.__SenaV4ScrambleTradeIn)
-		local flag14 = false
-		local str4 = "Trade-In not ready"
-
-		if quantumV4ScrambleTradeIn then
-			flag14, str4 = quantumV4ScrambleTradeIn.tradeOnce()
 		end
 
-		flag6:Notify({Title = "Dr Scramble", Content = flag14 and "Sacrifice complete" or tostring(str4), Duration = 4})
-	end)})
-
-	v53:AddButton({Title = "Use Free Reroll", Description = "Spends one of today's free rerolls on a new recipe.", Callback = fn144(function()
-		local quantumV4ScrambleTradeIn = (genv.__QuantumV4ScrambleTradeIn or genv.__SenaV4ScrambleTradeIn)
-		local flag14 = false
-		local str4 = "Trade-In not ready"
-
-		if quantumV4ScrambleTradeIn then
-			flag14, str4 = quantumV4ScrambleTradeIn.reroll()
-		end
-
-		flag6:Notify({Title = "Dr Scramble", Content = flag14 and "Recipe rerolled" or tostring(str4), Duration = 4})
-	end)})
-
-	v53:AddButton({Title = "Open Trade-In UI", Description = "Opens Dr Scramble's Lab window so you can pick pets by hand.", Callback = fn144(function()
-		if not pcall(function()
-			require(ReplicatedStorage.Client.Tabs).Activate("DrScrambleTradeIn")
-		end) then
-			flag6:Notify({Title = "Dr Scramble", Content = "Could not open the trade-in window", Duration = 3})
-		end
-	end)})
-
-	local v55 = v53:AddParagraph({Title = "Trade-In Status", Content = "Turn a trade-in toggle on to start reading the recipe."})
-
-	task.spawn(function()
-		while fn2() do
-			local quantumV4ScrambleTradeIn = (genv.__QuantumV4ScrambleTradeIn or genv.__SenaV4ScrambleTradeIn)
-
-			if quantumV4ScrambleTradeIn then
-				pcall(function()
-					v55:SetContent(string.format("%s  ·  %s\nRotates in %02d:%02d  ·  Pity %d/%d  ·  Free rerolls %d  ·  Traded %d\nRecipe (%d/%d): %s\nHeld: %s\nMissing: %s", quantumV4ScrambleTradeIn.banner, quantumV4ScrambleTradeIn.status, math.floor(quantumV4ScrambleTradeIn.rotation / 60), quantumV4ScrambleTradeIn.rotation % 60, quantumV4ScrambleTradeIn.pity, quantumV4ScrambleTradeIn.pityMax, quantumV4ScrambleTradeIn.free, quantumV4ScrambleTradeIn.trades, quantumV4ScrambleTradeIn.ready, quantumV4ScrambleTradeIn.total, quantumV4ScrambleTradeIn.demands, quantumV4ScrambleTradeIn.stock, quantumV4ScrambleTradeIn.missing))
-				end)
-			end
-
-			task.wait(1)
-		end
-	end)
-
-	v53:AddParagraph({Title = "• Boss Fight", Content = ""})
-
-	tbl24.scrambleBossAuto = v53:AddToggle("Toggle_AutoBoss", {Title = "Auto Boss", Description = "When Dr Scramble's boss is live, walks into the arena portal, joins the fight, hits the nearest target with your bat and breaks free from grabs. The clear reward lands automatically. While Auto Steal is on and this is off, an accidental touch on the arena portal is bounced back out so your steal is never hijacked.", Default = false, Callback = fn144(function(arg)
-		quantumV4Config.ScrambleBossAuto = arg == true
-		local quantumV4ScrambleBoss = (genv.__QuantumV4ScrambleBoss or genv.__SenaV4ScrambleBoss)
-
-		if quantumV4ScrambleBoss and type(quantumV4ScrambleBoss.setEnabled) == "function" then
-			pcall(quantumV4ScrambleBoss.setEnabled, quantumV4ScrambleBoss, arg == true)
-		end
-
-		if v13 and type(v13._reconcileScramblePortal) == "function" then
-			pcall(v13._reconcileScramblePortal, v13)
-		end
-	end)})
-
-	local v56 = v53:AddParagraph({Title = "Boss Status", Content = "Turn Auto Boss on. It sits idle until the boss event goes live."})
-
-	task.spawn(function()
-		while fn2() do
-			local quantumV4ScrambleBoss = (genv.__QuantumV4ScrambleBoss or genv.__SenaV4ScrambleBoss)
-
-			if quantumV4ScrambleBoss then
-				pcall(function()
-					local flag14 = type(quantumV4ScrambleBoss._snapshot) == "function" and quantumV4ScrambleBoss:_snapshot() or nil
-
-					if type(flag14) == "table" then
-						v56:SetContent(string.format("%s\nPhase %s  ·  HP %d/%d%s\nSamples %d  ·  Reward %s", tostring(flag14.status), tostring(flag14.phase), math.floor((flag14.health or 0) + 0.5), math.floor((flag14.maxHealth or 0) + 0.5), flag14.overheated and "  ·  OVERHEAT" or "", flag14.samples or 0, tostring(flag14.reward)))
-					else
-						v56:SetContent(tostring(quantumV4ScrambleBoss.status or "Idle"))
-					end
-				end)
-			end
-
-			task.wait(1)
-		end
-	end)
-
-	local v57 = tbl24.section(v36, "Treadmill", tbl24.gameIcon("Treadmills", "Directory", "Treadmill", "Icon"))
-	tbl24.autoTreadmill = v57:AddToggle("Toggle_AutoTreadmill", {Title = "Auto Treadmill", Description = "Walks to your treadmill and farms speed whenever nothing else is running.", Default = false, Callback = fn144(fn82)})
-	tbl24.treadmillUpgrade = v57:AddToggle("Toggle_AutoUpgradeTreadmill", {Title = "Auto Upgrade Treadmill", Description = "Buys the next treadmill tier with cash as soon as you can afford it.", Default = false, Callback = fn144(fn88)})
-	local Performance = v38:AddSection("Performance")
-	tbl24.startupBoost = Performance:AddToggle("Toggle_StartupBoost", {Title = "Startup Boost", Description = "Lowers graphics when the script starts. Turn it off to get the graphics back; hidden pets and eggs return after a rejoin.", Default = true, Callback = fn144(fn131)})
-	tbl24.boostFps = Performance:AddToggle("Toggle_BoostFPS", {Title = "Boost FPS", Description = "Removes extra map details and other players' plots for more FPS.", Default = false, Callback = fn144(fn132)})
-	tbl24.uncapFps = Performance:AddToggle("Toggle_UncapFPS", {Title = "Uncap FPS", Description = "Raises the FPS cap to 1000.", Default = true, Callback = fn144(fn133)})
-	local Guard = v38:AddSection("Guard")
-	tbl24.antiGuardKnockback = Guard:AddToggle("Toggle_AntiGuardKnockback", {Title = "Anti Guard Knockback", Description = "Cancels the knockback the Forest guard puts on you, so a hit never throws you off the lane.", Default = true, Callback = fn144(fn100)})
-	tbl24.antiHitGuard = Guard:AddToggle("Toggle_AntiHitGuard", {Title = "Anti Hit Guard", Description = "For eggs you pick up by hand. Pins you in the safe zone behind a look-alike clone until the guard goes back to sleep. Auto Steal has its own guard handling and always wins.", Default = false, Callback = fn144(fn140)})
-	local Windows = v31:AddSection("Windows", true)
-
-	Windows:AddButton({Title = "Egg Logs", Description = "Live feed of every egg that spawns on the server.", Callback = fn144(function()
-		quantumPanels.openLogs()
-	end)})
-
-	Windows:AddButton({Title = "Egg Board", Description = "Sortable list of the eggs currently up for grabs.", Callback = fn144(function()
-		quantumPanels.openBoard()
-	end)})
-
-	Windows:AddButton({Title = "Inventory & Base", Description = "Your pets, eggs and plot status in one window.", Callback = fn144(function()
-		quantumPanels.openInventory()
-	end)})
-
-	Windows:AddButton({Title = "Egg Checker", Description = "Pick eggs off the field by hand, then send them all to the steal queue.", Callback = fn144(function()
-		quantumPanels.openChecker()
-	end)})
-
-	Windows:AddButton({Title = "Egg Data & History", Description = "Drop-table values per area, plus what has actually spawned this session.", Callback = fn144(function()
-		quantumPanels.openAnalyst()
-	end)})
-
-	Windows:AddButton({Title = "Farm Stats", Description = "What is running now, money and income, steals, your plot and the Dr Scramble event at a glance.", Icon = "trending-up", Callback = fn144(function()
-		quantumPanels.openStats()
-	end)})
-
-	Windows:AddButton({Title = "Open All Windows", SubTitle = "Close All Windows", Description = "Opens every window at once, or hides them again.", Callback = fn144(function()
-		quantumPanels.openAll()
-	end), SubCallback = fn144(function()
-		quantumPanels.closeAll()
-	end)})
-
-	tbl24.antiTreadmill = tbl24.section(v36, "Blocker", tbl24.gameIcon("Gears", "Directory", "Trap", "Icon")):AddToggle("Toggle_AntiTreadmill", {Title = "Anti Treadmill", Description = "Never stay on a treadmill: any mount is dropped right away, and Auto Treadmill is held off while this is on.", Default = false, Callback = fn144(fn83)})
-	local v58 = v37:AddSection("Server Hop")
-	tbl24.hopNoMatch = v58:AddToggle("Toggle_HopWhenNothingMatches", {Title = "Hop When Nothing Matches", Description = "Hop to the emptiest server when no egg matches your filters.", Default = false, Callback = fn144(fn84)})
-	v58:AddParagraph({Title = "• Limits", Content = ""})
-	tbl24.hopCooldown = v58:AddSlider("Slider_HopCooldown", {Title = "Hop Cooldown", Description = "Seconds between auto hops and wait after rejoining.", Min = 1, Max = 60, Default = 5, Rounding = 0, Callback = fn144(fn87)})
-	local v59 = tbl24.privateTab:AddSection("Find Private Server", true)
-	local v60 = v59:AddParagraph({Title = "Current Server", Content = "Checking..."})
-	tbl24.privateServerMax = v59:AddDropdown("Dropdown_MaxPlayers", {Title = "Max Players", Description = "The most players you want in your server, you included. 2 (you + 1) is the easiest to find.", Values = {"1", "2", "3", "4", "5"}, Default = "2", Multi = false, Callback = fn144(fn85)})
-
-	v59:AddButton({Title = "Hop Server Now", Description = "Moves you to a quieter server right away.", Callback = fn144(function()
-		task.spawn(function()
-			tbl13.hopPrivateOnce()
-		end)
-	end)})
-
-	tbl24.privateServerAuto = v59:AddToggle("Toggle_AutoHop", {Title = "Auto Hop", Description = "Keeps moving you to quieter servers until the player count is at or under your max.", Default = false, Callback = fn144(fn86)})
-
-	task.spawn(function()
-		local v61
-
-		while fn2() do
-			local str4 = "Now: " .. #Players:GetPlayers() .. " player(s)  ·  Max: " .. tbl13.privateMax() .. "\n" .. tostring(tbl13.privateStatus or "")
-
-			if str4 ~= v61 then
-				pcall(function()
-					v60:SetContent(str4)
-				end)
-
-				v61 = str4
-			end
-
-			task.wait(1)
-		end
-	end)
-
-	local v61 = tbl24.section(v36, "Roaming", tbl24.gameIcon("Trails", "Directory", "PurpleTrail", "Icon"))
-
-	tbl24.waypoint = v61:AddDropdown("Dropdown_Waypoint", {Title = "Waypoint", Description = "Pick a place, then hit Teleport below.", Values = tbl25, Default = tbl25[1], Callback = fn144(function(arg)
-		v29 = arg
-	end)})
-
-	v61:AddButton({Title = "Teleport To Waypoint", Description = "Moves you straight to the waypoint you picked.", Callback = fn144(function()
-		local quantumV4Roaming2 = (genv.__QuantumV4Roaming or genv.__SenaV4Roaming)
-		flag6:Notify({Title = "Waypoint", Content = (if quantumV4Roaming2 then if type(quantumV4Roaming2.teleportWaypoint) == "function" then quantumV4Roaming2.teleportWaypoint(v29) == true else false else false) and "Moved to " .. tostring(v29) or "That waypoint is not in this server", Duration = 3})
-	end)})
-
-	local v62 = v30:AddSection("Run Once")
-
-	v62:AddButton({Title = "Place Everything Now", Description = "Runs one pass of Auto Place, even while the toggle is off.", Callback = fn144(function()
-		runOnce("AutoPlace", tbl10.AutoPlaceLoop)
-	end)})
-
-	v62:AddButton({Title = "Hatch Everything Ready", Description = "Runs one pass of Auto Hatch, even while the toggle is off.", Callback = fn144(function()
-		runOnce("AutoHatch", tbl10.AutoHatchLoop)
-	end)})
-
-	v62:AddButton({Title = "Sell Pets Now", Description = "Runs one pass of Auto Sell Pet using the filters above.", Callback = fn144(function()
-		runOnce("AutoSell", tbl10.startAutoSellLoop)
-	end)})
-
-	v62:AddButton({Title = "Sell Eggs Now", Description = "Runs one pass of Auto Sell Egg using the filters above.", Callback = fn144(function()
-		runOnce("AutoSellEgg", tbl10.startAutoSellEggLoop)
-	end)})
-
-	local Session = v38:AddSection("Session")
-	tbl24.bottingMode = Session:AddToggle("Toggle_BottingMode", {Title = "Botting Mode", Description = "Turns off 3D rendering and covers the screen in black. Everything keeps running, your GPU does not.", Default = false, Callback = fn144(fn114)})
-	tbl24.antiCutscene = Session:AddToggle("Toggle_AntiCutscene", {Title = "Anti Cutscene", Description = "Closes event cutscenes and the intro as soon as the game opens them, so nothing locks your camera.", Default = false, Callback = fn144(fn115)})
-
-	Session:AddButton({Title = "Rejoin This Server", Description = "Teleports you back into the exact server you are in now.", Callback = fn144(function()
-		pcall(function()
-			game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, localPlayer)
-		end)
-	end)})
-
-	Session:AddButton({Title = "Stop & Unload", Description = "Turns every loop off and closes the hub. Run the script again to bring it back.", Callback = fn144(function()
-		for i, v63 in ipairs({"AutoSteal", "AutoPlace", "AutoHatch", "AutoSell", "AutoSellEgg", "StealPlayers", "AutoFavorite", "AutoFusePets", "AutoEquipBest", "AutoClaimOffline", "AutoBaseUpgrade", "AutoClaimAlmanac", "Noclip", "BottingMode", "AntiCutscene"}) do
-			quantumV4Config[v63] = false
-		end
-
-		fn113(false)
-		fn114(false)
-
-		if v13 then
-			pcall(v13.setEnabled, v13, false)
-		end
-
-		local quantumV4HubShutdown = (genv.__QuantumV4HubShutdown or genv.__SenaV4HubShutdown)
-
-		if type(quantumV4HubShutdown) == "function" then
-			task.delay(0.2, function()
-				pcall(quantumV4HubShutdown)
-			end)
-		end
-	end)})
-
-	local Player = v38:AddSection("Player")
-	tbl24.antiAfk = Player:AddToggle("Toggle_AntiAFK", {Title = "Anti AFK", Description = "Blocks the game's idle kick while the script runs.", Default = true, Callback = fn144(fn141)})
-	tbl24.autoReconnect = Player:AddToggle("Toggle_AutoReconnect", {Title = "Auto Reconnect", Description = "Automatically reconnects you back to the server upon kick or disconnect.", Default = true, Callback = fn144(fn142)})
-	tbl24.autoExecute = Player:AddToggle("Toggle_AutoExecuteRejoin", {Title = "Auto Execute (Rejoin)", Description = "Prepares the bootstrapper so the script runs automatically after teleport or reconnect.", Default = false, Callback = fn144(fn143)})
-	local v63 = tbl24.section(v32, "Steal From Players", tbl24.gameIcon("Gears", "Directory", "Bat", "Icon"))
-	tbl24.stealPlayers = v63:AddToggle("Toggle_AutoStealFromPlayers", {Title = "Auto Steal From Players", Description = "Chases anyone carrying an egg in the field, bats them until the egg drops, grabs it and banks it. A carrier is only chased when the egg clears the filters below.", Default = false, Callback = fn144(fn145)})
-	tbl24.stealPlayerRarities = v63:AddDropdown("Dropdown_RarityFilter", {Title = "Rarity Filter", Description = "Only chase eggs of these rarities. Empty = uses the Auto Steal rarity filter.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn146)})
-	tbl24.stealPlayerValue = v63:AddInput("Input_MinimumValue", {Title = "Minimum Value", Description = "Skip carriers holding less than this per second. Supports k, m and b.", Placeholder = "e.g. 500k, 2m, 1b", Default = "", Callback = fn144(fn148)})
-	local v64 = v32:AddSection({Title = "Steal From Specific Player", AlwaysOpen = true, Icon = tbl24.gameIcon("Gears", "Directory", "Katana", "Icon")})
-	fn69 = v32:AddSection({Title = "Steal History", AlwaysOpen = true, Icon = tbl24.gameIcon("Gears", "Directory", "Flyswatter", "Icon")})
-	local v65, v66, v67, v68
-
-	if v64.AddActionList then
-		v67, v68 = v64:AddActionList({Title = "Players in this server", EmptyText = "Nobody else is in this server.", VisibleRows = 6, ButtonWidth = 76}), fn69:AddActionList({Title = "History of stolen eggs from players", EmptyText = "No player steals yet.", VisibleRows = 5, ButtonWidth = 72})
-	else
-		v64:AddParagraph({Title = "Update required", Content = "This Sena UI build has no player list yet. Rejoin to pull the latest version."})
-		v67, v68 = v65, v66
-	end
-
-	fn69:AddButton({Title = "Clear History", Description = "Wipe the list above.", Callback = fn144(function()
-		if quantumV4PlayerSteal then
-			quantumV4PlayerSteal:clearHistory()
-		end
-	end)})
-
-	if quantumV4PlayerSteal and v67 then
-		local quantumV4IdentitySetter2 = (genv.__QuantumV4IdentitySetter or genv.__SenaV4IdentitySetter)
-		local quantumV4UICapabilityIdentity = (genv.__QuantumV4UICapabilityIdentity or genv.__SenaV4UICapabilityIdentity) or 8
-
-		local function fn157(arg)
-			if quantumV4IdentitySetter2 then
-				pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
-			end
-
-			if v68 then
-				if not v68:Alive() then
-					return
-				end
-			else
-				return
-			end
-
-			local tbl29 = {}
-
-			for i, v69 in ipairs(arg.history) do
-				tbl29[i] = {id = tostring(i), name = v69.player, sub = string.format("<font color=\"#A2A2AE\">%s</font>", os.date("!%H:%M:%S", v69.at)), status = v69.egg, statusSub = v69.outcome, button = false}
-			end
-
-			v68:Update(tbl29)
-		end
-
-		quantumV4PlayerSteal:onChanged(fn157)
-		fn157(quantumV4PlayerSteal)
-		local v69
-		local n8, connection6 = 0
-
-		connection6 = game:GetService("RunService").Heartbeat:Connect(function()
-			if (genv.__QuantumV4PlayerSteal or genv.__SenaV4PlayerSteal) ~= quantumV4PlayerSteal then
-				connection6:Disconnect()
-				return
-			elseif not v67:Alive() then
-				connection6:Disconnect()
-				return
-			end
-
-			local now = os.clock()
-			if v69 and now - v69 < 5 then
-				return
-			end
-
-			if now - n8 < 1 then
-				return
-			end
-			n8 = now
-			local v70 = now
-			v69 = v70
-
+		local function spawnVisual(arg)
+			if not quantumVisual then return end
 			task.spawn(function()
-				local ok2, result = pcall(function()
-					if quantumV4IdentitySetter2 then
-						pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
-					end
-
-					local v71 = quantumV4PlayerSteal:listEntries()
-
-					if quantumV4IdentitySetter2 then
-						pcall(quantumV4IdentitySetter2, quantumV4UICapabilityIdentity)
-					end
-
-					if v67:Alive() then
-						v67:Update(v71)
-					end
-				end)
-
-				if not ok2 then
-					warn("[Quantum Steal] Player list update loop error:", result)
-				end
-
-				if v69 == v70 then
-					v69 = nil
-				end
+				quantumVisual.spawn(arg, visualItems[arg])
+				updateVisualStatus()
+				Fluent:Notify({Title = "Visual", Content = quantumVisual.status, Duration = 3})
 			end)
-		end)
+			task.delay(0.1, updateVisualStatus)
+		end
+
+		SecUtility:AddButton({
+			Title = "Remove All Visual Items",
+			Description = "Cleans up client-side spawned fake visual items",
+			Callback = function()
+				if quantumVisual then quantumVisual.clear() end
+				updateVisualStatus()
+			end
+		})
 	end
 
+	local SecCommunity = DiscordTab:AddSection("Community")
 
+	SecCommunity:AddParagraph({
+		Title = "Quantum | ID Community",
+		Content = "Join our official community for updates, announcements, and support.\n\n<b>Invite: discord.gg/CZVDHgHR</b>"
+	})
+
+	SecCommunity:AddButton({
+		Title = "Copy Discord Link",
+		Description = "Copies invite link to clipboard",
+		Callback = function()
+			if setclipboard then
+				setclipboard("https://discord.gg/CZVDHgHR")
+				Fluent:Notify({
+					Title = "Discord",
+					Content = "Invite link copied to clipboard: discord.gg/CZVDHgHR",
+					Duration = 5,
+					Type = "Success",
+					Icon = "solar/check-circle-bold"
+				})
+			end
+		end
+	})
 
 	do
-		local quantumV4Visual = (genv.__QuantumV4Visual or genv.__SenaV4Visual)
-		local v70, tbl29, v71 = Window:AddTab({ Title = "Visual", Icon = "lucide/eye" }), {rods = nil, fish = nil}
+		local SaveManager = Fluent.SaveManager
+		local InterfaceManager = Fluent.InterfaceManager
 
-		local function fn157()
-			if v71 and quantumV4Visual then
-				pcall(function()
-					v71:SetContent(quantumV4Visual.status)
-				end)
-			end
+		if SaveManager and type(SaveManager.BuildConfigSection) == "function" then
+			SaveManager:SetFolder("QuantumID")
+			SaveManager:SetLibrary(Fluent)
+			SaveManager:IgnoreThemeSettings()
+			SaveManager:BuildConfigSection(ConfigTab)
 		end
 
-		local function fn158(arg)
-			if not quantumV4Visual then
-				return
-			end
-
-			task.spawn(function()
-				quantumV4Visual.spawn(arg, tbl29[arg])
-				fn157()
-				flag6:Notify({Title = "Visual", Content = quantumV4Visual.status, Duration = 3})
-			end)
-
-			task.delay(0.1, fn157)
-		end
-
-		local v72 = v70:AddSection("Fish It")
-	v72:AddParagraph({Title = "• Rods", Content = ""})
-
-		local v73 = v72:AddDropdown("Dropdown_SelectRod", {Title = "Select Rod", Description = "Rods and skins from Fish It. Loading list...", Values = {}, Multi = false, Default = nil, Callback = fn144(function(rods)
-			tbl29.rods = rods
-		end)})
-
-		v72:AddButton({Title = "Spawn Rod", Description = "Downloads the rod and puts it in your backpack. Equip it like a bat. Only you can see it.", Callback = fn144(function()
-			fn158("rods")
-		end)})
-
-		v72:AddSlider("Slider_RodSize", {Title = "Rod Size", Description = "1 = the size it has in Fish It. Spawned rods update right away.", Min = 0.5, Max = 2, Default = 1, Rounding = 1, Callback = fn144(function(rodScale)
-			if quantumV4Visual then
-				if quantumV4Visual.rodScale == rodScale then
-					return
-				end
-			else
-				return
-			end
-
-			quantumV4Visual.rodScale = rodScale
-			task.spawn(quantumV4Visual.respawn, "rods")
-		end)})
-
-	v72:AddParagraph({Title = "• Fish", Content = ""})
-
-		local v74 = v72:AddDropdown("Dropdown_SelectFish", {Title = "Select Fish", Description = "Secret and Forgotten fish from Fish It. Loading list...", Values = {}, Multi = false, Default = nil, Callback = fn144(function(fish)
-			tbl29.fish = fish
-		end)})
-
-		v72:AddButton({Title = "Spawn Fish", Description = "Downloads the fish and puts it in your backpack under Pets. Only you can see it.", Callback = fn144(function()
-			fn158("fish")
-		end)})
-
-		v72:AddSlider("Slider_FishWeight", {Title = "Fish Weight", Description = "0% = lightest catch, 100% = heaviest Big catch. Size follows Fish It: weight / min weight.", Min = 0, Max = 100, Default = 0, Rounding = 0, Callback = fn144(function(arg)
-			local fishWeight = (tonumber(arg) or 0) / 100
-
-			if quantumV4Visual then
-				if quantumV4Visual.fishWeight == fishWeight then
-					return
-				end
-			else
-				return
-			end
-
-			quantumV4Visual.fishWeight = fishWeight
-			task.spawn(quantumV4Visual.respawn, "fish")
-		end)})
-
-	v72:AddParagraph({Title = "• Manage", Content = ""})
-		v71 = v72:AddParagraph({Title = "Status", Content = "Idle"})
-
-		v72:AddButton({Title = "Remove All Visual Items", Description = "Takes every spawned rod and fish out of your backpack.", Callback = fn144(function()
-			if quantumV4Visual then
-				quantumV4Visual.clear()
-			end
-
-			fn157()
-		end)})
-
-		task.spawn(function()
-			if not quantumV4Visual then
-				return
-			end
-			local rods = quantumV4Visual.names("rods")
-			local fish = quantumV4Visual.names("fish")
-
-			pcall(function()
-				v73:SetValues(rods)
-			end)
-
-			pcall(function()
-				v74:SetValues(fish)
-			end)
-
-			quantumV4Visual.status = #rods > 0 and string.format("%d rods and %d fish available", #rods, #fish) or "Could not load the item list. Try again later."
-			fn157()
-		end)
-
-		local v75 = v70:AddSection("Steal an Egg")
-		local str4 = "Egg"
-		local n8 = 50
-		local Egg = (genv.__QuantumV4VisualSAE or genv.__SenaV4VisualSAE) and (genv.__QuantumV4VisualSAE or genv.__SenaV4VisualSAE).categories("Egg") or {}
-		local v76 = Egg[1]
-
-		v75:AddDropdown("Dropdown_Type", {Title = "Type", Description = "Egg shows in the Eggs tab, Pet under Pets. Both are fake and local-only.", Values = {"Egg", "Pet"}, Multi = false, Default = "Egg", Callback = fn144(function(arg)
-			str4 = arg or "Egg"
-		end)})
-
-		v75:AddDropdown("Dropdown_SelectEggPet", {Title = "Select Egg / Pet", Description = "Which egg or pet to spawn.", Values = Egg, Multi = false, Default = Egg[1], MaxVisible = 8, Callback = fn144(function(arg)
-			v76 = arg
-		end)})
-
-		v75:AddSlider("Slider_SizeFlex", {Title = "Size / Flex", Description = "Bigger = heavier Kg & higher value (Kg = base weight x scale^3) AND a bigger egg in your hand. 50 hits the billions.", Min = 1, Max = 100, Default = 50, Rounding = 0, Callback = fn144(function(arg)
-			n8 = tonumber(arg) or 50
-		end)})
-
-		v75:AddButton({Title = "Hold in Hand", Description = "Spawns a model of it in your hand. Press again for more. (In-hand only - use the other button to also add it to All Items.)", Callback = fn144(function()
-			local quantumV4VisualSAE = (genv.__QuantumV4VisualSAE or genv.__SenaV4VisualSAE)
-
-			if quantumV4VisualSAE then
-				quantumV4VisualSAE.spawn(str4, v76, n8, true)
-			end
-		end)})
-
-		v75:AddButton({Title = "Add to Backpack (Kg)", Description = "Drops it in All Items (eggs) or Pets with a huge Kg for the inventory flex. Press again for more.", Callback = fn144(function()
-			local quantumV4VisualSAE = (genv.__QuantumV4VisualSAE or genv.__SenaV4VisualSAE)
-
-			if quantumV4VisualSAE then
-				quantumV4VisualSAE.spawn(str4, v76, n8, false)
-			end
-		end)})
-
-		v75:AddButton({Title = "Remove Egg / Pet Visuals", Description = "Takes every spawned fake egg/pet and held model out.", Callback = fn144(function()
-			local quantumV4VisualSAE = (genv.__QuantumV4VisualSAE or genv.__SenaV4VisualSAE)
-
-			if quantumV4VisualSAE then
-				quantumV4VisualSAE.clear()
-			end
-		end)})
-	end
-
-	local function fn157(arg, arg2)
-		v27()
-
-		if type(arg) == "table" and arg.Value ~= nil then
-			pcall(arg2, arg.Value)
+		if InterfaceManager and type(InterfaceManager.BuildInterfaceSection) == "function" then
+			InterfaceManager:SetFolder("QuantumID")
+			InterfaceManager:SetLibrary(Fluent)
+			InterfaceManager:BuildInterfaceSection(ConfigTab)
 		end
 	end
 
-	flag12 = false
-	fn157(tbl24.speed, fn90)
-	fn157(tbl24.stealMode, fn89)
-	fn157(tbl24.antiTreadmill, fn83)
-	fn157(tbl24.autoTreadmill, fn82)
-	fn157(tbl24.treadmillUpgrade, fn88)
-	fn157(tbl24.hopCooldown, fn87)
-	fn157(tbl24.hopNoMatch, fn84)
-	fn157(tbl24.privateServerMax, fn85)
-	fn157(tbl24.privateServerAuto, fn86)
+	Window:SelectTab("Farm")
+	tbl13.hopWindow = Window
 
-	fn157(tbl24.names, function(arg)
-		fn91("names", "name", arg)
-	end)
-
-	fn157(tbl24.areas, function(arg)
-		fn91("areas", "area", arg)
-	end)
-
-	fn157(tbl24.rarities, function(arg)
-		fn91("rarities", "rarity", arg)
-	end)
-
-	fn157(tbl24.value, fn92)
-	fn157(tbl24.autoIndex, fn149)
-	fn157(tbl24.scrambleBuy, fn116)
-	fn157(tbl24.scrambleBuyList, fn117)
-
-	fn157(tbl24.wispAutoQuest, function(arg)
-		quantumV4Config.WispAutoQuest = arg == true
-	end)
-
-	fn157(tbl24.banjoAuto, function(arg)
-		quantumV4Config.BanjoAuto = arg == true
-	end)
-
-	fn157(tbl24.bloomAutoNet, function(arg)
-		quantumV4Config.ButterflyAutoNet = arg == true
-	end)
-
-	fn157(tbl24.bloomAutoCatch, function(arg)
-		quantumV4Config.ButterflyAutoCatch = arg == true
-	end)
-
-	fn157(tbl24.bloomEsp, function(arg)
-		quantumV4Config.ButterflyEsp = arg == true
-	end)
-
-	fn157(tbl24.bloomAutoTrade, function(arg)
-		quantumV4Config.ButterflyAutoTrade = arg == true
-	end)
-
-	fn157(tbl24.bloomAutoCraft, function(arg)
-		quantumV4Config.ButterflyAutoCraft = arg == true
-	end)
-
-	fn157(tbl24.bloomTiers, function(arg)
-		local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
-
-		if quantumV4ButterflyRuntime then
-			quantumV4ButterflyRuntime.setTiers(fn67(arg))
-		end
-	end)
-
-	fn157(tbl24.bloomRecipe, function(arg)
-		local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
-
-		if quantumV4ButterflyRuntime then
-			quantumV4ButterflyRuntime.setRecipe(arg)
-		end
-	end)
-
-	fn157(tbl24.bloomMode, function(arg)
-		local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
-
-		if quantumV4ButterflyRuntime then
-			quantumV4ButterflyRuntime.setMode(arg)
-		end
-	end)
-
-	fn157(tbl24.noclip, fn113)
-	fn157(tbl24.bottingMode, fn114)
-	fn157(tbl24.antiCutscene, fn115)
-
-	fn157(tbl24.waypoint, function(arg)
-		v29 = arg
-	end)
-
-	fn157(tbl24.autoFavorite, fn101)
-	fn157(tbl24.favoriteRule, fn102)
-	fn157(tbl24.favoriteRarities, fn103)
-	fn157(tbl24.favoriteSpecies, fn104)
-	fn157(tbl24.autoFuse, fn109)
-	fn157(tbl24.fuseRule, fn110)
-	fn157(tbl24.fuseRarities, fn111)
-	fn157(tbl24.fuseSpecies, fn112)
-	fn157(tbl24.autoEquipBest, fn105)
-	fn157(tbl24.autoClaimOffline, fn106)
-	fn157(tbl24.autoBaseUpgrade, fn107)
-	fn157(tbl24.autoClaimAlmanac, fn108)
-	fn157(tbl24.mutations, fn93)
-	fn157(tbl24.weight, fn94)
-	fn157(tbl24.priority, fn95)
-	fn157(tbl24.eggEsp, fn96)
-	fn157(tbl24.espDetails, fn97)
-	fn157(tbl24.espMinRarity, tbl10.applyEspMinRarity)
-	fn157(tbl24.espMinValue, tbl10.applyEspMinValue)
-	fn157(tbl24.backpackRates, fn99)
-	fn157(tbl24.antiGuardKnockback, fn100)
-
-	fn157(tbl24.placeRarity, function(arg)
-		quantumV4Config.PlaceRarities = fn67(arg)
-	end)
-
-	fn157(v21, function(arg)
-		quantumV4Config.SellNames = fn67(arg)
-	end)
-
-	fn157(v22, function(arg)
-		quantumV4Config.SellRarities = fn67(arg)
-	end)
-
-	fn157(v23, function(arg)
-		quantumV4Config.SellEggRarities = fn67(arg)
-	end)
-
-	fn157(tbl24.sellPetValue, fn129)
-	fn157(tbl24.sellEggValue, fn130)
-	fn157(tbl24.godMode, fn80)
-	fn157(tbl24.antiAfk, fn141)
-	fn157(tbl24.autoReconnect, fn142)
-	fn157(tbl24.autoExecute, fn143)
-	fn157(tbl24.antiHitGuard, fn140)
-	fn157(tbl24.flyForCapture, fn135)
-	fn157(tbl24.autoStealCapture, fn138)
-	fn157(tbl24.instantGrab, fn136)
-	fn157(tbl24.infiniteJump, fn139)
-	fn157(tbl24.uncapFps, fn133)
-	fn157(tbl24.startupBoost, fn131)
-	fn157(tbl24.autoPlace, fn118)
-	fn157(tbl24.autoHatch, fn119)
-	fn157(tbl24.mutationChoice, fn122)
-	fn157(tbl24.mutationSpecies, fn123)
-	fn157(tbl24.mutationRarity, fn124)
-	fn157(tbl24.mutationMinValue, fn125)
-	fn157(tbl24.mutationRetry, fn126)
-	fn157(tbl24.autoMutation, fn120)
-	fn157(tbl24.taskOrder, fn156)
-	fn157(tbl24.stealHold, fn79)
-
-	fn157(tbl24.raceClaim, function(arg)
-		quantumV4Config.RaceClaim = arg == true
-	end)
-
-	fn157(tbl24.raceBuyList, function(arg)
-		quantumV4Config.RaceBuyList = fn67(arg)
-	end)
-
-	fn157(tbl24.raceBuy, function(arg)
-		quantumV4Config.RaceBuy = arg == true
-	end)
-
-	fn157(tbl24.raceAuto, function(arg)
-		quantumV4Config.RaceAuto = arg == true
-	end)
-
-	fn157(tbl24.starAlert, function(arg)
-		quantumV4Config.StarAlert = arg == true
-	end)
-
-	fn157(tbl24.starAutoCatch, function(arg)
-		quantumV4Config.StarAutoCatch = arg == true
-	end)
-
-	fn157(tbl24.scrambleTradeInBanners, fn98)
-
-	fn157(tbl24.scrambleTradeInReroll, function(arg)
-		quantumV4Config.ScrambleTradeInReroll = arg == true
-	end)
-
-	fn157(tbl24.scrambleTradeInTrade, function(arg)
-		quantumV4Config.ScrambleTradeInTrade = arg == true
-	end)
-
-	fn157(tbl24.scrambleBossAuto, function(arg)
-		quantumV4Config.ScrambleBossAuto = arg == true
-		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
-
-		if quantumV4ScrambleBoss and type(quantumV4ScrambleBoss.setEnabled) == "function" then
-			pcall(quantumV4ScrambleBoss.setEnabled, quantumV4ScrambleBoss, arg == true)
-		end
-	end)
-
-	if tbl24.taskOrder and type(tbl24.taskOrder.SetStatus) == "function" then
-		local taskOrder = tbl24.taskOrder
-
-		task.spawn(function()
-			while fn2() do
-				for i, v70 in ipairs(quantumV4TaskLadder.DEFAULT) do
-					local v71 = quantumV4TaskLadder.enabled(v70)
-
-					if type(taskOrder.SetVisible) == "function" then
-						pcall(taskOrder.SetVisible, taskOrder, v70, v71)
-					end
-
-					if v71 then
-						local v72, v73 = quantumV4TaskLadder.describe(v70)
-						pcall(taskOrder.SetStatus, taskOrder, v70, v72, v73)
-					end
-				end
-
-				task.wait(0.5)
-			end
-		end)
-	end
-
-	fn157(tbl24.autoRingEvent, fn121)
-	fn157(tbl24.autoSell, fn127)
-	fn157(tbl24.autoSellEgg, fn128)
-	fn157(tbl24.stealPlayerRarities, fn146)
-	fn157(tbl24.stealPlayerValue, fn148)
-	fn157(tbl24.webhookUrl, fn151)
-	fn157(tbl24.webhookRarities, fn152)
-	fn157(tbl24.webhookValue, fn153)
-	fn157(tbl24.webhookEnabled, fn150)
-
-	fn157(tbl24.webhookDisconnect, function(arg)
-		quantumV4Config.WebhookDisconnect = arg == true
-	end)
-
-	fn157(tbl24.helpFriend, function(arg)
-		quantumV4Config.HelpFriend = arg == true
-	end)
-
-	fn157(tbl24.lowSpeedBoost, function(arg)
-		quantumV4Config.LowSpeedBoost = arg == true
-	end)
-
-	fn157(tbl24.autoSteal, fn78)
-	fn157(tbl24.stealPlayers, fn145)
-	tbl13.hopWindow = v28
-
-	do
-		local hopHunt = tbl13.hopHunt
-
-		if hopHunt and hopHunt.state and (hopHunt.state.active or hopHunt.state.watch) then
-			pcall(function()
-				v28:LoadConfig("HopSession")
-			end)
-
-			task.delay(2, function()
-				pcall(hopHunt.open)
-			end)
-		end
-	end
-
-	genv.__QuantumV4HubShutdown = function()
-		if quantumV4PlayerSteal then
-			pcall(quantumV4PlayerSteal.setEnabled, quantumV4PlayerSteal, false)
+genv.__QuantumHubShutdown = function()
+		if quantumPlayerSteal then
+			pcall(quantumPlayerSteal.setEnabled, quantumPlayerSteal, false)
 		end
 
 		for i, v70 in ipairs({"AutoSteal", "AutoPlace", "AutoHatch", "AutoMutation", "AutoRingEvent", "AutoSell", "AutoSellEgg", "StealPlayers", "ScrambleBossAuto", "RaceAuto", "RaceClaim", "RaceBuy", "StarAutoCatch", "ButterflyAutoCatch", "ButterflyAutoNet", "ButterflyAutoTrade", "ButterflyAutoCraft"}) do
-			quantumV4Config[v70] = false
+			quantumConfig[v70] = false
 		end
 
 		if v13 then
 			pcall(v13.setEnabled, v13, false)
 		end
 
-		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
-
-		if quantumV4ScrambleBoss and type(quantumV4ScrambleBoss.setEnabled) == "function" then
-			pcall(quantumV4ScrambleBoss.setEnabled, quantumV4ScrambleBoss, false)
+		local quantumScrambleBoss = genv.__QuantumScrambleBoss
+		if quantumScrambleBoss and type(quantumScrambleBoss.setEnabled) == "function" then
+			pcall(quantumScrambleBoss.setEnabled, quantumScrambleBoss, false)
 		end
-
-		local value = v28 and rawget(v28, "Gui") or nil
-		local tbl29 = {game:GetService("CoreGui")}
 
 		pcall(function()
-			if gethui then
-				table.insert(tbl29, gethui())
+			if Window and type(Window.Destroy) == "function" then
+				Window:Destroy()
 			end
 		end)
-
-		for i, v70 in ipairs(tbl29) do
-			for i2, child in ipairs(v70:GetChildren()) do
-				if child == value or child:IsA("ScreenGui") and (child.Name == "Chloeex" or child.Name == "ToggleUIButton" or child.Name == "FluentGUI" or child.Name:find("Fluent")) then
-					pcall(child.Destroy, child)
-				end
-			end
-		end
-		if Fluent and Fluent.Destroy then pcall(function() Fluent:Destroy() end) end
 	end
-
-
 
 	flag = true
 end
