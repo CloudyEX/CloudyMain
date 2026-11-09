@@ -32489,7 +32489,8 @@ local function fn66()
 	end)
 
 	local v24 = fn67(tbl15)
-	local v25 = fn67(tbl16)
+	local v25_area = fn67(tbl16)
+	local v25 = v25_area
 	local v26 = fn68()
 	fn73 = fn69((fn67(tbl21)))
 
@@ -33342,7 +33343,13 @@ local function fn66()
 		["Player Steal"] = "lucide/swords",
 		["Specific Player"] = "lucide/user-check",
 		["Steal History"] = "lucide/history",
+		["Steal Webhook"] = "lucide/webhook",
 		["Capture The Egg"] = "lucide/flag",
+		["Wisp Event"] = "lucide/sparkles",
+		["Butterfly Bloom"] = "lucide/flower-2",
+		["Race Rally"] = "lucide/trophy",
+		["Shooting Star"] = "lucide/star",
+		["Dr Scramble Event"] = "lucide/flask-conical",
 		["Egg Automation"] = "lucide/sparkles",
 		["Placed Eggs"] = "lucide/layout-grid",
 		["Egg Selling"] = "lucide/coins",
@@ -33351,6 +33358,7 @@ local function fn66()
 		["Pet Favorite"] = "lucide/star",
 		["Pet Fusion"] = "lucide/combine",
 		["Movement"] = "lucide/gauge",
+		["Treadmill"] = "lucide/footprints",
 		["Ring Event"] = "lucide/flame",
 		["Guard Defense"] = "lucide/shield-check",
 		["Waypoints & Events"] = "lucide/compass",
@@ -33381,6 +33389,9 @@ local function fn66()
 		local allItems = withAll(originalList)
 		config.Values = allItems
 		config.Multi = true
+		if config.Default == nil then
+			config.Default = {}
+		end
 
 		local isUpdating = false
 		local hadAll = false
@@ -33444,14 +33455,15 @@ local function fn66()
 		local sec
 		if type(arg2) == "table" then
 			arg2.Icon = icon
+			arg2.Open = true
 			arg2.AlwaysOpen = true
 			sec = arg:AddSection(arg2)
 		else
-			sec = arg:AddSection({ Title = title, Icon = icon, AlwaysOpen = true })
+			sec = arg:AddSection({ Title = title, Icon = icon, Open = true, AlwaysOpen = true })
 		end
 		if sec and not sec.AddSubSection then
 			sec.AddSubSection = function(self, subTitle)
-				return self:AddParagraph({ Title = subTitle, Content = "" })
+				return self:AddParagraph({ Title = tostring(subTitle), Content = "" })
 			end
 		end
 		return sec
@@ -33460,6 +33472,7 @@ local function fn66()
 	local v32 = Window:AddTab({ Title = "Steal", Icon = "lucide/target" })
 	local v33 = Window:AddTab({ Title = "Farm", Icon = "lucide/egg" })
 	local v35 = Window:AddTab({ Title = "Movement", Icon = "lucide/gauge" })
+	local eventsTab = Window:AddTab({ Title = "Events", Icon = "lucide/flame" })
 	local v70 = Window:AddTab({ Title = "Visual", Icon = "lucide/eye" })
 	local v37 = Window:AddTab({ Title = "Server", Icon = "lucide/server" })
 	local v38 = Window:AddTab({ Title = "Settings", Icon = "lucide/settings" })
@@ -33468,7 +33481,7 @@ local function fn66()
 	local v30 = v38
 	local v31 = v38
 	local v34 = v33
-	local v36 = v35
+	local v36 = eventsTab
 	tbl24.privateTab = v37
 	local prependAll = fn69
 
@@ -33520,23 +33533,38 @@ local v41 = v40:AddParagraph({Title = "Speed Advice", Content = "Reading your sp
 	tbl24.stealHold = v40:AddSlider("Slider_StealHold", {Title = "Low Speed Multiplier", Description = "Pengali kecepatan Low Speed", Min = 1, Max = 10, Default = 1, Callback = fn144(fn79)})
 	tbl24.lowSpeedBoost = v40:AddToggle("Toggle_LowSpeedBoost", {Title = "Boost Low Speed", Description = "Akselerasi mode Low Speed", Default = false, Callback = fn144(fn92)})
 
+
 	local v42 = tbl24.section(v32, "Egg Filter")
-	tbl24.filterEggs = tbl24.allDropdown(v42, "Dropdown_FilterByEggName", {Title = "Egg Filter", Description = "Pilih nama egg"}, v24, fn82)
-	tbl24.filterRarity = tbl24.allDropdown(v42, "Dropdown_FilterByRarity", {Title = "Rarity Filter", Description = "Pilih rarity egg"}, v26, fn83)
-	tbl24.filterArea = tbl24.allDropdown(v42, "Dropdown_SelectArea", {Title = "Area Filter", Description = "Pilih area target"}, v25_area, fn84)
-	tbl24.filterMutation = tbl24.allDropdown(v42, "Dropdown_FilterByMutation", {Title = "Mutation Filter", Description = "Pilih mutasi target"}, tbl14, fn85)
-	tbl24.value = v42:AddInput("Input_StealByValuemoneys", {Flag = "stealMinValue", Title = "Min Value", Description = "Minimal value $/s", Placeholder = "e.g. 500k, 2m", Default = "", Callback = fn144(fn86)})
-	tbl24.weight = v42:AddInput("Input_StealByWeightkg", {Flag = "stealMinWeight", Title = "Min Weight", Description = "Minimal berat kg", Placeholder = "e.g. 10, 50", Default = "", Callback = fn144(fn87)})
-	tbl24.priority = v42:AddDropdown("Dropdown_StealPriority", {Title = "Steal Priority", Description = "Prioritas pemilihan egg", Values = {"Highest Value", "Heaviest", "Rarity"}, Multi = false, Default = "Highest Value", Callback = fn144(fn88)})
-	tbl24.autoIndex = v42:AddToggle("Toggle_AutoIndex", {Title = "Auto Index", Description = "Prioritaskan egg belum terdaftar", Default = false, Callback = fn144(fn90)})
+	tbl24.names = tbl24.allDropdown(v42, "Dropdown_FilterByEggName", {Title = "Egg Filter", Description = "Pilih nama egg", Default = {}}, v24, function(arg)
+		fn91("names", "name", arg)
+	end)
+	tbl24.filterEggs = tbl24.names
+
+	tbl24.rarities = tbl24.allDropdown(v42, "Dropdown_FilterByRarity", {Title = "Rarity Filter", Description = "Pilih rarity egg", Default = {}}, v26, function(arg)
+		fn91("rarities", "rarity", arg)
+	end)
+	tbl24.filterRarity = tbl24.rarities
+
+	tbl24.areas = tbl24.allDropdown(v42, "Dropdown_SelectArea", {Title = "Area Filter", Description = "Pilih area target", Default = {}}, v25, function(arg)
+		fn91("areas", "area", arg)
+	end)
+	tbl24.filterArea = tbl24.areas
+
+	tbl24.mutations = tbl24.allDropdown(v42, "Dropdown_FilterByMutation", {Title = "Mutation Filter", Description = "Pilih mutasi target", Default = {}}, tbl14, fn93)
+	tbl24.filterMutation = tbl24.mutations
+
+	tbl24.value = v42:AddInput("Input_StealByValuemoneys", {Flag = "stealMinValue", Title = "Min Value", Description = "Minimal value $/s", Placeholder = "e.g. 500k, 2m", Default = "", Callback = fn144(fn92)})
+	tbl24.weight = v42:AddInput("Input_StealByWeightkg", {Flag = "stealMinWeight", Title = "Min Weight", Description = "Minimal berat kg", Placeholder = "e.g. 10, 50", Default = "", Callback = fn144(fn94)})
+	tbl24.priority = v42:AddDropdown("Dropdown_StealPriority", {Title = "Steal Priority", Description = "Prioritas pemilihan egg", Values = {"Highest Value", "Heaviest", "Rarity"}, Multi = false, Default = "Highest Value", Callback = fn144(fn95)})
+	tbl24.autoIndex = v42:AddToggle("Toggle_AutoIndex", {Title = "Auto Index", Description = "Prioritaskan egg belum terdaftar", Default = false, Callback = fn144(fn149)})
 
 	local v63 = tbl24.section(v32, "Player Steal")
 	tbl24.stealPlayers = v63:AddToggle("Toggle_AutoStealFromPlayers", {Title = "Player Steal", Description = "Curi egg dari player lain", Default = false, Callback = fn144(fn145)})
 	tbl24.stealPlayerRarities = tbl24.allDropdown(v63, "Dropdown_RarityFilter", {Title = "Rarity Filter", Description = "Rarity egg player yang dikejar"}, v26, fn146)
 	tbl24.stealPlayerValue = v63:AddInput("Input_MinimumValue", {Title = "Min Value", Description = "Minimal value $/s player", Placeholder = "e.g. 500k, 2m", Default = "", Callback = fn144(fn148)})
 
-local v64 = v32:AddSection({Title = "Specific Player", AlwaysOpen = true, Icon = tbl24.gameIcon("Gears", "Directory", "Katana", "Icon")})
-	local stealHistorySec = v32:AddSection({Title = "Steal History", AlwaysOpen = true, Icon = tbl24.gameIcon("Gears", "Directory", "Flyswatter", "Icon")})
+local v64 = v32:AddSection({Title = "Specific Player", Open = true, AlwaysOpen = true, Icon = tbl24.gameIcon("Gears", "Directory", "Katana", "Icon")})
+	local stealHistorySec = v32:AddSection({Title = "Steal History", Open = true, AlwaysOpen = true, Icon = tbl24.gameIcon("Gears", "Directory", "Flyswatter", "Icon")})
 	local v65, v66, v67, v68
 
 	if v64.AddActionList then
@@ -33634,31 +33662,53 @@ local v64 = v32:AddSection({Title = "Specific Player", AlwaysOpen = true, Icon =
 
 
 
+	local v44 = tbl24.section(v32, "Steal Webhook")
+	tbl24.webhookEnabled = v44:AddToggle("Toggle_StealWebhook", {Title = "Steal Webhook", Description = "Posts a Discord embed the moment a stolen egg is banked, with its rarity, size, weight and cash per second.", Default = false, Callback = fn144(fn150)})
+	tbl24.webhookUrl = v44:AddInput("Input_WebhookURL", {Title = "Webhook URL", Description = "Paste the Discord webhook URL for the channel you want.", Placeholder = "https://discord.com/api/webhooks/...", Default = "", Callback = fn144(fn151)})
 
-	local eventSteal = tbl24.section(v32, "Capture The Egg")
-	tbl24.autoStealCapture = eventSteal:AddToggle("Toggle_AutoStealCapture", {Title = "Auto Steal Capture", Description = "Ambil egg event lalu bawa terbang", Default = false, Callback = fn144(fn138)})
-	tbl24.flyForCapture = eventSteal:AddToggle("Toggle_FlyForCapture", {Title = "Fly For Capture", Description = "Terbang diam di udara saat pegang egg", Default = false, Callback = fn144(fn135)})
+	tbl24.webhookDisconnect = v44:AddToggle("Toggle_DisconnectAlert", {Title = "Disconnect Alert", Description = "Posts to the same webhook when this account gets disconnected or kicked, with the reason.", Default = false, Callback = fn144(function(arg)
+		quantumV4Config.WebhookDisconnect = arg == true
+	end)})
 
-	v25 = tbl24.section(v33, "Egg Automation")
-	tbl24.autoPlace = v25:AddToggle("Toggle_AutoPlaceEgg", {Title = "Auto Place", Description = "Taruh egg di plot otomatis", Default = false, Callback = fn144(fn118)})
-	tbl24.placeRarity = tbl24.allDropdown(v25, "Dropdown_PlaceEggRarity", {Title = "Place Rarity", Description = "Filter rarity egg"}, v26, function(arg)
+	v44:AddParagraph({Title = "• Filter", Content = ""})
+	tbl24.webhookRarities = v44:AddDropdown("Dropdown_NotifyRarities", {Title = "Notify Rarities", Description = "Only post these rarities. Empty = every egg you steal.", Values = v26, Multi = true, Default = {}, Callback = fn144(fn152)})
+	tbl24.webhookValue = v44:AddInput("Input_NotifyMinimumValue", {Title = "Notify Minimum Value", Description = "Only post eggs worth at least this per second. Supports k, m and b.", Placeholder = "e.g. 500k, 2m, 1b", Default = "", Callback = fn144(fn153)})
+
+	v44:AddButton({Title = "Test Webhook", Description = "Sends one test embed so you can confirm the URL works.", Callback = fn144(function()
+		local quantumV4Webhook = genv.__QuantumV4Webhook
+		local value = tbl24.webhookUrl and tbl24.webhookUrl.Value
+
+		if type(value) == "string" and value ~= "" then
+			fn151(value)
+		end
+
+		if if quantumV4Webhook then not quantumV4Webhook.test() else not quantumV4Webhook then
+			flag6:Notify({Title = "Steal Webhook", Content = "Enter a webhook URL first", Duration = 3})
+			return
+		end
+		flag6:Notify({Title = "Steal Webhook", Content = "Test embed sent", Duration = 3})
+	end)})
+
+	local eggAutoSec = tbl24.section(v33, "Egg Automation")
+	tbl24.autoPlace = eggAutoSec:AddToggle("Toggle_AutoPlaceEgg", {Title = "Auto Place", Description = "Taruh egg di plot otomatis", Default = false, Callback = fn144(fn118)})
+	tbl24.placeRarity = tbl24.allDropdown(eggAutoSec, "Dropdown_PlaceEggRarity", {Title = "Place Rarity", Description = "Filter rarity egg"}, v26, function(arg)
 		quantumV4Config.PlaceRarities = fn67(arg)
 	end)
-	tbl24.autoHatch = v25:AddToggle("Toggle_AutoHatchEgg", {Title = "Auto Hatch", Description = "Hatch egg otomatis saat siap", Default = false, Callback = fn144(fn119)})
-	tbl24.mutationChoice = v25:AddDropdown("Dropdown_SelectMutation", {Title = "Select Mutation", Description = "Pilih jenis mutasi", Values = {"Scrambled", "Fractured", "Enchanted"}, Multi = false, Default = "Scrambled", Callback = fn144(fn122)})
-	tbl24.mutationSpecies = tbl24.allDropdown(v25, "Dropdown_MutateEggName", {Title = "Mutate Species", Description = "Filter nama egg mutasi"}, v24, fn123)
-	tbl24.mutationRarity = tbl24.allDropdown(v25, "Dropdown_MutateEggRarity", {Title = "Mutate Rarity", Description = "Filter rarity egg mutasi"}, v26, fn124)
-	tbl24.mutationMinValue = v25:AddInput("Input_MutateMinValuemoneys", {Flag = "mutationMinValue", Title = "Min Value Mutate", Description = "Minimal value mutasi", Placeholder = "e.g. 100k, 2m", Default = "", Callback = fn144(fn125)})
-	tbl24.mutationRetry = v25:AddToggle("Toggle_RetryUntilMutated", {Title = "Retry Mutate", Description = "Ulangi sampai termutasi", Default = true, Callback = fn144(fn126)})
-	tbl24.autoMutation = v25:AddToggle("Toggle_AutoApplyMutation", {Title = "Auto Mutate", Description = "Beri mutasi otomatis ke plot", Default = false, Callback = fn144(fn120)})
-	v25:AddButton({Title = "Apply Mutate Now", Description = "Mutasi plot sekarang", Callback = fn144(function()
+	tbl24.autoHatch = eggAutoSec:AddToggle("Toggle_AutoHatchEgg", {Title = "Auto Hatch", Description = "Hatch egg otomatis saat siap", Default = false, Callback = fn144(fn119)})
+	tbl24.mutationChoice = eggAutoSec:AddDropdown("Dropdown_SelectMutation", {Title = "Select Mutation", Description = "Pilih jenis mutasi", Values = {"Scrambled", "Fractured", "Enchanted"}, Multi = false, Default = "Scrambled", Callback = fn144(fn122)})
+	tbl24.mutationSpecies = tbl24.allDropdown(eggAutoSec, "Dropdown_MutateEggName", {Title = "Mutate Species", Description = "Filter nama egg mutasi"}, v24, fn123)
+	tbl24.mutationRarity = tbl24.allDropdown(eggAutoSec, "Dropdown_MutateEggRarity", {Title = "Mutate Rarity", Description = "Filter rarity egg mutasi"}, v26, fn124)
+	tbl24.mutationMinValue = eggAutoSec:AddInput("Input_MutateMinValuemoneys", {Flag = "mutationMinValue", Title = "Min Value Mutate", Description = "Minimal value mutasi", Placeholder = "e.g. 100k, 2m", Default = "", Callback = fn144(fn125)})
+	tbl24.mutationRetry = eggAutoSec:AddToggle("Toggle_RetryUntilMutated", {Title = "Retry Mutate", Description = "Ulangi sampai termutasi", Default = true, Callback = fn144(fn126)})
+	tbl24.autoMutation = eggAutoSec:AddToggle("Toggle_AutoApplyMutation", {Title = "Auto Mutate", Description = "Beri mutasi otomatis ke plot", Default = false, Callback = fn144(fn120)})
+	eggAutoSec:AddButton({Title = "Apply Mutate Now", Description = "Mutasi plot sekarang", Callback = fn144(function()
 		task.spawn(function()
 			pcall(tbl10.mutationSweep)
 		end)
 	end)})
 
 do
-		local placedEggsSec = v33:AddSection({Title = "Placed Eggs", AlwaysOpen = true, Icon = tbl24.gameIcon("Assets", "Directory", "Dragon", "Egg", "Icon")})
+		local placedEggsSec = v33:AddSection({Title = "Placed Eggs", Open = true, AlwaysOpen = true, Icon = tbl24.gameIcon("Assets", "Directory", "Dragon", "Egg", "Icon")})
 		local addActionList = placedEggsSec.AddActionList and placedEggsSec:AddActionList({Title = "Your placed eggs", EmptyText = "No eggs placed on your plot.", VisibleRows = 6, ButtonWidth = 64})
 
 		if addActionList then
@@ -33906,21 +33956,413 @@ do
 		flag6:Notify({Title = "Base", Content = flag14 and "Base upgraded" or tostring(str4 or "Could not upgrade"), Duration = 3})
 	end)})
 
+
 	local v39 = tbl24.section(v35, "Movement")
 	tbl24.adminBoost = v39:AddToggle("Toggle_AdminAbuseBoost", {Title = "Admin Abuse Boost", Description = "Kecepatan maksimal saat Admin Abuse", Default = false, Callback = fn144(fn137)})
 	tbl24.instantGrab = v39:AddToggle("Toggle_InstantGrab", {Title = "Instant Grab", Description = "Ambil egg instan tanpa tahan", Default = false, Callback = fn144(fn136)})
 	tbl24.infiniteJump = v39:AddToggle("Toggle_InfiniteJump", {Title = "Infinite Jump", Description = "Lompat bebas di udara", Default = false, Callback = fn144(fn139)})
 	tbl24.noclip = v39:AddToggle("Toggle_Noclip", {Title = "Noclip", Description = "Tembus objek/dinding", Default = false, Callback = fn144(fn113)})
 
+	local v57 = tbl24.section(v35, "Treadmill")
+	tbl24.autoTreadmill = v57:AddToggle("Toggle_AutoTreadmill", {Title = "Auto Treadmill", Description = "Latihan speed otomatis saat idle", Default = false, Callback = fn144(fn82)})
+	tbl24.treadmillUpgrade = v57:AddToggle("Toggle_AutoUpgradeTreadmill", {Title = "Auto Upgrade Treadmill", Description = "Upgrade treadmill otomatis", Default = false, Callback = fn144(fn88)})
+	tbl24.antiTreadmill = v57:AddToggle("Toggle_AntiTreadmill", {Title = "Anti Treadmill", Description = "Cegah jalan di treadmill saat bawa egg", Default = false, Callback = fn144(fn83)})
+
 	local Guard = tbl24.section(v35, "Guard Defense")
 	tbl24.antiGuardKnockback = Guard:AddToggle("Toggle_AntiGuardKnockback", {Title = "Anti Knockback", Description = "Tahan efek dorongan guard", Default = false, Callback = fn144(fn100)})
 	tbl24.antiHitGuard = Guard:AddToggle("Toggle_AntiHitGuard", {Title = "Anti Hit Guard", Description = "Hindari pukulan guard", Default = false, Callback = fn144(fn140)})
 
 	local v61 = tbl24.section(v35, "Waypoints & Events")
-	tbl24.waypoint = v61:AddDropdown("Dropdown_Waypoint", {Title = "Teleport Area", Description = "Pilih area tujuan", Values = v25_area, Multi = false, Default = v25_area[1], Callback = fn144(function(arg)
+	tbl24.waypoint = v61:AddDropdown("Dropdown_Waypoint", {Title = "Waypoint", Description = "Pilih area tujuan", Values = tbl25, Multi = false, Default = tbl25[1], Callback = fn144(function(arg)
 		v29 = arg
 	end)})
+	v61:AddButton({Title = "Teleport To Waypoint", Description = "Teleport langsung ke waypoint yang dipilih", Callback = fn144(function()
+		local quantumV4Roaming2 = genv.__QuantumV4Roaming
+		flag6:Notify({Title = "Waypoint", Content = (if quantumV4Roaming2 then if type(quantumV4Roaming2.teleportWaypoint) == "function" then quantumV4Roaming2.teleportWaypoint(v29) == true else false else false) and "Moved to " .. tostring(v29) or "That waypoint is not in this server", Duration = 3})
+	end)})
 	tbl24.autoRingEvent = v61:AddToggle("Toggle_AutoRingEvent", {Title = "Auto Ring Event", Description = "Loop ring safe zone - forest", Default = false, Callback = fn144(fn121)})
+
+	local eventSteal = tbl24.section(eventsTab, "Capture The Egg")
+	tbl24.autoStealCapture = eventSteal:AddToggle("Toggle_AutoStealCapture", {Title = "Auto Steal Capture", Description = "Ambil egg event lalu bawa terbang", Default = false, Callback = fn144(fn138)})
+	tbl24.flyForCapture = eventSteal:AddToggle("Toggle_FlyForCapture", {Title = "Fly For Capture", Description = "Terbang diam di udara saat pegang egg", Default = false, Callback = fn144(fn135)})
+
+		local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
+		v25 = tbl24.section(eventsTab, "Wisp Event", tbl24.gameIcon("WispQuests", "List", 1, "Icon"))
+		local v49 = v25:AddParagraph({Title = "Wisp Companion", Content = "Reading your wisp progress..."})
+
+		tbl24.wispAutoQuest = v25:AddToggle("Toggle_AutoWispQuest", {Title = "Auto Wisp Quest", Description = "Meets the Baby Wisp, hunts the quest eggs (Enchanted Forest eggs, an Eternal), fuses an Enchanted Forest animal, claims every reward and flies the wisp home to unlock the Enchanted Tree. Needs 50B SpeedPower.", Default = false, Callback = fn144(function(arg)
+			quantumV4Config.WispAutoQuest = arg == true
+		end)})
+
+		tbl24.banjoAuto = v25:AddToggle("Toggle_AutoBanjoCricket", {Title = "Auto Banjo Cricket", Description = "Goes into the Enchanted Tree, plays the Banjo Cricket's mushroom song back for all 5 stages, then claims the secret from Jitterbug. Needs the tree unlocked.", Default = false, Callback = fn144(function(arg)
+			quantumV4Config.BanjoAuto = arg == true
+		end)})
+
+		local v50 = tbl24.section(eventsTab, "Butterfly Bloom", tbl24.gameIcon("ButterflyCatalog", "Icons", "Net"))
+		local v51 = v50:AddParagraph({Title = "Bloom Status", Content = "Reading the Bloom schedule..."})
+		local addIconGrid, v52 = v50.AddIconGrid and v50:AddIconGrid({Title = "Butterflies Caught", Note = "", Columns = 4})
+		local tbl29 = {}
+
+		tbl24.bloomAutoNet = v50:AddToggle("Toggle_AutoClaimNet", {Title = "Auto Claim Net", Description = "Goes into the Enchanted Tree and claims your free Butterfly Net once.", Default = false, Callback = fn144(function(arg)
+			quantumV4Config.ButterflyAutoNet = arg == true
+		end)})
+
+		tbl24.bloomAutoCatch = v50:AddToggle("Toggle_AutoCatch", {Title = "Auto Catch", Description = "During every Bloom (every 30 min, 5 min long) flies to the Enchanted Forest, equips the net and catches with the Catch Mode below.", Default = false, Callback = fn144(function(arg)
+			quantumV4Config.ButterflyAutoCatch = arg == true
+		end)})
+
+		fn68 = quantumV4ButterflyRuntime and quantumV4ButterflyRuntime.modeOptions() or {"Tween to Butterfly"}
+
+		tbl24.bloomMode = v50:AddDropdown("Dropdown_CatchMode", {Title = "Catch Mode", Description = "Tween to Butterfly chases one butterfly at a time. Stand waits in the thickest part of the swarm, Zigzag sweeps back and forth across the forest, Circle loops around the swarm.", Values = fn68, Multi = false, Default = fn68[1], Callback = fn144(function(arg)
+			if quantumV4ButterflyRuntime then
+				quantumV4ButterflyRuntime.setMode(arg)
+			end
+		end)})
+
+		tbl24.bloomTiers = v50:AddDropdown("Dropdown_CatchTiers", {Title = "Catch Tiers", Description = "Only swing at these butterflies. Leave empty to catch every tier.", Values = quantumV4ButterflyRuntime and quantumV4ButterflyRuntime.tierOptions() or {"Radiant", "Amethyst", "Sapphire", "Emerald"}, Multi = true, Default = {}, Callback = fn144(function(arg)
+			if quantumV4ButterflyRuntime then
+				quantumV4ButterflyRuntime.setTiers(fn67(arg))
+			end
+		end)})
+
+		tbl24.bloomEsp = v50:AddToggle("Toggle_ButterflyESP", {Title = "Butterfly ESP", Description = "Shows every butterfly's tier and distance while a Bloom is live.", Default = false, Callback = fn144(function(arg)
+			quantumV4Config.ButterflyEsp = arg == true
+		end)})
+
+	v50:AddParagraph({Title = "• Trade & Craft", Content = ""})
+
+		tbl24.bloomAutoTrade = v50:AddToggle("Toggle_AutoTradeUp", {Title = "Auto Trade Up", Description = "After each Bloom, trades your butterflies up at the machine inside the Enchanted Tree.", Default = false, Callback = fn144(function(arg)
+			quantumV4Config.ButterflyAutoTrade = arg == true
+		end)})
+
+		fn73 = quantumV4ButterflyRuntime and quantumV4ButterflyRuntime.recipeOptions() or {"All Recipes"}
+
+		tbl24.bloomRecipe = v50:AddDropdown("Dropdown_TradeRecipe", {Title = "Trade Recipe", Description = "Which trade Auto Trade Up runs. For Essence only trades up what the essence recipe is still short of.", Values = fn73, Multi = false, Default = fn73[1], Callback = fn144(function(arg)
+			if quantumV4ButterflyRuntime then
+				quantumV4ButterflyRuntime.setRecipe(arg)
+			end
+		end)})
+
+		tbl24.bloomAutoCraft = v50:AddToggle("Toggle_AutoCraftEssence", {Title = "Auto Craft Essence", Description = "After each Bloom, crafts Enchanted Essence at the shrine once you hold the full recipe.", Default = false, Callback = fn144(function(arg)
+			quantumV4Config.ButterflyAutoCraft = arg == true
+		end)})
+
+		local function fn157(arg, arg2, arg3, arg4)
+			v50:AddButton({Title = arg, Description = arg2, Callback = fn144(function()
+				if not quantumV4ButterflyRuntime then
+					return
+				end
+
+				task.spawn(function()
+					quantumV4ButterflyRuntime.manual = true
+					local ok2, result, result2 = pcall(arg3)
+					quantumV4ButterflyRuntime.manual = false
+
+					if ok2 then
+					else
+						result, result2 = false, result
+					end
+
+					flag6:Notify({Title = "Butterfly Bloom", Content = result and arg4(result2) or tostring(result2 or "Could not do that"), Duration = 4})
+				end)
+			end)})
+		end
+
+		fn157("Claim Net Now", "Claims the Butterfly Net right now.", function()
+			return quantumV4ButterflyRuntime.claimNet()
+		end, function()
+			return "Butterfly Net claimed"
+		end)
+
+		fn157("Trade Up Now", "Runs the trade recipe once, even with Auto Trade Up off.", function()
+			return quantumV4ButterflyRuntime.tradeUp()
+		end, function(arg)
+			return ("Traded up %d time(s)"):format(tonumber(arg) or 0)
+		end)
+
+		fn157("Craft Essence Now", "Crafts Enchanted Essence right now if you hold the full recipe.", function()
+			return quantumV4ButterflyRuntime.craft()
+		end, function(arg)
+			return ("Crafted %d Enchanted Essence"):format(tonumber(arg) or 0)
+		end)
+
+		local function fn158(arg)
+			local n8 = tonumber(arg) or 0
+			if n8 >= 1000000000000 then
+				return ("%.2fT"):format(n8 / 1000000000000)
+			end
+
+			if n8 >= 1000000000 then
+				return ("%.2fB"):format(n8 / 1000000000)
+			end
+
+			if n8 >= 1000000 then
+				return ("%.2fM"):format(n8 / 1000000)
+			end
+
+			if n8 >= 1000 then
+				return ("%.1fK"):format(n8 / 1000)
+			end
+			return tostring(math.floor(n8))
+		end
+
+		task.spawn(function()
+			while fn2() do
+				if quantumV4ButterflyRuntime then
+					local function fn159()
+						local snap = quantumV4ButterflyRuntime.snap
+						local tbl30 = quantumV4ButterflyRuntime.tiers() or {}
+
+						if snap.unlocked then
+							v49:SetContent("Complete - the Enchanted Tree is unlocked.")
+						elseif snap.accepted then
+							v49:SetContent(("Stage %d / %d  ·  %s  (%d / %d)%s"):format(snap.stage or 1, snap.stages or 4, tostring(snap.quest), snap.progress or 0, snap.target or 0, snap.readyReturn and "\nAll quests done - return the wisp to unlock the tree." or (snap.claimable and "\nReady to claim." or (quantumV4ButterflyRuntime.questNote and "\n" .. quantumV4ButterflyRuntime.questNote or ""))))
+						elseif (snap.speed or 0) < (snap.need or 0) then
+							v49:SetContent(("Not eligible yet: SpeedPower %s of %s."):format(fn158(snap.speed), fn158(snap.need)))
+						else
+							v49:SetContent(("Eligible (SpeedPower %s). The Baby Wisp waits in the Enchanted Forest."):format(fn158(snap.speed)))
+						end
+
+						local str4
+
+						if snap.active then
+							local n8 = math.floor(snap.left or 0)
+							str4 = ("LIVE - ends in %dm %02ds"):format(math.floor(n8 / 60), n8 % 60)
+						else
+							if snap.enabled == false then
+								str4 = "Disabled on this server"
+							else
+								if snap.nextIn then
+									local n8 = math.floor(snap.nextIn)
+									str4 = ("Next in %dm %02ds"):format(math.floor(n8 / 60), n8 % 60)
+								else
+									str4 = "Not running"
+								end
+							end
+						end
+
+						local tbl31 = {}
+
+						for i, v53 in ipairs({"Golden", "Purple", "Blue", "Green"}) do
+							tbl31[#tbl31 + 1] = ("%s %d"):format(tbl30[v53] and tbl30[v53].name or v53, snap.counts and snap.counts[v53] or 0)
+						end
+
+						if addIconGrid then
+							local tbl32 = {}
+
+							for i, v53 in ipairs({"Green", "Blue", "Purple", "Golden"}) do
+								local counts = snap.counts and snap.counts[v53] or 0
+
+								if v52 and counts > (v52[v53] or 0) then
+									tbl29[v53] = (tbl29[v53] or 0) + counts - v52[v53]
+								end
+
+								local tbl33 = tbl30[v53] or {}
+								local n8 = tbl29[v53] or 0
+								tbl32[#tbl32 + 1] = {Name = tbl33.name or v53, Icon = tbl33.icon, Color = tbl33.color, Value = fn158(counts), Sub = n8 > 0 and ("+%d session"):format(n8) or (tbl33.rarity or ""), SubColor = n8 > 0 and Color3.fromRGB(74, 222, 128) or nil}
+							end
+
+							v52 = table.clone(snap.counts or {})
+							addIconGrid:SetItems(tbl32)
+							addIconGrid:SetNote(("Total %s  ·  Essence %d"):format(fn158(snap.caught), snap.essence or 0))
+							tbl31 = {}
+						end
+
+						v51:SetContent((("%s\n%s  ·  Essence %d  ·  Caught %d\n%s\n%s"):format(str4, snap.net and (snap.holding and "Net equipped" or "Net owned") or "No Butterfly Net", snap.essence or 0, snap.caught or 0, table.concat(tbl31, "  ·  "), tostring(quantumV4ButterflyRuntime.status or "Idle")):gsub("\n\n", "\n")))
+					end
+
+					pcall(fn159)
+				end
+
+				task.wait(1)
+			end
+		end)
+	end
+
+	local v49 = tbl24.section(eventsTab, "Race Rally", tbl24.gameIcon("FallenPowerUp", "Kinds", "x2Rings", "Icon"))
+	v49:AddParagraph({Title = "About This Event", Content = "Race Rally opens every 30 minutes for 60 seconds. Auto Race joins from anywhere, rides the track for you and brings you back to base after the finish."})
+
+	tbl24.raceAuto = v49:AddToggle("Toggle_AutoRace", {Title = "Auto Race", Description = "Joins every race, rides the track, uses power-ups and returns to base. Auto Steal pauses while you race.", Default = false, Callback = fn144(function(arg)
+		quantumV4Config.RaceAuto = arg == true
+	end)})
+
+	tbl24.raceClaim = v49:AddToggle("Toggle_AutoClaimEquipBestRacer", {Title = "Auto Claim & Equip Best Racer", Description = "Claims every win milestone you reached and equips the best racer you own.", Default = false, Callback = fn144(function(arg)
+		quantumV4Config.RaceClaim = arg == true
+	end)})
+
+	tbl24.raceBuy = v49:AddToggle("Toggle_AutoBuyShop", {Title = "Auto Buy Shop", Description = "Spends race tokens on the items you pick below.", Default = false, Callback = fn144(function(arg)
+		quantumV4Config.RaceBuy = arg == true
+	end)})
+
+	tbl24.raceBuyList = v49:AddDropdown("Dropdown_ShopBuyList", {Title = "Shop Buy List", Description = "Which race shop items Auto Buy should purchase.", Values = {"CashBooster", "SpeedBoost", "TreadmillBoost", "MutationToken", "RacingBat"}, Multi = true, Default = {}, Callback = fn144(function(arg)
+		quantumV4Config.RaceBuyList = fn67(arg)
+	end)})
+
+	local v50 = v49:AddParagraph({Title = "Race Status", Content = "Waiting for the next race."})
+
+	task.spawn(function()
+		while fn2() do
+			local quantumV4RaceRuntime = genv.__QuantumV4RaceRuntime
+
+			if quantumV4RaceRuntime then
+				pcall(function()
+					local v51 = quantumV4RaceRuntime.joinLeft()
+					local str4 = v51 > 0 and string.format("  ·  Join open %ds", math.floor(v51)) or ""
+					v50:SetContent(tostring(quantumV4RaceRuntime.status) .. str4 .. "\nLast: " .. tostring(quantumV4RaceRuntime.lastResult))
+				end)
+			end
+
+			task.wait(1)
+		end
+	end)
+
+	local v51 = tbl24.section(eventsTab, "Shooting Star", "rbxassetid://92160802930122")
+	v51:AddParagraph({Title = "About This Event", Content = "Sometimes a little star falls near you and runs around for a few minutes. Hold next to it to catch it."})
+
+	tbl24.starAlert = v51:AddToggle("Toggle_StarAlert", {Title = "Star Alert", Description = "Shows a notification the moment a star starts falling.", Default = true, Callback = fn144(function(arg)
+		quantumV4Config.StarAlert = arg == true
+	end)})
+
+	tbl24.starAutoCatch = v51:AddToggle("Toggle_AutoCatchStar", {Title = "Auto Catch Star", Description = "Goes to the star when it lands and catches it. Other tasks pause until it is caught.", Default = false, Callback = fn144(function(arg)
+		quantumV4Config.StarAutoCatch = arg == true
+	end)})
+
+	local v52 = v51:AddParagraph({Title = "Star Status", Content = "No star right now."})
+
+	task.spawn(function()
+		while fn2() do
+			local quantumV4StarRuntime = genv.__QuantumV4StarRuntime
+
+			if quantumV4StarRuntime then
+				pcall(function()
+					v52:SetContent(tostring(quantumV4StarRuntime.status) .. "\nLast: " .. tostring(quantumV4StarRuntime.lastResult))
+				end)
+			end
+
+			task.wait(1)
+		end
+	end)
+
+	local v53 = tbl24.section(eventsTab, "Dr Scramble Event", tbl24.gameIcon("Gears", "Directory", "The Scrambler", "Icon"))
+	v53:AddParagraph({Title = "About This Event", Content = "Dr Scramble only runs during the live event. The shop, trade-in and boss fight are still up; the rest of the time these toggles sit idle."})
+	tbl24.scrambleBuy = v53:AddToggle("Toggle_AutoBuyShop_2", {Title = "Auto Buy Shop", Description = "Spends samples on the shop items you pick below, as soon as you can afford them.", Default = false, Callback = fn144(fn116)})
+	tbl24.scrambleBuyList = v53:AddDropdown("Dropdown_ShopBuyList_2", {Title = "Shop Buy List", Description = "Which shop items Auto Buy should purchase. This list fills in once the event shop is open.", Values = tbl26, Multi = true, Default = {}, Callback = fn144(fn117)})
+	local v54 = v53:AddParagraph({Title = "Scramble Telemetry", Content = "Waiting for the event to start."})
+
+	task.spawn(function()
+		while fn2() do
+			local quantumV4ScrambleRuntime = genv.__QuantumV4ScrambleRuntime
+
+			if quantumV4ScrambleRuntime and type(quantumV4ScrambleRuntime.samples) == "function" then
+				local ok2, result = pcall(quantumV4ScrambleRuntime.samples)
+
+				if ok2 then
+					pcall(function()
+						v54:SetContent(string.format("Samples %d  ·  %s", result or 0, quantumV4ScrambleRuntime.status or "Idle"))
+					end)
+				end
+			end
+
+			task.wait(2)
+		end
+	end)
+
+	v53:AddParagraph({Title = "• Trade-In (Experimental Pets)", Content = ""})
+
+	tbl24.scrambleTradeInTrade = v53:AddToggle("Toggle_AutoTradeIn", {Title = "Auto Trade-In", Description = "Auto-completes the recipe: uses the required eggs you already have, and auto-adds any you're missing to the Auto Steal hunt (works even with Auto Steal off) so they get stolen off the field, then combines once all three are ready. Favorited / placed eggs are never spent.", Default = false, Callback = fn144(function(arg)
+		quantumV4Config.ScrambleTradeInTrade = arg == true
+	end)})
+
+	tbl24.scrambleTradeInReroll = v53:AddToggle("Toggle_AutoFreeReroll", {Title = "Auto Free Reroll", Description = "When pets are missing and a free reroll is left, rerolls the recipe instead of waiting.", Default = false, Callback = fn144(function(arg)
+		quantumV4Config.ScrambleTradeInReroll = arg == true
+	end)})
+
+	tbl24.scrambleTradeInBanners = v53:AddDropdown("Dropdown_TargetBanners", {Title = "Target Banners", Description = "Only work the trade-in while one of these banners is up. Leave empty to accept any banner.", Values = {"Biohazard Pets", "Experimental Pets", "Unstable DNA"}, Multi = true, Default = {}, Callback = fn144(fn98)})
+
+	v53:AddButton({Title = "Trade-In Once", Description = "Runs one sacrifice right now, even with Auto Trade-In off.", Callback = fn144(function()
+		local quantumV4ScrambleTradeIn = genv.__QuantumV4ScrambleTradeIn
+		local flag14 = false
+		local str4 = "Trade-In not ready"
+
+		if quantumV4ScrambleTradeIn then
+			flag14, str4 = quantumV4ScrambleTradeIn.tradeOnce()
+		end
+
+		flag6:Notify({Title = "Dr Scramble", Content = flag14 and "Sacrifice complete" or tostring(str4), Duration = 4})
+	end)})
+
+	v53:AddButton({Title = "Use Free Reroll", Description = "Spends one of today's free rerolls on a new recipe.", Callback = fn144(function()
+		local quantumV4ScrambleTradeIn = genv.__QuantumV4ScrambleTradeIn
+		local flag14 = false
+		local str4 = "Trade-In not ready"
+
+		if quantumV4ScrambleTradeIn then
+			flag14, str4 = quantumV4ScrambleTradeIn.reroll()
+		end
+
+		flag6:Notify({Title = "Dr Scramble", Content = flag14 and "Recipe rerolled" or tostring(str4), Duration = 4})
+	end)})
+
+	v53:AddButton({Title = "Open Trade-In UI", Description = "Opens Dr Scramble's Lab window so you can pick pets by hand.", Callback = fn144(function()
+		if not pcall(function()
+			require(ReplicatedStorage.Client.Tabs).Activate("DrScrambleTradeIn")
+		end) then
+			flag6:Notify({Title = "Dr Scramble", Content = "Could not open the trade-in window", Duration = 3})
+		end
+	end)})
+
+	local v55 = v53:AddParagraph({Title = "Trade-In Status", Content = "Turn a trade-in toggle on to start reading the recipe."})
+
+	task.spawn(function()
+		while fn2() do
+			local quantumV4ScrambleTradeIn = genv.__QuantumV4ScrambleTradeIn
+
+			if quantumV4ScrambleTradeIn then
+				pcall(function()
+					v55:SetContent(string.format("%s  ·  %s\nRotates in %02d:%02d  ·  Pity %d/%d  ·  Free rerolls %d  ·  Traded %d\nRecipe (%d/%d): %s\nHeld: %s\nMissing: %s", quantumV4ScrambleTradeIn.banner, quantumV4ScrambleTradeIn.status, math.floor(quantumV4ScrambleTradeIn.rotation / 60), quantumV4ScrambleTradeIn.rotation % 60, quantumV4ScrambleTradeIn.pity, quantumV4ScrambleTradeIn.pityMax, quantumV4ScrambleTradeIn.free, quantumV4ScrambleTradeIn.trades, quantumV4ScrambleTradeIn.ready, quantumV4ScrambleTradeIn.total, quantumV4ScrambleTradeIn.demands, quantumV4ScrambleTradeIn.stock, quantumV4ScrambleTradeIn.missing))
+				end)
+			end
+
+			task.wait(1)
+		end
+	end)
+
+	v53:AddParagraph({Title = "• Boss Fight", Content = ""})
+
+	tbl24.scrambleBossAuto = v53:AddToggle("Toggle_AutoBoss", {Title = "Auto Boss", Description = "When Dr Scramble's boss is live, walks into the arena portal, joins the fight, hits the nearest target with your bat and breaks free from grabs. The clear reward lands automatically. While Auto Steal is on and this is off, an accidental touch on the arena portal is bounced back out so your steal is never hijacked.", Default = false, Callback = fn144(function(arg)
+		quantumV4Config.ScrambleBossAuto = arg == true
+		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
+
+		if quantumV4ScrambleBoss and type(quantumV4ScrambleBoss.setEnabled) == "function" then
+			pcall(quantumV4ScrambleBoss.setEnabled, quantumV4ScrambleBoss, arg == true)
+		end
+
+		if v13 and type(v13._reconcileScramblePortal) == "function" then
+			pcall(v13._reconcileScramblePortal, v13)
+		end
+	end)})
+
+	local v56 = v53:AddParagraph({Title = "Boss Status", Content = "Turn Auto Boss on. It sits idle until the boss event goes live."})
+
+	task.spawn(function()
+		while fn2() do
+			local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
+
+			if quantumV4ScrambleBoss then
+				pcall(function()
+					local flag14 = type(quantumV4ScrambleBoss._snapshot) == "function" and quantumV4ScrambleBoss:_snapshot() or nil
+
+					if type(flag14) == "table" then
+						v56:SetContent(string.format("%s\nPhase %s  ·  HP %d/%d%s\nSamples %d  ·  Reward %s", tostring(flag14.status), tostring(flag14.phase), math.floor((flag14.health or 0) + 0.5), math.floor((flag14.maxHealth or 0) + 0.5), flag14.overheated and "  ·  OVERHEAT" or "", flag14.samples or 0, tostring(flag14.reward)))
+					else
+						v56:SetContent(tostring(quantumV4ScrambleBoss.status or "Idle"))
+					end
+				end)
+			end
+
+			task.wait(1)
+		end
+	end)
 
 	local v43 = tbl24.section(v70, "Egg ESP")
 	tbl24.eggEsp = v43:AddToggle("Toggle_EggESP", {Title = "Egg ESP", Description = "Tampilkan posisi egg tembus pandang", Default = false, Callback = fn144(fn96)})
@@ -33976,310 +34418,6 @@ do
 		end)})
 	end
 
-	local function fn157(arg, arg2)
-		v27()
-
-		if type(arg) == "table" and arg.Value ~= nil then
-			pcall(arg2, arg.Value)
-		end
-	end
-
-	flag12 = false
-	fn157(tbl24.speed, fn90)
-	fn157(tbl24.stealMode, fn89)
-	fn157(tbl24.antiTreadmill, fn83)
-	fn157(tbl24.autoTreadmill, fn82)
-	fn157(tbl24.treadmillUpgrade, fn88)
-	fn157(tbl24.hopCooldown, fn87)
-	fn157(tbl24.hopNoMatch, fn84)
-	fn157(tbl24.privateServerMax, fn85)
-	fn157(tbl24.privateServerAuto, fn86)
-
-	fn157(tbl24.names, function(arg)
-		fn91("names", "name", arg)
-	end)
-
-	fn157(tbl24.areas, function(arg)
-		fn91("areas", "area", arg)
-	end)
-
-	fn157(tbl24.rarities, function(arg)
-		fn91("rarities", "rarity", arg)
-	end)
-
-	fn157(tbl24.value, fn92)
-	fn157(tbl24.autoIndex, fn149)
-	fn157(tbl24.scrambleBuy, fn116)
-	fn157(tbl24.scrambleBuyList, fn117)
-
-	fn157(tbl24.wispAutoQuest, function(arg)
-		quantumV4Config.WispAutoQuest = arg == true
-	end)
-
-	fn157(tbl24.banjoAuto, function(arg)
-		quantumV4Config.BanjoAuto = arg == true
-	end)
-
-	fn157(tbl24.bloomAutoNet, function(arg)
-		quantumV4Config.ButterflyAutoNet = arg == true
-	end)
-
-	fn157(tbl24.bloomAutoCatch, function(arg)
-		quantumV4Config.ButterflyAutoCatch = arg == true
-	end)
-
-	fn157(tbl24.bloomEsp, function(arg)
-		quantumV4Config.ButterflyEsp = arg == true
-	end)
-
-	fn157(tbl24.bloomAutoTrade, function(arg)
-		quantumV4Config.ButterflyAutoTrade = arg == true
-	end)
-
-	fn157(tbl24.bloomAutoCraft, function(arg)
-		quantumV4Config.ButterflyAutoCraft = arg == true
-	end)
-
-	fn157(tbl24.bloomTiers, function(arg)
-		local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
-
-		if quantumV4ButterflyRuntime then
-			quantumV4ButterflyRuntime.setTiers(fn67(arg))
-		end
-	end)
-
-	fn157(tbl24.bloomRecipe, function(arg)
-		local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
-
-		if quantumV4ButterflyRuntime then
-			quantumV4ButterflyRuntime.setRecipe(arg)
-		end
-	end)
-
-	fn157(tbl24.bloomMode, function(arg)
-		local quantumV4ButterflyRuntime = genv.__QuantumV4ButterflyRuntime
-
-		if quantumV4ButterflyRuntime then
-			quantumV4ButterflyRuntime.setMode(arg)
-		end
-	end)
-
-	fn157(tbl24.noclip, fn113)
-	fn157(tbl24.bottingMode, fn114)
-	fn157(tbl24.antiCutscene, fn115)
-
-	fn157(tbl24.waypoint, function(arg)
-		v29 = arg
-	end)
-
-	fn157(tbl24.autoFavorite, fn101)
-	fn157(tbl24.favoriteRule, fn102)
-	fn157(tbl24.favoriteRarities, fn103)
-	fn157(tbl24.favoriteSpecies, fn104)
-	fn157(tbl24.autoFuse, fn109)
-	fn157(tbl24.fuseRule, fn110)
-	fn157(tbl24.fuseRarities, fn111)
-	fn157(tbl24.fuseSpecies, fn112)
-	fn157(tbl24.autoEquipBest, fn105)
-	fn157(tbl24.autoClaimOffline, fn106)
-	fn157(tbl24.autoBaseUpgrade, fn107)
-	fn157(tbl24.autoClaimAlmanac, fn108)
-	fn157(tbl24.mutations, fn93)
-	fn157(tbl24.weight, fn94)
-	fn157(tbl24.priority, fn95)
-	fn157(tbl24.eggEsp, fn96)
-	fn157(tbl24.espDetails, fn97)
-	fn157(tbl24.espMinRarity, tbl10.applyEspMinRarity)
-	fn157(tbl24.espMinValue, tbl10.applyEspMinValue)
-	fn157(tbl24.backpackRates, fn99)
-	fn157(tbl24.antiGuardKnockback, fn100)
-
-	fn157(tbl24.placeRarity, function(arg)
-		quantumV4Config.PlaceRarities = fn67(arg)
-	end)
-
-	fn157(v21, function(arg)
-		quantumV4Config.SellNames = fn67(arg)
-	end)
-
-	fn157(v22, function(arg)
-		quantumV4Config.SellRarities = fn67(arg)
-	end)
-
-	fn157(v23, function(arg)
-		quantumV4Config.SellEggRarities = fn67(arg)
-	end)
-
-	fn157(tbl24.sellPetValue, fn129)
-	fn157(tbl24.sellEggValue, fn130)
-	fn157(tbl24.godMode, fn80)
-	fn157(tbl24.antiAfk, fn141)
-	fn157(tbl24.autoReconnect, fn142)
-	fn157(tbl24.autoExecute, fn143)
-	fn157(tbl24.antiHitGuard, fn140)
-	fn157(tbl24.flyForCapture, fn135)
-	fn157(tbl24.autoStealCapture, fn138)
-	fn157(tbl24.instantGrab, fn136)
-	fn157(tbl24.infiniteJump, fn139)
-	fn157(tbl24.uncapFps, fn133)
-	fn157(tbl24.startupBoost, fn131)
-	fn157(tbl24.autoPlace, fn118)
-	fn157(tbl24.autoHatch, fn119)
-	fn157(tbl24.mutationChoice, fn122)
-	fn157(tbl24.mutationSpecies, fn123)
-	fn157(tbl24.mutationRarity, fn124)
-	fn157(tbl24.mutationMinValue, fn125)
-	fn157(tbl24.mutationRetry, fn126)
-	fn157(tbl24.autoMutation, fn120)
-	fn157(tbl24.taskOrder, fn156)
-	fn157(tbl24.stealHold, fn79)
-
-	fn157(tbl24.raceClaim, function(arg)
-		quantumV4Config.RaceClaim = arg == true
-	end)
-
-	fn157(tbl24.raceBuyList, function(arg)
-		quantumV4Config.RaceBuyList = fn67(arg)
-	end)
-
-	fn157(tbl24.raceBuy, function(arg)
-		quantumV4Config.RaceBuy = arg == true
-	end)
-
-	fn157(tbl24.raceAuto, function(arg)
-		quantumV4Config.RaceAuto = arg == true
-	end)
-
-	fn157(tbl24.starAlert, function(arg)
-		quantumV4Config.StarAlert = arg == true
-	end)
-
-	fn157(tbl24.starAutoCatch, function(arg)
-		quantumV4Config.StarAutoCatch = arg == true
-	end)
-
-	fn157(tbl24.scrambleTradeInBanners, fn98)
-
-	fn157(tbl24.scrambleTradeInReroll, function(arg)
-		quantumV4Config.ScrambleTradeInReroll = arg == true
-	end)
-
-	fn157(tbl24.scrambleTradeInTrade, function(arg)
-		quantumV4Config.ScrambleTradeInTrade = arg == true
-	end)
-
-	fn157(tbl24.scrambleBossAuto, function(arg)
-		quantumV4Config.ScrambleBossAuto = arg == true
-		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
-
-		if quantumV4ScrambleBoss and type(quantumV4ScrambleBoss.setEnabled) == "function" then
-			pcall(quantumV4ScrambleBoss.setEnabled, quantumV4ScrambleBoss, arg == true)
-		end
-	end)
-
-	if tbl24.taskOrder and type(tbl24.taskOrder.SetStatus) == "function" then
-		local taskOrder = tbl24.taskOrder
-
-		task.spawn(function()
-			while fn2() do
-				for i, v70 in ipairs(quantumV4TaskLadder.DEFAULT) do
-					local v71 = quantumV4TaskLadder.enabled(v70)
-
-					if type(taskOrder.SetVisible) == "function" then
-						pcall(taskOrder.SetVisible, taskOrder, v70, v71)
-					end
-
-					if v71 then
-						local v72, v73 = quantumV4TaskLadder.describe(v70)
-						pcall(taskOrder.SetStatus, taskOrder, v70, v72, v73)
-					end
-				end
-
-				task.wait(0.5)
-			end
-		end)
-	end
-
-	fn157(tbl24.autoRingEvent, fn121)
-	fn157(tbl24.autoSell, fn127)
-	fn157(tbl24.autoSellEgg, fn128)
-	fn157(tbl24.stealPlayerRarities, fn146)
-	fn157(tbl24.stealPlayerValue, fn148)
-	fn157(tbl24.webhookUrl, fn151)
-	fn157(tbl24.webhookRarities, fn152)
-	fn157(tbl24.webhookValue, fn153)
-	fn157(tbl24.webhookEnabled, fn150)
-
-	fn157(tbl24.webhookDisconnect, function(arg)
-		quantumV4Config.WebhookDisconnect = arg == true
-	end)
-
-	fn157(tbl24.helpFriend, function(arg)
-		quantumV4Config.HelpFriend = arg == true
-	end)
-
-	fn157(tbl24.lowSpeedBoost, function(arg)
-		quantumV4Config.LowSpeedBoost = arg == true
-	end)
-
-	fn157(tbl24.autoSteal, fn78)
-	fn157(tbl24.stealPlayers, fn145)
-	tbl13.hopWindow = v28
-
-	do
-		local hopHunt = tbl13.hopHunt
-
-		if hopHunt and hopHunt.state and (hopHunt.state.active or hopHunt.state.watch) then
-			pcall(function()
-				v28:LoadConfig("HopSession")
-			end)
-
-			task.delay(2, function()
-				pcall(hopHunt.open)
-			end)
-		end
-	end
-
-	genv.__QuantumV4HubShutdown = function()
-		if quantumV4PlayerSteal then
-			pcall(quantumV4PlayerSteal.setEnabled, quantumV4PlayerSteal, false)
-		end
-
-		for i, v70 in ipairs({"AutoSteal", "AutoPlace", "AutoHatch", "AutoMutation", "AutoRingEvent", "AutoSell", "AutoSellEgg", "StealPlayers", "ScrambleBossAuto", "RaceAuto", "RaceClaim", "RaceBuy", "StarAutoCatch", "ButterflyAutoCatch", "ButterflyAutoNet", "ButterflyAutoTrade", "ButterflyAutoCraft"}) do
-			quantumV4Config[v70] = false
-		end
-
-		if v13 then
-			pcall(v13.setEnabled, v13, false)
-		end
-
-		local quantumV4ScrambleBoss = genv.__QuantumV4ScrambleBoss
-
-		if quantumV4ScrambleBoss and type(quantumV4ScrambleBoss.setEnabled) == "function" then
-			pcall(quantumV4ScrambleBoss.setEnabled, quantumV4ScrambleBoss, false)
-		end
-
-		local value = v28 and rawget(v28, "Gui") or nil
-		local tbl29 = {game:GetService("CoreGui")}
-
-		pcall(function()
-			if gethui then
-				table.insert(tbl29, gethui())
-			end
-		end)
-
-		for i, v70 in ipairs(tbl29) do
-			for i2, child in ipairs(v70:GetChildren()) do
-				if child == value or child:IsA("ScreenGui") and (child.Name == "Chloeex" or child.Name == "ToggleUIButton" or child.Name == "FluentGUI" or child.Name:find("Fluent")) then
-					pcall(child.Destroy, child)
-				end
-			end
-		end
-		if Fluent and Fluent.Destroy then pcall(function() Fluent:Destroy() end) end
-	end
-
-
-
 	local v58 = tbl24.section(v37, "Server Hop")
 	tbl24.hopNoMatch = v58:AddToggle("Toggle_HopWhenNothingMatches", {Title = "Hop Jika Kosong", Description = "Pindah server jika tidak ada egg target", Default = false, Callback = fn144(fn84)})
 	tbl24.hopCooldown = v58:AddSlider("Slider_HopCooldown", {Title = "Hop Cooldown", Description = "Jeda waktu hop (detik)", Min = 1, Max = 60, Default = 5, Callback = fn144(fn153)})
@@ -34315,7 +34453,7 @@ do
 
 	local Performance = tbl24.section(v38, "Performance")
 	tbl24.startupBoost = Performance:AddToggle("Toggle_StartupBoost", {Title = "Startup Boost", Description = "Optimasi resource saat start", Default = false, Callback = fn144(fn131)})
-	tbl24.boostFps = Performance:AddToggle("Toggle_BoostFPS", {Title = "Boost FPS", Description = "Turunkan grafis untuk performa tinggi", Default = false, Callback = fn144(fn106)})
+	tbl24.boostFps = Performance:AddToggle("Toggle_BoostFPS", {Title = "Boost FPS", Description = "Turunkan grafis untuk performa tinggi", Default = false, Callback = fn144(fn132)})
 	tbl24.uncapFps = Performance:AddToggle("Toggle_UncapFPS", {Title = "Uncap FPS", Description = "Buka limit FPS Roblox", Default = false, Callback = fn144(fn133)})
 	tbl24.bottingMode = Performance:AddToggle("Toggle_BottingMode", {Title = "Botting Mode", Description = "Layar hitam (hemat GPU/CPU)", Default = false, Callback = fn144(fn114)})
 	tbl24.antiCutscene = Performance:AddToggle("Toggle_AntiCutscene", {Title = "Anti Cutscene", Description = "Lewati cutscene animasi", Default = false, Callback = fn144(fn115)})
@@ -34393,6 +34531,10 @@ local Windows = tbl24.section(v38, "Panels & Logs", "lucide/layout-dashboard")
 	Section_Info_1:AddParagraph({ Title = "Toggle LeftControl untuk Show/Hide UI", Content = "" })
 	Section_Info_1:AddParagraph({ Title = "Script FREE - Jangan diperjualbelikan!", Content = "" })
 
+	local function fn156(arg)
+		quantumV4Config.TaskOrder = fn67(arg)
+	end
+
 	local function fn157(arg, arg2)
 		v27()
 
@@ -34694,6 +34836,8 @@ local Windows = tbl24.section(v38, "Panels & Logs", "lucide/layout-dashboard")
 		end
 		if Fluent and Fluent.Destroy then pcall(function() Fluent:Destroy() end) end
 	end
+
+
 
 	flag = true
 end
