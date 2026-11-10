@@ -11774,17 +11774,25 @@ local v8 = (function()
 			arg:_setStatus("Searching")
 			arg:_schedule()
 		else
-			if arg._instantReturnToken ~= nil and (arg.carry.uid ~= nil and not arg._externalDeliver) then
+			if not arg.userStealEnabled then
+				-- Langsung bersihkan state jika user mematikan Auto Steal
+				arg._instantReturnToken = nil
+				arg._externalDeliver = nil
+				arg.carry.active = false
+				arg.carry.uid = nil
+				arg.activeTarget = nil
+				arg.running = false
+			elseif arg._instantReturnToken ~= nil and (arg.carry.uid ~= nil and not arg._externalDeliver) then
 				arg._externalDeliver = true
 				arg.planGeneration = arg.planGeneration + 1
 				arg.running = false
 				arg:_setStatus("Finishing target egg")
 
 				task.spawn(function()
-					local n70 = os.clock() + 45
+					local n70 = os.clock() + 5
 
-					while arg._instantReturnToken ~= nil and os.clock() < n70 and not arg.destroyed do
-						task.wait(0.2)
+					while arg._instantReturnToken ~= nil and os.clock() < n70 and not arg.destroyed and arg.userStealEnabled do
+						task.wait(0.1)
 					end
 
 					if arg.destroyed then
@@ -30169,22 +30177,34 @@ do
 			TweenService:Create(arg, TweenInfo.new(0.18, Enum.EasingStyle.Quad), arg2):Play()
 		end
 
-		local color2 = Color3.fromRGB(13, 13, 16)
-		local color3 = Color3.fromRGB(19, 19, 23)
-		local color4 = Color3.fromRGB(27, 27, 32)
-		local color5 = Color3.fromRGB(46, 46, 54)
-		local color6 = Color3.fromRGB(42, 42, 50)
-		local color7 = Color3.fromRGB(238, 238, 243)
-		local color8 = Color3.fromRGB(162, 162, 174)
-		local color9 = Color3.fromRGB(116, 116, 128)
-		local color10 = Color3.fromRGB(232, 232, 238)
-		local color11 = Color3.fromRGB(14, 14, 17)
-		local color12 = Color3.fromRGB(74, 222, 128)
-		local color13 = Color3.fromRGB(245, 190, 80)
-		local color14 = Color3.fromRGB(235, 90, 90)
-		local Frame = fn66("Frame", {Size = UDim2.new(0, 320, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Position = UDim2.new(0.5, -160, 0, 80), BackgroundColor3 = color2, BorderSizePixel = 0, Active = true, Draggable = true}, screenGui)
-		fn67(Frame, 12)
-		fn68(Frame, color6)
+		-- GLASSMORPHISM CYBERPUNK PALETTE
+		local color2 = Color3.fromRGB(10, 10, 16)
+		local color3 = Color3.fromRGB(18, 18, 28)
+		local color4 = Color3.fromRGB(28, 28, 42)
+		local color5 = Color3.fromRGB(44, 44, 64)
+		local color6 = Color3.fromRGB(255, 255, 255)
+		local color7 = Color3.fromRGB(245, 245, 255)
+		local color8 = Color3.fromRGB(160, 160, 185)
+		local color9 = Color3.fromRGB(110, 110, 135)
+		local color10 = Color3.fromRGB(255, 255, 255)
+		local color11 = Color3.fromRGB(12, 12, 18)
+		local color12 = Color3.fromRGB(50, 225, 130)
+		local color13 = Color3.fromRGB(255, 200, 60)
+		local color14 = Color3.fromRGB(255, 75, 75)
+
+		-- Main Glassmorphism Frame (Transparan Kaca dengan Border Halus)
+		local Frame = fn66("Frame", {
+			Size = UDim2.new(0, 320, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			Position = UDim2.new(0.5, -160, 0, 80),
+			BackgroundColor3 = color2,
+			BackgroundTransparency = 0.18,
+			BorderSizePixel = 0,
+			Active = true,
+			Draggable = true
+		}, screenGui)
+		fn67(Frame, 14)
+		fn68(Frame, Color3.fromRGB(255, 255, 255), 0.82)
 		fn66("UIPadding", {PaddingTop = UDim.new(0, 14), PaddingBottom = UDim.new(0, 14), PaddingLeft = UDim.new(0, 14), PaddingRight = UDim.new(0, 14)}, Frame)
 		fn66("UIListLayout", {Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder}, Frame)
 		local n8 = 0
@@ -30228,9 +30248,9 @@ do
 		end
 
 		TextButton.MouseLeave:Connect(fn73)
-		local v21 = fn70(64, {BackgroundTransparency = 0, BackgroundColor3 = color3})
+		local v21 = fn70(64, {BackgroundTransparency = 0.35, BackgroundColor3 = color3})
 		fn67(v21, 10)
-		local UIStroke = fn66("UIStroke", {Color = color6, Thickness = 1, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, v21)
+		local UIStroke = fn66("UIStroke", {Color = Color3.fromRGB(255, 255, 255), Thickness = 1, Transparency = 0.85, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, v21)
 		local Frame2 = fn66("Frame", {Position = UDim2.new(0, 12, 0, 15), Size = UDim2.new(0, 8, 0, 8), BackgroundColor3 = color9, BorderSizePixel = 0}, v21)
 		fn67(Frame2, 4)
 		local v22 = fn71(v21, {Position = UDim2.new(0, 28, 0, 8), Size = UDim2.new(1, -40, 0, 22), Text = "Checking", Font = Enum.Font.BuilderSansBold, TextSize = 13})
@@ -30244,8 +30264,9 @@ do
 		fn67(Frame4, 3)
 
 		local function fn74(arg)
-			local v27 = fn70(arg, {BackgroundTransparency = 0, BackgroundColor3 = color3})
+			local v27 = fn70(arg, {BackgroundTransparency = 0.35, BackgroundColor3 = color3})
 			fn67(v27, 10)
+			fn68(v27, Color3.fromRGB(255, 255, 255), 0.88)
 			return v27
 		end
 
@@ -30379,9 +30400,9 @@ do
 		end)
 
 		local v31 = fn70(36)
-		local TextButton2 = fn66("TextButton", {Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = color4, BorderSizePixel = 0, Text = "Hop Now", Font = Enum.Font.BuilderSansBold, TextSize = 13, TextColor3 = color7, AutoButtonColor = false}, v31)
-		fn67(TextButton2, 8)
-		fn68(TextButton2, color6)
+		local TextButton2 = fn66("TextButton", {Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Color3.fromRGB(35, 110, 220), BorderSizePixel = 0, Text = "⚡ Hop Server Sekarang", Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = Color3.fromRGB(255, 255, 255), AutoButtonColor = false}, v31)
+		fn67(TextButton2, 10)
+		fn68(TextButton2, Color3.fromRGB(255, 255, 255), 0.75)
 
 		local function fn82()
 			fn69(TextButton2, {BackgroundColor3 = color10, TextColor3 = color11})
@@ -30631,13 +30652,24 @@ local function fn66()
 
 local function fn67(arg)
 		local tbl14 = {}
+		if type(arg) == "table" then
+			local hasSelectAll = false
+			-- Cek apakah user memilih '[PILIH SEMUA]' atau '[Select All]'
+			for k, v in pairs(arg) do
+				local val = type(k) == "number" and v or (v == true and k or nil)
+				if val and (val == "[PILIH SEMUA]" or val == "[Select All]" or val == "All") then
+					hasSelectAll = true
+					break
+				end
+			end
 
-		for i, v21 in ipairs(type(arg) == "table" and arg or {}) do
-			if v21 ~= "None" and v21 ~= "" then
-				tbl14[#tbl14 + 1] = v21
+			for k, v in pairs(arg) do
+				local val = type(k) == "number" and v or (v == true and k or nil)
+				if val and val ~= "None" and val ~= "" and val ~= "[PILIH SEMUA]" and val ~= "[Select All]" then
+					tbl14[#tbl14 + 1] = val
+				end
 			end
 		end
-
 		return tbl14
 	end
 
@@ -32098,14 +32130,37 @@ local function fn67(arg)
 	fn73 = fn69((fn67(tbl21)))
 
 	local function fn78(arg)
-		quantumConfig.AutoSteal = arg == true
+		local isEnabled = arg == true
+		quantumConfig.AutoSteal = isEnabled
 
 		if v13 then
-			v13:setEnabled(quantumConfig.AutoSteal)
+			v13:setEnabled(isEnabled)
+			if not isEnabled then
+				-- FORCE ABORT IMMEDIATELY (tidak tunggu 45 detik lagi)
+				v13._instantReturnToken = nil
+				v13._externalDeliver = nil
+				v13.carry.active = false
+				v13.carry.uid = nil
+				v13.activeTarget = nil
+				v13.running = false
+				pcall(function() v13:_cancelTween("Disabled") end)
+				pcall(function() v13:_cleanupInstantSteal() end)
+				pcall(function() v13:_stopMovementProtection() end)
+				pcall(function() v13:_setStatus("Idle") end)
+			end
+		end
+
+		-- Matikan atau hidupkan Quantum Ultra sinkron dengan toggle Auto Steal
+		if isEnabled then
+			if quantumConfig.StealMode == "Quantum Ultra" then
+				pcall(activateQuantumUltra)
+			end
+		else
+			pcall(deactivateQuantumUltra)
 		end
 
 		if type(genv.__QuantumSetStealDeclutter) == "function" then
-			pcall(genv.__QuantumSetStealDeclutter, quantumConfig.AutoSteal)
+			pcall(genv.__QuantumSetStealDeclutter, isEnabled)
 		end
 	end
 
@@ -32185,7 +32240,7 @@ local function fn67(arg)
 	local isQuantumUltraActive = false
 	local isQuantumUltraProcessing = false
 	local QUANTUM_ULTRA_TARGET_POS = Vector3.new(565.74, 71.69, -368.14)
-	local quantumUltraHoldDuration = 1.0
+	local quantumUltraHoldDuration = 0.15
 	local quantumUltraRespawnGen = 0
 	local quantumUltraMoveGen = 0
 	local activeCameraLockConnection = nil
@@ -32360,7 +32415,7 @@ local function fn67(arg)
 			end
 		end
 
-		task.delay(1.2, function()
+		task.delay(0.25, function()
 			isQuantumUltraProcessing = false
 		end)
 	end
@@ -32413,13 +32468,25 @@ local function fn67(arg)
 			end
 		end)
 
-		for _, d in ipairs(Workspace:GetDescendants()) do
-			if d:IsA("ProximityPrompt") and (d.Name == "CarryAreaEgg" or d.Name:lower():find("egg")) and d.Enabled then
-				local p = d.Parent
-				if p:IsA("Attachment") then p = p.Parent end
-				if p and p:IsA("BasePart") and (p.Position - hrp.Position).Magnitude < 15 then
-					quantumUltraInstantGrab(d)
-					break
+		-- OPTIMIZED: Scan container telur spesifik, HINDARI Workspace:GetDescendants() yang bikin lag freeze
+		local searchFolders = {
+			Workspace:FindFirstChild("EggWorld"),
+			Workspace:FindFirstChild("__OBJECTS"),
+			Workspace:FindFirstChild("World"),
+			Workspace:FindFirstChild("Eggs"),
+			Workspace:FindFirstChild("FieldEggs")
+		}
+		for _, folder in ipairs(searchFolders) do
+			if folder then
+				for _, d in ipairs(folder:GetDescendants()) do
+					if d:IsA("ProximityPrompt") and d.Enabled then
+						local p = d.Parent
+						if p:IsA("Attachment") then p = p.Parent end
+						if p and p:IsA("BasePart") and (p.Position - hrp.Position).Magnitude < 22 then
+							quantumUltraInstantGrab(d)
+							break
+						end
+					end
 				end
 			end
 		end
@@ -32430,12 +32497,23 @@ local function fn67(arg)
 		local hrp = char and (char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart)
 		if not hrp then return end
 
-		for _, d in ipairs(Workspace:GetDescendants()) do
-			if d:IsA("ProximityPrompt") and d.Enabled then
-				local p = d.Parent
-				if p:IsA("Attachment") then p = p.Parent end
-				if p and p:IsA("BasePart") and (p.Position - pos).Magnitude < 15 then
-					quantumUltraInstantGrab(d)
+		local eggContainers = {
+			Workspace:FindFirstChild("EggWorld"),
+			Workspace:FindFirstChild("__OBJECTS"),
+			Workspace:FindFirstChild("World"),
+			Workspace:FindFirstChild("Eggs"),
+			Workspace:FindFirstChild("FieldEggs")
+		}
+		for _, folder in ipairs(eggContainers) do
+			if folder then
+				for _, d in ipairs(folder:GetDescendants()) do
+					if d:IsA("ProximityPrompt") and d.Enabled then
+						local p = d.Parent
+						if p:IsA("Attachment") then p = p.Parent end
+						if p and p:IsA("BasePart") and (p.Position - pos).Magnitude < 22 then
+							quantumUltraInstantGrab(d)
+						end
+					end
 				end
 			end
 		end
@@ -32497,41 +32575,15 @@ local function fn67(arg)
 				end
 			end)
 
+		-- CAMERA LOCK REMOVED (mencegah layar freeze/mandeg selama 2 detik)
 		task.spawn(function()
-				local camera = workspace.CurrentCamera
-				if not camera or not isQuantumUltraActive or quantumUltraMoveGen ~= currentMoveGen then return end
-
-				local cameraOffset = camera.CFrame.Position - root.Position
-				local targetCamCFrame = CFrame.new(targetPos + cameraOffset) * camera.CFrame.Rotation
-
-				if activeCameraLockConnection then
-					activeCameraLockConnection:Disconnect()
-					activeCameraLockConnection = nil
-				end
-
-				camera.CameraType = Enum.CameraType.Scriptable
-				local lockStartTime = os.clock()
-				local camConnection
-
-				camConnection = RunService.RenderStepped:Connect(function()
-					if not isQuantumUltraActive or quantumUltraMoveGen ~= currentMoveGen or localPlayer.Character ~= character or os.clock() - lockStartTime >= 2 then
-						camConnection:Disconnect()
-						if activeCameraLockConnection == camConnection then
-							activeCameraLockConnection = nil
-						end
-						if camera.CameraType == Enum.CameraType.Scriptable then
-							camera.CameraType = Enum.CameraType.Custom
-						end
-						local hum = (localPlayer.Character or character) and (localPlayer.Character or character):FindFirstChildOfClass("Humanoid")
-						if hum then
-							camera.CameraSubject = hum
-						end
-					else
-						camera.CFrame = targetCamCFrame
-					end
-				end)
-				activeCameraLockConnection = camConnection
-			end)
+			local camera = workspace.CurrentCamera
+			if camera and camera.CameraType == Enum.CameraType.Scriptable then
+				camera.CameraType = Enum.CameraType.Custom
+				local hum = character and character:FindFirstChildOfClass("Humanoid")
+				if hum then camera.CameraSubject = hum end
+			end
+		end)
 		end
 	end
 
@@ -33465,7 +33517,7 @@ local function fn67(arg)
 		end
 	})
 
-	SecAutoSteal:AddDropdown("StealEggNames", {
+	local ddStealEggNames = SecAutoSteal:AddDropdown("StealEggNames", {
 		Title = "Filter By Egg Name",
 		Description = "Hanya curi telur ini. Kosongkan untuk semua.",
 		Values = v24,
@@ -33476,7 +33528,7 @@ local function fn67(arg)
 		end
 	})
 
-	SecAutoSteal:AddDropdown("StealRarities", {
+	local ddStealRarities = SecAutoSteal:AddDropdown("StealRarities", {
 		Title = "Filter By Rarity",
 		Description = "Hanya curi rarity ini. Kosongkan untuk semua.",
 		Values = v26,
@@ -33487,7 +33539,22 @@ local function fn67(arg)
 		end
 	})
 
-	SecAutoSteal:AddDropdown("StealAreas", {
+	SecAutoSteal:AddButton({
+		Title = "[+] Pilih Semua Rarity Telur",
+		Description = "Centang semua opsi rarity target sekaligus tanpa ribet",
+		Callback = function()
+			if ddStealRarities and type(v26) == "table" then
+				local all = {}
+				for _, rName in ipairs(v26) do
+					all[rName] = true
+				end
+				pcall(function() ddStealRarities:SetValue(all) end)
+				quantumConfig.StealRarities = fn67(all)
+			end
+		end
+	})
+
+	local ddStealAreas = SecAutoSteal:AddDropdown("StealAreas", {
 		Title = "Select Area",
 		Description = "Hanya curi dari area terpilih. Kosongkan untuk semua.",
 		Values = v25,
@@ -33495,6 +33562,21 @@ local function fn67(arg)
 		Default = {},
 		Callback = function(v)
 			quantumConfig.StealAreas = fn67(v)
+		end
+	})
+
+	SecAutoSteal:AddButton({
+		Title = "[+] Pilih Semua Area Map",
+		Description = "Centang semua area sekaligus",
+		Callback = function()
+			if ddStealAreas and type(v25) == "table" then
+				local all = {}
+				for _, aName in ipairs(v25) do
+					all[aName] = true
+				end
+				pcall(function() ddStealAreas:SetValue(all) end)
+				quantumConfig.StealAreas = fn67(all)
+			end
 		end
 	})
 
@@ -33628,7 +33710,7 @@ local function fn67(arg)
 		end
 	})
 
-	SecAutoPlace:AddDropdown("PlaceEggRarity", {
+	local ddPlaceRarity = SecAutoPlace:AddDropdown("PlaceEggRarity", {
 		Title = "Place Egg Rarity",
 		Description = "Filter rarity telur yang ditaruh. Kosong = semua.",
 		Values = v26,
@@ -33636,6 +33718,19 @@ local function fn67(arg)
 		Default = {},
 		Callback = function(v)
 			quantumConfig.PlaceRarities = fn67(v)
+		end
+	})
+
+	SecAutoPlace:AddButton({
+		Title = "[+] Pilih Semua Rarity Place",
+		Description = "Pilih semua rarity telur untuk ditaruh ke base",
+		Callback = function()
+			if ddPlaceRarity and type(v26) == "table" then
+				local all = {}
+				for _, rName in ipairs(v26) do all[rName] = true end
+				pcall(function() ddPlaceRarity:SetValue(all) end)
+				quantumConfig.PlaceRarities = fn67(all)
+			end
 		end
 	})
 
@@ -33720,7 +33815,7 @@ local function fn67(arg)
 		end
 	})
 
-	SecAutoSell:AddDropdown("SellPetRarities", {
+	local ddSellPetRarities = SecAutoSell:AddDropdown("SellPetRarities", {
 		Title = "Pet Rarity Filter",
 		Description = "Filter rarity pet yang akan dijual",
 		Values = fn69(v26),
@@ -33728,6 +33823,19 @@ local function fn67(arg)
 		Default = {},
 		Callback = function(v)
 			quantumConfig.SellRarities = fn67(v)
+		end
+	})
+
+	SecAutoSell:AddButton({
+		Title = "[+] Pilih Semua Rarity Pet Dijual",
+		Description = "Centang semua opsi rarity pet sekaligus",
+		Callback = function()
+			if ddSellPetRarities and type(v26) == "table" then
+				local all = {}
+				for _, rName in ipairs(v26) do all[rName] = true end
+				pcall(function() ddSellPetRarities:SetValue(all) end)
+				quantumConfig.SellRarities = fn67(all)
+			end
 		end
 	})
 
@@ -33758,7 +33866,7 @@ local function fn67(arg)
 		end
 	})
 
-	SecAutoSell:AddDropdown("SellEggRarities", {
+	local ddSellEggRarities = SecAutoSell:AddDropdown("SellEggRarities", {
 		Title = "Egg Rarity Filter",
 		Description = "Filter rarity telur yang akan dijual",
 		Values = fn69(v26),
@@ -33766,6 +33874,19 @@ local function fn67(arg)
 		Default = {},
 		Callback = function(v)
 			quantumConfig.SellEggRarities = fn67(v)
+		end
+	})
+
+	SecAutoSell:AddButton({
+		Title = "[+] Pilih Semua Rarity Telur Dijual",
+		Description = "Centang semua opsi rarity telur sekaligus",
+		Callback = function()
+			if ddSellEggRarities and type(v26) == "table" then
+				local all = {}
+				for _, rName in ipairs(v26) do all[rName] = true end
+				pcall(function() ddSellEggRarities:SetValue(all) end)
+				quantumConfig.SellEggRarities = fn67(all)
+			end
 		end
 	})
 
