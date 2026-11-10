@@ -885,7 +885,7 @@ local function fn30(character)
 end
 
 localPlayer.CharacterAdded:Connect(fn30)
-local quantumConfig = {AutoSteal = false, HelpFriend = false, LowSpeedBoost = false, StarAlert = true, ScrambleTradeInTrade = false, ScrambleTradeInReroll = false, ScrambleTradeInBanners = {}, ScrambleBossAuto = false, StealMode = "Fly", FlyAerial = false, FlyZigzag = false, StealHoldSeconds = 5, StealAreas = {"None"}, StealRarities = {"None"}, StealNamesFilter = {"None"}, StealMinValue = 0, StealMutations = {"None"}, StealMinWeight = 0, StealPriority = "Rarity", TaskOrder = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}, AutoFavorite = false, FavMode = "Rarity", FavRarities = {"None"}, FavSpecies = {"None"}, AutoEquipBest = false, AutoClaimOffline = false, AutoBaseUpgrade = false, AutoClaimAlmanac = false, AutoFusePets = false, ScrambleAutoBuy = false, ScrambleBuyList = {}, ButterflyAutoNet = false, ButterflyAutoCatch = false, ButterflyEsp = false, ButterflyTiers = {}, ButterflyAutoTrade = false, ButterflyTradeRecipe = "All", ButterflyCatchMode = "Tween", ButterflyAutoCraft = false, WispAutoQuest = false, BanjoAuto = false, Noclip = false, BottingMode = false, AntiCutscene = false, FuseSelectedOnly = false, FuseRarities = {"None"}, FuseSpecies = {"None"}, EspDetails = {"Name", "Rarity", "Value"}, BackpackRateEsp = false, AntiAFK = true, AutoReconnect = true, AutoExecute = false, AutoPlace = false, PlaceRarities = {"None"}, AutoHatch = false, SellAll = false, AutoSell = false, SellNames = {"None"}, SellRarities = {"None"}, AutoSellEgg = false, SellEggRarities = {"None"}, WebhookEnabled = false, WebhookURL = "", WebhookDisconnect = false, TweenSpeedMultiplier = 60, AutoTreadmillIdle = false, AutoTreadmillUpgrade = false, AntiTreadmill = false, HopNoMatch = false, PrivateServerMax = "2", PrivateServerAuto = false, HopCooldown = 5, AutoIndex = false, AntiHitGuard = false, FlyForCapture = false, AutoStealCapture = false, InstantGrab = false, InfiniteJump = false, WalkSpeedMultiplier = 1, AntiGuardKnockback = true, GodMode = true, EggPredictUI = false, EggESP = false, StealPlayers = false, StealPlayerRarities = {"None"}, StealPlayerMinValue = 0, StealPlayerTarget = "Any Player", WebhookRarities = {"None"}, WebhookMinValue = 0}
+local quantumConfig = {AutoSteal = false, HelpFriend = false, LowSpeedBoost = false, StarAlert = true, ScrambleTradeInTrade = false, ScrambleTradeInReroll = false, ScrambleTradeInBanners = {}, ScrambleBossAuto = false, StealMode = "Quantum Ultra", FlyAerial = false, FlyZigzag = false, StealHoldSeconds = 5, StealAreas = {"None"}, StealRarities = {"None"}, StealNamesFilter = {"None"}, StealMinValue = 0, StealMutations = {"None"}, StealMinWeight = 0, StealPriority = "Rarity", TaskOrder = {"auto_steal", "race", "star", "mech_boss", "butterfly", "auto_place", "use_scrambled", "auto_sell", "treadmill"}, AutoFavorite = false, FavMode = "Rarity", FavRarities = {"None"}, FavSpecies = {"None"}, AutoEquipBest = false, AutoClaimOffline = false, AutoBaseUpgrade = false, AutoClaimAlmanac = false, AutoFusePets = false, ScrambleAutoBuy = false, ScrambleBuyList = {}, ButterflyAutoNet = false, ButterflyAutoCatch = false, ButterflyEsp = false, ButterflyTiers = {}, ButterflyAutoTrade = false, ButterflyTradeRecipe = "All", ButterflyCatchMode = "Tween", ButterflyAutoCraft = false, WispAutoQuest = false, BanjoAuto = false, Noclip = false, BottingMode = false, AntiCutscene = false, FuseSelectedOnly = false, FuseRarities = {"None"}, FuseSpecies = {"None"}, EspDetails = {"Name", "Rarity", "Value"}, BackpackRateEsp = false, AntiAFK = true, AutoReconnect = true, AutoExecute = false, AutoPlace = false, PlaceRarities = {"None"}, AutoHatch = false, SellAll = false, AutoSell = false, SellNames = {"None"}, SellRarities = {"None"}, AutoSellEgg = false, SellEggRarities = {"None"}, WebhookEnabled = false, WebhookURL = "", WebhookDisconnect = false, TweenSpeedMultiplier = 60, AutoTreadmillIdle = false, AutoTreadmillUpgrade = false, AntiTreadmill = false, HopNoMatch = false, PrivateServerMax = "2", PrivateServerAuto = false, HopCooldown = 5, AutoIndex = false, AntiHitGuard = false, FlyForCapture = false, AutoStealCapture = false, InstantGrab = false, InfiniteJump = false, WalkSpeedMultiplier = 1, AntiGuardKnockback = true, GodMode = true, EggPredictUI = false, EggESP = false, StealPlayers = false, StealPlayerRarities = {"None"}, StealPlayerMinValue = 0, StealPlayerTarget = "Any Player", WebhookRarities = {"None"}, WebhookMinValue = 0}
 local EggState = require(game:GetService("ReplicatedStorage").Client.EggState)
 EggState.GetAreaEggSnapshot = EggState.ReadFieldEggs
 EggState.GetAreaEggRecord = EggState.ReadFieldEgg
@@ -5152,7 +5152,7 @@ local v8 = (function()
 
 		if flag5 then
 			arg._modeBeforeCapture = {arg.config.stealMode, arg.config.flyAerial, arg.config.flyZigzag}
-			arg:setStealMode("Instant", false, false)
+			arg:setStealMode("Quantum Ultra", false, false)
 			arg.captureObjectiveEnabled = true
 		else
 			arg.captureObjectiveEnabled = false
@@ -5451,11 +5451,11 @@ local v8 = (function()
 	end
 
 	index.getStealMode = function(arg)
-		return arg.config.stealMode == "Fly" and "Fly" or "Instant"
+		return arg.config.stealMode == "Fly" and "Fly" or "Quantum Ultra"
 	end
 
 	index.setStealMode = function(arg, arg2, arg3, arg4)
-		local stealMode = arg2 == "Fly" and "Fly" or "Instant"
+		local stealMode = if arg2 == "Fly" then "Fly" elseif arg2 == "Quantum Ultra" or arg2 == "Instant" then "Quantum Ultra" else "Quantum Ultra"
 		local flyAerial = stealMode == "Fly" and arg3 == true
 		local flyZigzag = stealMode == "Fly" and arg4 == true and not flyAerial
 
@@ -6026,7 +6026,7 @@ local v8 = (function()
 			return
 		end
 
-		if arg.config.stealMode == "Instant" then
+		if arg.config.stealMode == "Instant" or arg.config.stealMode == "Quantum Ultra" then
 			local uid = v8.Uid
 
 			local function fn88()
@@ -6035,6 +6035,16 @@ local v8 = (function()
 
 			local n58 = v9 + Vector3.new(0, n25, 0)
 			arg:_setStatus("Heading to target egg")
+
+			local ultraMove = genv.__QuantumUltraMoveToTarget
+			local char = (localPlayer2 or localPlayer).Character
+			if arg.config.stealMode == "Quantum Ultra" and type(ultraMove) == "function" and char then
+				ultraMove(char, v9)
+				if not fn88() then
+					task.spawn(arg._hoverSettleCarry, arg, v8, v9, n58, fn88)
+				end
+				return
+			end
 
 			if not arg:_glideRoot(n58, fn88) then
 				if not fn88() then
@@ -8501,7 +8511,7 @@ local v8 = (function()
 		end
 
 		local v9 = arg.records[arg3] or EggState2.ReadFieldEgg(arg3)
-		local flag6 = arg.config.stealMode == "Instant" and (arg3 == arg.primerUid or type(v9) == "table" and v9.AreaId == "Forest")
+		local flag6 = (arg.config.stealMode == "Instant" or arg.config.stealMode == "Quantum Ultra") and (arg3 == arg.primerUid or type(v9) == "table" and v9.AreaId == "Forest")
 		arg.carry.generation += 1
 		arg:_invalidateCarryWorker()
 		arg.carryAttemptToken = nil
@@ -8824,7 +8834,7 @@ local v8 = (function()
 	local n69 = 5000
 
 	index._usesPortalBoost = function(arg, arg2)
-		return quantumConfig.LowSpeedBoost == true and arg.config.stealMode == "Instant" and type(arg2) == "table" and tbl16[arg2.AreaId] ~= nil and not (arg.portalBoostFailed and (arg.portalBoostFailed[arg2.Uid] or 0) > os.clock())
+		return quantumConfig.LowSpeedBoost == true and (arg.config.stealMode == "Instant" or arg.config.stealMode == "Quantum Ultra") and type(arg2) == "table" and tbl16[arg2.AreaId] ~= nil and not (arg.portalBoostFailed and (arg.portalBoostFailed[arg2.Uid] or 0) > os.clock())
 	end
 
 	local function fn91(arg, arg2)
@@ -10136,7 +10146,7 @@ local v8 = (function()
 
 				if arg2 then
 					arg.settleBonus[forestDropInProgress] = nil
-				elseif arg.config.stealMode == "Instant" then
+				elseif arg.config.stealMode == "Instant" or arg.config.stealMode == "Quantum Ultra" then
 					if arg.boostedUid ~= forestDropInProgress then
 						local settleBonus = arg.settleBonus
 						local tbl18 = {seconds = n23}
@@ -10232,6 +10242,9 @@ local v8 = (function()
 				for i = 1, index.RELAY_ROUNDS, 1 do
 					arg._forestDropInProgress = forestDropInProgress
 					arg:_setStatus("Bringing egg home")
+					if arg.config.stealMode == "Quantum Ultra" and type(genv.__QuantumUltraDropSafe) == "function" then
+						genv.__QuantumUltraDropSafe(cframe)
+					end
 
 					arg:_hopRoot(cframe, function()
 						local v9 = fn94()
@@ -10765,7 +10778,7 @@ local v8 = (function()
 			return
 		end
 
-		if arg.config.stealMode == "Instant" or arg.config.stealMode == "Fly" then
+		if arg.config.stealMode == "Instant" or arg.config.stealMode == "Quantum Ultra" or arg.config.stealMode == "Fly" then
 			uid = arg.carry.uid or arg.activeTarget and arg.activeTarget.Uid
 			if uid then
 				arg:_instantReturn(uid)
@@ -11635,7 +11648,7 @@ local v8 = (function()
 		arg.activeTarget = v12
 		arg._flyDeparting = arg.config.stealMode == "Fly"
 
-		if arg.config.stealMode == "Instant" then
+		if arg.config.stealMode == "Instant" or arg.config.stealMode == "Quantum Ultra" then
 			arg:_showTreadmillDecoy()
 		end
 
@@ -12155,7 +12168,7 @@ local v8 = (function()
 	index._noteLowSpeedOutcome = function(arg, arg2)
 		local flag5 = arg._untrustedSeen == true
 		arg._untrustedSeen = nil
-		if arg.config.stealMode ~= "Instant" then
+		if arg.config.stealMode ~= "Instant" and arg.config.stealMode ~= "Quantum Ultra" then
 			return
 		end
 
@@ -17640,7 +17653,7 @@ do
 	register("auto_steal", tbl)
 end
 
-v13:setStealMode(quantumConfig.StealMode == "Semi Teleport" and "Instant" or quantumConfig.StealMode)
+v13:setStealMode(if quantumConfig.StealMode == "Fly" then "Fly" else "Quantum Ultra")
 v13:setSpeed(quantumConfig.TweenSpeedMultiplier or 60)
 
 if quantumConfig.StealMinValue and quantumConfig.StealMinValue > 0 then
@@ -27297,11 +27310,11 @@ local function fn65()
 		return tbl30
 	end
 
-	local tbl30 = {{"Low Speed User", "Low"}, {"High Speed User Normal", "High"}, {"High Speed User (Fly)", "High Fly"}, {"Zig-Zag High Speed User", "Zig-Zag"}}
+	local tbl30 = {{"Quantum Ultra", "Quantum"}, {"High Speed Normal", "High"}, {"High Speed Fly", "Fly"}, {"Zig-Zag Speed", "Zig-Zag"}}
 
 	local function fn92()
 		local flag6 = type(quantumPanels.getStealMode) == "function" and quantumPanels.getStealMode() or nil
-		return type(flag6) == "string" and flag6 or "High Speed User Normal"
+		return type(flag6) == "string" and flag6 or "Quantum Ultra"
 	end
 
 	function quantumPanels.syncStealMode()
@@ -32169,12 +32182,487 @@ local function fn67(arg)
 		end
 	end
 
+	local isQuantumUltraActive = false
+	local isQuantumUltraProcessing = false
+	local QUANTUM_ULTRA_TARGET_POS = Vector3.new(565.74, 71.69, -368.14)
+	local quantumUltraHoldDuration = 1.0
+	local quantumUltraRespawnGen = 0
+	local quantumUltraMoveGen = 0
+	local activeCameraLockConnection = nil
+	local activeHoldConnection = nil
+	local quantumUltraConnections = {}
+	local quantumUltraCharConnections = {}
+
+	local function getQuantumSafeZonePos()
+		if v13 and type(v13._resolveSafeCFrame) == "function" then
+			local hrp = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				local ok, safeCFrame = pcall(function()
+					return v13:_resolveSafeCFrame(hrp)
+				end)
+				if ok and safeCFrame and typeof(safeCFrame) == "CFrame" then
+					return safeCFrame.Position
+				end
+			end
+		end
+		return QUANTUM_ULTRA_TARGET_POS
+	end
+
+	local function fastPurgeDeathAnimation(character)
+		if not character then return end
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			local animator = humanoid:FindFirstChildOfClass("Animator")
+			if animator then
+				for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+					track:Stop(0)
+					pcall(function() track:Destroy() end)
+				end
+			end
+		end
+
+		for _, part in ipairs(character:GetDescendants()) do
+			if part:IsA("Constraint") or part:IsA("BallSocketConstraint") or part:IsA("RopeConstraint") then
+				pcall(function() part:Destroy() end)
+			end
+		end
+	end
+
+	local function applyInstantBypassState(character)
+		if not character or not isQuantumUltraActive then return end
+		local humanoid = character:WaitForChild("Humanoid", 5)
+		local root = character:WaitForChild("HumanoidRootPart", 5)
+		if not humanoid or not root or not isQuantumUltraActive then return end
+
+		root.AssemblyLinearVelocity = Vector3.zero
+		root.AssemblyAngularVelocity = Vector3.zero
+
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
+		humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+		humanoid.PlatformStand = false
+
+		fastPurgeDeathAnimation(character)
+
+		if quantumUltraCharConnections.health then
+			quantumUltraCharConnections.health:Disconnect()
+			quantumUltraCharConnections.health = nil
+		end
+		if quantumUltraCharConnections.died then
+			quantumUltraCharConnections.died:Disconnect()
+			quantumUltraCharConnections.died = nil
+		end
+		if quantumUltraCharConnections.touches then
+			for _, c in ipairs(quantumUltraCharConnections.touches) do
+				if c and typeof(c) == "RBXScriptConnection" then c:Disconnect() end
+			end
+			quantumUltraCharConnections.touches = nil
+		end
+
+		quantumUltraCharConnections.health = humanoid.HealthChanged:Connect(function(health)
+			if isQuantumUltraActive and health <= 0 then
+				fastPurgeDeathAnimation(character)
+				pcall(function()
+					root.CFrame = CFrame.new(getQuantumSafeZonePos())
+				end)
+			end
+		end)
+
+		quantumUltraCharConnections.died = humanoid.Died:Connect(function()
+			if isQuantumUltraActive then
+				fastPurgeDeathAnimation(character)
+				pcall(function()
+					root.CFrame = CFrame.new(getQuantumSafeZonePos())
+				end)
+			end
+		end)
+
+		if workspace.CurrentCamera then
+			workspace.CurrentCamera.CameraSubject = humanoid
+		end
+
+		local touchConns = {}
+		local function hookPartTouch(part)
+			if part:IsA("BasePart") then
+				part.CanTouch = true
+				local c = part.Touched:Connect(function(hit)
+					if isQuantumUltraActive and hit and hit.Parent then
+						local lowerName = string.lower(hit.Name)
+						local lowerParent = string.lower(hit.Parent.Name)
+						if string.find(lowerName, "kill") or string.find(lowerName, "lava") or string.find(lowerName, "void") or string.find(lowerName, "anticheat") or string.find(lowerParent, "anticheat") then
+							hit.CanTouch = false
+						end
+					end
+				end)
+				table.insert(touchConns, c)
+			end
+		end
+
+		for _, part in ipairs(character:GetDescendants()) do
+			hookPartTouch(part)
+		end
+		table.insert(touchConns, character.DescendantAdded:Connect(function(desc)
+			if isQuantumUltraActive then
+				hookPartTouch(desc)
+			end
+		end))
+		quantumUltraCharConnections.touches = touchConns
+	end
+
+	local function executeDropAndHoldAtSafeZone(customTargetPos)
+		if not isQuantumUltraActive then return end
+		if customTargetPos == nil and isQuantumUltraProcessing then return end
+		isQuantumUltraProcessing = true
+
+		local char = localPlayer.Character
+		if char then
+			local root = char:FindFirstChild("HumanoidRootPart")
+			if root then
+				for _, item in ipairs(char:GetChildren()) do
+					if item:IsA("Tool") then
+						pcall(function() item.Parent = workspace end)
+					end
+				end
+
+				local targetPos = (typeof(customTargetPos) == "Vector3" and customTargetPos)
+					or (typeof(customTargetPos) == "CFrame" and customTargetPos.Position)
+					or getQuantumSafeZonePos()
+				local targetSafeZoneCFrame = (typeof(customTargetPos) == "CFrame" and customTargetPos) or CFrame.new(targetPos)
+				local startTime = os.clock()
+
+				if activeHoldConnection then
+					activeHoldConnection:Disconnect()
+					activeHoldConnection = nil
+				end
+
+				local holdConnection
+				holdConnection = RunService.Heartbeat:Connect(function()
+					if not isQuantumUltraActive or not char or not root or not root.Parent or localPlayer.Character ~= char then
+						if holdConnection then holdConnection:Disconnect() end
+						if activeHoldConnection == holdConnection then activeHoldConnection = nil end
+						return
+					end
+
+					root.AssemblyLinearVelocity = Vector3.zero
+					root.AssemblyAngularVelocity = Vector3.zero
+					root.CFrame = targetSafeZoneCFrame
+					pcall(function() char:PivotTo(targetSafeZoneCFrame) end)
+
+					if os.clock() - startTime >= quantumUltraHoldDuration then
+						holdConnection:Disconnect()
+						if activeHoldConnection == holdConnection then activeHoldConnection = nil end
+					end
+				end)
+				activeHoldConnection = holdConnection
+			end
+		end
+
+		task.delay(1.2, function()
+			isQuantumUltraProcessing = false
+		end)
+	end
+
+	local function quantumUltraInstantGrab(prompt)
+		if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled then
+			prompt.HoldDuration = 0
+			pcall(function()
+				fireproximityprompt(prompt)
+			end)
+		end
+	end
+
+	local function quantumUltraTakeEggRecord(record)
+		if not record or not record.Uid then return end
+		local char = localPlayer.Character
+		local hrp = char and (char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart)
+		if not hrp then return end
+
+		local areaEggSlotIdentity = nil
+		pcall(function()
+			local sharedFolder = ReplicatedStorage:FindFirstChild("Shared")
+			local mod = (sharedFolder and sharedFolder:FindFirstChild("Util") and sharedFolder.Util:FindFirstChild("AreaEggSlotIdentity"))
+				or (ReplicatedStorage:FindFirstChild("Util") and ReplicatedStorage.Util:FindFirstChild("AreaEggSlotIdentity"))
+				or (sharedFolder and sharedFolder:FindFirstChild("Utils") and sharedFolder.Utils:FindFirstChild("AreaEggSlotIdentity"))
+			if mod then
+				areaEggSlotIdentity = require(mod)
+			end
+		end)
+
+		local slotKey = nil
+		if areaEggSlotIdentity and areaEggSlotIdentity.LooksLikeFirstAreaUid and areaEggSlotIdentity.LooksLikeFirstAreaUid(record.Uid) then
+			slotKey = areaEggSlotIdentity.SlotKey(record.AreaId or 1, record.NestId or 1)
+		end
+
+		local net = ReplicatedStorage:FindFirstChild("Packages") and ReplicatedStorage.Packages:FindFirstChild("Networking")
+		local carryRemote = net and net:FindFirstChild("RF/EggWorld/AskFieldEggCarry")
+		if carryRemote then
+			pcall(function()
+				carryRemote:InvokeServer({ Uid = record.Uid, FirstAreaSlotKey = slotKey })
+			end)
+		end
+
+		pcall(function()
+			local clientFolder = ReplicatedStorage:WaitForChild("Client", 2)
+			local eggStateModule = clientFolder and clientFolder:WaitForChild("EggState", 2)
+			local eggState = eggStateModule and require(eggStateModule)
+			if eggState and eggState.CarryFieldEgg then
+				eggState.CarryFieldEgg(record.Uid, slotKey)
+			end
+		end)
+
+		for _, d in ipairs(Workspace:GetDescendants()) do
+			if d:IsA("ProximityPrompt") and (d.Name == "CarryAreaEgg" or d.Name:lower():find("egg")) and d.Enabled then
+				local p = d.Parent
+				if p:IsA("Attachment") then p = p.Parent end
+				if p and p:IsA("BasePart") and (p.Position - hrp.Position).Magnitude < 15 then
+					quantumUltraInstantGrab(d)
+					break
+				end
+			end
+		end
+	end
+
+	local function quantumUltraAutoTakeEggAtPosition(pos)
+		local char = localPlayer.Character
+		local hrp = char and (char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart)
+		if not hrp then return end
+
+		for _, d in ipairs(Workspace:GetDescendants()) do
+			if d:IsA("ProximityPrompt") and d.Enabled then
+				local p = d.Parent
+				if p:IsA("Attachment") then p = p.Parent end
+				if p and p:IsA("BasePart") and (p.Position - pos).Magnitude < 15 then
+					quantumUltraInstantGrab(d)
+				end
+			end
+		end
+
+		local eggWorld = Workspace:FindFirstChild("EggWorld") or Workspace:FindFirstChild("Eggs") or Workspace:FindFirstChild("FieldEggs")
+		if eggWorld then
+			for _, eggObj in ipairs(eggWorld:GetChildren()) do
+				local primary = eggObj:IsA("BasePart") and eggObj or eggObj:FindFirstChildWhichIsA("BasePart")
+				if primary and (primary.Position - pos).Magnitude < 15 then
+					local uid = eggObj:GetAttribute("Uid") or eggObj.Name
+					local areaId = eggObj:GetAttribute("AreaId") or 1
+					local nestId = eggObj:GetAttribute("NestId") or 1
+
+					quantumUltraTakeEggRecord({
+						Uid = uid,
+						AreaId = areaId,
+						NestId = nestId
+					})
+					break
+				end
+			end
+		end
+	end
+
+	local function moveToTargetVeryFast(character, destPos)
+		local root = character and character:WaitForChild("HumanoidRootPart", 5)
+		if not root or not isQuantumUltraActive or localPlayer.Character ~= character then return end
+
+		quantumUltraMoveGen = quantumUltraMoveGen + 1
+		local currentMoveGen = quantumUltraMoveGen
+
+		local targetPos = (typeof(destPos) == "CFrame" and destPos.Position) or (typeof(destPos) == "Vector3" and destPos) or destPos or QUANTUM_ULTRA_TARGET_POS
+		local targetCFrame = CFrame.new(targetPos)
+		local startCFrame = root.CFrame
+		local distance = (targetPos - root.Position).Magnitude
+
+		local speed = 350
+		local travelTime = math.max(0.05, distance / speed)
+		local startTime = os.clock()
+
+		while os.clock() - startTime < travelTime do
+			if not isQuantumUltraActive or quantumUltraMoveGen ~= currentMoveGen or not character or not character.Parent or not root or not root.Parent or localPlayer.Character ~= character then break end
+
+			local alpha = math.clamp((os.clock() - startTime) / travelTime, 0, 1)
+			root.AssemblyLinearVelocity = Vector3.zero
+			root.AssemblyAngularVelocity = Vector3.zero
+			root.CFrame = startCFrame:Lerp(targetCFrame, alpha)
+			RunService.Stepped:Wait()
+		end
+
+		if isQuantumUltraActive and quantumUltraMoveGen == currentMoveGen and root and root.Parent and localPlayer.Character == character then
+			root.CFrame = targetCFrame
+			root.AssemblyLinearVelocity = Vector3.zero
+			root.AssemblyAngularVelocity = Vector3.zero
+
+			task.spawn(function()
+				if isQuantumUltraActive and quantumUltraMoveGen == currentMoveGen then
+					quantumUltraAutoTakeEggAtPosition(targetPos)
+				end
+			end)
+
+		task.spawn(function()
+				local camera = workspace.CurrentCamera
+				if not camera or not isQuantumUltraActive or quantumUltraMoveGen ~= currentMoveGen then return end
+
+				local cameraOffset = camera.CFrame.Position - root.Position
+				local targetCamCFrame = CFrame.new(targetPos + cameraOffset) * camera.CFrame.Rotation
+
+				if activeCameraLockConnection then
+					activeCameraLockConnection:Disconnect()
+					activeCameraLockConnection = nil
+				end
+
+				camera.CameraType = Enum.CameraType.Scriptable
+				local lockStartTime = os.clock()
+				local camConnection
+
+				camConnection = RunService.RenderStepped:Connect(function()
+					if not isQuantumUltraActive or quantumUltraMoveGen ~= currentMoveGen or localPlayer.Character ~= character or os.clock() - lockStartTime >= 2 then
+						camConnection:Disconnect()
+						if activeCameraLockConnection == camConnection then
+							activeCameraLockConnection = nil
+						end
+						if camera.CameraType == Enum.CameraType.Scriptable then
+							camera.CameraType = Enum.CameraType.Custom
+						end
+						local hum = (localPlayer.Character or character) and (localPlayer.Character or character):FindFirstChildOfClass("Humanoid")
+						if hum then
+							camera.CameraSubject = hum
+						end
+					else
+						camera.CFrame = targetCamCFrame
+					end
+				end)
+				activeCameraLockConnection = camConnection
+			end)
+		end
+	end
+
+	local function setupQuantumUltraCharacterDetection(char)
+		if not char or not isQuantumUltraActive then return end
+		if quantumUltraCharConnections.childAdded then
+			quantumUltraCharConnections.childAdded:Disconnect()
+			quantumUltraCharConnections.childAdded = nil
+		end
+		quantumUltraCharConnections.childAdded = char.ChildAdded:Connect(function(child)
+			if isQuantumUltraActive and not child:IsA("Tool") then
+				local name = string.lower(child.Name)
+				if string.find(name, "egg") or string.find(name, "telur") then
+					task.spawn(function() executeDropAndHoldAtSafeZone() end)
+				end
+			end
+		end)
+	end
+
+	local function activateQuantumUltra()
+		if isQuantumUltraActive then return end
+		isQuantumUltraActive = true
+
+		genv.__QuantumUltraMoveToTarget = moveToTargetVeryFast
+		genv.__QuantumUltraDropSafe = executeDropAndHoldAtSafeZone
+
+		local char = localPlayer.Character
+		if char then
+			applyInstantBypassState(char)
+			setupQuantumUltraCharacterDetection(char)
+		end
+
+		if not quantumUltraConnections.characterAdded then
+			quantumUltraConnections.characterAdded = localPlayer.CharacterAdded:Connect(function(newChar)
+				if not isQuantumUltraActive then return end
+
+				quantumUltraRespawnGen = quantumUltraRespawnGen + 1
+				local currentGen = quantumUltraRespawnGen
+
+				applyInstantBypassState(newChar)
+				setupQuantumUltraCharacterDetection(newChar)
+
+				task.spawn(function()
+					task.wait(2)
+					if not isQuantumUltraActive or quantumUltraRespawnGen ~= currentGen or localPlayer.Character ~= newChar then
+						return
+					end
+					if v13 and v13.enabled and (v13.activeTarget or v13.instantPhase == "hunting") then
+						return
+					end
+					if v13 and v13.enabled then
+						return
+					end
+					moveToTargetVeryFast(newChar)
+				end)
+			end)
+		end
+
+		if not quantumUltraConnections.promptTriggered then
+			quantumUltraConnections.promptTriggered = ProximityPromptService.PromptTriggered:Connect(function(prompt, playerWhoTriggered)
+				if isQuantumUltraActive and playerWhoTriggered == localPlayer then
+					task.spawn(function() executeDropAndHoldAtSafeZone() end)
+				end
+			end)
+		end
+	end
+
+	local function deactivateQuantumUltra()
+		isQuantumUltraActive = false
+		isQuantumUltraProcessing = false
+		quantumUltraMoveGen = quantumUltraMoveGen + 1
+
+		if activeCameraLockConnection then
+			activeCameraLockConnection:Disconnect()
+			activeCameraLockConnection = nil
+		end
+		if workspace.CurrentCamera and workspace.CurrentCamera.CameraType == Enum.CameraType.Scriptable then
+			workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+			local char = localPlayer.Character
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+			if hum then
+				workspace.CurrentCamera.CameraSubject = hum
+			end
+		end
+
+		if activeHoldConnection then
+			activeHoldConnection:Disconnect()
+			activeHoldConnection = nil
+		end
+
+		if quantumUltraCharConnections.health then
+			quantumUltraCharConnections.health:Disconnect()
+			quantumUltraCharConnections.health = nil
+		end
+		if quantumUltraCharConnections.died then
+			quantumUltraCharConnections.died:Disconnect()
+			quantumUltraCharConnections.died = nil
+		end
+		if quantumUltraCharConnections.childAdded then
+			quantumUltraCharConnections.childAdded:Disconnect()
+			quantumUltraCharConnections.childAdded = nil
+		end
+		if quantumUltraCharConnections.touches then
+			for _, c in ipairs(quantumUltraCharConnections.touches) do
+				if c and typeof(c) == "RBXScriptConnection" then c:Disconnect() end
+			end
+			quantumUltraCharConnections.touches = nil
+		end
+
+		if quantumUltraConnections.characterAdded then
+			quantumUltraConnections.characterAdded:Disconnect()
+			quantumUltraConnections.characterAdded = nil
+		end
+
+		if quantumUltraConnections.promptTriggered then
+			quantumUltraConnections.promptTriggered:Disconnect()
+			quantumUltraConnections.promptTriggered = nil
+		end
+
+		genv.__QuantumUltraMoveToTarget = nil
+		genv.__QuantumUltraDropSafe = nil
+	end
+
 	local function fn89(arg)
 		local str4 = type(arg) == "string" and arg or ""
 		local str5 = str4:lower()
 		local flag11 = str5:find("zig") ~= nil
-		local stealMode = (str4:find("Fly") or str4:find("High") or flag11) and "Fly" or "Instant"
-		local flyAerial = stealMode == "Fly" and not flag11 and (str4:find("%(Fly%)") ~= nil or str5:find("aerial") ~= nil)
+		local isQuantum = str5:find("quantum") ~= nil or str5:find("ultra") ~= nil
+		local isFly = (str4:find("Fly") or str4:find("High") or flag11) and not isQuantum
+		local stealMode = if isQuantum then "Quantum Ultra" elseif isFly then "Fly" else "Quantum Ultra"
+		local flyAerial = stealMode == "Fly" and not flag11 and (str4:find("%(Fly%)") ~= nil or str5:find("fly") ~= nil or str5:find("aerial") ~= nil)
 		local flyZigzag = flag11 and stealMode == "Fly"
 		quantumConfig.StealMode = stealMode
 		quantumConfig.FlyAerial = flyAerial
@@ -32184,6 +32672,25 @@ local function fn67(arg)
 			v13._modeBeforeCapture = {stealMode, flyAerial, flyZigzag}
 		elseif v13 then
 			v13:setStealMode(stealMode, flyAerial, flyZigzag)
+		end
+
+		if stealMode == "Quantum Ultra" then
+			activateQuantumUltra()
+		else
+			deactivateQuantumUltra()
+		end
+
+		if quantumPanels and type(quantumPanels.syncStealMode) == "function" then
+			pcall(quantumPanels.syncStealMode)
+		end
+	end
+
+	if quantumPanels then
+		quantumPanels.getStealMode = function()
+			return quantumConfig.StealMode or "Quantum Ultra"
+		end
+		quantumPanels.setStealMode = function(arg)
+			fn89(arg)
 		end
 	end
 
@@ -32798,28 +33305,28 @@ local function fn67(arg)
 		MinimizeIcon = "rbxassetid://109388426525855"
 	})
 
-	local FarmTab = Window:AddTab({ Title = "Farm", Icon = "solar/fire-bold" })
-	local PlayerTab = Window:AddTab({ Title = "Player", Icon = "solar/user-bold" })
-	local PredictorTab = Window:AddTab({ Title = "Predictor", Icon = "solar/eye-bold" })
-	local ProgressTab = Window:AddTab({ Title = "Progress", Icon = "solar/crown-star-bold" })
-	local ServerTab = Window:AddTab({ Title = "Server", Icon = "solar/server-bold" })
-	local MiscTab = Window:AddTab({ Title = "Misc", Icon = "solar/settings-minimalistic-bold" })
-	local DiscordTab = Window:AddTab({ Title = "Discord", Icon = "solar/share-bold" })
-	local ConfigTab = Window:AddTab({ Title = "Configuration", Icon = "solar/settings-bold" })
+	local FarmTab = Window:AddTab({ Title = "Farm", Icon = "lucide/wheat" })
+	local PlayerTab = Window:AddTab({ Title = "Player", Icon = "lucide/user" })
+	local PredictorTab = Window:AddTab({ Title = "Predictor", Icon = "lucide/eye" })
+	local ProgressTab = Window:AddTab({ Title = "Progress", Icon = "lucide/crown" })
+	local ServerTab = Window:AddTab({ Title = "Server", Icon = "lucide/server" })
+	local MiscTab = Window:AddTab({ Title = "Misc", Icon = "lucide/wrench" })
+	local DiscordTab = Window:AddTab({ Title = "Discord", Icon = "lucide/message-square" })
+	local ConfigTab = Window:AddTab({ Title = "Configuration", Icon = "lucide/settings" })
 
-	local SecDrScramble = FarmTab:AddSection("Dr Scramble Event")
-	local SecAutoSteal = FarmTab:AddSection("Auto Steal")
-	local SecAutoPlace = FarmTab:AddSection("Auto Place Egg")
-	local SecAutoTreadmill = FarmTab:AddSection("Auto Treadmill")
-	local SecAutoHatch = FarmTab:AddSection("Auto Hatch & Equip")
-	local SecAutoSell = FarmTab:AddSection("Auto Sell")
-	local SecAutoFuse = FarmTab:AddSection("Auto Fuse Machine")
-	local SecAutoFav = FarmTab:AddSection("Auto Favorite")
-	local SecAutoRift = FarmTab:AddSection("Auto Rift & Boss")
+	local SecDrScramble = FarmTab:AddSection("Dr Scramble Event", "lucide/flask-conical")
+	local SecAutoSteal = FarmTab:AddSection("Auto Steal", "lucide/hand")
+	local SecAutoPlace = FarmTab:AddSection("Auto Place Egg", "lucide/layout-grid")
+	local SecAutoTreadmill = FarmTab:AddSection("Auto Treadmill", "lucide/gauge")
+	local SecAutoHatch = FarmTab:AddSection("Auto Hatch & Equip", "lucide/sparkles")
+	local SecAutoSell = FarmTab:AddSection("Auto Sell", "lucide/coins")
+	local SecAutoFuse = FarmTab:AddSection("Auto Fuse Machine", "lucide/merge")
+	local SecAutoFav = FarmTab:AddSection("Auto Favorite", "lucide/star")
+	local SecAutoRift = FarmTab:AddSection("Auto Rift & Boss", "lucide/swords")
 
 	SecDrScramble:AddToggle("ScrambleBossAuto", {
 		Title = "Auto Boss",
-		Description = "Fights the mech boss automatically during Dr. Scramble events",
+		Description = "Lawan bos mech otomatis saat event Dr. Scramble",
 		Default = quantumConfig.ScrambleBossAuto or false,
 		Callback = function(v)
 			quantumConfig.ScrambleBossAuto = v == true
@@ -32832,7 +33339,7 @@ local function fn67(arg)
 
 	SecDrScramble:AddToggle("ScrambleBuy", {
 		Title = "Auto Buy Shop",
-		Description = "Automatically purchases selected items from the event vendor",
+		Description = "Beli item pilihan otomatis dari toko event",
 		Default = quantumConfig.ScrambleAutoBuy or false,
 		Callback = function(v)
 			fn116(v)
@@ -32841,7 +33348,7 @@ local function fn67(arg)
 
 	SecDrScramble:AddDropdown("ScrambleBuyList", {
 		Title = "Shop Buy List",
-		Description = "Select items to automatically purchase from the event shop",
+		Description = "Pilih item yang dibeli otomatis dari toko event",
 		Values = tbl26,
 		Multi = true,
 		Default = {},
@@ -32852,7 +33359,7 @@ local function fn67(arg)
 
 	SecDrScramble:AddToggle("ScrambleTradeInTrade", {
 		Title = "Auto Trade-In",
-		Description = "Submits matching pets for banner trade-in rewards",
+		Description = "Tukarkan pet yang cocok untuk hadiah banner",
 		Default = quantumConfig.ScrambleTradeInTrade or false,
 		Callback = function(v)
 			quantumConfig.ScrambleTradeInTrade = v == true
@@ -32861,7 +33368,7 @@ local function fn67(arg)
 
 	SecDrScramble:AddToggle("ScrambleTradeInReroll", {
 		Title = "Auto Free Reroll",
-		Description = "Claims free trade-in banner rerolls automatically",
+		Description = "Klaim reroll gratis banner otomatis",
 		Default = quantumConfig.ScrambleTradeInReroll or false,
 		Callback = function(v)
 			quantumConfig.ScrambleTradeInReroll = v == true
@@ -32870,7 +33377,7 @@ local function fn67(arg)
 
 	SecDrScramble:AddDropdown("ScrambleTradeInBanners", {
 		Title = "Target Banners",
-		Description = "Filter target banners for trade-in",
+		Description = "Filter target banner untuk penukaran",
 		Values = {"Biohazard Pets", "Experimental Pets", "Unstable DNA"},
 		Multi = true,
 		Default = {},
@@ -32881,7 +33388,7 @@ local function fn67(arg)
 
 	SecDrScramble:AddButton({
 		Title = "Trade-In Once",
-		Description = "Executes a single trade-in attempt immediately",
+		Description = "Eksekusi satu kali penukaran langsung",
 		Callback = function()
 			local s = genv.__QuantumScrambleTradeIn
 			if s and type(s.tradeOnce) == "function" then
@@ -32892,7 +33399,7 @@ local function fn67(arg)
 
 	SecDrScramble:AddButton({
 		Title = "Use Free Reroll",
-		Description = "Consumes available free trade-in reroll",
+		Description = "Gunakan reroll gratis yang tersedia",
 		Callback = function()
 			local s = genv.__QuantumScrambleTradeIn
 			if s and type(s.rerollOnce) == "function" then
@@ -32903,7 +33410,7 @@ local function fn67(arg)
 
 	SecDrScramble:AddButton({
 		Title = "Open Trade-In UI",
-		Description = "Opens the in-game event trade-in dialog",
+		Description = "Buka menu penukaran event",
 		Callback = function()
 			local s = genv.__QuantumScrambleTradeIn
 			if s and type(s.openUI) == "function" then
@@ -32914,12 +33421,12 @@ local function fn67(arg)
 
 	SecDrScramble:AddParagraph({
 		Title = "Event Telemetry",
-		Content = "Dr. Scramble event monitor active. Autonomous boss combat, overheating exploit, and sample collection ready."
+		Content = "Monitor event Dr. Scramble aktif. Pertarungan bos, eksploit panas, dan koleksi sampel siap."
 	})
 
 	SecAutoSteal:AddToggle("AutoSteal", {
 		Title = "Auto Steal",
-		Description = "Steals eggs that match your filter and brings them home",
+		Description = "Ambil telur sesuai filter dan bawa pulang otomatis",
 		Default = quantumConfig.AutoSteal or false,
 		Callback = function(v)
 			fn78(v)
@@ -32928,9 +33435,9 @@ local function fn67(arg)
 
 	SecAutoSteal:AddDropdown("StealMode", {
 		Title = "Steal Mode",
-		Description = "Select movement traversal mode for egg stealing",
-		Values = {"Low Speed User", "High Speed User Normal", "High Speed User (Fly)", "Zig-Zag High Speed User"},
-		Default = "High Speed User Normal",
+		Description = "Pilih mode pergerakan untuk mencuri telur",
+		Values = {"Quantum Ultra", "High Speed Normal", "High Speed Fly", "Zig-Zag Speed"},
+		Default = "Quantum Ultra",
 		Multi = false,
 		Callback = function(v)
 			fn89(v)
@@ -32939,7 +33446,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddSlider("StealHold", {
 		Title = "Low Speed Multiplier",
-		Description = "Hold multiplier for Low Speed User mode",
+		Description = "Pengali jeda untuk mode Low Speed",
 		Min = 1,
 		Max = 10,
 		Default = 5,
@@ -32950,8 +33457,8 @@ local function fn67(arg)
 	})
 
 	SecAutoSteal:AddToggle("LowSpeedBoost", {
-		Title = "Boost for Mode Low Speed",
-		Description = "Faster movement when using Low Speed mode",
+		Title = "Low Speed Boost",
+		Description = "Pergerakan lebih cepat saat mode Quantum Ultra aktif",
 		Default = quantumConfig.LowSpeedBoost or false,
 		Callback = function(v)
 			quantumConfig.LowSpeedBoost = v == true
@@ -32960,7 +33467,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddDropdown("StealEggNames", {
 		Title = "Filter By Egg Name",
-		Description = "Only steal these eggs. Leave empty for all eggs.",
+		Description = "Hanya curi telur ini. Kosongkan untuk semua.",
 		Values = v24,
 		Multi = true,
 		Default = {},
@@ -32971,7 +33478,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddDropdown("StealRarities", {
 		Title = "Filter By Rarity",
-		Description = "Only steal these rarities. Leave empty for all.",
+		Description = "Hanya curi rarity ini. Kosongkan untuk semua.",
 		Values = v26,
 		Multi = true,
 		Default = {},
@@ -32982,7 +33489,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddDropdown("StealAreas", {
 		Title = "Select Area",
-		Description = "Only steal from selected areas. Leave empty for all.",
+		Description = "Hanya curi dari area terpilih. Kosongkan untuk semua.",
 		Values = v25,
 		Multi = true,
 		Default = {},
@@ -32993,7 +33500,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddInput("StealMinValue", {
 		Title = "Steal By Value",
-		Description = "Minimum money per second (e.g. 10k, 5m)",
+		Description = "Nilai minimum koin per detik (contoh: 10k, 5m)",
 		Default = "",
 		Placeholder = "0",
 		Callback = function(v)
@@ -33003,7 +33510,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddDropdown("StealMutations", {
 		Title = "Filter By Mutation",
-		Description = "Only steal eggs carrying one of these mutations",
+		Description = "Hanya curi telur dengan mutasi tertentu",
 		Values = tbl14,
 		Multi = true,
 		Default = {},
@@ -33014,7 +33521,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddInput("StealMinWeight", {
 		Title = "Steal By Weight",
-		Description = "Minimum egg weight in kg",
+		Description = "Berat minimum telur dalam satuan kg",
 		Default = "",
 		Placeholder = "0",
 		Callback = function(v)
@@ -33024,7 +33531,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddDropdown("StealPriority", {
 		Title = "Steal Priority",
-		Description = "Which egg to prioritize first when multiple targets pass filters",
+		Description = "Prioritas target saat banyak telur lolos filter",
 		Values = {"Rarity", "Highest Value", "Heaviest"},
 		Default = "Rarity",
 		Multi = false,
@@ -33035,7 +33542,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddToggle("AutoIndex", {
 		Title = "Auto Index",
-		Description = "Prioritizes stealing uncollected eggs needed for player index",
+		Description = "Prioritaskan telur yang belum ada di indeks",
 		Default = quantumConfig.AutoIndex or false,
 		Callback = function(v)
 			fn149(v)
@@ -33044,7 +33551,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddToggle("HelpFriend", {
 		Title = "Help Friend",
-		Description = "Drops carried eggs right outside safe line for friends to pick up",
+		Description = "Jatuhkan telur di luar garis aman untuk teman",
 		Default = quantumConfig.HelpFriend or false,
 		Callback = function(v)
 			quantumConfig.HelpFriend = v == true
@@ -33052,8 +33559,8 @@ local function fn67(arg)
 	})
 
 	SecAutoSteal:AddToggle("StealPlayers", {
-		Title = "Auto Steal From Players",
-		Description = "Chases and intercepts other players carrying eggs",
+		Title = "Steal Players",
+		Description = "Kejar dan rebut telur dari pemain lain",
 		Default = quantumConfig.StealPlayers or false,
 		Callback = function(v)
 			fn145(v)
@@ -33062,7 +33569,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddDropdown("StealPlayerRarities", {
 		Title = "Player Rarity Filter",
-		Description = "Rarities to steal from players. Empty = uses general filter.",
+		Description = "Rarity target pemain. Kosong = gunakan filter umum.",
 		Values = v26,
 		Multi = true,
 		Default = {},
@@ -33073,7 +33580,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddInput("StealPlayerValue", {
 		Title = "Player Minimum Value",
-		Description = "Minimum money/s required to steal from players",
+		Description = "Nilai minimum koin/detik untuk mencuri dari pemain",
 		Default = "",
 		Placeholder = "0",
 		Callback = function(v)
@@ -33083,7 +33590,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddToggle("AntiGuardKnockback", {
 		Title = "Anti Guard Knockback",
-		Description = "Prevents NPC guard hits from pushing character around",
+		Description = "Cegah efek knockback saat terkena pukulan penjaga",
 		Default = true,
 		Callback = function(v)
 			fn100(v)
@@ -33092,7 +33599,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddToggle("AntiHitGuard", {
 		Title = "Anti Hit Guard",
-		Description = "Suppresses damage from guard strikes",
+		Description = "Cegah damage dari serangan penjaga",
 		Default = false,
 		Callback = function(v)
 			fn140(v)
@@ -33101,7 +33608,7 @@ local function fn67(arg)
 
 	SecAutoSteal:AddButton({
 		Title = "Open Hop UI",
-		Description = "Opens the Rare Egg Hop panel to search for Divine, Eternal, or Secret eggs",
+		Description = "Buka panel pencarian server untuk telur langka",
 		Callback = function()
 			local hopHunt = tbl13.hopHunt
 			if hopHunt then
@@ -33114,7 +33621,7 @@ local function fn67(arg)
 
 	SecAutoPlace:AddToggle("AutoPlace", {
 		Title = "Auto Place Egg",
-		Description = "Places eggs from inventory onto base pens automatically",
+		Description = "Taruh telur dari ransel ke base otomatis",
 		Default = quantumConfig.AutoPlace or false,
 		Callback = function(v)
 			fn118(v)
@@ -33123,7 +33630,7 @@ local function fn67(arg)
 
 	SecAutoPlace:AddDropdown("PlaceEggRarity", {
 		Title = "Place Egg Rarity",
-		Description = "Only place eggs of these rarities. Empty = all rarities.",
+		Description = "Filter rarity telur yang ditaruh. Kosong = semua.",
 		Values = v26,
 		Multi = true,
 		Default = {},
@@ -33133,8 +33640,8 @@ local function fn67(arg)
 	})
 
 	SecAutoPlace:AddButton({
-		Title = "Place Everything Now",
-		Description = "Places every egg currently held in inventory onto available pens",
+		Title = "Place All Now",
+		Description = "Taruh semua telur di ransel ke base sekarang",
 		Callback = function()
 			fn123()
 		end
@@ -33142,7 +33649,7 @@ local function fn67(arg)
 
 	SecAutoTreadmill:AddToggle("AutoTreadmill", {
 		Title = "Auto Treadmill",
-		Description = "Walks onto base treadmill when idle to build speed and earn gems",
+		Description = "Lari di treadmill base otomatis untuk melatih kecepatan",
 		Default = quantumConfig.AutoTreadmillIdle or false,
 		Callback = function(v)
 			fn82(v)
@@ -33151,7 +33658,7 @@ local function fn67(arg)
 
 	SecAutoTreadmill:AddToggle("TreadmillUpgrade", {
 		Title = "Auto Upgrade Treadmill",
-		Description = "Upgrades treadmill whenever player can afford it",
+		Description = "Tingkatkan level treadmill otomatis saat koin cukup",
 		Default = quantumConfig.AutoTreadmillUpgrade or false,
 		Callback = function(v)
 			fn88(v)
@@ -33160,7 +33667,7 @@ local function fn67(arg)
 
 	SecAutoTreadmill:AddToggle("AntiTreadmill", {
 		Title = "Anti Treadmill",
-		Description = "Dismounts character immediately if trapped or nudged onto treadmill",
+		Description = "Turun dari treadmill seketika jika tersangkut",
 		Default = quantumConfig.AntiTreadmill or false,
 		Callback = function(v)
 			fn83(v)
@@ -33169,7 +33676,7 @@ local function fn67(arg)
 
 	SecAutoHatch:AddToggle("AutoHatch", {
 		Title = "Auto Hatch Egg",
-		Description = "Automatically hatches incubated eggs on your base as soon as ready",
+		Description = "Tetaskan telur yang siap di base otomatis",
 		Default = quantumConfig.AutoHatch or false,
 		Callback = function(v)
 			fn119(v)
@@ -33178,7 +33685,7 @@ local function fn67(arg)
 
 	SecAutoHatch:AddToggle("EquipBest", {
 		Title = "Equip Best",
-		Description = "Equips top multiplier pets automatically",
+		Description = "Pasang pet terkuat otomatis",
 		Default = quantumConfig.AutoEquipBest or false,
 		Callback = function(v)
 			fn105(v)
@@ -33186,8 +33693,8 @@ local function fn67(arg)
 	})
 
 	SecAutoHatch:AddButton({
-		Title = "Hatch Everything Ready",
-		Description = "Hatches all ready eggs across all base pens instantly",
+		Title = "Hatch All Ready",
+		Description = "Tetaskan semua telur yang siap di base sekarang",
 		Callback = function()
 			fn124()
 		end
@@ -33195,7 +33702,7 @@ local function fn67(arg)
 
 	SecAutoSell:AddToggle("AutoSellPet", {
 		Title = "Auto Sell Pet",
-		Description = "Continuously liquidates pets matching filter criteria",
+		Description = "Jual pet yang cocok dengan filter otomatis",
 		Default = quantumConfig.AutoSell or false,
 		Callback = function(v)
 			fn127(v)
@@ -33204,7 +33711,7 @@ local function fn67(arg)
 
 	SecAutoSell:AddDropdown("SellPetNames", {
 		Title = "Pet Name Filter",
-		Description = "Filter specific pet species to sell. Leave empty for all.",
+		Description = "Pilih nama pet untuk dijual. Kosong = semua.",
 		Values = fn73,
 		Multi = true,
 		Default = {},
@@ -33215,7 +33722,7 @@ local function fn67(arg)
 
 	SecAutoSell:AddDropdown("SellPetRarities", {
 		Title = "Pet Rarity Filter",
-		Description = "Filter pet rarities to sell",
+		Description = "Filter rarity pet yang akan dijual",
 		Values = fn69(v26),
 		Multi = true,
 		Default = {},
@@ -33226,7 +33733,7 @@ local function fn67(arg)
 
 	SecAutoSell:AddInput("SellPetValue", {
 		Title = "Sell Pet By Value",
-		Description = "Sells pets earning less than this value (money/s)",
+		Description = "Jual pet dengan nilai di bawah batas ini (koin/dtk)",
 		Default = "",
 		Placeholder = "0",
 		Callback = function(v)
@@ -33236,7 +33743,7 @@ local function fn67(arg)
 
 	SecAutoSell:AddButton({
 		Title = "Sell Pets Now",
-		Description = "Runs an immediate batch sell across all matching pets",
+		Description = "Jual semua pet yang cocok dengan filter sekarang",
 		Callback = function()
 			fn125()
 		end
@@ -33244,7 +33751,7 @@ local function fn67(arg)
 
 	SecAutoSell:AddToggle("AutoSellEgg", {
 		Title = "Auto Sell Egg",
-		Description = "Automatically liquidates low-value or surplus eggs",
+		Description = "Jual telur bernilai rendah otomatis",
 		Default = quantumConfig.AutoSellEgg or false,
 		Callback = function(v)
 			fn128(v)
@@ -33253,7 +33760,7 @@ local function fn67(arg)
 
 	SecAutoSell:AddDropdown("SellEggRarities", {
 		Title = "Egg Rarity Filter",
-		Description = "Filter egg rarities to sell",
+		Description = "Filter rarity telur yang akan dijual",
 		Values = fn69(v26),
 		Multi = true,
 		Default = {},
@@ -33264,7 +33771,7 @@ local function fn67(arg)
 
 	SecAutoSell:AddInput("SellEggValue", {
 		Title = "Sell Egg By Value",
-		Description = "Sells eggs worth less than this value (money/s)",
+		Description = "Jual telur dengan nilai di bawah batas ini (koin/dtk)",
 		Default = "",
 		Placeholder = "0",
 		Callback = function(v)
@@ -33274,7 +33781,7 @@ local function fn67(arg)
 
 	SecAutoSell:AddButton({
 		Title = "Sell Eggs Now",
-		Description = "Runs an immediate batch sell across all matching eggs",
+		Description = "Jual semua telur yang cocok dengan filter sekarang",
 		Callback = function()
 			fn126()
 		end
@@ -33282,7 +33789,7 @@ local function fn67(arg)
 
 	SecAutoFuse:AddToggle("AutoFuse", {
 		Title = "Auto Fuse",
-		Description = "Automatically feeds eligible pets into fusion cauldrons",
+		Description = "Masukkan pet ke mesin fusi otomatis",
 		Default = quantumConfig.AutoFusePets or false,
 		Callback = function(v)
 			fn109(v)
@@ -33291,7 +33798,7 @@ local function fn67(arg)
 
 	SecAutoFuse:AddDropdown("FuseRule", {
 		Title = "Fusion Rule",
-		Description = "Fuse anything passing rarity filter or only chosen species",
+		Description = "Aturan fusi: berdasarkan rarity atau spesies",
 		Values = {"Any Species", "Selected Species"},
 		Default = "Any Species",
 		Multi = false,
@@ -33302,7 +33809,7 @@ local function fn67(arg)
 
 	SecAutoFuse:AddDropdown("FuseRarities", {
 		Title = "Rarities to Fuse",
-		Description = "Only fuse pets of these rarities",
+		Description = "Hanya fusi pet dengan rarity ini",
 		Values = v26,
 		Multi = true,
 		Default = {},
@@ -33313,7 +33820,7 @@ local function fn67(arg)
 
 	SecAutoFuse:AddDropdown("FuseSpecies", {
 		Title = "Species to Fuse",
-		Description = "Only these species will be inserted into the machine",
+		Description = "Hanya spesies ini yang dimasukkan ke mesin fusi",
 		Values = v24,
 		Multi = true,
 		Default = {},
@@ -33324,7 +33831,7 @@ local function fn67(arg)
 
 	SecAutoFav:AddToggle("AutoFavorite", {
 		Title = "Auto Favorite",
-		Description = "Protects high-value pets from accidental sale or fusion",
+		Description = "Kunci pet favorit agar tidak terjual atau terfusi",
 		Default = quantumConfig.AutoFavorite or false,
 		Callback = function(v)
 			fn101(v)
@@ -33333,7 +33840,7 @@ local function fn67(arg)
 
 	SecAutoFav:AddDropdown("FavoriteRule", {
 		Title = "Favorite Rule",
-		Description = "Match pets to lock by rarity or by species",
+		Description = "Aturan favorit: berdasarkan rarity atau spesies",
 		Values = {"Rarity", "Species"},
 		Default = "Rarity",
 		Multi = false,
@@ -33344,7 +33851,7 @@ local function fn67(arg)
 
 	SecAutoFav:AddDropdown("FavoriteRarities", {
 		Title = "Rarities to Keep",
-		Description = "Pets of these rarities will be favorited",
+		Description = "Pet dengan rarity ini otomatis difavoritkan",
 		Values = v26,
 		Multi = true,
 		Default = {},
@@ -33355,7 +33862,7 @@ local function fn67(arg)
 
 	SecAutoFav:AddDropdown("FavoriteSpecies", {
 		Title = "Species to Keep",
-		Description = "Pets of these species will be favorited",
+		Description = "Pet dari spesies ini otomatis difavoritkan",
 		Values = v24,
 		Multi = true,
 		Default = {},
@@ -33365,8 +33872,8 @@ local function fn67(arg)
 	})
 
 	SecAutoFav:AddButton({
-		Title = "Unfavorite Everything",
-		Description = "Removes favorite lock from all pets in inventory",
+		Title = "Unfavorite All",
+		Description = "Hapus status favorit seluruh pet di inventaris",
 		Callback = function()
 			local p = genv.__QuantumPetBarn
 			if p and type(p.unfavoriteAll) == "function" then
@@ -33377,7 +33884,7 @@ local function fn67(arg)
 
 	SecAutoRift:AddToggle("AuraBat", {
 		Title = "Aura Bat",
-		Description = "Automatically strikes nearby hostile entities with Bat",
+		Description = "Pukul musuh rift terdekat otomatis menggunakan Bat",
 		Default = quantumConfig.GodMode or false,
 		Callback = function(v)
 			fn80(v)
@@ -33386,7 +33893,7 @@ local function fn67(arg)
 
 	SecAutoRift:AddDropdown("MutationChoice", {
 		Title = "Select Mutation",
-		Description = "Which mutation to apply to placed eggs",
+		Description = "Pilih mutasi target untuk telur di base",
 		Values = {"Scrambled", "Fractured", "Enchanted"},
 		Default = "Scrambled",
 		Multi = false,
@@ -33397,7 +33904,7 @@ local function fn67(arg)
 
 	SecAutoRift:AddDropdown("MutationSpecies", {
 		Title = "Mutate Egg Name",
-		Description = "Only mutate placed eggs of these names",
+		Description = "Hanya mutasi telur di base dengan nama ini",
 		Values = v24,
 		Multi = true,
 		Default = {},
@@ -33408,7 +33915,7 @@ local function fn67(arg)
 
 	SecAutoRift:AddDropdown("MutationRarity", {
 		Title = "Mutate Egg Rarity",
-		Description = "Only mutate placed eggs of these rarities",
+		Description = "Hanya mutasi telur di base dengan rarity ini",
 		Values = v26,
 		Multi = true,
 		Default = {},
@@ -33419,7 +33926,7 @@ local function fn67(arg)
 
 	SecAutoRift:AddInput("MutationMinValue", {
 		Title = "Mutate Min Value",
-		Description = "Minimum value before mutation is applied",
+		Description = "Nilai minimum koin/detik sebelum dimutasi",
 		Default = "",
 		Placeholder = "0",
 		Callback = function(v)
@@ -33429,7 +33936,7 @@ local function fn67(arg)
 
 	SecAutoRift:AddToggle("MutationRetry", {
 		Title = "Retry Until Mutated",
-		Description = "Re-applies mutation items until target is successfully mutated",
+		Description = "Ulangi pemberian item mutasi sampai berhasil",
 		Default = quantumConfig.MutationRetry or false,
 		Callback = function(v)
 			fn126(v)
@@ -33438,7 +33945,7 @@ local function fn67(arg)
 
 	SecAutoRift:AddToggle("AutoMutation", {
 		Title = "Auto Apply Mutation",
-		Description = "Continuously feeds mutation items to matching plot eggs",
+		Description = "Berikan item mutasi ke telur base otomatis",
 		Default = quantumConfig.AutoMutation or false,
 		Callback = function(v)
 			fn120(v)
@@ -33447,7 +33954,7 @@ local function fn67(arg)
 
 	SecAutoRift:AddButton({
 		Title = "Apply Mutation Now",
-		Description = "Attempts a single mutation pass on matching plot eggs",
+		Description = "Coba satu kali mutasi pada telur yang cocok sekarang",
 		Callback = function()
 			if type(tbl10.mutationSweep) == "function" then
 				task.spawn(tbl10.mutationSweep)
@@ -33455,13 +33962,13 @@ local function fn67(arg)
 		end
 	})
 
-	local SecESP = PlayerTab:AddSection("ESP")
-	local SecMovement = PlayerTab:AddSection("Movement")
-	local SecCharacter = PlayerTab:AddSection("Character")
+	local SecESP = PlayerTab:AddSection("ESP", "lucide/scan")
+	local SecMovement = PlayerTab:AddSection("Movement", "lucide/move")
+	local SecCharacter = PlayerTab:AddSection("Character", "lucide/user-check")
 
 	SecESP:AddToggle("EggESP", {
 		Title = "Egg ESP",
-		Description = "Draws billboard labels over spawned eggs in the world",
+		Description = "Tampilkan label billboard pada telur di map",
 		Default = quantumConfig.EggESP or false,
 		Callback = function(v)
 			fn96(v)
@@ -33470,7 +33977,7 @@ local function fn67(arg)
 
 	SecESP:AddDropdown("ESPDetails", {
 		Title = "ESP Details",
-		Description = "Configure information displayed on billboard labels",
+		Description = "Atur informasi yang tampil pada label ESP",
 		Values = {"Name", "Rarity", "Value", "Weight", "Mutation", "Placed Eggs", "Icon"},
 		Multi = true,
 		Default = {"Name", "Rarity", "Value", "Icon"},
@@ -33481,7 +33988,7 @@ local function fn67(arg)
 
 	SecESP:AddDropdown("ESPMinRarity", {
 		Title = "ESP Min Rarity",
-		Description = "Only render ESP for eggs of this rarity or rarer",
+		Description = "Hanya tampilkan ESP untuk telur rarity ini ke atas",
 		Values = (function()
 			local r = {"Any"}
 			for _, x in ipairs(v26) do r[#r + 1] = x end
@@ -33496,7 +34003,7 @@ local function fn67(arg)
 
 	SecESP:AddInput("ESPMinValue", {
 		Title = "ESP Min Value",
-		Description = "Only render ESP for eggs worth at least this amount",
+		Description = "Hanya tampilkan ESP untuk telur bernilai di atas batas ini",
 		Default = "",
 		Placeholder = "0",
 		Callback = function(v)
@@ -33506,7 +34013,7 @@ local function fn67(arg)
 
 	SecESP:AddToggle("BackpackRates", {
 		Title = "Backpack Value/s",
-		Description = "Displays rate earnings directly over inventory items",
+		Description = "Tampilkan koin/detik di atas item ransel",
 		Default = quantumConfig.BackpackRateEsp or false,
 		Callback = function(v)
 			fn99(v)
@@ -33514,8 +34021,8 @@ local function fn67(arg)
 	})
 
 	SecMovement:AddToggle("AdminBoost", {
-		Title = "Admin Abuse Boost",
-		Description = "High-speed traversal mode specifically calibrated for Admin Abuse events",
+		Title = "Admin Boost",
+		Description = "Mode kecepatan tinggi untuk event Admin Abuse",
 		Default = false,
 		Callback = function(v)
 			fn137(v)
@@ -33523,8 +34030,8 @@ local function fn67(arg)
 	})
 
 	SecMovement:AddToggle("FlyForCapture", {
-		Title = "Fly For Capture",
-		Description = "Ascends to safe ceiling altitude after grabbing event egg",
+		Title = "Fly Capture",
+		Description = "Terbang ke ketinggian aman setelah mengambil telur",
 		Default = false,
 		Callback = function(v)
 			fn135(v)
@@ -33533,7 +34040,7 @@ local function fn67(arg)
 
 	SecMovement:AddToggle("InfiniteJump", {
 		Title = "Infinite Jump",
-		Description = "Allows continuous jumping mid-air via JumpRequest impulse",
+		Description = "Lompat tanpa batas di udara saat tombol spasi ditekan",
 		Default = false,
 		Callback = function(v)
 			fn139(v)
@@ -33542,7 +34049,7 @@ local function fn67(arg)
 
 	SecMovement:AddToggle("Noclip", {
 		Title = "Noclip",
-		Description = "Disables limb collisions to walk through doors and walls",
+		Description = "Nonaktifkan tabrakan agar bisa menembus dinding",
 		Default = false,
 		Callback = function(v)
 			fn113(v)
@@ -33551,7 +34058,7 @@ local function fn67(arg)
 
 	SecMovement:AddDropdown("Waypoint", {
 		Title = "Waypoint",
-		Description = "Select a saved map location to teleport to",
+		Description = "Pilih lokasi map tersimpan untuk teleport",
 		Values = tbl25,
 		Default = tbl25[1],
 		Multi = false,
@@ -33562,7 +34069,7 @@ local function fn67(arg)
 
 	SecMovement:AddButton({
 		Title = "Teleport To Waypoint",
-		Description = "Teleports character to selected waypoint position",
+		Description = "Teleport karakter ke koordinat waypoint terpilih",
 		Callback = function()
 			local roaming = genv.__QuantumRoaming
 			if roaming and type(roaming.teleport) == "function" then
@@ -33573,7 +34080,7 @@ local function fn67(arg)
 
 	SecCharacter:AddToggle("InstantGrab", {
 		Title = "Instant Grab",
-		Description = "Bypasses egg interaction hold timers for immediate pickup",
+		Description = "Ambil telur instan tanpa waktu tunggu hold",
 		Default = false,
 		Callback = function(v)
 			fn136(v)
@@ -33582,7 +34089,7 @@ local function fn67(arg)
 
 	SecCharacter:AddToggle("AntiAFK", {
 		Title = "Anti AFK",
-		Description = "Simulates user input to prevent 20-minute idle disconnects",
+		Description = "Cegah disconnect otomatis saat tidak aktif 20 menit",
 		Default = true,
 		Callback = function(v)
 			fn141(v)
@@ -33591,21 +34098,21 @@ local function fn67(arg)
 
 	SecCharacter:AddToggle("AntiCutscene", {
 		Title = "Anti Cutscene",
-		Description = "Skips camera animations and cinematic lockouts",
+		Description = "Lewati animasi kamera dan cutscene sinematik",
 		Default = false,
 		Callback = function(v)
 			fn115(v)
 		end
 	})
 
-	local SecWebhook = PredictorTab:AddSection("Discord Webhook")
-	local SecEggPred = PredictorTab:AddSection("Egg Predictor")
-	local SecRiftPred = PredictorTab:AddSection("Rift Predictor")
-	local SecFusePred = PredictorTab:AddSection("Fuse Predictor")
+	local SecWebhook = PredictorTab:AddSection("Discord Webhook", "lucide/webhook")
+	local SecEggPred = PredictorTab:AddSection("Egg Predictor", "lucide/binary")
+	local SecRiftPred = PredictorTab:AddSection("Rift Predictor", "lucide/compass")
+	local SecFusePred = PredictorTab:AddSection("Fuse Predictor", "lucide/calculator")
 
 	SecWebhook:AddToggle("WebhookEnabled", {
 		Title = "Steal Webhook",
-		Description = "Dispatches Discord webhook embeds when rare eggs are secured",
+		Description = "Kirim notifikasi webhook Discord saat mendapat telur langka",
 		Default = quantumConfig.WebhookEnabled or false,
 		Callback = function(v)
 			fn150(v)
@@ -33614,7 +34121,7 @@ local function fn67(arg)
 
 	SecWebhook:AddInput("WebhookUrl", {
 		Title = "Webhook URL",
-		Description = "Destination Discord webhook URL",
+		Description = "URL webhook Discord tujuan",
 		Default = quantumConfig.WebhookURL or "",
 		Placeholder = "https://discord.com/api/webhooks/...",
 		Callback = function(v)
@@ -33624,7 +34131,7 @@ local function fn67(arg)
 
 	SecWebhook:AddToggle("WebhookDisconnect", {
 		Title = "Disconnect Alert",
-		Description = "Posts an alert embed if client gets disconnected or kicked",
+		Description = "Kirim notifikasi webhook jika terputus atau terkena kick",
 		Default = quantumConfig.WebhookDisconnect or false,
 		Callback = function(v)
 			quantumConfig.WebhookDisconnect = v == true
@@ -33633,7 +34140,7 @@ local function fn67(arg)
 
 	SecWebhook:AddDropdown("WebhookRarities", {
 		Title = "Notify Rarities",
-		Description = "Only send notifications for eggs of these rarities",
+		Description = "Kirim notifikasi hanya untuk telur dengan rarity ini",
 		Values = v26,
 		Multi = true,
 		Default = {},
@@ -33644,7 +34151,7 @@ local function fn67(arg)
 
 	SecWebhook:AddInput("WebhookValue", {
 		Title = "Notify Minimum Value",
-		Description = "Minimum value required before dispatching webhook notification",
+		Description = "Nilai minimum koin/detik untuk mengirim notifikasi",
 		Default = "",
 		Placeholder = "0",
 		Callback = function(v)
@@ -33654,7 +34161,7 @@ local function fn67(arg)
 
 	SecWebhook:AddButton({
 		Title = "Test Webhook",
-		Description = "Sends a test notification embed to verify webhook connectivity",
+		Description = "Kirim pesan uji coba untuk memverifikasi webhook",
 		Callback = function()
 			local wh = genv.__QuantumWebhook
 			if wh and type(wh.test) == "function" then
@@ -33664,8 +34171,8 @@ local function fn67(arg)
 	})
 
 	SecEggPred:AddToggle("EggPredictUI", {
-		Title = "Egg Predictor Preview",
-		Description = "Renders preview card of upcoming eggs in active hatch queue",
+		Title = "Egg Predictor HUD",
+		Description = "Tampilkan kartu pratinjau telur di antrean tetas",
 		Default = quantumConfig.EggPredictUI or false,
 		Callback = function(v)
 			quantumConfig.EggPredictUI = v == true
@@ -33674,24 +34181,24 @@ local function fn67(arg)
 
 	SecEggPred:AddParagraph({
 		Title = "Hatch Queue Status",
-		Content = "Egg queue telemetry active. Decodes upcoming egg seed iterations and rarity tiers."
+		Content = "Telemetri antrean telur aktif. Menghitung iterasi seed dan tier rarity berikutnya."
 	})
 
 	SecRiftPred:AddParagraph({
 		Title = "Rift Machine Decoder",
-		Content = "Decodes active Rift requirements and pre-calculates upcoming recipe components."
+		Content = "Mendekode kebutuhan Rift aktif dan menghitung komponen resep berikutnya."
 	})
 
 	SecFusePred:AddParagraph({
 		Title = "Fusion Machine Calculator",
-		Content = "Calculates exact mutation roll probabilities and species output odds."
+		Content = "Menghitung peluang mutasi akurat dan probabilitas spesies hasil fusi."
 	})
 
-	local SecProgression = ProgressTab:AddSection("Auto Progression")
+	local SecProgression = ProgressTab:AddSection("Auto Progression", "lucide/trending-up")
 
 	SecProgression:AddToggle("BaseUpgrade", {
 		Title = "Auto Base Upgrade",
-		Description = "Upgrades plot capacity and slots whenever affordable",
+		Description = "Tingkatkan kapasitas dan slot base otomatis",
 		Default = false,
 		Callback = function(v)
 			fn107(v)
@@ -33700,7 +34207,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("ClaimAlmanac", {
 		Title = "Claim Almanac",
-		Description = "Claims pet collection milestone rewards automatically",
+		Description = "Klaim hadiah pencapaian koleksi almanak otomatis",
 		Default = false,
 		Callback = function(v)
 			fn108(v)
@@ -33709,7 +34216,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("ClaimOffline", {
 		Title = "Claim Offline",
-		Description = "Claims accrued offline earnings upon reconnect",
+		Description = "Klaim pendapatan offline otomatis saat terhubung kembali",
 		Default = false,
 		Callback = function(v)
 			fn106(v)
@@ -33718,7 +34225,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("AutoRace", {
 		Title = "Auto Race",
-		Description = "Enters and steers through race course waypoints automatically",
+		Description = "Ikuti dan selesaikan lintasan balapan otomatis",
 		Default = false,
 		Callback = function(v)
 			quantumConfig.RaceAuto = v == true
@@ -33727,7 +34234,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("RaceClaim", {
 		Title = "Auto Claim Race",
-		Description = "Claims race completion trophies and rewards",
+		Description = "Klaim trofi dan hadiah balapan otomatis",
 		Default = false,
 		Callback = function(v)
 			quantumConfig.RaceClaim = v == true
@@ -33736,7 +34243,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("RaceBuy", {
 		Title = "Auto Buy Race Shop",
-		Description = "Purchases items from the race shop automatically",
+		Description = "Beli item dari toko balapan otomatis saat koin cukup",
 		Default = false,
 		Callback = function(v)
 			quantumConfig.RaceBuy = v == true
@@ -33745,7 +34252,7 @@ local function fn67(arg)
 
 	SecProgression:AddDropdown("RaceBuyList", {
 		Title = "Shop Buy List",
-		Description = "Select race items to purchase",
+		Description = "Pilih item toko balapan yang ingin dibeli",
 		Values = {"CashBooster", "SpeedBoost", "TreadmillBoost", "MutationToken", "RacingBat"},
 		Multi = true,
 		Default = {},
@@ -33756,7 +34263,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("StarAlert", {
 		Title = "Star Alert",
-		Description = "Alerts when a shooting star event begins",
+		Description = "Beri peringatan saat event bintang jatuh dimulai",
 		Default = true,
 		Callback = function(v)
 			quantumConfig.StarAlert = v == true
@@ -33765,7 +34272,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("StarAutoCatch", {
 		Title = "Auto Catch Star",
-		Description = "Navigates to falling star landing point and loots it",
+		Description = "Menuju lokasi bintang jatuh dan ambil hadiah otomatis",
 		Default = false,
 		Callback = function(v)
 			quantumConfig.StarAutoCatch = v == true
@@ -33774,7 +34281,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("WispAutoQuest", {
 		Title = "Auto Wisp Quests",
-		Description = "Automates wisp quests and progression tasks",
+		Description = "Selesaikan misi wisp dan tugas progres otomatis",
 		Default = false,
 		Callback = function(v)
 			quantumConfig.WispAutoQuest = v == true
@@ -33783,7 +34290,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("AutoRingEvent", {
 		Title = "Auto Ring Event",
-		Description = "Continuous glide loop: Forest -> Angels & Demons -> Forest",
+		Description = "Loop terbang cincin: Forest -> Angels & Demons -> Forest",
 		Default = false,
 		Callback = function(v)
 			fn121(v)
@@ -33792,7 +34299,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("BloomCatch", {
 		Title = "Auto Catch Butterfly",
-		Description = "Swings net to catch butterflies in Butterfly Bloom event",
+		Description = "Ayunkan jaring untuk menangkap kupu-kupu otomatis",
 		Default = false,
 		Callback = function(v)
 			quantumConfig.ButterflyAutoCatch = v == true
@@ -33801,7 +34308,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("BloomNet", {
 		Title = "Auto Net Butterfly",
-		Description = "Equips and readies butterfly net automatically",
+		Description = "Pasang dan siapkan jaring kupu-kupu otomatis",
 		Default = false,
 		Callback = function(v)
 			quantumConfig.ButterflyAutoNet = v == true
@@ -33810,7 +34317,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("BloomCraft", {
 		Title = "Auto Craft Best Net",
-		Description = "Crafts next tier net as soon as materials are available",
+		Description = "Buat jaring tier lebih tinggi saat material tersedia",
 		Default = false,
 		Callback = function(v)
 			quantumConfig.ButterflyAutoCraft = v == true
@@ -33819,7 +34326,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("BloomTrade", {
 		Title = "Auto Trade Butterfly",
-		Description = "Trades duplicate butterflies for essence recipes",
+		Description = "Tukarkan kupu-kupu duplikat untuk resep essence",
 		Default = false,
 		Callback = function(v)
 			quantumConfig.ButterflyAutoTrade = v == true
@@ -33828,7 +34335,7 @@ local function fn67(arg)
 
 	SecProgression:AddDropdown("BloomMode", {
 		Title = "Catch Mode",
-		Description = "Butterfly pursuit mode",
+		Description = "Mode pengejaran kupu-kupu",
 		Values = {"Tween", "Stand", "Zigzag", "Circle"},
 		Default = "Tween",
 		Multi = false,
@@ -33839,7 +34346,7 @@ local function fn67(arg)
 
 	SecProgression:AddDropdown("BloomTiers", {
 		Title = "Catch Tiers",
-		Description = "Filter butterfly tiers to catch",
+		Description = "Filter tier kupu-kupu yang ingin ditangkap",
 		Values = {"Radiant", "Amethyst", "Sapphire", "Emerald"},
 		Multi = true,
 		Default = {},
@@ -33850,7 +34357,7 @@ local function fn67(arg)
 
 	SecProgression:AddDropdown("BloomRecipe", {
 		Title = "Trade Recipe",
-		Description = "Which trade recipe to prioritize",
+		Description = "Prioritas resep penukaran kupu-kupu",
 		Values = {"All", "Essence Only"},
 		Default = "All",
 		Multi = false,
@@ -33861,7 +34368,7 @@ local function fn67(arg)
 
 	SecProgression:AddToggle("BloomESP", {
 		Title = "Butterfly ESP",
-		Description = "Highlights active butterflies across the map",
+		Description = "Sorot posisi kupu-kupu aktif di map",
 		Default = false,
 		Callback = function(v)
 			quantumConfig.ButterflyEsp = v == true
@@ -33870,14 +34377,14 @@ local function fn67(arg)
 
 	SecProgression:AddParagraph({
 		Title = "Task Priority Ladder",
-		Content = "Deterministic scheduler order: Steal > Race > Star > Mech Boss > Butterfly > Place > Mutation > Sell > Treadmill."
+		Content = "Urutan jadwal tugas: Curi > Balapan > Bintang > Bos Mech > Kupu-kupu > Taruh > Mutasi > Jual > Treadmill."
 	})
 
-	local SecServer = ServerTab:AddSection("Server")
+	local SecServer = ServerTab:AddSection("Server", "lucide/server")
 
 	SecServer:AddToggle("HopNoMatch", {
 		Title = "Hop When Nothing Matches",
-		Description = "Automatically hops server if no eggs pass current filters",
+		Description = "Pindah server otomatis jika tidak ada telur sesuai filter",
 		Default = false,
 		Callback = function(v)
 			fn84(v)
@@ -33886,7 +34393,7 @@ local function fn67(arg)
 
 	SecServer:AddSlider("HopCooldown", {
 		Title = "Hop Cooldown (s)",
-		Description = "Seconds to wait on a server before hopping again",
+		Description = "Jeda detik sebelum berpindah server lagi",
 		Min = 1,
 		Max = 30,
 		Default = 5,
@@ -33898,7 +34405,7 @@ local function fn67(arg)
 
 	SecServer:AddDropdown("PrivateServerMax", {
 		Title = "Max Players (Private Hop)",
-		Description = "Target maximum player count for private hop",
+		Description = "Batas maksimal pemain untuk pencarian server sepi",
 		Values = {"1", "2", "3", "4", "5"},
 		Default = "2",
 		Multi = false,
@@ -33909,7 +34416,7 @@ local function fn67(arg)
 
 	SecServer:AddToggle("PrivateServerAuto", {
 		Title = "Auto Hop (Low Players)",
-		Description = "Searches for and joins low-population public servers",
+		Description = "Cari dan masuk server publik berpopulasi sedikit",
 		Default = false,
 		Callback = function(v)
 			fn86(v)
@@ -33918,7 +34425,7 @@ local function fn67(arg)
 
 	SecServer:AddButton({
 		Title = "Hop Server Now",
-		Description = "Finds and joins a low-player server immediately",
+		Description = "Cari dan masuk server sepi langsung sekarang",
 		Callback = function()
 			if type(tbl13.startPrivateAutoHop) == "function" then
 				tbl13.startPrivateAutoHop()
@@ -33928,7 +34435,7 @@ local function fn67(arg)
 
 	SecServer:AddButton({
 		Title = "Rejoin This Server",
-		Description = "Reconnects to the exact same server instance",
+		Description = "Masuk kembali ke server yang sama saat ini",
 		Callback = function()
 			fn134()
 		end
@@ -33936,7 +34443,7 @@ local function fn67(arg)
 
 	SecServer:AddToggle("AutoReconnect", {
 		Title = "Auto Reconnect",
-		Description = "Reconnects automatically upon disconnection or kick",
+		Description = "Sambung ulang otomatis jika terputus atau terkena kick",
 		Default = true,
 		Callback = function(v)
 			fn142(v)
@@ -33945,7 +34452,7 @@ local function fn67(arg)
 
 	SecServer:AddToggle("AutoExecute", {
 		Title = "Auto Execute (Rejoin)",
-		Description = "Queues auto-execute payload to re-run script upon rejoin",
+		Description = "Jalankan ulang script otomatis setelah rejoin",
 		Default = false,
 		Callback = function(v)
 			fn143(v)
@@ -33954,7 +34461,7 @@ local function fn67(arg)
 
 	SecServer:AddButton({
 		Title = "Stop & Unload",
-		Description = "Shuts down background workers and unloads the script cleanly",
+		Description = "Hentikan seluruh proses dan tutup script bersih",
 		Callback = function()
 			if genv.__QuantumHubShutdown then
 				genv.__QuantumHubShutdown()
@@ -33962,12 +34469,12 @@ local function fn67(arg)
 		end
 	})
 
-	local SecPerformance = MiscTab:AddSection("Performance")
-	local SecUtility = MiscTab:AddSection("Utility")
+	local SecPerformance = MiscTab:AddSection("Performance", "lucide/cpu")
+	local SecUtility = MiscTab:AddSection("Utility", "lucide/wrench")
 
 	SecPerformance:AddToggle("StartupBoost", {
 		Title = "Startup Boost",
-		Description = "Boosts performance optimizations on load",
+		Description = "Aktifkan optimasi performa saat script dimuat",
 		Default = false,
 		Callback = function(v)
 			fn131(v)
@@ -33976,7 +34483,7 @@ local function fn67(arg)
 
 	SecPerformance:AddToggle("BoostFPS", {
 		Title = "Boost FPS",
-		Description = "Lowers decorative rendering to increase frame rate",
+		Description = "Turunkan kualitas grafis dekoratif untuk menaikkan FPS",
 		Default = false,
 		Callback = function(v)
 			fn132(v)
@@ -33985,7 +34492,7 @@ local function fn67(arg)
 
 	SecPerformance:AddToggle("UncapFPS", {
 		Title = "Uncap FPS",
-		Description = "Removes default 60 FPS cap",
+		Description = "Hapus batas 60 FPS untuk frame rate maksimal",
 		Default = false,
 		Callback = function(v)
 			fn133(v)
@@ -33994,7 +34501,7 @@ local function fn67(arg)
 
 	SecPerformance:AddToggle("BottingMode", {
 		Title = "Botting Mode",
-		Description = "Enables minimalist dark telemetry overlay for headless running",
+		Description = "Aktifkan tampilan gelap minimalis untuk menghemat resource",
 		Default = false,
 		Callback = function(v)
 			fn114(v)
@@ -34003,7 +34510,7 @@ local function fn67(arg)
 
 	SecUtility:AddButton({
 		Title = "Egg Logs",
-		Description = "Opens recent egg discovery and steal activity log",
+		Description = "Buka riwayat penemuan dan pencurian telur",
 		Callback = function()
 			local p = genv.QuantumPanels
 			if p and type(p.openLogs) == "function" then p.openLogs() end
@@ -34012,7 +34519,7 @@ local function fn67(arg)
 
 	SecUtility:AddButton({
 		Title = "Egg Board",
-		Description = "Opens live server egg leaderboard",
+		Description = "Buka papan peringkat telur server saat ini",
 		Callback = function()
 			local p = genv.QuantumPanels
 			if p and type(p.openBoard) == "function" then p.openBoard() end
@@ -34021,7 +34528,7 @@ local function fn67(arg)
 
 	SecUtility:AddButton({
 		Title = "Inventory & Base",
-		Description = "Inspects base plots and backpack capacity",
+		Description = "Periksa plot base dan kapasitas ransel",
 		Callback = function()
 			local p = genv.QuantumPanels
 			if p and type(p.openInventory) == "function" then p.openInventory() end
@@ -34030,7 +34537,7 @@ local function fn67(arg)
 
 	SecUtility:AddButton({
 		Title = "Egg Checker",
-		Description = "Inspects field egg rarity rates and values",
+		Description = "Lihat peluang rarity dan nilai telur di map",
 		Callback = function()
 			local p = genv.QuantumPanels
 			if p and type(p.openChecker) == "function" then p.openChecker() end
@@ -34039,7 +34546,7 @@ local function fn67(arg)
 
 	SecUtility:AddButton({
 		Title = "Egg Data & History",
-		Description = "Historical analytics and steal stats",
+		Description = "Statistik riwayat dan analisa telur yang dicuri",
 		Callback = function()
 			local p = genv.QuantumPanels
 			if p and type(p.openAnalyst) == "function" then p.openAnalyst() end
@@ -34048,7 +34555,7 @@ local function fn67(arg)
 
 	SecUtility:AddButton({
 		Title = "Farm Stats",
-		Description = "Total stolen eggs, session time, and rate telemetry",
+		Description = "Total telur dicuri, durasi sesi, dan pendapatan",
 		Callback = function()
 			local p = genv.QuantumPanels
 			if p and type(p.openStats) == "function" then p.openStats() end
@@ -34057,7 +34564,7 @@ local function fn67(arg)
 
 	SecUtility:AddButton({
 		Title = "Open All Windows",
-		Description = "Opens all telemetry panels simultaneously",
+		Description = "Buka semua panel telemetri secara bersamaan",
 		Callback = function()
 			local p = genv.QuantumPanels
 			if p and type(p.openAll) == "function" then p.openAll() end
@@ -34088,7 +34595,7 @@ local function fn67(arg)
 
 		SecUtility:AddButton({
 			Title = "Remove All Visual Items",
-			Description = "Cleans up client-side spawned fake visual items",
+			Description = "Hapus seluruh objek visual tiruan client",
 			Callback = function()
 				if quantumVisual then quantumVisual.clear() end
 				updateVisualStatus()
@@ -34096,25 +34603,25 @@ local function fn67(arg)
 		})
 	end
 
-	local SecCommunity = DiscordTab:AddSection("Community")
+	local SecCommunity = DiscordTab:AddSection("Community", "lucide/users")
 
 	SecCommunity:AddParagraph({
 		Title = "Quantum | ID Community",
-		Content = "Join our official community for updates, announcements, and support.\n\n<b>Invite: discord.gg/CZVDHgHR</b>"
+		Content = "Gabung ke komunitas resmi kami untuk pembaruan, pengumuman, dan bantuan.\n\n<b>Invite: discord.gg/CZVDHgHR</b>"
 	})
 
 	SecCommunity:AddButton({
 		Title = "Copy Discord Link",
-		Description = "Copies invite link to clipboard",
+		Description = "Salin tautan undangan ke clipboard",
 		Callback = function()
 			if setclipboard then
 				setclipboard("https://discord.gg/CZVDHgHR")
 				Fluent:Notify({
 					Title = "Discord",
-					Content = "Invite link copied to clipboard: discord.gg/CZVDHgHR",
+					Content = "Tautan undangan disalin ke clipboard: discord.gg/CZVDHgHR",
 					Duration = 5,
 					Type = "Success",
-					Icon = "solar/check-circle-bold"
+					Icon = "lucide/check-circle"
 				})
 			end
 		end
@@ -34141,7 +34648,12 @@ local function fn67(arg)
 	Window:SelectTab("Farm")
 	tbl13.hopWindow = Window
 
-genv.__QuantumHubShutdown = function()
+	if quantumConfig.StealMode == "Quantum Ultra" then
+		pcall(activateQuantumUltra)
+	end
+
+	genv.__QuantumHubShutdown = function()
+		pcall(deactivateQuantumUltra)
 		if quantumPlayerSteal then
 			pcall(quantumPlayerSteal.setEnabled, quantumPlayerSteal, false)
 		end
