@@ -6041,7 +6041,14 @@ local v8 = (function()
 			if arg.config.stealMode == "Quantum Ultra" and type(ultraMove) == "function" and char then
 				ultraMove(char, v9)
 				if not fn88() then
-					task.spawn(arg._hoverSettleCarry, arg, v8, v9, n58, fn88)
+					arg:_setStatus("Securing target egg")
+					arg:_requestCarry(v8, true)
+					task.wait(0.08)
+					if arg.carry and arg.carry.active then
+						arg:_instantReturn(uid)
+					else
+						task.spawn(arg._hoverSettleCarry, arg, v8, v9, n58, fn88)
+					end
 				end
 				return
 			end
@@ -7877,7 +7884,7 @@ local v8 = (function()
 			return false
 		end
 		arg.travelBusy = true
-		arg.travelBusyUntil = os.clock() + 45
+		arg.travelBusyUntil = os.clock() + 30
 
 		ok, flag5 = pcall(function()
 			local flag6
@@ -10239,12 +10246,26 @@ local v8 = (function()
 			if v8 then
 				arg._forestDropInProgress = forestDropInProgress
 
+				if arg.config.stealMode == "Quantum Ultra" then
+					arg:_setStatus("Bringing egg home")
+					if type(genv.__QuantumUltraDropSafe) == "function" then
+						genv.__QuantumUltraDropSafe(cframe)
+					else
+						local char = (localPlayer2 or localPlayer).Character
+						local root = char and char:FindFirstChild("HumanoidRootPart")
+						if root then
+							root.CFrame = cframe
+							root.AssemblyLinearVelocity = Vector3.zero
+							root.AssemblyAngularVelocity = Vector3.zero
+						end
+					end
+					arg:_dropEgg()
+					task.wait(0.2)
+					flag5 = not fn97()
+				else
 				for i = 1, index.RELAY_ROUNDS, 1 do
 					arg._forestDropInProgress = forestDropInProgress
 					arg:_setStatus("Bringing egg home")
-					if arg.config.stealMode == "Quantum Ultra" and type(genv.__QuantumUltraDropSafe) == "function" then
-						genv.__QuantumUltraDropSafe(cframe)
-					end
 
 					arg:_hopRoot(cframe, function()
 						local v9 = fn94()
@@ -10498,6 +10519,7 @@ local v8 = (function()
 					arg:_setStatus("Bringing egg home")
 				end
 			end
+		end
 
 			local n72 = 80
 
@@ -11609,7 +11631,7 @@ local v8 = (function()
 			return
 		end
 
-		if arg.config.stealMode == "Fly" then
+		if arg.config.stealMode == "Fly" or arg.config.stealMode == "Quantum Ultra" then
 			arg.instantPhase = "priming"
 			arg.primerUid = nil
 			arg.targetUid = v10.Uid
@@ -11618,7 +11640,7 @@ local v8 = (function()
 			arg.lowFpsPrime = false
 			arg:_installGuardHitDistanceBoost()
 			arg:_startMovementProtection()
-			arg.stats.lastResult = "High Speed departing"
+			arg.stats.lastResult = if arg.config.stealMode == "Quantum Ultra" then "Quantum Ultra departing" else "High Speed departing"
 			arg:_startPrimerTargetHunt()
 			return
 		end
@@ -11774,56 +11796,13 @@ local v8 = (function()
 			arg:_setStatus("Searching")
 			arg:_schedule()
 		else
-			if not arg.userStealEnabled then
-				-- Langsung bersihkan state jika user mematikan Auto Steal
-				arg._instantReturnToken = nil
-				arg._externalDeliver = nil
-				arg.carry.active = false
-				arg.carry.uid = nil
-				arg.activeTarget = nil
-				arg.running = false
-			elseif arg._instantReturnToken ~= nil and (arg.carry.uid ~= nil and not arg._externalDeliver) then
-				arg._externalDeliver = true
-				arg.planGeneration = arg.planGeneration + 1
-				arg.running = false
-				arg:_setStatus("Finishing target egg")
-
-				task.spawn(function()
-					local n70 = os.clock() + 5
-
-					while arg._instantReturnToken ~= nil and os.clock() < n70 and not arg.destroyed and arg.userStealEnabled do
-						task.wait(0.1)
-					end
-
-					if arg.destroyed then
-						return
-					elseif arg.enabled then
-						return
-					end
-
-					arg._externalDeliver = nil
-					arg._instantReturnToken = nil
-					arg.carry.active = false
-					arg.carry.uid = nil
-					arg.activeTarget = nil
-					arg:_cleanupInstantSteal()
-					arg:_removeGuardHitDistanceBoost()
-					arg:_restoreTreadmillVisualAtSafe()
-					arg:_stopMovementProtection()
-					fn68(arg)
-					arg:_setStatus("Idle")
-				end)
-
-				arg:_refreshCounts()
-				return
-			end
-
 			local v8 = arg:_needsHiddenRecall()
 
 			if v8 then
 				arg._recalling = true
 			end
 
+			arg._externalDeliver = nil
 			arg.planGeneration = arg.planGeneration + 1
 			arg.carry.generation += 1
 			arg:_cleanupInstantSteal()
@@ -11842,6 +11821,11 @@ local v8 = (function()
 			arg.safeStarting = false
 			arg.movementRetryPending = false
 			arg:_cancelTween("Disabled")
+			if arg.arrivalHoldConnection then
+				pcall(arg.arrivalHoldConnection.Disconnect, arg.arrivalHoldConnection)
+				arg.arrivalHoldConnection = nil
+			end
+			arg:_clearArrivalHold()
 			arg:_releaseOperation()
 
 			if v8 then
@@ -11855,6 +11839,17 @@ local v8 = (function()
 			arg.activeTarget = nil
 			arg.running = false
 			arg:_setStatus("Idle")
+
+			local char = (localPlayer2 or localPlayer).Character
+			local root = char and char:FindFirstChild("HumanoidRootPart")
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+			if root then
+				root.AssemblyLinearVelocity = Vector3.zero
+				root.AssemblyAngularVelocity = Vector3.zero
+			end
+			if hum then
+				hum.AutoRotate = true
+			end
 		end
 
 		arg:_refreshCounts()
@@ -15083,6 +15078,12 @@ local walkSpeedMultiplier = (function()
 			arg:_setStatus("looking for a carrier")
 			arg:_start()
 		else
+			if arg.loop then
+				pcall(task.cancel, arg.loop)
+				arg.loop = nil
+			end
+			arg.running = false
+			arg.wantsTarget = false
 			arg:_setStatus("idle")
 		end
 	end
@@ -16558,7 +16559,7 @@ local walkSpeedMultiplier = (function()
 		end
 
 		arg.loop = task.spawn(function()
-			while true do
+			while arg.enabled and fn2() do
 				task.wait(0.4)
 				if genv.ChloeX_Running == nil and genv.__QuantumPlayerSteal ~= arg then
 					break
@@ -16982,7 +16983,26 @@ local v18 = (function()
 
 	index.setInfiniteJump = function(arg, arg2)
 		arg.jumpEnabled = arg2 == true
-		if #arg.jumpConnections > 0 then
+
+		if not arg.jumpEnabled then
+			if arg.jumpHeartbeatConnection then
+				pcall(function()
+					arg.jumpHeartbeatConnection:Disconnect()
+				end)
+				arg.jumpHeartbeatConnection = nil
+			end
+
+			for i, jumpConnection in ipairs(arg.jumpConnections) do
+				pcall(function()
+					jumpConnection:Disconnect()
+				end)
+			end
+
+			arg.jumpConnections = {}
+			return
+		end
+
+		if arg.jumpHeartbeatConnection or #arg.jumpConnections > 0 then
 			return
 		end
 
@@ -17015,27 +17035,25 @@ local v18 = (function()
 			end))
 		end)
 
-		task.spawn(function()
-			while true do
-				RunService2.Heartbeat:Wait()
+		arg.jumpHeartbeatConnection = RunService2.Heartbeat:Connect(function()
+			if not arg.jumpEnabled or UserInputService:GetFocusedTextBox() then
+				return
+			end
 
-				if arg.jumpEnabled and not UserInputService:GetFocusedTextBox() then
-					local flag5 = false
+			local flag5 = false
 
-					pcall(function()
-						if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-							flag5 = true
-						else
-							if UserInputService:IsGamepadButtonDown(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonA) then
-								flag5 = true
-							end
-						end
-					end)
-
-					if flag5 and os.clock() - arg.lastJumpAt >= n11 then
-						arg:triggerJump()
+			pcall(function()
+				if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+					flag5 = true
+				else
+					if UserInputService:IsGamepadButtonDown(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonA) then
+						flag5 = true
 					end
 				end
+			end)
+
+			if flag5 and os.clock() - arg.lastJumpAt >= n11 then
+				arg:triggerJump()
 			end
 		end)
 	end
@@ -17138,15 +17156,7 @@ local v18 = (function()
 	index.destroy = function(arg)
 		arg:setFlyForCapture(false)
 		arg:setInstantGrab(false)
-		arg.jumpEnabled = false
-
-		for i, jumpConnection in ipairs(arg.jumpConnections) do
-			pcall(function()
-				jumpConnection:Disconnect()
-			end)
-		end
-
-		arg.jumpConnections = {}
+		arg:setInfiniteJump(false)
 
 		if arg.speedConnection then
 			pcall(function()
@@ -17500,29 +17510,39 @@ v10 = (function()
 	index.setEnabled = function(arg, arg2)
 		arg.enabled = arg2 == true
 
-		if arg.enabled then
-			arg.wasHolding = arg:_carriedUid() ~= nil
+		if not arg.enabled then
+			if arg.connection then
+				pcall(function()
+					arg.connection:Disconnect()
+				end)
+				arg.connection = nil
+			end
+			if arg.watcherThread then
+				pcall(task.cancel, arg.watcherThread)
+				arg.watcherThread = nil
+			end
+			arg.watcher = false
+			return
 		end
 
-		if not arg.watcher then
+		arg.wasHolding = arg:_carriedUid() ~= nil
+
+		if not arg.watcherThread then
 			arg.watcher = true
-
-			task.spawn(function()
-				while not arg.destroyed do
-					if arg.enabled then
-						if arg.running then
-							task.wait(0.5)
-						else
-							pcall(function()
-								arg:_check()
-							end)
-
-							task.wait(0.15)
-						end
-					else
+			arg.watcherThread = task.spawn(function()
+				while not arg.destroyed and arg.enabled do
+					if arg.running then
 						task.wait(0.5)
+					else
+						pcall(function()
+							arg:_check()
+						end)
+
+						task.wait(0.15)
 					end
 				end
+				arg.watcher = false
+				arg.watcherThread = nil
 			end)
 		end
 
@@ -17535,6 +17555,9 @@ v10 = (function()
 
 			if EggState2 and EggState2.CarryChanged then
 				arg.connection = EggState2.CarryChanged:Connect(function(arg3)
+					if not arg.enabled then
+						return
+					end
 					task.defer(function()
 						arg:_check(arg3)
 					end)
@@ -17546,6 +17569,12 @@ v10 = (function()
 	index.destroy = function(arg)
 		arg.destroyed = true
 		arg.enabled = false
+
+		if arg.watcherThread then
+			pcall(task.cancel, arg.watcherThread)
+			arg.watcherThread = nil
+		end
+		arg.watcher = false
 
 		if arg.connection then
 			pcall(function()
@@ -23784,7 +23813,7 @@ do
 		tbl13.hopLoopRunning = true
 
 		task.spawn(function()
-			while fn2() do
+			while fn2() and quantumConfig.HopNoMatch do
 				task.wait(2)
 
 				if quantumConfig.HopNoMatch and not tbl13.hubBusy() then
@@ -23813,7 +23842,7 @@ do
 		tbl13.antiTreadmillRunning = true
 
 		task.spawn(function()
-			while fn2() do
+			while fn2() and quantumConfig.AntiTreadmill do
 				if quantumConfig.AntiTreadmill then
 					local quantumTreadmillManager = genv.__QuantumTreadmillManager
 
@@ -25689,33 +25718,24 @@ end)();
 		end
 
 		arg.worker = task.spawn(function()
-			while true do
-				local destroyed = arg.destroyed
-				if not (if destroyed then not destroyed else fn2()) then
-					break
-				end
-				destroyed = nil
+			while not arg.destroyed and arg.enabled and fn2() do
+				local ok, result = xpcall(function()
+					return arg:_step()
+				end, debug.traceback)
 
-				if arg.enabled then
-					local ok, result = xpcall(function()
-						return arg:_step()
-					end, debug.traceback)
-
-					if ok then
-						destroyed = result
-					else
-						warn("[StealAnEgg] ScrambleBoss worker failed:\n" .. tostring(result))
-						arg:_restoreCharacterControl()
-						arg:_releaseOperation()
-						arg.status = "Runtime error - retrying"
-						destroyed = n9
-					end
+				local destroyed
+				if ok then
+					destroyed = result
 				else
-					destroyed = n10
+					warn("[StealAnEgg] ScrambleBoss worker failed:\n" .. tostring(result))
+					arg:_restoreCharacterControl()
+					arg:_releaseOperation()
+					arg.status = "Runtime error - retrying"
+					destroyed = n9
 				end
 
 				arg:_emit(false)
-				task.wait(destroyed)
+				task.wait(destroyed or n10)
 			end
 
 			arg.worker = nil
@@ -25733,6 +25753,10 @@ end)();
 			arg:_setStatus(arg:_eventPresent() and "Boss detected" or "Waiting for boss portal")
 			arg:_ensureWorker()
 		else
+			if arg.worker then
+				pcall(task.cancel, arg.worker)
+				arg.worker = nil
+			end
 			arg:_restoreCharacterControl()
 			arg:_releaseOperation()
 			arg:_resetCycle()
@@ -28748,7 +28772,8 @@ local function fn65()
 		imageLabel.ZIndex = 0
 		imageLabel.Parent = frame2
 		local frame3 = Instance.new("Frame")
-		frame3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		frame3.BackgroundColor3 = Color3.fromRGB(15, 18, 28)
+		frame3.BackgroundTransparency = 0.22
 		frame3.BorderSizePixel = 0
 		frame3.Size = UDim2.fromScale(1, 1)
 		frame3.ZIndex = 1
@@ -28757,10 +28782,11 @@ local function fn65()
 		local uiGradient = Instance.new("UIGradient", frame3)
 		uiGradient.Rotation = 16
 		uiGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, tbl14.obsTop), ColorSequenceKeypoint.new(0.52, tbl14.obsMid), ColorSequenceKeypoint.new(1, tbl14.obsLow)})
+		uiGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.22), NumberSequenceKeypoint.new(1, 0.28)})
 		local uiStroke = Instance.new("UIStroke", frame3)
-		uiStroke.Color = tbl14.strokeCol
+		uiStroke.Color = Color3.fromRGB(255, 255, 255)
 		uiStroke.Thickness = 1
-		uiStroke.Transparency = 0.72
+		uiStroke.Transparency = 0.84
 		local imageLabel2 = Instance.new("ImageLabel")
 		imageLabel2.AnchorPoint = Vector2.new(0, 0.5)
 		imageLabel2.BackgroundTransparency = 1
@@ -29145,17 +29171,20 @@ local function fn65()
 			frame.AnchorPoint = Vector2.new(0.5, 0)
 			frame.Position = UDim2.new(0.5, 0, 0, -n9 - 24)
 			frame.Size = UDim2.fromOffset(n8, n9)
-			frame.BackgroundColor3 = tbl14.surface
+			frame.BackgroundColor3 = Color3.fromRGB(15, 18, 28)
+			frame.BackgroundTransparency = 0.22
 			frame.BorderSizePixel = 0
 			frame.Visible = false
 			frame.Parent = screenGui
 			fn110(frame)
 			local uiStroke = Instance.new("UIStroke")
-			uiStroke.Color = tbl14.strokeCol
+			uiStroke.Color = Color3.fromRGB(255, 255, 255)
 			uiStroke.Thickness = 1
+			uiStroke.Transparency = 0.84
 			uiStroke.Parent = frame
 			local uiGradient = Instance.new("UIGradient")
 			uiGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, tbl14.obsTop), ColorSequenceKeypoint.new(0.55, tbl14.obsMid), ColorSequenceKeypoint.new(1, tbl14.obsLow)})
+			uiGradient.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.22), NumberSequenceKeypoint.new(1, 0.28)})
 			uiGradient.Rotation = 16
 			uiGradient.Parent = frame
 			local n13 = -(n10 * 2 + n11 + 12)
@@ -30177,34 +30206,22 @@ do
 			TweenService:Create(arg, TweenInfo.new(0.18, Enum.EasingStyle.Quad), arg2):Play()
 		end
 
-		-- GLASSMORPHISM CYBERPUNK PALETTE
-		local color2 = Color3.fromRGB(10, 10, 16)
-		local color3 = Color3.fromRGB(18, 18, 28)
-		local color4 = Color3.fromRGB(28, 28, 42)
-		local color5 = Color3.fromRGB(44, 44, 64)
+		local color2 = Color3.fromRGB(14, 17, 26)
+		local color3 = Color3.fromRGB(20, 24, 38)
+		local color4 = Color3.fromRGB(26, 32, 50)
+		local color5 = Color3.fromRGB(46, 46, 54)
 		local color6 = Color3.fromRGB(255, 255, 255)
-		local color7 = Color3.fromRGB(245, 245, 255)
-		local color8 = Color3.fromRGB(160, 160, 185)
-		local color9 = Color3.fromRGB(110, 110, 135)
-		local color10 = Color3.fromRGB(255, 255, 255)
-		local color11 = Color3.fromRGB(12, 12, 18)
-		local color12 = Color3.fromRGB(50, 225, 130)
-		local color13 = Color3.fromRGB(255, 200, 60)
-		local color14 = Color3.fromRGB(255, 75, 75)
-
-		-- Main Glassmorphism Frame (Transparan Kaca dengan Border Halus)
-		local Frame = fn66("Frame", {
-			Size = UDim2.new(0, 320, 0, 0),
-			AutomaticSize = Enum.AutomaticSize.Y,
-			Position = UDim2.new(0.5, -160, 0, 80),
-			BackgroundColor3 = color2,
-			BackgroundTransparency = 0.18,
-			BorderSizePixel = 0,
-			Active = true,
-			Draggable = true
-		}, screenGui)
-		fn67(Frame, 14)
-		fn68(Frame, Color3.fromRGB(255, 255, 255), 0.82)
+		local color7 = Color3.fromRGB(238, 238, 243)
+		local color8 = Color3.fromRGB(162, 162, 174)
+		local color9 = Color3.fromRGB(116, 116, 128)
+		local color10 = Color3.fromRGB(232, 232, 238)
+		local color11 = Color3.fromRGB(14, 14, 17)
+		local color12 = Color3.fromRGB(74, 222, 128)
+		local color13 = Color3.fromRGB(245, 190, 80)
+		local color14 = Color3.fromRGB(235, 90, 90)
+		local Frame = fn66("Frame", {Size = UDim2.new(0, 320, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Position = UDim2.new(0.5, -160, 0, 80), BackgroundColor3 = color2, BackgroundTransparency = 0.20, BorderSizePixel = 0, Active = true, Draggable = true}, screenGui)
+		fn67(Frame, 12)
+		fn68(Frame, color6, 0.84)
 		fn66("UIPadding", {PaddingTop = UDim.new(0, 14), PaddingBottom = UDim.new(0, 14), PaddingLeft = UDim.new(0, 14), PaddingRight = UDim.new(0, 14)}, Frame)
 		fn66("UIListLayout", {Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder}, Frame)
 		local n8 = 0
@@ -30248,9 +30265,9 @@ do
 		end
 
 		TextButton.MouseLeave:Connect(fn73)
-		local v21 = fn70(64, {BackgroundTransparency = 0.35, BackgroundColor3 = color3})
+		local v21 = fn70(64, {BackgroundTransparency = 0.40, BackgroundColor3 = color3})
 		fn67(v21, 10)
-		local UIStroke = fn66("UIStroke", {Color = Color3.fromRGB(255, 255, 255), Thickness = 1, Transparency = 0.85, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, v21)
+		local UIStroke = fn66("UIStroke", {Color = Color3.fromRGB(255, 255, 255), Thickness = 1, Transparency = 0.88, ApplyStrokeMode = Enum.ApplyStrokeMode.Border}, v21)
 		local Frame2 = fn66("Frame", {Position = UDim2.new(0, 12, 0, 15), Size = UDim2.new(0, 8, 0, 8), BackgroundColor3 = color9, BorderSizePixel = 0}, v21)
 		fn67(Frame2, 4)
 		local v22 = fn71(v21, {Position = UDim2.new(0, 28, 0, 8), Size = UDim2.new(1, -40, 0, 22), Text = "Checking", Font = Enum.Font.BuilderSansBold, TextSize = 13})
@@ -30264,7 +30281,7 @@ do
 		fn67(Frame4, 3)
 
 		local function fn74(arg)
-			local v27 = fn70(arg, {BackgroundTransparency = 0.35, BackgroundColor3 = color3})
+			local v27 = fn70(arg, {BackgroundTransparency = 0.40, BackgroundColor3 = color3})
 			fn67(v27, 10)
 			fn68(v27, Color3.fromRGB(255, 255, 255), 0.88)
 			return v27
@@ -30400,9 +30417,9 @@ do
 		end)
 
 		local v31 = fn70(36)
-		local TextButton2 = fn66("TextButton", {Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = Color3.fromRGB(35, 110, 220), BorderSizePixel = 0, Text = "⚡ Hop Server Sekarang", Font = Enum.Font.GothamBold, TextSize = 12, TextColor3 = Color3.fromRGB(255, 255, 255), AutoButtonColor = false}, v31)
-		fn67(TextButton2, 10)
-		fn68(TextButton2, Color3.fromRGB(255, 255, 255), 0.75)
+		local TextButton2 = fn66("TextButton", {Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = color4, BorderSizePixel = 0, Text = "Hop Now", Font = Enum.Font.BuilderSansBold, TextSize = 13, TextColor3 = color7, AutoButtonColor = false}, v31)
+		fn67(TextButton2, 8)
+		fn68(TextButton2, color6)
 
 		local function fn82()
 			fn69(TextButton2, {BackgroundColor3 = color10, TextColor3 = color11})
@@ -30426,9 +30443,9 @@ do
 		end
 
 		TextButton2.MouseButton1Click:Connect(fn84)
-		local v32 = fn70(92, {BackgroundTransparency = 0, BackgroundColor3 = color3, Visible = false})
+		local v32 = fn70(92, {BackgroundTransparency = 0.18, BackgroundColor3 = Color3.fromRGB(16, 20, 32), Visible = false})
 		fn67(v32, 10)
-		fn68(v32, color10, 0.4)
+		fn68(v32, Color3.fromRGB(255, 255, 255), 0.84)
 		local v33 = fn71(v32, {Position = UDim2.new(0, 12, 0, 8), Size = UDim2.new(1, -24, 0, 18), Text = "", Font = Enum.Font.BuilderSansBold})
 		local Frame5 = fn66("Frame", {Position = UDim2.new(0, 12, 0, 32), Size = UDim2.new(1, -24, 0, 4), BackgroundColor3 = color4, BorderSizePixel = 0}, v32)
 		fn67(Frame5, 2)
@@ -30650,26 +30667,51 @@ end
 local function fn66()
 		local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
 
-local function fn67(arg)
+local function withSelectAll(list)
+		local out = {"Select All"}
+		for _, item in ipairs(list or {}) do
+			if item ~= "Select All" and item ~= "None" and item ~= "" then
+				out[#out + 1] = item
+			end
+		end
+		return out
+	end
+
+	local function fn67(arg, fullList)
 		local tbl14 = {}
-		if type(arg) == "table" then
-			local hasSelectAll = false
-			-- Cek apakah user memilih '[PILIH SEMUA]' atau '[Select All]'
-			for k, v in pairs(arg) do
-				local val = type(k) == "number" and v or (v == true and k or nil)
-				if val and (val == "[PILIH SEMUA]" or val == "[Select All]" or val == "All") then
-					hasSelectAll = true
+		if type(arg) ~= "table" then return tbl14 end
+
+		local selectAllActive = (arg["Select All"] == true) or (arg["All"] == true)
+		if not selectAllActive then
+			for _, val in ipairs(arg) do
+				if val == "Select All" or val == "All" then
+					selectAllActive = true
 					break
 				end
 			end
+		end
 
-			for k, v in pairs(arg) do
-				local val = type(k) == "number" and v or (v == true and k or nil)
-				if val and val ~= "None" and val ~= "" and val ~= "[PILIH SEMUA]" and val ~= "[Select All]" then
-					tbl14[#tbl14 + 1] = val
+		if selectAllActive and type(fullList) == "table" then
+			for _, opt in ipairs(fullList) do
+				if opt ~= "Select All" and opt ~= "All" and opt ~= "None" and opt ~= "" and not table.find(tbl14, opt) then
+					tbl14[#tbl14 + 1] = opt
+				end
+			end
+			return tbl14
+		end
+
+		for k, v in pairs(arg) do
+			if type(k) == "number" and type(v) == "string" then
+				if v ~= "None" and v ~= "" and v ~= "Select All" and v ~= "All" and not table.find(tbl14, v) then
+					tbl14[#tbl14 + 1] = v
+				end
+			elseif type(k) == "string" and v == true then
+				if k ~= "None" and k ~= "" and k ~= "Select All" and k ~= "All" and not table.find(tbl14, k) then
+					tbl14[#tbl14 + 1] = k
 				end
 			end
 		end
+
 		return tbl14
 	end
 
@@ -30880,13 +30922,15 @@ local function fn67(arg)
 	end
 
 	function tbl10.AutoPlaceLoop()
-		if quantumConfig.IsAutoPlaceWorkerRunning then
-			return
-		end
+		quantumConfig.AutoPlaceGen = (quantumConfig.AutoPlaceGen or 0) + 1
+		local currentGen = quantumConfig.AutoPlaceGen
 		quantumConfig.IsAutoPlaceWorkerRunning = true
 
-		while quantumConfig.AutoPlace and fn2() do
+		while quantumConfig.AutoPlace and fn2() and quantumConfig.AutoPlaceGen == currentGen do
 			task.wait(1.5)
+			if not quantumConfig.AutoPlace or not fn2() or quantumConfig.AutoPlaceGen ~= currentGen then
+				break
+			end
 
 			local ok2, result = pcall(function()
 				local ReplicatedStorage2 = game:GetService("ReplicatedStorage")
@@ -31194,7 +31238,9 @@ local function fn67(arg)
 			end
 		end
 
-		quantumConfig.IsAutoPlaceWorkerRunning = false
+		if quantumConfig.AutoPlaceGen == currentGen then
+			quantumConfig.IsAutoPlaceWorkerRunning = false
+		end
 	end
 
 	quantumTaskLadder.register("auto_place", {wants = fn73, active = function()
@@ -31206,16 +31252,18 @@ local function fn67(arg)
 	end})
 
 	function tbl10.AutoHatchLoop()
-		if quantumConfig.IsAutoHatchWorkerRunning then
-			return
-		end
+		quantumConfig.AutoHatchGen = (quantumConfig.AutoHatchGen or 0) + 1
+		local currentGen = quantumConfig.AutoHatchGen
 		quantumConfig.IsAutoHatchWorkerRunning = true
 
 		task.spawn(function()
 			local tbl18 = {}
 
-			while quantumConfig.AutoHatch and fn2() do
+			while quantumConfig.AutoHatch and fn2() and quantumConfig.AutoHatchGen == currentGen do
 				task.wait(1.5)
+				if not quantumConfig.AutoHatch or not fn2() or quantumConfig.AutoHatchGen ~= currentGen then
+					break
+				end
 
 				pcall(function()
 					local EggState2 = require(game:GetService("ReplicatedStorage").Client.EggState)
@@ -31234,7 +31282,7 @@ local function fn67(arg)
 					local now = os.time()
 
 					for i, v22 in ipairs(tbl19) do
-						if not quantumConfig.AutoHatch then
+						if not quantumConfig.AutoHatch or quantumConfig.AutoHatchGen ~= currentGen then
 							break
 						end
 
@@ -31262,7 +31310,9 @@ local function fn67(arg)
 				end)
 			end
 
-			quantumConfig.IsAutoHatchWorkerRunning = false
+			if quantumConfig.AutoHatchGen == currentGen then
+				quantumConfig.IsAutoHatchWorkerRunning = false
+			end
 		end)
 	end
 
@@ -31567,25 +31617,28 @@ local function fn67(arg)
 	end})
 
 	function tbl10.AutoMutationLoop()
-		if quantumConfig.IsAutoMutationWorkerRunning then
-			return
-		end
+		quantumConfig.AutoMutationGen = (quantumConfig.AutoMutationGen or 0) + 1
+		local currentGen = quantumConfig.AutoMutationGen
 		quantumConfig.IsAutoMutationWorkerRunning = true
 
 		task.spawn(function()
-			while quantumConfig.AutoMutation and fn2() do
+			while quantumConfig.AutoMutation and fn2() and quantumConfig.AutoMutationGen == currentGen do
 				task.wait(1)
+				if not quantumConfig.AutoMutation or not fn2() or quantumConfig.AutoMutationGen ~= currentGen then
+					break
+				end
 				pcall(tbl10.mutationSweep)
 			end
 
-			quantumConfig.IsAutoMutationWorkerRunning = false
+			if quantumConfig.AutoMutationGen == currentGen then
+				quantumConfig.IsAutoMutationWorkerRunning = false
+			end
 		end)
 	end
 
 	function tbl10.RingEventLoop()
-		if quantumConfig.IsRingEventRunning then
-			return
-		end
+		quantumConfig.RingEventGen = (quantumConfig.RingEventGen or 0) + 1
+		local currentGen = quantumConfig.RingEventGen
 		quantumConfig.IsRingEventRunning = true
 
 		task.spawn(function()
@@ -31594,7 +31647,7 @@ local function fn67(arg)
 			local cframe3 = CFrame.new(5573, 70.77, -363)
 
 			local function fn75()
-				local autoRingEvent = quantumConfig.AutoRingEvent
+				local autoRingEvent = quantumConfig.AutoRingEvent and quantumConfig.RingEventGen == currentGen
 				return if autoRingEvent then not fn2() else not autoRingEvent
 			end
 
@@ -31631,7 +31684,9 @@ local function fn67(arg)
 				end
 			end
 
-			quantumConfig.IsRingEventRunning = false
+			if quantumConfig.RingEventGen == currentGen then
+				quantumConfig.IsRingEventRunning = false
+			end
 		end)
 	end
 
@@ -32129,40 +32184,7 @@ local function fn67(arg)
 	local v26 = fn68()
 	fn73 = fn69((fn67(tbl21)))
 
-	local function fn78(arg)
-		local isEnabled = arg == true
-		quantumConfig.AutoSteal = isEnabled
-
-		if v13 then
-			v13:setEnabled(isEnabled)
-			if not isEnabled then
-				-- FORCE ABORT IMMEDIATELY (tidak tunggu 45 detik lagi)
-				v13._instantReturnToken = nil
-				v13._externalDeliver = nil
-				v13.carry.active = false
-				v13.carry.uid = nil
-				v13.activeTarget = nil
-				v13.running = false
-				pcall(function() v13:_cancelTween("Disabled") end)
-				pcall(function() v13:_cleanupInstantSteal() end)
-				pcall(function() v13:_stopMovementProtection() end)
-				pcall(function() v13:_setStatus("Idle") end)
-			end
-		end
-
-		-- Matikan atau hidupkan Quantum Ultra sinkron dengan toggle Auto Steal
-		if isEnabled then
-			if quantumConfig.StealMode == "Quantum Ultra" then
-				pcall(activateQuantumUltra)
-			end
-		else
-			pcall(deactivateQuantumUltra)
-		end
-
-		if type(genv.__QuantumSetStealDeclutter) == "function" then
-			pcall(genv.__QuantumSetStealDeclutter, isEnabled)
-		end
-	end
+	local fn78
 
 	local function fn79(arg)
 		quantumConfig.StealHoldSeconds = math.clamp(math.floor((tonumber(arg) or 5) + 0.5), 1, 10)
@@ -32240,7 +32262,7 @@ local function fn67(arg)
 	local isQuantumUltraActive = false
 	local isQuantumUltraProcessing = false
 	local QUANTUM_ULTRA_TARGET_POS = Vector3.new(565.74, 71.69, -368.14)
-	local quantumUltraHoldDuration = 0.15
+	local quantumUltraHoldDuration = 1.0
 	local quantumUltraRespawnGen = 0
 	local quantumUltraMoveGen = 0
 	local activeCameraLockConnection = nil
@@ -32415,7 +32437,7 @@ local function fn67(arg)
 			end
 		end
 
-		task.delay(0.25, function()
+		task.delay(1.2, function()
 			isQuantumUltraProcessing = false
 		end)
 	end
@@ -32468,25 +32490,13 @@ local function fn67(arg)
 			end
 		end)
 
-		-- OPTIMIZED: Scan container telur spesifik, HINDARI Workspace:GetDescendants() yang bikin lag freeze
-		local searchFolders = {
-			Workspace:FindFirstChild("EggWorld"),
-			Workspace:FindFirstChild("__OBJECTS"),
-			Workspace:FindFirstChild("World"),
-			Workspace:FindFirstChild("Eggs"),
-			Workspace:FindFirstChild("FieldEggs")
-		}
-		for _, folder in ipairs(searchFolders) do
-			if folder then
-				for _, d in ipairs(folder:GetDescendants()) do
-					if d:IsA("ProximityPrompt") and d.Enabled then
-						local p = d.Parent
-						if p:IsA("Attachment") then p = p.Parent end
-						if p and p:IsA("BasePart") and (p.Position - hrp.Position).Magnitude < 22 then
-							quantumUltraInstantGrab(d)
-							break
-						end
-					end
+		for _, d in ipairs(Workspace:GetDescendants()) do
+			if d:IsA("ProximityPrompt") and (d.Name == "CarryAreaEgg" or d.Name:lower():find("egg")) and d.Enabled then
+				local p = d.Parent
+				if p:IsA("Attachment") then p = p.Parent end
+				if p and p:IsA("BasePart") and (p.Position - hrp.Position).Magnitude < 15 then
+					quantumUltraInstantGrab(d)
+					break
 				end
 			end
 		end
@@ -32497,23 +32507,12 @@ local function fn67(arg)
 		local hrp = char and (char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart)
 		if not hrp then return end
 
-		local eggContainers = {
-			Workspace:FindFirstChild("EggWorld"),
-			Workspace:FindFirstChild("__OBJECTS"),
-			Workspace:FindFirstChild("World"),
-			Workspace:FindFirstChild("Eggs"),
-			Workspace:FindFirstChild("FieldEggs")
-		}
-		for _, folder in ipairs(eggContainers) do
-			if folder then
-				for _, d in ipairs(folder:GetDescendants()) do
-					if d:IsA("ProximityPrompt") and d.Enabled then
-						local p = d.Parent
-						if p:IsA("Attachment") then p = p.Parent end
-						if p and p:IsA("BasePart") and (p.Position - pos).Magnitude < 22 then
-							quantumUltraInstantGrab(d)
-						end
-					end
+		for _, d in ipairs(Workspace:GetDescendants()) do
+			if d:IsA("ProximityPrompt") and d.Enabled then
+				local p = d.Parent
+				if p:IsA("Attachment") then p = p.Parent end
+				if p and p:IsA("BasePart") and (p.Position - pos).Magnitude < 15 then
+					quantumUltraInstantGrab(d)
 				end
 			end
 		end
@@ -32575,15 +32574,41 @@ local function fn67(arg)
 				end
 			end)
 
-		-- CAMERA LOCK REMOVED (mencegah layar freeze/mandeg selama 2 detik)
 		task.spawn(function()
-			local camera = workspace.CurrentCamera
-			if camera and camera.CameraType == Enum.CameraType.Scriptable then
-				camera.CameraType = Enum.CameraType.Custom
-				local hum = character and character:FindFirstChildOfClass("Humanoid")
-				if hum then camera.CameraSubject = hum end
-			end
-		end)
+				local camera = workspace.CurrentCamera
+				if not camera or not isQuantumUltraActive or quantumUltraMoveGen ~= currentMoveGen then return end
+
+				local cameraOffset = camera.CFrame.Position - root.Position
+				local targetCamCFrame = CFrame.new(targetPos + cameraOffset) * camera.CFrame.Rotation
+
+				if activeCameraLockConnection then
+					activeCameraLockConnection:Disconnect()
+					activeCameraLockConnection = nil
+				end
+
+				camera.CameraType = Enum.CameraType.Scriptable
+				local lockStartTime = os.clock()
+				local camConnection
+
+				camConnection = RunService.RenderStepped:Connect(function()
+					if not isQuantumUltraActive or quantumUltraMoveGen ~= currentMoveGen or localPlayer.Character ~= character or os.clock() - lockStartTime >= 2 then
+						camConnection:Disconnect()
+						if activeCameraLockConnection == camConnection then
+							activeCameraLockConnection = nil
+						end
+						if camera.CameraType == Enum.CameraType.Scriptable then
+							camera.CameraType = Enum.CameraType.Custom
+						end
+						local hum = (localPlayer.Character or character) and (localPlayer.Character or character):FindFirstChildOfClass("Humanoid")
+						if hum then
+							camera.CameraSubject = hum
+						end
+					else
+						camera.CFrame = targetCamCFrame
+					end
+				end)
+				activeCameraLockConnection = camConnection
+			end)
 		end
 	end
 
@@ -32707,6 +32732,24 @@ local function fn67(arg)
 		genv.__QuantumUltraDropSafe = nil
 	end
 
+	fn78 = function(arg)
+		quantumConfig.AutoSteal = arg == true
+
+		if v13 then
+			v13:setEnabled(quantumConfig.AutoSteal)
+		end
+
+		if not quantumConfig.AutoSteal then
+			pcall(deactivateQuantumUltra)
+		elseif quantumConfig.StealMode == "Quantum Ultra" then
+			pcall(activateQuantumUltra)
+		end
+
+		if type(genv.__QuantumSetStealDeclutter) == "function" then
+			pcall(genv.__QuantumSetStealDeclutter, quantumConfig.AutoSteal)
+		end
+	end
+
 	local function fn89(arg)
 		local str4 = type(arg) == "string" and arg or ""
 		local str5 = str4:lower()
@@ -32782,7 +32825,7 @@ local function fn67(arg)
 	end
 
 	local function fn93(arg)
-		local v27 = fn67(arg)
+		local v27 = fn67(arg, tbl14)
 		quantumConfig.StealMutations = v27
 
 		if v13 then
@@ -32818,7 +32861,7 @@ local function fn67(arg)
 	end
 
 	local function fn97(arg)
-		local v27 = fn67(arg)
+		local v27 = fn67(arg, {"Name", "Rarity", "Value", "Weight", "Mutation", "Placed Eggs", "Icon"})
 		quantumConfig.EspDetails = v27
 		if not v13 then
 			return
@@ -32856,7 +32899,7 @@ local function fn67(arg)
 	end
 
 	local function fn98(arg)
-		quantumConfig.ScrambleTradeInBanners = fn67(arg)
+		quantumConfig.ScrambleTradeInBanners = fn67(arg, {"Biohazard Pets", "Experimental Pets", "Unstable DNA"})
 	end
 
 	local function fn99(arg)
@@ -32881,11 +32924,11 @@ local function fn67(arg)
 	end
 
 	local function fn103(arg)
-		quantumConfig.FavRarities = fn67(arg)
+		quantumConfig.FavRarities = fn67(arg, v26)
 	end
 
 	local function fn104(arg)
-		quantumConfig.FavSpecies = fn67(arg)
+		quantumConfig.FavSpecies = fn67(arg, v24)
 	end
 
 	local function fn105(arg)
@@ -32913,11 +32956,11 @@ local function fn67(arg)
 	end
 
 	local function fn111(arg)
-		quantumConfig.FuseRarities = fn67(arg)
+		quantumConfig.FuseRarities = fn67(arg, v26)
 	end
 
 	local function fn112(arg)
-		quantumConfig.FuseSpecies = fn67(arg)
+		quantumConfig.FuseSpecies = fn67(arg, v24)
 	end
 
 	local function fn113(arg)
@@ -32966,8 +33009,8 @@ local function fn67(arg)
 		quantumConfig.ScrambleAutoBuy = arg == true
 	end
 
-	local function fn117(arg)
-		quantumConfig.ScrambleBuyList = fn67(arg)
+	local function fn117(arg, list)
+		quantumConfig.ScrambleBuyList = fn67(arg, list)
 	end
 
 	local function fn118(arg)
@@ -32975,6 +33018,8 @@ local function fn67(arg)
 
 		if quantumConfig.AutoPlace then
 			task.spawn(tbl10.AutoPlaceLoop)
+		else
+			quantumConfig.AutoPlaceGen = (quantumConfig.AutoPlaceGen or 0) + 1
 		end
 	end
 
@@ -32983,6 +33028,8 @@ local function fn67(arg)
 
 		if quantumConfig.AutoHatch then
 			task.spawn(tbl10.AutoHatchLoop)
+		else
+			quantumConfig.AutoHatchGen = (quantumConfig.AutoHatchGen or 0) + 1
 		end
 	end
 
@@ -32991,6 +33038,8 @@ local function fn67(arg)
 
 		if quantumConfig.AutoMutation then
 			task.spawn(tbl10.AutoMutationLoop)
+		else
+			quantumConfig.AutoMutationGen = (quantumConfig.AutoMutationGen or 0) + 1
 		end
 	end
 
@@ -32999,6 +33048,8 @@ local function fn67(arg)
 
 		if quantumConfig.AutoRingEvent then
 			tbl10.RingEventLoop()
+		else
+			quantumConfig.RingEventGen = (quantumConfig.RingEventGen or 0) + 1
 		end
 	end
 
@@ -33007,11 +33058,11 @@ local function fn67(arg)
 	end
 
 	local function fn123(arg)
-		quantumConfig.MutationSpecies = fn67(arg)
+		quantumConfig.MutationSpecies = fn67(arg, v24)
 	end
 
 	local function fn124(arg)
-		quantumConfig.MutationRarities = fn67(arg)
+		quantumConfig.MutationRarities = fn67(arg, v26)
 	end
 
 	local function fn125(arg)
@@ -33260,7 +33311,7 @@ local function fn67(arg)
 	end
 
 	local function fn146(arg)
-		quantumConfig.StealPlayerRarities = fn67(arg)
+		quantumConfig.StealPlayerRarities = fn67(arg, v26)
 	end
 
 	local function fn147(arg)
@@ -33309,7 +33360,7 @@ local function fn67(arg)
 	end
 
 	local function fn152(arg)
-		quantumConfig.WebhookRarities = fn67(arg)
+		quantumConfig.WebhookRarities = fn67(arg, v26)
 	end
 
 	local function fn153(arg)
@@ -33401,11 +33452,11 @@ local function fn67(arg)
 	SecDrScramble:AddDropdown("ScrambleBuyList", {
 		Title = "Shop Buy List",
 		Description = "Pilih item yang dibeli otomatis dari toko event",
-		Values = tbl26,
+		Values = withSelectAll(tbl26),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
-			fn117(v)
+			fn117(v, tbl26)
 		end
 	})
 
@@ -33430,7 +33481,7 @@ local function fn67(arg)
 	SecDrScramble:AddDropdown("ScrambleTradeInBanners", {
 		Title = "Target Banners",
 		Description = "Filter target banner untuk penukaran",
-		Values = {"Biohazard Pets", "Experimental Pets", "Unstable DNA"},
+		Values = withSelectAll({"Biohazard Pets", "Experimental Pets", "Unstable DNA"}),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
@@ -33517,66 +33568,36 @@ local function fn67(arg)
 		end
 	})
 
-	local ddStealEggNames = SecAutoSteal:AddDropdown("StealEggNames", {
+	SecAutoSteal:AddDropdown("StealEggNames", {
 		Title = "Filter By Egg Name",
 		Description = "Hanya curi telur ini. Kosongkan untuk semua.",
-		Values = v24,
+		Values = withSelectAll(v24),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
-			quantumConfig.StealNamesFilter = fn67(v)
+			quantumConfig.StealNamesFilter = fn67(v, v24)
 		end
 	})
 
-	local ddStealRarities = SecAutoSteal:AddDropdown("StealRarities", {
+	SecAutoSteal:AddDropdown("StealRarities", {
 		Title = "Filter By Rarity",
 		Description = "Hanya curi rarity ini. Kosongkan untuk semua.",
-		Values = v26,
+		Values = withSelectAll(v26),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
-			quantumConfig.StealRarities = fn67(v)
+			quantumConfig.StealRarities = fn67(v, v26)
 		end
 	})
 
-	SecAutoSteal:AddButton({
-		Title = "[+] Pilih Semua Rarity Telur",
-		Description = "Centang semua opsi rarity target sekaligus tanpa ribet",
-		Callback = function()
-			if ddStealRarities and type(v26) == "table" then
-				local all = {}
-				for _, rName in ipairs(v26) do
-					all[rName] = true
-				end
-				pcall(function() ddStealRarities:SetValue(all) end)
-				quantumConfig.StealRarities = fn67(all)
-			end
-		end
-	})
-
-	local ddStealAreas = SecAutoSteal:AddDropdown("StealAreas", {
+	SecAutoSteal:AddDropdown("StealAreas", {
 		Title = "Select Area",
 		Description = "Hanya curi dari area terpilih. Kosongkan untuk semua.",
-		Values = v25,
+		Values = withSelectAll(v25),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
-			quantumConfig.StealAreas = fn67(v)
-		end
-	})
-
-	SecAutoSteal:AddButton({
-		Title = "[+] Pilih Semua Area Map",
-		Description = "Centang semua area sekaligus",
-		Callback = function()
-			if ddStealAreas and type(v25) == "table" then
-				local all = {}
-				for _, aName in ipairs(v25) do
-					all[aName] = true
-				end
-				pcall(function() ddStealAreas:SetValue(all) end)
-				quantumConfig.StealAreas = fn67(all)
-			end
+			quantumConfig.StealAreas = fn67(v, v25)
 		end
 	})
 
@@ -33593,7 +33614,7 @@ local function fn67(arg)
 	SecAutoSteal:AddDropdown("StealMutations", {
 		Title = "Filter By Mutation",
 		Description = "Hanya curi telur dengan mutasi tertentu",
-		Values = tbl14,
+		Values = withSelectAll(tbl14),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
@@ -33652,7 +33673,7 @@ local function fn67(arg)
 	SecAutoSteal:AddDropdown("StealPlayerRarities", {
 		Title = "Player Rarity Filter",
 		Description = "Rarity target pemain. Kosong = gunakan filter umum.",
-		Values = v26,
+		Values = withSelectAll(v26),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
@@ -33710,27 +33731,14 @@ local function fn67(arg)
 		end
 	})
 
-	local ddPlaceRarity = SecAutoPlace:AddDropdown("PlaceEggRarity", {
+	SecAutoPlace:AddDropdown("PlaceEggRarity", {
 		Title = "Place Egg Rarity",
 		Description = "Filter rarity telur yang ditaruh. Kosong = semua.",
-		Values = v26,
+		Values = withSelectAll(v26),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
-			quantumConfig.PlaceRarities = fn67(v)
-		end
-	})
-
-	SecAutoPlace:AddButton({
-		Title = "[+] Pilih Semua Rarity Place",
-		Description = "Pilih semua rarity telur untuk ditaruh ke base",
-		Callback = function()
-			if ddPlaceRarity and type(v26) == "table" then
-				local all = {}
-				for _, rName in ipairs(v26) do all[rName] = true end
-				pcall(function() ddPlaceRarity:SetValue(all) end)
-				quantumConfig.PlaceRarities = fn67(all)
-			end
+			quantumConfig.PlaceRarities = fn67(v, v26)
 		end
 	})
 
@@ -33807,35 +33815,22 @@ local function fn67(arg)
 	SecAutoSell:AddDropdown("SellPetNames", {
 		Title = "Pet Name Filter",
 		Description = "Pilih nama pet untuk dijual. Kosong = semua.",
-		Values = fn73,
+		Values = withSelectAll(fn73),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
-			quantumConfig.SellNames = fn67(v)
+			quantumConfig.SellNames = fn67(v, fn73)
 		end
 	})
 
-	local ddSellPetRarities = SecAutoSell:AddDropdown("SellPetRarities", {
+	SecAutoSell:AddDropdown("SellPetRarities", {
 		Title = "Pet Rarity Filter",
 		Description = "Filter rarity pet yang akan dijual",
-		Values = fn69(v26),
+		Values = withSelectAll(fn69(v26)),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
-			quantumConfig.SellRarities = fn67(v)
-		end
-	})
-
-	SecAutoSell:AddButton({
-		Title = "[+] Pilih Semua Rarity Pet Dijual",
-		Description = "Centang semua opsi rarity pet sekaligus",
-		Callback = function()
-			if ddSellPetRarities and type(v26) == "table" then
-				local all = {}
-				for _, rName in ipairs(v26) do all[rName] = true end
-				pcall(function() ddSellPetRarities:SetValue(all) end)
-				quantumConfig.SellRarities = fn67(all)
-			end
+			quantumConfig.SellRarities = fn67(v, v26)
 		end
 	})
 
@@ -33866,27 +33861,14 @@ local function fn67(arg)
 		end
 	})
 
-	local ddSellEggRarities = SecAutoSell:AddDropdown("SellEggRarities", {
+	SecAutoSell:AddDropdown("SellEggRarities", {
 		Title = "Egg Rarity Filter",
 		Description = "Filter rarity telur yang akan dijual",
-		Values = fn69(v26),
+		Values = withSelectAll(fn69(v26)),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
-			quantumConfig.SellEggRarities = fn67(v)
-		end
-	})
-
-	SecAutoSell:AddButton({
-		Title = "[+] Pilih Semua Rarity Telur Dijual",
-		Description = "Centang semua opsi rarity telur sekaligus",
-		Callback = function()
-			if ddSellEggRarities and type(v26) == "table" then
-				local all = {}
-				for _, rName in ipairs(v26) do all[rName] = true end
-				pcall(function() ddSellEggRarities:SetValue(all) end)
-				quantumConfig.SellEggRarities = fn67(all)
-			end
+			quantumConfig.SellEggRarities = fn67(v, v26)
 		end
 	})
 
@@ -33931,7 +33913,7 @@ local function fn67(arg)
 	SecAutoFuse:AddDropdown("FuseRarities", {
 		Title = "Rarities to Fuse",
 		Description = "Hanya fusi pet dengan rarity ini",
-		Values = v26,
+		Values = withSelectAll(v26),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
@@ -33942,7 +33924,7 @@ local function fn67(arg)
 	SecAutoFuse:AddDropdown("FuseSpecies", {
 		Title = "Species to Fuse",
 		Description = "Hanya spesies ini yang dimasukkan ke mesin fusi",
-		Values = v24,
+		Values = withSelectAll(v24),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
@@ -33973,7 +33955,7 @@ local function fn67(arg)
 	SecAutoFav:AddDropdown("FavoriteRarities", {
 		Title = "Rarities to Keep",
 		Description = "Pet dengan rarity ini otomatis difavoritkan",
-		Values = v26,
+		Values = withSelectAll(v26),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
@@ -33984,7 +33966,7 @@ local function fn67(arg)
 	SecAutoFav:AddDropdown("FavoriteSpecies", {
 		Title = "Species to Keep",
 		Description = "Pet dari spesies ini otomatis difavoritkan",
-		Values = v24,
+		Values = withSelectAll(v24),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
@@ -34026,7 +34008,7 @@ local function fn67(arg)
 	SecAutoRift:AddDropdown("MutationSpecies", {
 		Title = "Mutate Egg Name",
 		Description = "Hanya mutasi telur di base dengan nama ini",
-		Values = v24,
+		Values = withSelectAll(v24),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
@@ -34037,7 +34019,7 @@ local function fn67(arg)
 	SecAutoRift:AddDropdown("MutationRarity", {
 		Title = "Mutate Egg Rarity",
 		Description = "Hanya mutasi telur di base dengan rarity ini",
-		Values = v26,
+		Values = withSelectAll(v26),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
@@ -34099,7 +34081,7 @@ local function fn67(arg)
 	SecESP:AddDropdown("ESPDetails", {
 		Title = "ESP Details",
 		Description = "Atur informasi yang tampil pada label ESP",
-		Values = {"Name", "Rarity", "Value", "Weight", "Mutation", "Placed Eggs", "Icon"},
+		Values = withSelectAll({"Name", "Rarity", "Value", "Weight", "Mutation", "Placed Eggs", "Icon"}),
 		Multi = true,
 		Default = {"Name", "Rarity", "Value", "Icon"},
 		Callback = function(v)
@@ -34262,7 +34244,7 @@ local function fn67(arg)
 	SecWebhook:AddDropdown("WebhookRarities", {
 		Title = "Notify Rarities",
 		Description = "Kirim notifikasi hanya untuk telur dengan rarity ini",
-		Values = v26,
+		Values = withSelectAll(v26),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
@@ -34374,11 +34356,11 @@ local function fn67(arg)
 	SecProgression:AddDropdown("RaceBuyList", {
 		Title = "Shop Buy List",
 		Description = "Pilih item toko balapan yang ingin dibeli",
-		Values = {"CashBooster", "SpeedBoost", "TreadmillBoost", "MutationToken", "RacingBat"},
+		Values = withSelectAll({"CashBooster", "SpeedBoost", "TreadmillBoost", "MutationToken", "RacingBat"}),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
-			quantumConfig.RaceBuyList = fn67(v)
+			quantumConfig.RaceBuyList = fn67(v, {"CashBooster", "SpeedBoost", "TreadmillBoost", "MutationToken", "RacingBat"})
 		end
 	})
 
@@ -34468,11 +34450,11 @@ local function fn67(arg)
 	SecProgression:AddDropdown("BloomTiers", {
 		Title = "Catch Tiers",
 		Description = "Filter tier kupu-kupu yang ingin ditangkap",
-		Values = {"Radiant", "Amethyst", "Sapphire", "Emerald"},
+		Values = withSelectAll({"Radiant", "Amethyst", "Sapphire", "Emerald"}),
 		Multi = true,
 		Default = {},
 		Callback = function(v)
-			quantumConfig.ButterflyTiers = fn67(v)
+			quantumConfig.ButterflyTiers = fn67(v, {"Radiant", "Amethyst", "Sapphire", "Emerald"})
 		end
 	})
 
