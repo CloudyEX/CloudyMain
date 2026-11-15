@@ -2974,20 +2974,18 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
     local playerSpeed = getPlayerCurrentSpeed()
     local baseStep = CONFIG.HopDistance
     local stepSize = (playerSpeed < 100) and math.max(34, playerSpeed * 0.45) or math.min(baseStep, math.max(60, playerSpeed * 0.75))
+    local interval = CONFIG.CheckpointInterval or 1600
     local safeTarget = CONFIG.BaseDropPosition
 
     local laneZ = math.clamp(root.Position.Z, -425, -300)
     local currentX = root.Position.X
-    local startX = currentX
+    local lastCheckpointX = currentX
 
     StealUIManager:Lock()
     ShieldManager:MuteUGI()
     if humanoid then humanoid.PlatformStand = false end
 
     local groundY = CONFIG.GroundAltitude + 1.0
-    local totalDist = math.max(0, startX - boundaryX)
-    local midDropX = boundaryX + (totalDist * 0.5)
-    local didMidDrop = false
 
     while currentX - stepSize > boundaryX do
         if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then
@@ -3026,8 +3024,8 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
             CONFIG.HopGap = math.max(CONFIG.HopGapMin, CONFIG.HopGap - 0.005)
         end
 
-        if not didMidDrop and currentX <= midDropX then
-            didMidDrop = true
+        if math.abs(lastCheckpointX - currentX) >= interval then
+            lastCheckpointX = currentX
             local ok = performGroundCheckpoint(targetEgg, currentX, laneZ, sessionId)
             if not ok and not isHoldingEgg() then
                 ShieldManager:UnmuteUGI()
@@ -3035,7 +3033,6 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
                 cleanupFlightState()
                 return false
             end
-            task.wait(0.08)
         end
     end
 
@@ -3056,7 +3053,6 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
             cleanupFlightState()
             return false
         end
-        task.wait(0.08)
     end
 
     local corridorStep = 45
@@ -3688,55 +3684,78 @@ end)
 
 WorkerScheduler:Start()
 
-local SyntaxisLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/quantumdingle123/GUILib/main/SyntaxisLib.lua"))()
+local CloudyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
 
-Window = SyntaxisLib:CreateWindow({
-    Title = "Syntaxis",
-    GuiName = "SyntaxHubGUI",
-    Theme = currentSettings.Theme or "Sapphire",
-    Transparency = currentSettings.Transparency or 0,
-    State = State,
-    OnThemeChanged = function(themeName, themePalette)
-        activeTheme = themePalette
-        currentSettings.Theme = themeName
+Window = CloudyLib:CreateWindow({
+    Title = "Quantum | ID",
+    SubTitle = "Steal an Egg",
+    TabWidth = 145,
+    Theme = currentSettings.Theme or "Cloudy",
+    MinimizeKey = Enum.KeyCode.RightControl
+})
+
+activeTheme = {
+    Accent = Color3.fromRGB(92, 170, 255),
+    Background = Color3.fromRGB(24, 24, 30)
+}
+
+local Tabs = {
+    Farm = Window:AddTab({ Title = "Farm", Icon = "solar/gamepad-bold" }),
+    Priority = Window:AddTab({ Title = "Priority", Icon = "solar/sort-vertical-bold" }),
+    StealPanel = Window:AddTab({ Title = "Steal Panel", Icon = "solar/database-bold" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "solar/settings-bold" })
+}
+
+local StealSec = Tabs.Farm:AddSection("Automation Steal", "solar/fire-bold")
+
+StealSec:AddToggle("AutoStealToggle", {
+    Title = "Auto Steal",
+    Description = "Automatically steal eggs from areas",
+    Default = currentSettings.AutoFarm,
+    Callback = function(state)
+        getgenv().config.autoFarm = state
+        currentSettings.AutoFarm = state
+        saveStuff()
+        table.clear(State.blacklistedEggs)
+        if not state then
+            abortStealRoutine()
+        end
+    end
+})
+
+StealSec:AddDropdown("OutboundModeDropdown", {
+    Title = "Outbound Mode",
+    Description = "Movement style to egg: Fly or Instant",
+    Values = {"Fly", "Instant"},
+    Default = currentSettings.OutboundMode or "Fly",
+    Callback = function(val)
+        currentSettings.OutboundMode = val
+        getgenv().config.outboundMode = val
         saveStuff()
     end
 })
 
-activeTheme = Window:GetActiveTheme()
-
-local FarmTab = Window:CreateTab("Farm", "Farm")
-
-local stealCategory = FarmTab:CreateCategory("Automation Steal", false, 1)
-
-stealCategory:CreateToggle("Auto Steal", "Automatically steal eggs from areas", currentSettings.AutoFarm, function(state)
-    getgenv().config.autoFarm = state
-    currentSettings.AutoFarm = state
-    saveStuff()
-    table.clear(State.blacklistedEggs)
-    if not state then
-        abortStealRoutine()
-    end
-end)
-
-stealCategory:CreateDropdown("Outbound Mode", "Travel to egg: Fly or Instant", {"Fly", "Instant"}, currentSettings.OutboundMode or "Fly", function(selected)
-    currentSettings.OutboundMode = selected
-    getgenv().config.outboundMode = selected
-    saveStuff()
-end)
-
-stealCategory:CreateToggle("Fast Steal", "Only works on Titan temple and above areas.", currentSettings.FastSteal, function(state)
-    getgenv().config.fastSteal = state
-    currentSettings.FastSteal = state
-    saveStuff()
-    if state then
-        Window:ShowWarningModal("Fast Steal Warning", "Fast Steal is unreliable. Do not use if you are lagging or AFK farming.")
-    else
-        if State.isStealingActive and not isHoldingEgg() then
-            abortStealRoutine()
+StealSec:AddToggle("FastStealToggle", {
+    Title = "Fast Steal",
+    Description = "Only works on Titan temple and above areas",
+    Default = currentSettings.FastSteal,
+    Callback = function(state)
+        getgenv().config.fastSteal = state
+        currentSettings.FastSteal = state
+        saveStuff()
+        if state then
+            CloudyLib:Notify({
+                Title = "Fast Steal Notice",
+                Content = "Fast Steal is optimized for high-tier biomes. Ensure steady ping.",
+                Duration = 4
+            })
+        else
+            if State.isStealingActive and not isHoldingEgg() then
+                abortStealRoutine()
+            end
         end
     end
-end)
+})
 
 local areaList = {
     "All", "Forest", "Lake", "Desert", "Jungle", "Snow", 
@@ -3744,12 +3763,19 @@ local areaList = {
     "Cherry Blossom", "Titan Temple", "Light Dark", "Enchanted Forest"
 }
 
-stealCategory:CreateMultiDropdown("Target Areas", "Select one or multiple areas (empty = all)", areaList, currentSettings.TargetAreas, function(selectedMap)
-    getgenv().config.targetAreas = selectedMap
-    currentSettings.TargetAreas = selectedMap
-    saveStuff()
-    table.clear(State.blacklistedEggs)
-end)
+StealSec:AddDropdown("TargetAreasDropdown", {
+    Title = "Target Areas",
+    Description = "Select target biome areas",
+    Values = areaList,
+    Multi = true,
+    Default = currentSettings.TargetAreas,
+    Callback = function(selectedMap)
+        getgenv().config.targetAreas = selectedMap
+        currentSettings.TargetAreas = selectedMap
+        saveStuff()
+        table.clear(State.blacklistedEggs)
+    end
+})
 
 local rarityList = {
     "All", "1 - Common", "2 - Uncommon", "3 - Rare", "4 - Epic",
@@ -3757,144 +3783,290 @@ local rarityList = {
     "9 - Eternal", "10 - Divine"
 }
 
-stealCategory:CreateDropdown("Min Rarity", "Only steal eggs with rarity >= this", rarityList, currentSettings.MinRarity, function(selected)
-    getgenv().config.minRarity = selected
-    currentSettings.MinRarity = selected
-    saveStuff()
-    table.clear(State.blacklistedEggs)
-end)
-
-local treadmillCategory = FarmTab:CreateCategory("Automation Treadmill", false, 2)
-
-treadmillCategory:CreateToggle("Auto Treadmill", "Gain treadmill speed when idle", currentSettings.AutoTreadmill, function(state)
-    getgenv().config.autoTreadmill = state
-    currentSettings.AutoTreadmill = state
-    saveStuff()
-end)
-
-local ufoCategory = FarmTab:CreateCategory("UFO Event", false, 3)
-
-ufoCategory:CreateToggle("Auto UFO", "Automate decoding, tractor beam delivery & rewards", currentSettings.AutoUFO, function(state)
-    getgenv().config.autoUFO = state
-    currentSettings.AutoUFO = state
-    saveStuff()
-    if state and UFOManager and UFOManager.FetchState then
-        pcall(function() UFOManager:FetchState() end)
+StealSec:AddDropdown("MinRarityDropdown", {
+    Title = "Min Rarity",
+    Description = "Only steal eggs with rarity >= this",
+    Values = rarityList,
+    Default = currentSettings.MinRarity,
+    Callback = function(selected)
+        getgenv().config.minRarity = selected
+        currentSettings.MinRarity = selected
+        saveStuff()
+        table.clear(State.blacklistedEggs)
     end
-end)
+})
 
-ufoCategory:CreateToggle("Collect UFO Debris", "Collect space rocks across the world", currentSettings.UFORocks, function(state)
-    getgenv().config.ufoRocks = state
-    currentSettings.UFORocks = state
-    saveStuff()
-    if state and UFOManager and UFOManager.FetchState then
-        pcall(function() UFOManager:FetchState() end)
+local TreadmillSec = Tabs.Farm:AddSection("Automation Treadmill", "solar/running-2-bold")
+
+TreadmillSec:AddToggle("AutoTreadmillToggle", {
+    Title = "Auto Treadmill",
+    Description = "Gain treadmill speed when idle",
+    Default = currentSettings.AutoTreadmill,
+    Callback = function(state)
+        getgenv().config.autoTreadmill = state
+        currentSettings.AutoTreadmill = state
+        saveStuff()
     end
-end)
+})
 
-ufoCategory:CreateToggle("Farm Rare UFO", "Board mothership, smash capsules, vault & alien staff", currentSettings.UFORare, function(state)
-    getgenv().config.ufoRare = state
-    currentSettings.UFORare = state
-    saveStuff()
-    if state and UFOManager and UFOManager.FetchState then
-        pcall(function() UFOManager:FetchState() end)
+local UfoSec = Tabs.Farm:AddSection("UFO Event", "solar/ufo-bold")
+
+UfoSec:AddToggle("AutoUFOToggle", {
+    Title = "Auto UFO",
+    Description = "Automate decoding, tractor beam delivery & rewards",
+    Default = currentSettings.AutoUFO,
+    Callback = function(state)
+        getgenv().config.autoUFO = state
+        currentSettings.AutoUFO = state
+        saveStuff()
+        if state and UFOManager and UFOManager.FetchState then
+            pcall(function() UFOManager:FetchState() end)
+        end
     end
-end)
+})
 
-ufoCategory:CreateToggle("Auto Trade Debris", "Trade space rocks at Alien Camp", currentSettings.UFOTrade, function(state)
-    getgenv().config.ufoTrade = state
-    currentSettings.UFOTrade = state
-    saveStuff()
-    if state and UFOManager and UFOManager.FetchState then
-        pcall(function() UFOManager:FetchState() end)
+UfoSec:AddToggle("CollectUFORocksToggle", {
+    Title = "Collect UFO Debris",
+    Description = "Collect space rocks across the world",
+    Default = currentSettings.UFORocks,
+    Callback = function(state)
+        getgenv().config.ufoRocks = state
+        currentSettings.UFORocks = state
+        saveStuff()
+        if state and UFOManager and UFOManager.FetchState then
+            pcall(function() UFOManager:FetchState() end)
+        end
     end
-end)
+})
 
-ufoCategory:CreateToggle("Teleport If Far From Egg", "Rapid travel to distant UFO eggs", currentSettings.UFOTp, function(state)
-    getgenv().config.ufoTp = state
-    currentSettings.UFOTp = state
-    saveStuff()
-end)
+UfoSec:AddToggle("FarmRareUFOToggle", {
+    Title = "Farm Rare UFO",
+    Description = "Board mothership, smash capsules & vault",
+    Default = currentSettings.UFORare,
+    Callback = function(state)
+        getgenv().config.ufoRare = state
+        currentSettings.UFORare = state
+        saveStuff()
+        if state and UFOManager and UFOManager.FetchState then
+            pcall(function() UFOManager:FetchState() end)
+        end
+    end
+})
 
-local bloomCategory = FarmTab:CreateCategory("Enchanted / Bloom Event", false, 4)
+UfoSec:AddToggle("AutoTradeDebrisToggle", {
+    Title = "Auto Trade Debris",
+    Description = "Trade space rocks at Alien Camp",
+    Default = currentSettings.UFOTrade,
+    Callback = function(state)
+        getgenv().config.ufoTrade = state
+        currentSettings.UFOTrade = state
+        saveStuff()
+        if state and UFOManager and UFOManager.FetchState then
+            pcall(function() UFOManager:FetchState() end)
+        end
+    end
+})
 
-bloomCategory:CreateToggle("Auto Butterfly Bloom", "Safe ground-level butterfly catching", currentSettings.AutoCatchButterfly, function(state)
-    getgenv().config.autoCatchButterfly = state
-    currentSettings.AutoCatchButterfly = state
-    saveStuff()
-end)
+UfoSec:AddToggle("UFOTpToggle", {
+    Title = "Teleport If Far From Egg",
+    Description = "Rapid travel to distant UFO eggs",
+    Default = currentSettings.UFOTp,
+    Callback = function(state)
+        getgenv().config.ufoTp = state
+        currentSettings.UFOTp = state
+        saveStuff()
+    end
+})
 
-bloomCategory:CreateDropdown("Catch Mode", "Stand in center or ground chase", {"Stand", "Chase"}, currentSettings.BloomCatchMode or "Stand", function(selected)
-    getgenv().config.bloomCatchMode = selected
-    currentSettings.BloomCatchMode = selected
-    saveStuff()
-end)
+local BloomSec = Tabs.Farm:AddSection("Enchanted / Bloom Event", "solar/leaf-bold")
 
-bloomCategory:CreateDropdown("Catch Priority", "Priority order for Chase mode", {"Rarest", "Nearest"}, currentSettings.BloomCatchPriority or "Rarest", function(selected)
-    getgenv().config.bloomCatchPriority = selected
-    currentSettings.BloomCatchPriority = selected
-    saveStuff()
-end)
+BloomSec:AddToggle("AutoButterflyToggle", {
+    Title = "Auto Butterfly Bloom",
+    Description = "Safe ground-level butterfly catching",
+    Default = currentSettings.AutoCatchButterfly,
+    Callback = function(state)
+        getgenv().config.autoCatchButterfly = state
+        currentSettings.AutoCatchButterfly = state
+        saveStuff()
+    end
+})
 
-bloomCategory:CreateSlider("Catch Speed", "Ground movement speed for Chase mode", 100, 600, currentSettings.ButterflySpeed, function(val)
-    getgenv().config.butterflySpeed = val
-    currentSettings.ButterflySpeed = val
-    saveStuff()
-end)
+BloomSec:AddDropdown("BloomCatchModeDropdown", {
+    Title = "Catch Mode",
+    Description = "Stand in center or ground chase",
+    Values = {"Stand", "Chase"},
+    Default = currentSettings.BloomCatchMode or "Stand",
+    Callback = function(selected)
+        getgenv().config.bloomCatchMode = selected
+        currentSettings.BloomCatchMode = selected
+        saveStuff()
+    end
+})
 
-bloomCategory:CreateToggle("Auto Trade Up", "Trade butterflies at station inside tree", currentSettings.AutoTradeUp, function(state)
-    getgenv().config.autoTradeUp = state
-    currentSettings.AutoTradeUp = state
-    saveStuff()
-end)
+BloomSec:AddDropdown("BloomCatchPriorityDropdown", {
+    Title = "Catch Priority",
+    Description = "Priority order for Chase mode",
+    Values = {"Rarest", "Nearest"},
+    Default = currentSettings.BloomCatchPriority or "Rarest",
+    Callback = function(selected)
+        getgenv().config.bloomCatchPriority = selected
+        currentSettings.BloomCatchPriority = selected
+        saveStuff()
+    end
+})
 
-bloomCategory:CreateToggle("Smart Trade For Essence", "Only trade exact counts needed for essence", currentSettings.BloomSmartTrade ~= false, function(state)
-    getgenv().config.bloomSmartTrade = state
-    currentSettings.BloomSmartTrade = state
-    saveStuff()
-end)
+BloomSec:AddSlider("CatchSpeedSlider", {
+    Title = "Catch Speed",
+    Description = "Ground movement speed for Chase mode",
+    Min = 100,
+    Max = 600,
+    Default = currentSettings.ButterflySpeed or 320,
+    Rounding = 0,
+    Callback = function(val)
+        getgenv().config.butterflySpeed = val
+        currentSettings.ButterflySpeed = val
+        saveStuff()
+    end
+})
 
-bloomCategory:CreateToggle("Auto Craft Essence", "Craft mutation essence at shrine inside tree", currentSettings.AutoCraftEssence, function(state)
-    getgenv().config.autoCraftEssence = state
-    currentSettings.AutoCraftEssence = state
-    saveStuff()
-end)
+BloomSec:AddToggle("AutoTradeUpToggle", {
+    Title = "Auto Trade Up",
+    Description = "Trade butterflies at station inside tree",
+    Default = currentSettings.AutoTradeUp,
+    Callback = function(state)
+        getgenv().config.autoTradeUp = state
+        currentSettings.AutoTradeUp = state
+        saveStuff()
+    end
+})
 
-bloomCategory:CreateToggle("Auto Wisp Quest", "Accept, progress & claim wisp companion quests", currentSettings.AutoWispQuest, function(state)
-    getgenv().config.autoWispQuest = state
-    currentSettings.AutoWispQuest = state
-    saveStuff()
-end)
+BloomSec:AddToggle("BloomSmartTradeToggle", {
+    Title = "Smart Trade For Essence",
+    Description = "Only trade exact counts needed for essence",
+    Default = currentSettings.BloomSmartTrade ~= false,
+    Callback = function(state)
+        getgenv().config.bloomSmartTrade = state
+        currentSettings.BloomSmartTrade = state
+        saveStuff()
+    end
+})
 
-local upgradesCategory = FarmTab:CreateCategory("Automation Upgrades", false, 5)
+BloomSec:AddToggle("AutoCraftEssenceToggle", {
+    Title = "Auto Craft Essence",
+    Description = "Craft mutation essence at shrine inside tree",
+    Default = currentSettings.AutoCraftEssence,
+    Callback = function(state)
+        getgenv().config.autoCraftEssence = state
+        currentSettings.AutoCraftEssence = state
+        saveStuff()
+    end
+})
 
-upgradesCategory:CreateToggle("Auto Upgrade Treadmill", "Auto buy next tier treadmill", currentSettings.AutoUpgradeTreadmill, function(state)
-    getgenv().config.autoUpgradeTreadmill = state
-    currentSettings.AutoUpgradeTreadmill = state
-    saveStuff()
-end)
+BloomSec:AddToggle("AutoWispQuestToggle", {
+    Title = "Auto Wisp Quest",
+    Description = "Accept, progress & claim wisp companion quests",
+    Default = currentSettings.AutoWispQuest,
+    Callback = function(state)
+        getgenv().config.autoWispQuest = state
+        currentSettings.AutoWispQuest = state
+        saveStuff()
+    end
+})
 
-upgradesCategory:CreateToggle("Auto Upgrade Base", "Auto buy homestead base expansion", currentSettings.AutoUpgradeBase, function(state)
-    getgenv().config.autoUpgradeBase = state
-    currentSettings.AutoUpgradeBase = state
-    saveStuff()
-end)
+local UpgradesSec = Tabs.Farm:AddSection("Automation Upgrades", "solar/chart-bold")
 
-local PriorityTab = Window:CreatePriorityTab("Priority", "Task Priority", {
-    GetList = function()
-        return PriorityManager.List
-    end,
-    OnMoveUp = function(index)
-        PriorityManager:MoveUp(index, function(list)
-            currentSettings.TaskPriorities = list
-            saveStuff()
-        end)
-    end,
-    OnMoveDown = function(index)
-        PriorityManager:MoveDown(index, function(list)
-            currentSettings.TaskPriorities = list
-            saveStuff()
-        end)
+UpgradesSec:AddToggle("AutoUpgradeTreadmillToggle", {
+    Title = "Auto Upgrade Treadmill",
+    Description = "Auto buy next tier treadmill",
+    Default = currentSettings.AutoUpgradeTreadmill,
+    Callback = function(state)
+        getgenv().config.autoUpgradeTreadmill = state
+        currentSettings.AutoUpgradeTreadmill = state
+        saveStuff()
+    end
+})
+
+UpgradesSec:AddToggle("AutoUpgradeBaseToggle", {
+    Title = "Auto Upgrade Base",
+    Description = "Auto buy homestead base expansion",
+    Default = currentSettings.AutoUpgradeBase,
+    Callback = function(state)
+        getgenv().config.autoUpgradeBase = state
+        currentSettings.AutoUpgradeBase = state
+        saveStuff()
+    end
+})
+
+local PrioSec = Tabs.Priority:AddSection("Task Execution Sequence", "solar/sort-vertical-bold")
+
+local function formatPrioText()
+    local text = ""
+    for idx, item in ipairs(PriorityManager.List) do
+        text = text .. string.format("%d. %s\n", idx, item)
+    end
+    return text
+end
+
+local prioPara = PrioSec:AddParagraph({
+    Title = "Current Priority Order",
+    Content = formatPrioText()
+})
+
+local selectedPrioTask = PriorityManager.List[1] or "Auto Steal"
+PrioSec:AddDropdown("PrioSelectTaskDropdown", {
+    Title = "Select Task to Move",
+    Description = "Choose a task to shift its execution priority",
+    Values = { "Auto Steal", "UFO Event", "Enchanted / Bloom Event", "Auto Treadmill" },
+    Default = selectedPrioTask,
+    Callback = function(val)
+        selectedPrioTask = val
+    end
+})
+
+PrioSec:AddButton({
+    Title = "Move Up",
+    Description = "Increase priority of selected task",
+    Callback = function()
+        for idx, taskName in ipairs(PriorityManager.List) do
+            if taskName == selectedPrioTask then
+                if PriorityManager:MoveUp(idx, function(list)
+                    currentSettings.TaskPriorities = list
+                    saveStuff()
+                end) then
+                    prioPara:SetContent(formatPrioText())
+                end
+                break
+            end
+        end
+    end
+})
+
+PrioSec:AddButton({
+    Title = "Move Down",
+    Description = "Decrease priority of selected task",
+    Callback = function()
+        for idx, taskName in ipairs(PriorityManager.List) do
+            if taskName == selectedPrioTask then
+                if PriorityManager:MoveDown(idx, function(list)
+                    currentSettings.TaskPriorities = list
+                    saveStuff()
+                end) then
+                    prioPara:SetContent(formatPrioText())
+                end
+                break
+            end
+        end
+    end
+})
+
+PrioSec:AddButton({
+    Title = "Reset Default Order",
+    Description = "Restore standard factory task priority order",
+    Callback = function()
+        PriorityManager.List = { "Auto Steal", "UFO Event", "Enchanted / Bloom Event", "Auto Treadmill" }
+        currentSettings.TaskPriorities = PriorityManager.List
+        saveStuff()
+        prioPara:SetContent(formatPrioText())
     end
 })
 
@@ -3983,58 +4155,125 @@ local function getStealPanelEggItems()
     return (#eggItems > 0 and eggItems) or State.cachedStealPanelItems or {}
 end
 
-local StealPanelTab, renderStealPanel = Window:CreateStealPanelTab("Steal Panel", "Steal Panel", {
-    FormatValue = formatMoneyPerSec,
-    GetItems = getStealPanelEggItems,
-    OnSelectItem = function(item, actBtn)
-        local curTheme = Window:GetActiveTheme()
-        if State.targetedSpecificUid == item.Uid then
-            State.targetedSpecificUid = nil
-            abortStealRoutine()
-            actBtn.BackgroundColor3 = curTheme.Accent
-            actBtn.Text = "Steal"
+local PanelSec = Tabs.StealPanel:AddSection("Targeted Egg Stealer", "solar/radar-bold")
+
+local statusPara = PanelSec:AddParagraph({
+    Title = "Steal Target Status",
+    Content = "Target: [Auto Mode - Highest Value Egg]"
+})
+
+local cachedEggItems = {}
+local eggTitles = {"[Auto Mode]"}
+local eggMap = {}
+
+local function refreshEggList()
+    cachedEggItems = getStealPanelEggItems()
+    table.sort(cachedEggItems, function(a, b) return (a.Value or 0) > (b.Value or 0) end)
+    table.clear(eggTitles)
+    table.clear(eggMap)
+    table.insert(eggTitles, "[Auto Mode]")
+    for i, item in ipairs(cachedEggItems) do
+        if i <= 30 then
+            local label = string.format("[%s] %s (%s)", tostring(item.Area), tostring(item.Name), formatMoneyPerSec(item.Value))
+            table.insert(eggTitles, label)
+            eggMap[label] = item.Uid
+        end
+    end
+end
+
+refreshEggList()
+
+local eggSelectorDropdown = PanelSec:AddDropdown("TargetEggDropdown", {
+    Title = "Target Specific Egg",
+    Description = "Select an egg from live scan to steal specifically",
+    Values = eggTitles,
+    Default = "[Auto Mode]",
+    Callback = function(choice)
+        local chosenUid = eggMap[choice]
+        if chosenUid then
+            if State.isStealingActive then abortStealRoutine() end
+            State.targetedSpecificUid = chosenUid
+            State.blacklistedEggs[chosenUid] = nil
+            statusPara:SetContent(string.format("Target: %s\nUID: %s", choice, chosenUid))
         else
-            if State.isStealingActive then
-                abortStealRoutine()
-            end
-            State.targetedSpecificUid = item.Uid
-            State.blacklistedEggs[item.Uid] = nil
-            for u, b in pairs(State.activeStealButtons) do
-                if u == item.Uid then
-                    b.BackgroundColor3 = Color3.fromRGB(240, 65, 60)
-                    b.Text = "Stop Steal"
-                else
-                    b.BackgroundColor3 = curTheme.Accent
-                    b.Text = "Steal"
-                end
-            end
+            State.targetedSpecificUid = nil
+            statusPara:SetContent("Target: [Auto Mode - Highest Value Egg]")
         end
     end
 })
 
-local SettingsTab = Window:CreateSettingsTab("Settings", "Settings", {
-    OnThemeSelected = function(themeName)
+PanelSec:AddButton({
+    Title = "Refresh Egg Scanner",
+    Description = "Scan world for newly spawned eggs",
+    Callback = function()
+        refreshEggList()
+        pcall(function()
+            eggSelectorDropdown:SetValues(eggTitles)
+        end)
+        statusPara:SetContent(string.format("Scanned %d eggs.\nCurrent: %s", #cachedEggItems, State.targetedSpecificUid and "Custom Target" or "[Auto Mode]"))
+    end
+})
+
+PanelSec:AddButton({
+    Title = "Clear Target (Auto Mode)",
+    Description = "Resume automatic steal of best field egg",
+    Callback = function()
+        State.targetedSpecificUid = nil
+        abortStealRoutine()
+        statusPara:SetContent("Target: [Auto Mode - Highest Value Egg]")
+        pcall(function() eggSelectorDropdown:SetValue("[Auto Mode]") end)
+    end
+})
+
+local SettingsSec = Tabs.Settings:AddSection("Theme & Interface", "solar/palette-bold")
+
+SettingsSec:AddDropdown("ThemeDropdown", {
+    Title = "Interface Theme",
+    Description = "Select theme appearance",
+    Values = { "Cloudy", "Emerald", "Blood Red", "Rimuru Tempest", "Solar", "Neko", "HUT RI 81" },
+    Default = currentSettings.Theme or "Cloudy",
+    Callback = function(themeName)
         currentSettings.Theme = themeName
         saveStuff()
-    end,
-    OnTransparencyChanged = function(val)
-        currentSettings.Transparency = val
-        saveStuff()
+        CloudyLib:SetTheme(themeName)
     end
 })
 
-task.spawn(function()
-    while true do
-        task.wait(1.5)
-        if StealPanelTab.Page and StealPanelTab.Page.Visible and not State.isStealingActive and renderStealPanel then
-            pcall(renderStealPanel)
-        end
+SettingsSec:AddSlider("OutboundBoostSlider", {
+    Title = "Outbound Speed Boost",
+    Description = "Speed multiplier when going to egg (1.00x - 1.35x)",
+    Min = 100,
+    Max = 135,
+    Default = math.floor((CONFIG.OutboundSpeedMultiplier or 1.20) * 100),
+    Rounding = 0,
+    Callback = function(val)
+        CONFIG.OutboundSpeedMultiplier = val / 100
     end
-end)
+})
 
-Window:Initialize()
+SettingsSec:AddButton({
+    Title = "Save Settings",
+    Description = "Save current configuration to JSON",
+    Callback = function()
+        saveStuff()
+        CloudyLib:Notify({
+            Title = "Quantum | ID",
+            Content = "Settings saved successfully!",
+            Duration = 3
+        })
+    end
+})
 
-task.defer(function()
-    task.wait(0.5)
-    Window:ShowDiscordModal()
-end)
+local AboutSec = Tabs.Settings:AddSection("About", "solar/info-circle-bold")
+AboutSec:AddParagraph({
+    Title = "Quantum | ID",
+    Content = "Steal an Egg Automation Suite\nPowered by Cloudy UI Library."
+})
+
+Window:SelectTab(1)
+
+CloudyLib:Notify({
+    Title = "Quantum | ID",
+    Content = "Quantum | ID loaded successfully!",
+    Duration = 4
+})
