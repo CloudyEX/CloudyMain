@@ -97,6 +97,7 @@ end
 local saveFile = "QuantumID_Config.json"
 
 local currentSettings = {
+    OutboundMode = "Fly",
     Theme = "Sapphire",
     Transparency = 0,
     AutoFarm = false,
@@ -173,6 +174,7 @@ getgenv().config.targetAreas = currentSettings.TargetAreas
 getgenv().config.minRarity = currentSettings.MinRarity
 getgenv().config.autoFarm = currentSettings.AutoFarm
 getgenv().config.fastSteal = currentSettings.FastSteal
+getgenv().config.outboundMode = currentSettings.OutboundMode or 'Fly'
 getgenv().config.autoTreadmill = currentSettings.AutoTreadmill
 getgenv().config.autoUpgradeTreadmill = currentSettings.AutoUpgradeTreadmill
 getgenv().config.autoUpgradeBase = currentSettings.AutoUpgradeBase
@@ -231,7 +233,8 @@ local CONFIG = {
     BoundaryCheckpointX = 600.2,
     SeparationLineX = 552.2,
     FastStealLineDropOffset = 45,
-    FastStealDirectSnapRadius = 45,
+    FastStealDirectSnapRadius = 65,
+    OutboundSpeedMultiplier = 1.20,
     BaseDropPosition = Vector3.new(528.7, 70.8, -364.1)
 }
 
@@ -2415,31 +2418,1297 @@ function WorkerScheduler:Register(name, interval, runFn)
 end
 
 function WorkerScheduler:Start()
+    if self.IsRunningLoop then return end
+    self.IsRunningLoop = true
+    task.spawn(function()
+        local lastPrune = 0
+        while self.IsActive do
+            local dt = task.wait(0.05)
+            local now = os.clock()
 
-local Cloudy = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
+            if now - lastPrune >= 30.0 then
+                lastPrune = now
+                if State and State.blacklistedEggs then
+                    for uid, exp in pairs(State.blacklistedEggs) do
+                        if now > exp then
+                            State.blacklistedEggs[uid] = nil
+                        end
+                    end
+                end
+            end
 
-Window = Cloudy:CreateWindow({
+            for _, t in ipairs(self.Tasks) do
+                t.Gap = t.Gap + dt
+                if t.Hold > 0 then
+                    t.Hold = t.Hold - dt
+                elseif not t.Running and t.Gap >= t.Interval then
+                    t.Gap = 0
+                    t.Running = true
+                    task.spawn(function()
+                        local ok, err = pcall(t.Run)
+                        t.Running = false
+                        if not ok and err then
+                            t.Hold = 3
+                        end
+                    end)
+                end
+            end
+        end
+        self.IsRunningLoop = false
+    end)
+end
+
+local function tryUpgradeTreadmill()
+    if not Remotes.TierRaise or os.clock() < State.treadmillUpgradeCooldown then return end
+    State.treadmillUpgradeCooldown = os.clock() + 5
+
+    local save = getSaveData()
+    local myMoney = math.max(getPlayerMoney(), tonumber(save and save.Money) or 0)
+
+    local dataFolder = Services.ReplicatedStorage:FindFirstChild("Data")
+    local treadmillsModule = dataFolder and dataFolder:FindFirstChild("Treadmills")
+    if not treadmillsModule then return end
+
+    local ok, tData = pcall(require, treadmillsModule)
+    if not ok or type(tData) ~= "table" then return end
+
+    local currentLevel = tonumber(save and save.TreadmillUpgradeLevel) or 0
+    if type(tData.GetByUpgradeLevel) == "function" then
+        local okNext, nextTier = pcall(tData.GetByUpgradeLevel, currentLevel + 1)
+        if okNext and type(nextTier) == "table" then
+            local nextId = nextTier._id
+            local price = tonumber(nextTier.Price) or math.huge
+            if type(nextId) == "string" and myMoney >= price then
+                pcall(function() Remotes.TierRaise:InvokeServer(nextId) end)
+                return
+            end
+        end
+    end
+
+    if type(tData.Directory) == "table" then
+        local sorted = {}
+        for name, cfg in pairs(tData.Directory) do
+            table.insert(sorted, { Name = tostring(name), Price = tonumber(cfg.Price) or 0, Level = tonumber(cfg.UpgradeLevel) or tonumber(cfg.Level) or 0 })
+        end
+        table.sort(sorted, function(a, b) return a.Price < b.Price end)
+        for _, item in ipairs(sorted) do
+            if item.Level > currentLevel and myMoney >= item.Price then
+                pcall(function() Remotes.TierRaise:InvokeServer(item.Name) end)
+                break
+            end
+        end
+    end
+end
+
+local function tryUpgradeBase()
+    if not Remotes.BaseTierRaise or os.clock() < State.baseUpgradeCooldown then return end
+    State.baseUpgradeCooldown = os.clock() + 5
+
+    local dataFolder = Services.ReplicatedStorage:FindFirstChild("Data")
+    local basesModule = dataFolder and dataFolder:FindFirstChild("Bases")
+    if not basesModule then return end
+
+    local ok, bData = pcall(require, basesModule)
+    if not ok or type(bData) ~= "table" or type(bData.BASES) ~= "table" then return end
+
+    local save = getSaveData()
+    local currentLevel = tonumber(save and save.BaseUpgradeLevel) or 0
+    local maxLevel = type(bData.GetMaxBaseLevel) == "function" and tonumber(bData.GetMaxBaseLevel()) or #bData.BASES
+
+    if currentLevel >= maxLevel then return end
+
+    local nextTier = bData.BASES[currentLevel + 1]
+    local cost = nextTier and (tonumber(nextTier.Cost) or tonumber(nextTier.Price)) or nil
+    local myMoney = math.max(getPlayerMoney(), tonumber(save and save.Money) or 0)
+
+    if cost and myMoney >= cost then
+        pcall(function() Remotes.BaseTierRaise:FireServer() end)
+    end
+end
+
+local function getPlayerCurrentSpeed()
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+    if hum and typeof(hum.WalkSpeed) == "number" and hum.WalkSpeed > 0 then
+        if ShieldManager and ShieldManager.OriginalHumanoid and ShieldManager.OriginalHumanoid.Parent == nil then
+            if ShieldManager.OriginalHumanoid.WalkSpeed > hum.WalkSpeed then
+                return ShieldManager.OriginalHumanoid.WalkSpeed
+            end
+        end
+        return hum.WalkSpeed
+    end
+
+    if char then
+        for _, attrName in ipairs({"WalkSpeed", "Speed", "CurrentSpeed", "MovementSpeed"}) do
+            local val = char:GetAttribute(attrName)
+            if typeof(val) == "number" and val > 0 then return val end
+        end
+    end
+    for _, attrName in ipairs({"WalkSpeed", "Speed", "CurrentSpeed", "MovementSpeed"}) do
+        local val = LocalPlayer:GetAttribute(attrName)
+        if typeof(val) == "number" and val > 0 then return val end
+    end
+
+    local lstats = LocalPlayer:FindFirstChild("leaderstats")
+    if lstats then
+        for _, child in ipairs(lstats:GetChildren()) do
+            local lName = child.Name:lower()
+            if (lName == "speed" or lName == "walkspeed") and typeof(child.Value) == "number" and child.Value > 0 then
+                return child.Value
+            end
+        end
+    end
+
+    local saveMod = Services.ReplicatedStorage:FindFirstChild("Shared") and Services.ReplicatedStorage.Shared:FindFirstChild("Save")
+    if saveMod and saveMod:IsA("ModuleScript") then
+        local ok, mod = pcall(require, saveMod)
+        if ok and type(mod) == "table" then
+            local getter = type(mod.Get) == "function" and mod.Get or (type(mod.Peek) == "function" and mod.Peek)
+            if getter then
+                local resOk, res = pcall(getter)
+                if resOk and type(res) == "table" then
+                    for k, v in pairs(res) do
+                        local lk = tostring(k):lower()
+                        if (lk == "speed" or lk == "walkspeed") and typeof(v) == "number" and v > 0 then
+                            return v
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return 16
+end
+getgenv().getPlayerCurrentSpeed = getPlayerCurrentSpeed
+
+local function getStandingPosition(basePos)
+    local _, root, hum = getAliveRig()
+    local hipHeight = hum and hum.HipHeight or 2
+    local rootSizeY = root and (root.Size.Y / 2) or 1
+    return Vector3.new(basePos.X, basePos.Y + hipHeight + rootSizeY, basePos.Z)
+end
+
+local function runAlongGroundSegment(targetPos, stopDist, sessionId, targetUid, speedMultiplier, preserveMomentum)
+    local char, root, hum = getAliveRig()
+    if not root or not hum then return false end
+    stopDist = stopDist or 3.5
+
+    local baseSpeed = getPlayerCurrentSpeed()
+    local multiplier = tonumber(speedMultiplier) or 1.0
+    if (os.clock() - State.lastServerRollbackTime) < 3.0 then
+        multiplier = 1.0
+    end
+
+    local effectiveSpeed = baseSpeed * multiplier
+    setCollisions(false)
+    if hum then hum.PlatformStand = false end
+
+    local delta = Vector3.new(targetPos.X - root.Position.X, 0, targetPos.Z - root.Position.Z)
+    local timeout = os.clock() + math.max(8, (delta.Magnitude / math.max(effectiveSpeed, 16)) + 5)
+    local arrived = false
+    local lastLiveCheck = 0
+
+    local conn
+    conn = Services.RunService.Heartbeat:Connect(function()
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or isMapClosed() then
+            if conn then conn:Disconnect() conn = nil end
+            return
+        end
+
+        local _, cRoot = getAliveRig()
+        if not cRoot or os.clock() > timeout then
+            if conn then conn:Disconnect() conn = nil end
+            return
+        end
+
+        if targetUid and (os.clock() - lastLiveCheck >= 0.25) then
+            lastLiveCheck = os.clock()
+            if not isEggStillValid(targetUid) then
+                blacklistEgg(targetUid, 15)
+                if conn then conn:Disconnect() conn = nil end
+                return
+            end
+        end
+
+        local currentPos = cRoot.Position
+        local flatDiff = Vector3.new(targetPos.X - currentPos.X, 0, targetPos.Z - currentPos.Z)
+        if flatDiff.Magnitude <= stopDist then
+            arrived = true
+            if not preserveMomentum then
+                cRoot.AssemblyLinearVelocity = Vector3.zero
+                cRoot.AssemblyAngularVelocity = Vector3.zero
+            end
+            if conn then conn:Disconnect() conn = nil end
+            return
+        end
+
+        local liveBase = getPlayerCurrentSpeed()
+        local activeMult = multiplier
+        if (os.clock() - State.lastServerRollbackTime) < 3.0 then
+            activeMult = 1.0
+        end
+
+        local curSpeed = liveBase * activeMult
+        local dir = flatDiff.Unit
+        cRoot.AssemblyLinearVelocity = Vector3.new(dir.X * curSpeed, cRoot.AssemblyLinearVelocity.Y, dir.Z * curSpeed)
+        cRoot.CFrame = CFrame.new(currentPos.X, currentPos.Y, currentPos.Z) * CFrame.lookAt(Vector3.zero, dir)
+    end)
+
+    while conn and conn.Connected do
+        Services.RunService.Heartbeat:Wait()
+    end
+
+    local _, fRoot = getAliveRig()
+    if fRoot and not preserveMomentum then
+        fRoot.AssemblyLinearVelocity = Vector3.zero
+        fRoot.AssemblyAngularVelocity = Vector3.zero
+    end
+
+    return arrived and (sessionId == State.currentStealSession) and isStealEnabled()
+end
+
+local function runAlongGroundToEgg(targetPos, speed, sessionId, targetUid)
+    local char, root, hum = getAliveRig()
+    if not root or not hum then return false end
+
+    local currentPosInit = root.Position
+    local groundY = CONFIG.GroundAltitude + 1.0
+    local outboundMult = CONFIG.OutboundSpeedMultiplier or 1.20
+
+    if currentPosInit.X < CONFIG.BoundaryCheckpointX then
+        local centerDeliveryPos = Vector3.new(CONFIG.BaseDropPosition.X, groundY, CONFIG.BaseDropPosition.Z)
+        local mouthPos = Vector3.new(CONFIG.BoundaryCheckpointX, groundY, CONFIG.BaseDropPosition.Z)
+
+        local lateralDist = math.abs(currentPosInit.Z - CONFIG.BaseDropPosition.Z)
+        if lateralDist > 12 or currentPosInit.X < CONFIG.BaseDropPosition.X then
+            local ok = runAlongGroundSegment(centerDeliveryPos, 4.0, sessionId, targetUid, outboundMult, true)
+            if not ok or sessionId ~= State.currentStealSession or not isStealEnabled() then
+                return false
+            end
+        end
+
+        local ok2 = runAlongGroundSegment(mouthPos, 4.0, sessionId, targetUid, outboundMult, true)
+        if not ok2 or sessionId ~= State.currentStealSession or not isStealEnabled() then
+            return false
+        end
+    end
+
+    local targetStandPos = getStandingPosition(targetPos)
+    local reached = runAlongGroundSegment(targetStandPos, 3.5, sessionId, targetUid, outboundMult, false)
+    if not reached or sessionId ~= State.currentStealSession or not isStealEnabled() then
+        return false
+    end
+
+    local _, fRoot = getAliveRig()
+    if fRoot then
+        fRoot.CFrame = CFrame.lookAt(targetStandPos, targetPos)
+        fRoot.AssemblyLinearVelocity = Vector3.zero
+        fRoot.AssemblyAngularVelocity = Vector3.zero
+    end
+    task.wait(0.04)
+    return true
+end
+
+local function executeFastStealOutbound(targetPos, sessionId, targetUid)
+    local world = Services.Workspace:FindFirstChild("World") or Services.Workspace:FindFirstChild("__OBJECTS")
+    local build = world and world:FindFirstChild("Build")
+    local portals = build and build:FindFirstChild("FuseBiomeLanePortals")
+    local entrance = portals and portals:FindFirstChildWhichIsA("BasePart")
+    local zone = build and build:FindFirstChild("FuseBiomeZone")
+    local exitPart = zone and zone:FindFirstChild("ExitPart", true)
+
+    if not entrance or not exitPart then
+        return runAlongGroundToEgg(targetPos, nil, sessionId, targetUid)
+    end
+
+    local _, root = getAliveRig()
+    if not root then return false end
+
+    root.CFrame = CFrame.new(CONFIG.BaseDropPosition)
+    root.AssemblyLinearVelocity = Vector3.zero
+    task.wait(0.06)
+
+    local inSky = false
+    local entranceTimeout = os.clock() + 4.0
+
+    while os.clock() < entranceTimeout do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
+        local _, cRoot = getAliveRig()
+        if not cRoot then return false end
+
+        cRoot.CFrame = CFrame.new(entrance.Position)
+        cRoot.AssemblyLinearVelocity = Vector3.new(0, -0.5, 0)
+        UniversalCompat.FireTouch(cRoot, entrance)
+
+        if cRoot.Position.Y > 10000 then
+            inSky = true
+            break
+        end
+        Services.RunService.Heartbeat:Wait()
+    end
+
+    if not inSky then
+        return runAlongGroundToEgg(targetPos, nil, sessionId, targetUid)
+    end
+
+    local exitedSky = false
+    local exitDeadline = os.clock() + 5.0
+
+    while os.clock() < exitDeadline do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
+        local _, cRoot = getAliveRig()
+        if not cRoot then return false end
+
+        cRoot.CFrame = CFrame.new(exitPart.Position)
+        cRoot.AssemblyLinearVelocity = Vector3.new(0, -0.5, 0)
+        UniversalCompat.FireTouch(cRoot, exitPart)
+
+        if cRoot.Position.Y < 10000 then
+            exitedSky = true
+            break
+        end
+        Services.RunService.Heartbeat:Wait()
+    end
+
+    if not exitedSky then return false end
+    task.wait(0.06)
+
+    local _, cRoot = getAliveRig()
+    if not cRoot then return false end
+
+    local remainingDist = (Vector3.new(targetPos.X, 0, targetPos.Z) - Vector3.new(cRoot.Position.X, 0, cRoot.Position.Z)).Magnitude
+    if remainingDist <= CONFIG.FastStealDirectSnapRadius then
+        setCollisions(false)
+        local standPos = getStandingPosition(targetPos)
+        cRoot.CFrame = CFrame.lookAt(standPos, targetPos)
+        cRoot.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.05)
+        return true
+    else
+        return runAlongGroundToEgg(targetPos, nil, sessionId, targetUid)
+    end
+end
+
+local function findMyPlot()
+    if State.myPlot and State.myPlot.Parent and State.myTreadmill and State.myTreadmill.Parent then
+        return State.myPlot
+    end
+
+    local myName = LocalPlayer.Name:lower()
+    local myDisplayName = LocalPlayer.DisplayName:lower()
+    local myUserId = LocalPlayer.UserId
+
+    local plotsFolder = Services.Workspace:FindFirstChild("Plots")
+    local candidates = plotsFolder and plotsFolder:GetChildren() or Services.Workspace:GetChildren()
+
+    for _, plot in ipairs(candidates) do
+        local ownerAttr = plot:GetAttribute("Owner") or plot:GetAttribute("OwnerUserId") or plot:GetAttribute("Player")
+        if ownerAttr and (tostring(ownerAttr):lower() == myName or tonumber(ownerAttr) == myUserId) then
+            State.myPlot = plot
+            break
+        end
+
+        local sign = plot:FindFirstChild("PlotSign") or plot:FindFirstChild("Sign")
+        if sign then
+            for _, desc in ipairs(sign:GetDescendants()) do
+                if desc:IsA("TextLabel") or desc:IsA("TextButton") then
+                    local txt = desc.Text:lower()
+                    if txt:find(myName, 1, true) or txt:find(myDisplayName, 1, true) then
+                        State.myPlot = plot
+                        break
+                    end
+                end
+            end
+        end
+        if State.myPlot then break end
+    end
+
+    if State.myPlot then
+        for _, desc in ipairs(State.myPlot:GetDescendants()) do
+            if desc.Name:lower():find("treadmill") then
+                if desc:IsA("BasePart") then
+                    State.myTreadmill = desc
+                    break
+                elseif desc:IsA("Model") then
+                    State.myTreadmill = desc.PrimaryPart or desc:FindFirstChildWhichIsA("BasePart")
+                    if State.myTreadmill then break end
+                end
+            end
+        end
+        if not State.myTreadmill then
+            for _, child in ipairs(State.myPlot:GetChildren()) do
+                if child.Name:lower():find("treadmill") then
+                    State.myTreadmill = child:IsA("BasePart") and child or (child:IsA("Model") and (child.PrimaryPart or child:FindFirstChildWhichIsA("BasePart")))
+                    if State.myTreadmill then break end
+                end
+            end
+        end
+    end
+
+    if not State.myTreadmill then
+        for _, obj in ipairs(Services.Workspace:GetDescendants()) do
+            if obj.Name == "TreadmillBottom" and obj:IsA("BasePart") then
+                State.myTreadmill = obj
+                break
+            end
+        end
+    end
+    return State.myPlot
+end
+
+local function instantGrabAtPosition(uid, targetPos, sessionId, isNest)
+    if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
+    local _, root = getAliveRig()
+    if root and targetPos then
+        local offsetY = isNest and CONFIG.AirGrabOffset or 1.0
+        local safeY = (targetPos.Y or CONFIG.GroundAltitude) + offsetY
+        root.CFrame = CFrame.new(Vector3.new(targetPos.X, safeY, targetPos.Z))
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+    end
+
+    local targetPrompt = nil
+    local eggModel = uid and (Services.Workspace:FindFirstChild(uid) or (Services.Workspace:FindFirstChild("AreaEggSlotsClient") and Services.Workspace.AreaEggSlotsClient:FindFirstChild(uid)))
+    if eggModel then
+        targetPrompt = eggModel:FindFirstChildWhichIsA("ProximityPrompt", true)
+    end
+    if not targetPrompt and targetPos then
+        local parts = Services.Workspace:GetPartBoundsInRadius(targetPos, 12)
+        for _, part in ipairs(parts) do
+            local p = part:FindFirstChildWhichIsA("ProximityPrompt", true)
+            if p and p.Enabled then
+                targetPrompt = p
+                break
+            end
+        end
+    end
+
+    local grabTimeout = os.clock() + 3.0
+    local nextRemoteDispatch = 0
+
+    while os.clock() < grabTimeout do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() then break end
+        local _, cRoot = getAliveRig()
+        if not cRoot then break end
+
+        if uid and not isHoldingEgg() and not isEggStillValid(uid) then
+            blacklistEgg(uid, 15)
+            return false
+        end
+
+        if os.clock() >= nextRemoteDispatch then
+            nextRemoteDispatch = os.clock() + 0.3
+            if Remotes.AskFieldEggCarry and uid then
+                task.spawn(function() pcall(function() Remotes.AskFieldEggCarry:InvokeServer({ Uid = uid }) end) end)
+            end
+            if typeof(EggState.CarryFieldEgg) == "function" and uid then
+                pcall(function() EggState.CarryFieldEgg(uid) end)
+            end
+        end
+
+        if targetPrompt and targetPrompt.Enabled then
+            UniversalCompat.FireProximityPrompt(targetPrompt)
+        end
+
+        for _ = 1, 3 do
+            Services.RunService.Heartbeat:Wait()
+            if isHoldingEgg() then return true end
+        end
+    end
+    return isHoldingEgg()
+end
+
+local function performGroundCheckpoint(targetEgg, currentX, laneZ, sessionId)
+    if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
+    local _, root, humanoid = getAliveRig()
+    if not root then return false end
+    if humanoid then humanoid.PlatformStand = false end
+
+    local uid = (targetEgg and targetEgg.Uid) or (EggState and EggState.CarryUid)
+    local checkY = CONFIG.GroundAltitude + 1.0
+
+    pcall(function()
+        root.CFrame = CFrame.new(currentX, checkY, laneZ) * CFrame.Angles(0, math.rad(90), 0)
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+    end)
+    task.wait(0.06)
+
+    dropHeldEggDirect()
+    local dropWait = os.clock() + 0.6
+    while os.clock() < dropWait and isHoldingEgg() do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
+        dropHeldEggDirect()
+        task.wait(0.08)
+    end
+    task.wait(0.04)
+
+    if uid and EggState and typeof(EggState.CarryFieldEgg) == "function" then
+        pcall(function() EggState.CarryFieldEgg(uid) end)
+        task.wait(0.12)
+    end
+
+    if not isHoldingEgg() then
+        local eggFloorPos = getPhysicalEggPosition(uid, Vector3.new(currentX, checkY, laneZ))
+        local grabSuccess = false
+        local retryTimeout = os.clock() + 3.0
+
+        while os.clock() < retryTimeout do
+            if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
+            grabSuccess = instantGrabAtPosition(uid, eggFloorPos, sessionId, false)
+            if grabSuccess and isHoldingEgg() then break end
+            Services.RunService.Heartbeat:Wait()
+        end
+    end
+    task.wait(0.04)
+    return isHoldingEgg()
+end
+
+local function executeCheckpointedHopsHome(targetEgg, sessionId)
+    local _, root, humanoid = getAliveRig()
+    if not root then return false end
+
+    local boundaryX = CONFIG.BoundaryCheckpointX
+    local playerSpeed = getPlayerCurrentSpeed()
+    local baseStep = CONFIG.HopDistance
+    local stepSize = (playerSpeed < 100) and math.max(34, playerSpeed * 0.45) or math.min(baseStep, math.max(60, playerSpeed * 0.75))
+    local interval = CONFIG.CheckpointInterval
+    local safeTarget = CONFIG.BaseDropPosition
+
+    local laneZ = math.clamp(root.Position.Z, -425, -300)
+    local currentX = root.Position.X
+    local lastCheckpointX = currentX
+
+    StealUIManager:Lock()
+    ShieldManager:MuteUGI()
+    if humanoid then humanoid.PlatformStand = false end
+
+    local groundY = CONFIG.GroundAltitude + 1.0
+
+    while currentX - stepSize > boundaryX do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then
+            ShieldManager:UnmuteUGI()
+            StealUIManager:Unlock()
+            cleanupFlightState()
+            return false
+        end
+
+        local _, cRoot = getAliveRig()
+        if not cRoot then 
+            ShieldManager:UnmuteUGI()
+            StealUIManager:Unlock()
+            cleanupFlightState() 
+            return false 
+        end
+
+        local nextX = currentX - stepSize
+        local preHopTime = os.clock()
+
+        pcall(function()
+            cRoot.CFrame = CFrame.new(nextX, groundY, laneZ) * CFrame.Angles(0, math.rad(90), 0)
+            cRoot.AssemblyLinearVelocity = Vector3.zero
+        end)
+        task.wait(CONFIG.HopGap)
+
+        local _, postRoot = getAliveRig()
+        local pulled = (State.lastServerRollbackTime > preHopTime) or (postRoot ~= nil and (postRoot.Position.X - nextX > 15))
+
+        if pulled then
+            CONFIG.HopGap = math.min(CONFIG.HopGapMax, CONFIG.HopGap + 0.02)
+            stepSize = math.max(34, stepSize * 0.75)
+            task.wait(0.1)
+        else
+            currentX = nextX
+            CONFIG.HopGap = math.max(CONFIG.HopGapMin, CONFIG.HopGap - 0.005)
+        end
+
+        if math.abs(lastCheckpointX - currentX) >= interval then
+            lastCheckpointX = currentX
+            local ok = performGroundCheckpoint(targetEgg, currentX, laneZ, sessionId)
+            if not ok and not isHoldingEgg() then
+                ShieldManager:UnmuteUGI()
+                StealUIManager:Unlock()
+                cleanupFlightState()
+                return false
+            end
+        end
+    end
+
+    if isHoldingEgg() then
+        currentX = boundaryX
+        pcall(function()
+            local _, bRoot = getAliveRig()
+            if bRoot then
+                bRoot.CFrame = CFrame.new(boundaryX, groundY, laneZ) * CFrame.Angles(0, math.rad(90), 0)
+                bRoot.AssemblyLinearVelocity = Vector3.zero
+            end
+        end)
+        task.wait(0.08)
+        local boundaryOk = performGroundCheckpoint(targetEgg, boundaryX, laneZ, sessionId)
+        if not boundaryOk and not isHoldingEgg() then
+            ShieldManager:UnmuteUGI()
+            StealUIManager:Unlock()
+            cleanupFlightState()
+            return false
+        end
+    end
+
+    local corridorStep = 45
+    while currentX - corridorStep > safeTarget.X do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then
+            break
+        end
+
+        local nextX = currentX - corridorStep
+        local _, cRoot = getAliveRig()
+        if cRoot then
+            pcall(function()
+                cRoot.CFrame = CFrame.new(nextX, groundY, safeTarget.Z) * CFrame.Angles(0, math.rad(90), 0)
+                cRoot.AssemblyLinearVelocity = Vector3.zero
+            end)
+        end
+        task.wait(CONFIG.HopGap)
+        currentX = nextX
+    end
+
+    local _, fRoot, fHum = getAliveRig()
+    if fRoot then
+        pcall(function()
+            fRoot.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
+            fRoot.AssemblyLinearVelocity = Vector3.zero
+        end)
+    end
+    task.wait(0.15)
+    if fHum then fHum.PlatformStand = false end
+
+    dropHeldEggDirect()
+    task.wait(0.25)
+
+    local dropVerifyTimeout = os.clock() + 2.0
+    while os.clock() < dropVerifyTimeout and isHoldingEgg() do
+        dropHeldEggDirect()
+        task.wait(0.2)
+    end
+
+    StealUIManager:Unlock()
+    ShieldManager:UnmuteUGI()
+    cleanupFlightState()
+    return not isHoldingEgg()
+end
+
+local function executeFastStealDelivery(targetEgg, sessionId)
+    local _, root, hum = getAliveRig()
+    if not root or not hum then return false end
+
+    local uid = targetEgg.Uid
+    local laneZ = math.clamp(root.Position.Z, -425, -300)
+    local dropTargetPos = Vector3.new(CONFIG.SeparationLineX + CONFIG.FastStealLineDropOffset, CONFIG.GroundAltitude + 1.0, laneZ)
+    local playerSpeed = getPlayerCurrentSpeed()
+
+    setCollisions(false)
+    ShieldManager:MuteUGI()
+
+    local startTime = os.clock()
+    local travelTimeout = math.max(12, ((root.Position.X - dropTargetPos.X) / playerSpeed) + 6)
+
+    while root.Position.X > dropTargetPos.X + 2.0 and (os.clock() - startTime) < travelTimeout do
+        Services.RunService.Heartbeat:Wait()
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then
+            setCollisions(true)
+            ShieldManager:UnmuteUGI()
+            return false
+        end
+
+        local _, cRoot = getAliveRig()
+        if not cRoot then break end
+        cRoot.AssemblyLinearVelocity = Vector3.new(-playerSpeed, cRoot.AssemblyLinearVelocity.Y, 0)
+        cRoot.CFrame = CFrame.new(cRoot.Position.X, CONFIG.GroundAltitude + 1.0, laneZ) * CFrame.Angles(0, math.rad(90), 0)
+    end
+
+    local _, cRoot = getAliveRig()
+    if cRoot then
+        cRoot.CFrame = CFrame.new(dropTargetPos) * CFrame.Angles(0, math.rad(90), 0)
+        cRoot.AssemblyLinearVelocity = Vector3.zero
+    end
+    task.wait(0.1)
+
+    local checkpointOk = performGroundCheckpoint(targetEgg, dropTargetPos.X, laneZ, sessionId)
+    if not checkpointOk and not isHoldingEgg() then
+        setCollisions(true)
+        ShieldManager:UnmuteUGI()
+        return false
+    end
+
+    local currentX = dropTargetPos.X
+    local safeTarget = CONFIG.BaseDropPosition
+    local corridorStep = 55
+
+    while currentX - corridorStep > safeTarget.X do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then break end
+        local nextX = currentX - corridorStep
+        local _, hRoot = getAliveRig()
+        if hRoot then
+            pcall(function()
+                hRoot.CFrame = CFrame.new(nextX, CONFIG.GroundAltitude + 1.0, safeTarget.Z) * CFrame.Angles(0, math.rad(90), 0)
+                hRoot.AssemblyLinearVelocity = Vector3.zero
+            end)
+        end
+        task.wait(CONFIG.HopGap)
+        currentX = nextX
+    end
+
+    local _, fRoot, fHum = getAliveRig()
+    if fRoot then
+        fRoot.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
+        fRoot.AssemblyLinearVelocity = Vector3.zero
+    end
+    task.wait(0.15)
+    if fHum then fHum.PlatformStand = false end
+
+    dropHeldEggDirect()
+    task.wait(0.25)
+
+    local dropVerifyTimeout = os.clock() + 2.0
+    while os.clock() < dropVerifyTimeout and isHoldingEgg() do
+        dropHeldEggDirect()
+        task.wait(0.2)
+    end
+
+    setCollisions(true)
+    ShieldManager:UnmuteUGI()
+    return not isHoldingEgg()
+end
+
+local function executeGroundDeliveryHome(targetEgg, sessionId)
+    return executeCheckpointedHopsHome(targetEgg, sessionId)
+end
+
+local function travelPlaneSegment(targetPos, stopDist, speed, timeout, sessionId, targetUid)
+    local char, root = getAliveRig()
+    if not root then return false end
+
+    stopDist = stopDist or 4
+    local startTime = os.clock()
+    local reached = false
+    local lastLiveCheck = 0
+
+    State.activeFlightConnection = Services.RunService.Heartbeat:Connect(function()
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or isMapClosed() then
+            if State.activeFlightConnection then State.activeFlightConnection:Disconnect() State.activeFlightConnection = nil end
+            return
+        end
+
+        local _, cRoot = getAliveRig()
+        if not cRoot then
+            if State.activeFlightConnection then State.activeFlightConnection:Disconnect() State.activeFlightConnection = nil end
+            return
+        end
+
+        if targetUid and (os.clock() - lastLiveCheck >= 0.25) then
+            lastLiveCheck = os.clock()
+            if not isEggStillValid(targetUid) then
+                blacklistEgg(targetUid, 15)
+                if State.activeFlightConnection then State.activeFlightConnection:Disconnect() State.activeFlightConnection = nil end
+                return
+            end
+        end
+
+        local currentPos = cRoot.Position
+        local delta = Vector3.new(targetPos.X - currentPos.X, 0, targetPos.Z - currentPos.Z)
+        local dist = delta.Magnitude
+
+        if dist <= stopDist then
+            reached = true
+            cRoot.AssemblyLinearVelocity = Vector3.zero
+            if State.activeFlightConnection then State.activeFlightConnection:Disconnect() State.activeFlightConnection = nil end
+            return
+        end
+
+        if (os.clock() - startTime) > timeout then
+            cRoot.AssemblyLinearVelocity = Vector3.zero
+            if State.activeFlightConnection then State.activeFlightConnection:Disconnect() State.activeFlightConnection = nil end
+            return
+        end
+
+        local moveDir = delta.Unit
+        cRoot.AssemblyLinearVelocity = Vector3.new(moveDir.X * speed, 0, moveDir.Z * speed)
+        cRoot.CFrame = CFrame.new(currentPos.X, CONFIG.FlightAltitude, currentPos.Z) * CFrame.lookAt(Vector3.zero, moveDir)
+    end)
+
+    while State.activeFlightConnection and State.activeFlightConnection.Connected do
+        Services.RunService.Heartbeat:Wait()
+    end
+
+    return reached and (sessionId == State.currentStealSession) and isStealEnabled() and not isMapClosed()
+end
+
+local function flyOutboundElevated(targetPosition, stopDistance, sessionId, targetUid)
+    local char, root, humanoid = getAliveRig()
+    if not root or not humanoid then return false end
+
+    StealUIManager:SnapshotNormalHUD()
+    stopDistance = stopDistance or 4
+
+    local playerSpeed = math.max(getPlayerCurrentSpeed() * 2.0, 75)
+
+    table.clear(State.activeCollisionsDisabled)
+    for _, part in ipairs(char:GetDescendants()) do
+        if part:IsA("BasePart") and part.CanCollide then
+            State.activeCollisionsDisabled[part] = true
+            part.CanCollide = false
+        end
+    end
+
+    humanoid.PlatformStand = true
+
+    local function snapAltitude(targetY)
+        local _, cRoot = getAliveRig()
+        if cRoot then
+            pcall(function()
+                cRoot.CFrame = CFrame.new(cRoot.Position.X, targetY, cRoot.Position.Z) * cRoot.CFrame.Rotation
+                cRoot.AssemblyLinearVelocity = Vector3.zero
+            end)
+            task.wait(0.03)
+        end
+    end
+    snapAltitude(CONFIG.FlightAltitude)
+
+    local currentPosInit = root.Position
+    if currentPosInit.X < CONFIG.BoundaryCheckpointX then
+        local centerDeliveryPos = Vector3.new(CONFIG.BaseDropPosition.X, CONFIG.FlightAltitude, CONFIG.BaseDropPosition.Z)
+        local mouthPos = Vector3.new(CONFIG.BoundaryCheckpointX, CONFIG.FlightAltitude, CONFIG.BaseDropPosition.Z)
+
+        local lateralDist = math.abs(currentPosInit.Z - CONFIG.BaseDropPosition.Z)
+        if lateralDist > 12 or currentPosInit.X < CONFIG.BaseDropPosition.X then
+            local ok = travelPlaneSegment(centerDeliveryPos, 4, playerSpeed, 20, sessionId, targetUid)
+            if not ok then cleanupFlightState() return false end
+        end
+
+        local ok2 = travelPlaneSegment(mouthPos, 4, playerSpeed, 20, sessionId, targetUid)
+        if not ok2 then cleanupFlightState() return false end
+    end
+
+    local finalDelta = Vector3.new(targetPosition.X - root.Position.X, 0, targetPosition.Z - root.Position.Z)
+    local dynamicTimeout = math.max(30, (finalDelta.Magnitude / playerSpeed) + 20)
+
+    local reached = travelPlaneSegment(targetPosition, stopDistance, playerSpeed, dynamicTimeout, sessionId, targetUid)
+    if reached and sessionId == State.currentStealSession and isStealEnabled() and not isMapClosed() then
+        snapAltitude((targetPosition.Y or CONFIG.GroundAltitude) + CONFIG.AirGrabOffset)
+    end
+
+    cleanupFlightState()
+    return reached and (sessionId == State.currentStealSession) and isStealEnabled() and not isMapClosed()
+end
+
+local function executeInstantOutbound(targetPos, sessionId, targetUid)
+    local char, root, hum = getAliveRig()
+    if not root or not hum then return false end
+
+    setCollisions(false)
+    if hum then hum.PlatformStand = false end
+
+    local currentPos = root.Position
+    local targetY = (targetPos.Y and targetPos.Y > 200) and (targetPos.Y + 1.0) or (CONFIG.GroundAltitude + 1.0)
+
+    if currentPos.X < CONFIG.BoundaryCheckpointX then
+        local mouthPos = Vector3.new(CONFIG.BoundaryCheckpointX, targetY, CONFIG.BaseDropPosition.Z)
+        pcall(function()
+            root.CFrame = CFrame.new(mouthPos) * CFrame.Angles(0, math.rad(90), 0)
+            root.AssemblyLinearVelocity = Vector3.zero
+        end)
+        task.wait(0.04)
+    end
+
+    local _, cRoot = getAliveRig()
+    if not cRoot then return false end
+
+    local targetStandPos = getStandingPosition(targetPos)
+    local startPos = cRoot.Position
+    local delta = Vector3.new(targetStandPos.X - startPos.X, 0, targetStandPos.Z - startPos.Z)
+    local dist = delta.Magnitude
+    local stepSize = 120
+    local steps = math.max(1, math.ceil(dist / stepSize))
+
+    for i = 1, steps do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
+        local _, curR = getAliveRig()
+        if not curR then return false end
+
+        local frac = math.min(1.0, i / steps)
+        local hopPos = startPos + delta * frac
+        local lookVector = delta.Unit
+        pcall(function()
+            curR.CFrame = CFrame.new(hopPos.X, targetY, hopPos.Z) * CFrame.lookAt(Vector3.zero, lookVector)
+            curR.AssemblyLinearVelocity = Vector3.zero
+        end)
+        task.wait(0.02)
+    end
+
+    local _, fRoot = getAliveRig()
+    if fRoot then
+        fRoot.CFrame = CFrame.lookAt(targetStandPos, targetPos)
+        fRoot.AssemblyLinearVelocity = Vector3.zero
+        fRoot.AssemblyAngularVelocity = Vector3.zero
+    end
+    task.wait(0.04)
+    return true
+end
+
+local function travelOutboundToEgg(targetPos, sessionId, targetUid)
+    local mode = currentSettings.OutboundMode or 'Fly'
+    local arrived = false
+
+    if mode == 'Instant' then
+        arrived = executeInstantOutbound(targetPos, sessionId, targetUid)
+    elseif mode == 'Fly' then
+        arrived = flyOutboundElevated(targetPos, 3.5, sessionId, targetUid)
+    end
+
+    if not arrived and sessionId == State.currentStealSession and isStealEnabled() and isEggStillValid(targetUid) then
+        arrived = runAlongGroundToEgg(targetPos, nil, sessionId, targetUid)
+    end
+
+    return arrived
+end
+
+getBestEgg = function()
+    if isMapClosed() then return nil end
+    local records = getFieldEggRecords()
+    if not records or next(records) == nil then return nil end
+    local data = { Records = records }
+
+    if isNormalStealPanelTarget() then
+        for uid, record in pairs(data.Records) do
+            if type(record) == "table" then
+                if uid == State.targetedSpecificUid or record.Uid == State.targetedSpecificUid then
+                    record.Uid = record.Uid or uid
+                    if State.isStealingActive or isHoldingEgg() or (record.State ~= "Claimed" and record.State ~= "Carried") then
+                        return record
+                    end
+                end
+            end
+        end
+
+        local directFloorPos = getPhysicalEggPosition(State.targetedSpecificUid, nil)
+        if directFloorPos and (State.isStealingActive or isHoldingEgg() or isEggStillValid(State.targetedSpecificUid)) then
+            return {
+                Uid = State.targetedSpecificUid,
+                BottomCFrame = CFrame.new(directFloorPos),
+                AssetCategory = "TargetedEgg"
+            }
+        end
+
+        if not State.isStealingActive and not isHoldingEgg() then
+            if State.activeStealButtons[State.targetedSpecificUid] then
+                State.activeStealButtons[State.targetedSpecificUid].BackgroundColor3 = activeTheme and activeTheme.Accent or Color3.fromRGB(92, 170, 255)
+                State.activeStealButtons[State.targetedSpecificUid].Text = "Steal"
+            end
+            State.targetedSpecificUid = nil
+        end
+    end
+
+    local minScore = getMinRequiredScore()
+    local bestEgg = nil
+    local highestScore = -math.huge
+    local normalStealEnabled = getgenv().config.autoFarm == true
+
+    for keyUid, record in pairs(data.Records) do
+        if type(record) == "table" then
+            local uid = (type(record.Uid) == "string" and record.Uid) or (type(keyUid) == "string" and keyUid) or nil
+            record.Uid = uid
+            if uid and not isBlacklisted(uid) then
+                if record.State == "Slot" or record.State == "Dropped" or record.State == nil then
+                    local posX = nil
+                    local cf = record.BottomCFrame or record.BoundsCFrame or record.CFrame
+                    if typeof(cf) == "CFrame" then posX = cf.Position.X
+                    elseif typeof(cf) == "Vector3" then posX = cf.X
+                    elseif typeof(record.Position) == "Vector3" then posX = record.Position.X end
+
+                    if not posX or posX >= 560 then
+                        local rawName = record.AssetCategory or record.Category or record.Name or "Unknown"
+
+                    if isLabNeeded then
+                        local scale = tonumber(record.AssetScale) or 1
+                        local mutationBonus = (record.Mutations and #record.Mutations > 0) and 2.5 or 1
+                        local score = 100000000 + ((scale ^ 1.85) * mutationBonus)
+
+                        if score > highestScore then
+                            highestScore = score
+                            bestEgg = record
+                        end
+                    elseif normalStealEnabled then
+                        local areaIdStr = tostring(record.AreaId or "")
+                        if matchesTargetArea(areaIdStr) then
+                            local _, rank = MasterRegistry:Lookup(rawName)
+                            if rank >= minScore then
+                                local scale = tonumber(record.AssetScale) or 1
+                                local mutationBonus = (record.Mutations and #record.Mutations > 0) and 2.5 or 1
+                                local score = (rank * 1000) + ((scale ^ 1.85) * mutationBonus)
+
+                                if score > highestScore then
+                                    highestScore = score
+                                    bestEgg = record
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    end
+    return bestEgg
+end
+
+WorkerScheduler:Register("AutoUpgrades", 6.0, function()
+    if getgenv().config.autoUpgradeTreadmill then tryUpgradeTreadmill() end
+    if getgenv().config.autoUpgradeBase then tryUpgradeBase() end
+end)
+
+WorkerScheduler:Register("UFOEvent", 0.25, function()
+    if State.isStealingActive or isHoldingEgg() then return end
+    if not PriorityManager:CanRun("UFO") then return end
+
+    UFOManager.tick = (UFOManager.tick or 0) + 1
+    if (UFOManager.tick % 40) == 1 then
+        pcall(function() UFOManager:FetchState() end)
+    end
+
+    if PriorityManager:Acquire("UFO", 25.0) then
+        pcall(function() UFOManager:Process() end)
+        PriorityManager:Release("UFO")
+    end
+end)
+
+WorkerScheduler:Register("EventsCombat", 0.35, function()
+    if State.isStealingActive or isHoldingEgg() then return end
+    if not PriorityManager:CanRun("Bloom") then return end
+
+    if PriorityManager:Acquire("Bloom", 15.0) then
+        pcall(function() BloomManager:Process() end)
+        PriorityManager:Release("Bloom")
+    end
+end)
+
+WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
+    local char = LocalPlayer.Character
+    if not char then return end
+
+    if isStealEnabled() and not State.isStealingActive and not isMapClosed() and PriorityManager:CanRun("Steal") then
+        local currentTargetEgg = getBestEgg()
+        if currentTargetEgg then
+            local targetUid = currentTargetEgg.Uid
+            if not isEggStillValid(targetUid) then
+                blacklistEgg(targetUid, 15)
+                if State.targetedSpecificUid == targetUid then
+                    if State.activeStealButtons[targetUid] then
+                        State.activeStealButtons[targetUid].BackgroundColor3 = activeTheme and activeTheme.Accent or Color3.fromRGB(92, 170, 255)
+                        State.activeStealButtons[targetUid].Text = "Steal"
+                    end
+                    State.targetedSpecificUid = nil
+                end
+                return
+            end
+
+            PriorityManager:Claim("Steal")
+            State.isStealingActive = true
+            State.treadmillFailCount = 0
+            State.currentStealSession = State.currentStealSession + 1
+            local session = State.currentStealSession
+
+            hopOffTreadmill()
+            ShieldManager:ApplyHumanoidSwap(char)
+            task.wait(0.08)
+
+            local targetCFrame = currentTargetEgg.BottomCFrame or currentTargetEgg.BoundsCFrame or currentTargetEgg.CFrame
+            local eggTargetPos = nil
+            if typeof(targetCFrame) == "CFrame" then eggTargetPos = targetCFrame.Position
+            elseif typeof(targetCFrame) == "Vector3" then eggTargetPos = targetCFrame
+            elseif typeof(currentTargetEgg.Position) == "Vector3" then eggTargetPos = currentTargetEgg.Position end
+
+            if not eggTargetPos and targetUid then
+                eggTargetPos = getPhysicalEggPosition(targetUid, nil)
+            end
+
+            local stealSuccess = false
+            if eggTargetPos then
+                local areaId = currentTargetEgg.AreaId
+                local isUfoEgg = UFOManager and UFOManager.IsUfoEgg and UFOManager:IsUfoEgg(currentTargetEgg, targetUid)
+                local canUfoTp = (getgenv().config.ufoTp == true) and isUfoEgg and root and ((root.Position - eggTargetPos).Magnitude >= 1000)
+                local canUseFastSteal = ((getgenv().config.fastSteal == true and isFastStealArea(areaId)) or canUfoTp)
+
+                local function tryDeliverToUfo()
+                    if not isUfoEgg then return false end
+                    local ufoPos = UFOManager:GetUfoPosition()
+                    if not ufoPos then return false end
+                    local d0 = UFOManager.State.st and UFOManager.State.st.Delivered or 0
+                    local _, cRoot = getAliveRig()
+                    if not cRoot then return false end
+
+                    local beamTarget = Vector3.new(ufoPos.X, math.max(ufoPos.Y - 60, cRoot.Position.Y), ufoPos.Z)
+                    local arriveTimeout = os.clock() + 4.0
+                    while os.clock() < arriveTimeout and isHoldingEgg() and (UFOManager.State.st.Delivered or 0) <= d0 do
+                        local _, curR = getAliveRig()
+                        if not curR then break end
+                        local diff = beamTarget - curR.Position
+                        if diff.Magnitude <= 15 then break end
+                        curR.CFrame = CFrame.new(curR.Position + diff.Unit * math.min(diff.Magnitude, 35))
+                        curR.AssemblyLinearVelocity = Vector3.zero
+                        task.wait(0.08)
+                    end
+
+                    local waitTimeout = os.clock() + 5.0
+                    while os.clock() < waitTimeout and isHoldingEgg() and (UFOManager.State.st.Delivered or 0) <= d0 do
+                        task.wait(0.1)
+                    end
+
+                    return (UFOManager.State.st.Delivered or 0) > d0
+                end
+
+                local arrived = false
+                if canUseFastSteal and isFastStealArea(areaId) then
+                    arrived = executeFastStealOutbound(eggTargetPos, session, targetUid)
+                end
+
+                if not arrived and session == State.currentStealSession and isStealEnabled() and isEggStillValid(targetUid) then
+                    arrived = travelOutboundToEgg(eggTargetPos, session, targetUid)
+                end
+
+                if arrived and session == State.currentStealSession and isStealEnabled() then
+                    task.wait(0.04)
+                    local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
+
+                    if (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                        stealSuccess = tryDeliverToUfo()
+
+                        if not stealSuccess and (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                            if canUseFastSteal and isFastStealArea(areaId) then
+                                stealSuccess = executeFastStealDelivery(currentTargetEgg, session)
+                            end
+                            if not stealSuccess and isHoldingEgg() and session == State.currentStealSession and isStealEnabled() then
+                                stealSuccess = executeCheckpointedHopsHome(currentTargetEgg, session)
+                            end
+                        end
+                    end
+                end
+            end
+
+            if session == State.currentStealSession then
+                State.isStealingActive = false
+                ShieldManager:UndoSwap()
+                cleanupFlightState()
+                PriorityManager:Release("Steal")
+
+                if State.targetedSpecificUid == targetUid and (stealSuccess or not isEggStillValid(targetUid)) then
+                    if State.activeStealButtons[targetUid] then
+                        State.activeStealButtons[targetUid].BackgroundColor3 = activeTheme and activeTheme.Accent or Color3.fromRGB(92, 170, 255)
+                        State.activeStealButtons[targetUid].Text = "Steal"
+                    end
+                    State.targetedSpecificUid = nil
+                end
+            else
+                State.isStealingActive = false
+                ShieldManager:UndoSwap()
+                cleanupFlightState()
+                if PriorityManager then
+                    PriorityManager:Release("Steal")
+                    PriorityManager:Release("Auto Steal")
+                end
+            end
+        end
+    end
+
+    local isStealBusy = State.isStealingActive or isHoldingEgg()
+    local canTreadmill = getgenv().config.autoTreadmill and not isStealBusy and PriorityManager:CanRun("Treadmill")
+
+    if canTreadmill and getAliveRig() then
+        ShieldManager:UndoSwap()
+        findMyPlot()
+        local _, cRoot, cHum = getAliveRig()
+        if cRoot and cHum then
+            if State.myTreadmill then
+                local tPos = State.myTreadmill.Position + Vector3.new(0, 3, 0)
+                local dist = (cRoot.Position - tPos).Magnitude
+                if dist > 4 then
+                    cHum.PlatformStand = false
+                    cHum.Sit = false
+                    local speed = cHum.WalkSpeed
+                    if not speed or speed <= 0 then speed = 16 end
+                    local travelDuration = math.clamp(dist / math.max(speed, 16), 0.3, 3)
+                    local tw = Services.TweenService:Create(cRoot, TweenInfo.new(travelDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                        CFrame = CFrame.new(tPos) * cRoot.CFrame.Rotation
+                    })
+                    tw:Play()
+                    tw.Completed:Wait()
+                end
+
+                local _, postRoot, postHum = getAliveRig()
+                if postRoot and not postRoot.Anchored then
+                    if postHum then
+                        postHum.PlatformStand = false
+                        postHum.Sit = false
+                    end
+                    if Remotes.AskWearStill and not isStealBusy and PriorityManager:CanRun("Treadmill") then
+                        pcall(function() Remotes.AskWearStill:InvokeServer() end)
+                    end
+                    task.wait(0.35)
+                    local _, verifyRoot = getAliveRig()
+                    if verifyRoot and not verifyRoot.Anchored then
+                        State.treadmillFailCount = State.treadmillFailCount + 1
+                        if State.treadmillFailCount >= 8 then
+                            resetFlaggedCharacter()
+                        elseif State.treadmillFailCount == 4 and Remotes.AskDoff then
+                            pcall(function() Remotes.AskDoff:InvokeServer() end)
+                        end
+                    else
+                        State.treadmillFailCount = 0
+                    end
+                else
+                    State.treadmillFailCount = 0
+                end
+            else
+                State.treadmillFailCount = 0
+            end
+        end
+    else
+        if not canTreadmill and getgenv().config.autoTreadmill then
+            local _, curRoot = getAliveRig()
+            if curRoot and curRoot.Anchored then
+                hopOffTreadmill()
+            end
+        end
+    end
+end)
+
+WorkerScheduler:Start()
+
+local CloudyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
+
+Window = CloudyLib:CreateWindow({
     Title = "Quantum | ID",
-    SubTitle = "Main",
+    SubTitle = "Steal an Egg",
+    TabWidth = 145,
     Theme = currentSettings.Theme or "Cloudy",
     MinimizeKey = Enum.KeyCode.RightControl
 })
 
 activeTheme = {
-    Accent = Color3.fromRGB(0, 162, 255),
-    Accent2 = Color3.fromRGB(77, 186, 255),
-    CardBg = Color3.fromRGB(22, 24, 29),
-    BoxBg = Color3.fromRGB(28, 32, 38),
-    RowBg = Color3.fromRGB(18, 20, 24),
-    Stroke = Color3.fromRGB(45, 52, 64),
-    SubText = Color3.fromRGB(160, 170, 185)
+    Accent = Color3.fromRGB(92, 170, 255),
+    Background = Color3.fromRGB(24, 24, 30)
 }
 
-local FarmTab = Window:AddTab({ Title = "Farm", Icon = "lucide-wheat" })
+local Tabs = {
+    Farm = Window:AddTab({ Title = "Farm", Icon = "solar/gamepad-bold" }),
+    Priority = Window:AddTab({ Title = "Priority", Icon = "solar/sort-vertical-bold" }),
+    StealPanel = Window:AddTab({ Title = "Steal Panel", Icon = "solar/database-bold" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "solar/settings-bold" })
+}
 
-local stealSection = FarmTab:AddSection("Automation Steal")
+local StealSec = Tabs.Farm:AddSection("Automation Steal", "solar/fire-bold")
 
-stealSection:AddToggle("AutoSteal", {
+StealSec:AddToggle("AutoStealToggle", {
     Title = "Auto Steal",
     Description = "Automatically steal eggs from areas",
     Default = currentSettings.AutoFarm,
@@ -2454,19 +3723,31 @@ stealSection:AddToggle("AutoSteal", {
     end
 })
 
-stealSection:AddToggle("FastSteal", {
+StealSec:AddDropdown("OutboundModeDropdown", {
+    Title = "Outbound Mode",
+    Description = "Movement style to egg: Fly or Instant",
+    Values = {"Fly", "Instant"},
+    Default = currentSettings.OutboundMode or "Fly",
+    Callback = function(val)
+        currentSettings.OutboundMode = val
+        getgenv().config.outboundMode = val
+        saveStuff()
+    end
+})
+
+StealSec:AddToggle("FastStealToggle", {
     Title = "Fast Steal",
-    Description = "Only works on Titan temple and above areas.",
+    Description = "Only works on Titan temple and above areas",
     Default = currentSettings.FastSteal,
     Callback = function(state)
         getgenv().config.fastSteal = state
         currentSettings.FastSteal = state
         saveStuff()
         if state then
-            Cloudy:Notify({
-                Title = "Fast Steal Warning",
-                Content = "Fast Steal is unreliable. Do not use if you are lagging or AFK farming.",
-                Duration = 6
+            CloudyLib:Notify({
+                Title = "Fast Steal Notice",
+                Content = "Fast Steal is optimized for high-tier biomes. Ensure steady ping.",
+                Duration = 4
             })
         else
             if State.isStealingActive and not isHoldingEgg() then
@@ -2482,9 +3763,9 @@ local areaList = {
     "Cherry Blossom", "Titan Temple", "Light Dark", "Enchanted Forest"
 }
 
-stealSection:AddDropdown("TargetAreas", {
+StealSec:AddDropdown("TargetAreasDropdown", {
     Title = "Target Areas",
-    Description = "Select one or multiple areas (empty = all)",
+    Description = "Select target biome areas",
     Values = areaList,
     Multi = true,
     Default = currentSettings.TargetAreas,
@@ -2502,7 +3783,7 @@ local rarityList = {
     "9 - Eternal", "10 - Divine"
 }
 
-stealSection:AddDropdown("MinRarity", {
+StealSec:AddDropdown("MinRarityDropdown", {
     Title = "Min Rarity",
     Description = "Only steal eggs with rarity >= this",
     Values = rarityList,
@@ -2515,9 +3796,9 @@ stealSection:AddDropdown("MinRarity", {
     end
 })
 
-local treadmillSection = FarmTab:AddSection("Automation Treadmill")
+local TreadmillSec = Tabs.Farm:AddSection("Automation Treadmill", "solar/running-2-bold")
 
-treadmillSection:AddToggle("AutoTreadmill", {
+TreadmillSec:AddToggle("AutoTreadmillToggle", {
     Title = "Auto Treadmill",
     Description = "Gain treadmill speed when idle",
     Default = currentSettings.AutoTreadmill,
@@ -2528,9 +3809,9 @@ treadmillSection:AddToggle("AutoTreadmill", {
     end
 })
 
-local ufoSection = FarmTab:AddSection("UFO Event")
+local UfoSec = Tabs.Farm:AddSection("UFO Event", "solar/ufo-bold")
 
-ufoSection:AddToggle("AutoUFO", {
+UfoSec:AddToggle("AutoUFOToggle", {
     Title = "Auto UFO",
     Description = "Automate decoding, tractor beam delivery & rewards",
     Default = currentSettings.AutoUFO,
@@ -2544,7 +3825,7 @@ ufoSection:AddToggle("AutoUFO", {
     end
 })
 
-ufoSection:AddToggle("CollectUFODebris", {
+UfoSec:AddToggle("CollectUFORocksToggle", {
     Title = "Collect UFO Debris",
     Description = "Collect space rocks across the world",
     Default = currentSettings.UFORocks,
@@ -2558,9 +3839,9 @@ ufoSection:AddToggle("CollectUFODebris", {
     end
 })
 
-ufoSection:AddToggle("FarmRareUFO", {
+UfoSec:AddToggle("FarmRareUFOToggle", {
     Title = "Farm Rare UFO",
-    Description = "Board mothership, smash capsules, vault & alien staff",
+    Description = "Board mothership, smash capsules & vault",
     Default = currentSettings.UFORare,
     Callback = function(state)
         getgenv().config.ufoRare = state
@@ -2572,7 +3853,7 @@ ufoSection:AddToggle("FarmRareUFO", {
     end
 })
 
-ufoSection:AddToggle("AutoTradeDebris", {
+UfoSec:AddToggle("AutoTradeDebrisToggle", {
     Title = "Auto Trade Debris",
     Description = "Trade space rocks at Alien Camp",
     Default = currentSettings.UFOTrade,
@@ -2586,7 +3867,7 @@ ufoSection:AddToggle("AutoTradeDebris", {
     end
 })
 
-ufoSection:AddToggle("TeleportFarEgg", {
+UfoSec:AddToggle("UFOTpToggle", {
     Title = "Teleport If Far From Egg",
     Description = "Rapid travel to distant UFO eggs",
     Default = currentSettings.UFOTp,
@@ -2597,9 +3878,9 @@ ufoSection:AddToggle("TeleportFarEgg", {
     end
 })
 
-local bloomSection = FarmTab:AddSection("Enchanted / Bloom Event")
+local BloomSec = Tabs.Farm:AddSection("Enchanted / Bloom Event", "solar/leaf-bold")
 
-bloomSection:AddToggle("AutoButterflyBloom", {
+BloomSec:AddToggle("AutoButterflyToggle", {
     Title = "Auto Butterfly Bloom",
     Description = "Safe ground-level butterfly catching",
     Default = currentSettings.AutoCatchButterfly,
@@ -2610,7 +3891,7 @@ bloomSection:AddToggle("AutoButterflyBloom", {
     end
 })
 
-bloomSection:AddDropdown("BloomCatchMode", {
+BloomSec:AddDropdown("BloomCatchModeDropdown", {
     Title = "Catch Mode",
     Description = "Stand in center or ground chase",
     Values = {"Stand", "Chase"},
@@ -2622,7 +3903,7 @@ bloomSection:AddDropdown("BloomCatchMode", {
     end
 })
 
-bloomSection:AddDropdown("BloomCatchPriority", {
+BloomSec:AddDropdown("BloomCatchPriorityDropdown", {
     Title = "Catch Priority",
     Description = "Priority order for Chase mode",
     Values = {"Rarest", "Nearest"},
@@ -2634,12 +3915,12 @@ bloomSection:AddDropdown("BloomCatchPriority", {
     end
 })
 
-bloomSection:AddSlider("CatchSpeed", {
+BloomSec:AddSlider("CatchSpeedSlider", {
     Title = "Catch Speed",
     Description = "Ground movement speed for Chase mode",
     Min = 100,
     Max = 600,
-    Default = currentSettings.ButterflySpeed or 350,
+    Default = currentSettings.ButterflySpeed or 320,
     Rounding = 0,
     Callback = function(val)
         getgenv().config.butterflySpeed = val
@@ -2648,7 +3929,7 @@ bloomSection:AddSlider("CatchSpeed", {
     end
 })
 
-bloomSection:AddToggle("AutoTradeUp", {
+BloomSec:AddToggle("AutoTradeUpToggle", {
     Title = "Auto Trade Up",
     Description = "Trade butterflies at station inside tree",
     Default = currentSettings.AutoTradeUp,
@@ -2659,7 +3940,7 @@ bloomSection:AddToggle("AutoTradeUp", {
     end
 })
 
-bloomSection:AddToggle("SmartTradeEssence", {
+BloomSec:AddToggle("BloomSmartTradeToggle", {
     Title = "Smart Trade For Essence",
     Description = "Only trade exact counts needed for essence",
     Default = currentSettings.BloomSmartTrade ~= false,
@@ -2670,7 +3951,7 @@ bloomSection:AddToggle("SmartTradeEssence", {
     end
 })
 
-bloomSection:AddToggle("AutoCraftEssence", {
+BloomSec:AddToggle("AutoCraftEssenceToggle", {
     Title = "Auto Craft Essence",
     Description = "Craft mutation essence at shrine inside tree",
     Default = currentSettings.AutoCraftEssence,
@@ -2681,7 +3962,7 @@ bloomSection:AddToggle("AutoCraftEssence", {
     end
 })
 
-bloomSection:AddToggle("AutoWispQuest", {
+BloomSec:AddToggle("AutoWispQuestToggle", {
     Title = "Auto Wisp Quest",
     Description = "Accept, progress & claim wisp companion quests",
     Default = currentSettings.AutoWispQuest,
@@ -2692,9 +3973,9 @@ bloomSection:AddToggle("AutoWispQuest", {
     end
 })
 
-local upgradesSection = FarmTab:AddSection("Automation Upgrades")
+local UpgradesSec = Tabs.Farm:AddSection("Automation Upgrades", "solar/chart-bold")
 
-upgradesSection:AddToggle("AutoUpgradeTreadmill", {
+UpgradesSec:AddToggle("AutoUpgradeTreadmillToggle", {
     Title = "Auto Upgrade Treadmill",
     Description = "Auto buy next tier treadmill",
     Default = currentSettings.AutoUpgradeTreadmill,
@@ -2705,7 +3986,7 @@ upgradesSection:AddToggle("AutoUpgradeTreadmill", {
     end
 })
 
-upgradesSection:AddToggle("AutoUpgradeBase", {
+UpgradesSec:AddToggle("AutoUpgradeBaseToggle", {
     Title = "Auto Upgrade Base",
     Description = "Auto buy homestead base expansion",
     Default = currentSettings.AutoUpgradeBase,
@@ -2716,132 +3997,78 @@ upgradesSection:AddToggle("AutoUpgradeBase", {
     end
 })
 
-local PriorityTab = Window:AddTab({ Title = "Priority", Icon = "lucide-list-ordered" })
+local PrioSec = Tabs.Priority:AddSection("Task Execution Sequence", "solar/sort-vertical-bold")
 
-local function renderPriorityPanel()
-    for _, child in ipairs(PriorityTab.Container:GetChildren()) do
-        if child:IsA("Frame") and child.Name == "PriorityCard" then
-            child:Destroy()
-        end
+local function formatPrioText()
+    local text = ""
+    for idx, item in ipairs(PriorityManager.List) do
+        text = text .. string.format("%d. %s\\n", idx, item)
     end
-
-    local list = (PriorityManager and PriorityManager.List) or {}
-
-    for index, taskName in ipairs(list) do
-        local card = Instance.new("Frame")
-        card.Name = "PriorityCard"
-        card.Size = UDim2.new(1, -6, 0, 48)
-        card.BackgroundColor3 = activeTheme.CardBg
-        card.BackgroundTransparency = 0.2
-        card.BorderSizePixel = 0
-        card.LayoutOrder = index
-
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 8)
-        corner.Parent = card
-
-        local cardStroke = Instance.new("UIStroke")
-        cardStroke.Color = (index == 1) and activeTheme.Accent or activeTheme.Stroke
-        cardStroke.Thickness = (index == 1) and 1.5 or 1
-        cardStroke.Transparency = (index == 1) and 0 or 0.4
-        cardStroke.Parent = card
-
-        local badge = Instance.new("TextLabel")
-        badge.Size = UDim2.new(0, 24, 0, 24)
-        badge.Position = UDim2.new(0, 8, 0.5, -12)
-        badge.BackgroundColor3 = (index == 1) and activeTheme.Accent or activeTheme.BoxBg
-        badge.TextColor3 = Color3.fromRGB(255, 255, 255)
-        badge.Font = Enum.Font.GothamBold
-        badge.TextSize = 11
-        badge.Text = "#" .. tostring(index)
-        local bCorner = Instance.new("UICorner")
-        bCorner.CornerRadius = UDim.new(1, 0)
-        bCorner.Parent = badge
-        badge.Parent = card
-
-        local title = Instance.new("TextLabel")
-        title.Size = UDim2.new(1, -120, 0, 18)
-        title.Position = UDim2.new(0, 40, 0, 6)
-        title.BackgroundTransparency = 1
-        title.Font = Enum.Font.GothamBold
-        title.TextSize = 12
-        title.TextColor3 = Color3.fromRGB(255, 255, 255)
-        title.TextXAlignment = Enum.TextXAlignment.Left
-        title.TextTruncate = Enum.TextTruncate.AtEnd
-        title.Text = tostring(taskName)
-        title.Parent = card
-
-        local desc = Instance.new("TextLabel")
-        desc.Size = UDim2.new(1, -120, 0, 16)
-        desc.Position = UDim2.new(0, 40, 0, 24)
-        desc.BackgroundTransparency = 1
-        desc.Font = Enum.Font.Gotham
-        desc.TextSize = 9
-        desc.TextColor3 = (index == 1) and activeTheme.Accent2 or activeTheme.SubText
-        desc.TextXAlignment = Enum.TextXAlignment.Left
-        desc.TextTruncate = Enum.TextTruncate.AtEnd
-        desc.Text = (index == 1 and "Highest Priority (Runs First)" or (index == #list and "Lowest Priority (Idle Fallback)" or "Active Task Priority"))
-        desc.Parent = card
-
-        local btnHolder = Instance.new("Frame")
-        btnHolder.Size = UDim2.new(0, 64, 0, 26)
-        btnHolder.Position = UDim2.new(1, -70, 0.5, -13)
-        btnHolder.BackgroundTransparency = 1
-        btnHolder.Parent = card
-
-        local upBtn = Instance.new("TextButton")
-        upBtn.Size = UDim2.new(0, 28, 0, 26)
-        upBtn.Position = UDim2.new(0, 0, 0, 0)
-        upBtn.BackgroundColor3 = (index > 1) and activeTheme.BoxBg or activeTheme.RowBg
-        upBtn.BackgroundTransparency = (index > 1) and 0.1 or 0.5
-        upBtn.TextColor3 = (index > 1) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 165, 190)
-        upBtn.Font = Enum.Font.GothamBold
-        upBtn.TextSize = 12
-        upBtn.Text = "^"
-        local upCorn = Instance.new("UICorner")
-        upCorn.CornerRadius = UDim.new(0, 6)
-        upCorn.Parent = upBtn
-        upBtn.Parent = btnHolder
-
-        local downBtn = Instance.new("TextButton")
-        downBtn.Size = UDim2.new(0, 28, 0, 26)
-        downBtn.Position = UDim2.new(0, 34, 0, 0)
-        downBtn.BackgroundColor3 = (index < #list) and activeTheme.BoxBg or activeTheme.RowBg
-        downBtn.BackgroundTransparency = (index < #list) and 0.1 or 0.5
-        downBtn.TextColor3 = (index < #list) and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 165, 190)
-        downBtn.Font = Enum.Font.GothamBold
-        downBtn.TextSize = 12
-        downBtn.Text = "v"
-        local downCorn = Instance.new("UICorner")
-        downCorn.CornerRadius = UDim.new(0, 6)
-        downCorn.Parent = downBtn
-        downBtn.Parent = btnHolder
-
-        if index > 1 then
-            upBtn.MouseButton1Click:Connect(function()
-                PriorityManager:MoveUp(index, function(l)
-                    currentSettings.TaskPriorities = l
-                    saveStuff()
-                    renderPriorityPanel()
-                end)
-            end)
-        end
-
-        if index < #list then
-            downBtn.MouseButton1Click:Connect(function()
-                PriorityManager:MoveDown(index, function(l)
-                    currentSettings.TaskPriorities = l
-                    saveStuff()
-                    renderPriorityPanel()
-                end)
-            end)
-        end
-
-        card.Parent = PriorityTab.Container
-    end
+    return text
 end
 
-renderPriorityPanel()
+local prioPara = PrioSec:AddParagraph({
+    Title = "Current Priority Order",
+    Content = formatPrioText()
+})
+
+local selectedPrioTask = PriorityManager.List[1] or "Auto Steal"
+PrioSec:AddDropdown("PrioSelectTaskDropdown", {
+    Title = "Select Task to Move",
+    Description = "Choose a task to shift its execution priority",
+    Values = { "Auto Steal", "UFO Event", "Enchanted / Bloom Event", "Auto Treadmill" },
+    Default = selectedPrioTask,
+    Callback = function(val)
+        selectedPrioTask = val
+    end
+})
+
+PrioSec:AddButton({
+    Title = "Move Up",
+    Description = "Increase priority of selected task",
+    Callback = function()
+        for idx, taskName in ipairs(PriorityManager.List) do
+            if taskName == selectedPrioTask then
+                if PriorityManager:MoveUp(idx, function(list)
+                    currentSettings.TaskPriorities = list
+                    saveStuff()
+                end) then
+                    prioPara:SetContent(formatPrioText())
+                end
+                break
+            end
+        end
+    end
+})
+
+PrioSec:AddButton({
+    Title = "Move Down",
+    Description = "Decrease priority of selected task",
+    Callback = function()
+        for idx, taskName in ipairs(PriorityManager.List) do
+            if taskName == selectedPrioTask then
+                if PriorityManager:MoveDown(idx, function(list)
+                    currentSettings.TaskPriorities = list
+                    saveStuff()
+                end) then
+                    prioPara:SetContent(formatPrioText())
+                end
+                break
+            end
+        end
+    end
+})
+
+PrioSec:AddButton({
+    Title = "Reset Default Order",
+    Description = "Restore standard factory task priority order",
+    Callback = function()
+        PriorityManager.List = { "Auto Steal", "UFO Event", "Enchanted / Bloom Event", "Auto Treadmill" }
+        currentSettings.TaskPriorities = PriorityManager.List
+        saveStuff()
+        prioPara:SetContent(formatPrioText())
+    end
+})
 
 local function getStealPanelEggItems()
     local records = getFieldEggRecords()
@@ -2928,247 +4155,125 @@ local function getStealPanelEggItems()
     return (#eggItems > 0 and eggItems) or State.cachedStealPanelItems or {}
 end
 
-local StealPanelTab = Window:AddTab({ Title = "Steal Panel", Icon = "lucide-radar" })
+local PanelSec = Tabs.StealPanel:AddSection("Targeted Egg Stealer", "solar/radar-bold")
 
-local spTopBar = Instance.new("Frame")
-spTopBar.Name = "StealTopBar"
-spTopBar.Size = UDim2.new(1, -6, 0, 32)
-spTopBar.BackgroundTransparency = 1
-spTopBar.LayoutOrder = 1
-spTopBar.Parent = StealPanelTab.Container
+local statusPara = PanelSec:AddParagraph({
+    Title = "Steal Target Status",
+    Content = "Target: [Auto Mode - Highest Value Egg]"
+})
 
-local spSortLbl = Instance.new("TextLabel")
-spSortLbl.Size = UDim2.new(0, 60, 1, 0)
-spSortLbl.Position = UDim2.new(0, 4, 0, 0)
-spSortLbl.BackgroundTransparency = 1
-spSortLbl.Font = Enum.Font.GothamBold
-spSortLbl.TextSize = 12
-spSortLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-spSortLbl.TextXAlignment = Enum.TextXAlignment.Left
-spSortLbl.Text = "Sort By:"
-spSortLbl.Parent = spTopBar
+local cachedEggItems = {}
+local eggTitles = {"[Auto Mode]"}
+local eggMap = {}
 
-local spSortBtn = Instance.new("TextButton")
-spSortBtn.Size = UDim2.new(0, 160, 0, 26)
-spSortBtn.Position = UDim2.new(0, 64, 0.5, -13)
-spSortBtn.BackgroundColor3 = activeTheme.BoxBg
-spSortBtn.BackgroundTransparency = 0.15
-spSortBtn.BorderSizePixel = 0
-spSortBtn.Font = Enum.Font.GothamBold
-spSortBtn.TextSize = 11
-spSortBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-spSortBtn.Text = (State.spSortChoice or "Value (Money/s)") .. "  v"
-local spSortCorn = Instance.new("UICorner")
-spSortCorn.CornerRadius = UDim.new(0, 6)
-spSortCorn.Parent = spSortBtn
-local spSortStr = Instance.new("UIStroke")
-spSortStr.Thickness = 1
-spSortStr.Color = activeTheme.Stroke
-spSortStr.Transparency = 0.4
-spSortStr.Parent = spSortBtn
-spSortBtn.Parent = spTopBar
-
-local spCardsHolder = Instance.new("Frame")
-spCardsHolder.Name = "StealCardsHolder"
-spCardsHolder.Size = UDim2.new(1, 0, 0, 0)
-spCardsHolder.AutomaticSize = Enum.AutomaticSize.Y
-spCardsHolder.BackgroundTransparency = 1
-spCardsHolder.BorderSizePixel = 0
-spCardsHolder.LayoutOrder = 2
-local spCardsLayout = Instance.new("UIListLayout")
-spCardsLayout.Padding = UDim.new(0, 6)
-spCardsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-spCardsLayout.Parent = spCardsHolder
-spCardsHolder.Parent = StealPanelTab.Container
-
-local renderStealPanel
-
-local spSortOptions = { "Value (Money/s)", "Rarity", "Weight (Scale)" }
-spSortBtn.MouseButton1Click:Connect(function()
-    State.spSortIndex = ((State.spSortIndex or 1) % #spSortOptions) + 1
-    State.spSortChoice = spSortOptions[State.spSortIndex]
-    spSortBtn.Text = State.spSortChoice .. "  v"
-    if renderStealPanel then
-        pcall(renderStealPanel)
-    end
-end)
-
-renderStealPanel = function()
-    for _, child in ipairs(spCardsHolder:GetChildren()) do
-        if child:IsA("Frame") and child.Name == "EggCard" then
-            child:Destroy()
+local function refreshEggList()
+    cachedEggItems = getStealPanelEggItems()
+    table.sort(cachedEggItems, function(a, b) return (a.Value or 0) > (b.Value or 0) end)
+    table.clear(eggTitles)
+    table.clear(eggMap)
+    table.insert(eggTitles, "[Auto Mode]")
+    for i, item in ipairs(cachedEggItems) do
+        if i <= 30 then
+            local label = string.format("[%s] %s (%s)", tostring(item.Area), tostring(item.Name), formatMoneyPerSec(item.Value))
+            table.insert(eggTitles, label)
+            eggMap[label] = item.Uid
         end
-    end
-
-    if table.clear then
-        table.clear(State.activeStealButtons)
-    else
-        State.activeStealButtons = {}
-    end
-
-    local rawItems = getStealPanelEggItems()
-    local eggItems = {}
-    if type(rawItems) == "table" then
-        for idx, entry in ipairs(rawItems) do
-            eggItems[idx] = entry
-        end
-    end
-
-    table.sort(eggItems, function(a, b)
-        if State.spSortChoice == "Value (Money/s)" then
-            return (a.Value or 0) > (b.Value or 0)
-        elseif State.spSortChoice == "Rarity" then
-            if (a.Rank or 0) ~= (b.Rank or 0) then
-                return (a.Rank or 0) > (b.Rank or 0)
-            end
-            return (a.Value or 0) > (b.Value or 0)
-        elseif State.spSortChoice == "Weight (Scale)" then
-            return (a.Scale or 0) > (b.Scale or 0)
-        end
-        return (a.Value or 0) > (b.Value or 0)
-    end)
-
-    for i, item in ipairs(eggItems) do
-        local card = Instance.new("Frame")
-        card.Name = "EggCard"
-        card.Size = UDim2.new(1, -6, 0, 50)
-        card.BackgroundColor3 = activeTheme.CardBg
-        card.BackgroundTransparency = 0.2
-        card.BorderSizePixel = 0
-        card.LayoutOrder = i
-
-        local cCorn = Instance.new("UICorner")
-        cCorn.CornerRadius = UDim.new(0, 8)
-        cCorn.Parent = card
-
-        local cStr = Instance.new("UIStroke")
-        cStr.Thickness = 1
-        cStr.Color = activeTheme.Stroke
-        cStr.Transparency = 0.4
-        cStr.Parent = card
-
-        local img = Instance.new("ImageLabel")
-        img.Size = UDim2.new(0, 36, 0, 36)
-        img.Position = UDim2.new(0, 7, 0.5, -18)
-        img.BackgroundColor3 = activeTheme.RowBg
-        img.BackgroundTransparency = 0.25
-        img.BorderSizePixel = 0
-        img.Image = tostring(item.Icon or "")
-        local imgCorn = Instance.new("UICorner")
-        imgCorn.CornerRadius = UDim.new(0, 6)
-        imgCorn.Parent = img
-        img.Parent = card
-
-        local nameLbl = Instance.new("TextLabel")
-        nameLbl.Size = UDim2.new(1, -135, 0, 18)
-        nameLbl.Position = UDim2.new(0, 48, 0, 7)
-        nameLbl.BackgroundTransparency = 1
-        nameLbl.Font = Enum.Font.GothamBold
-        nameLbl.TextSize = 12
-        nameLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-        nameLbl.TextXAlignment = Enum.TextXAlignment.Left
-        nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
-        nameLbl.Text = string.format("%s [%s]", tostring(item.Name or "Egg"), tostring(item.Rarity or "Common"))
-        nameLbl.Parent = card
-
-        local subLbl = Instance.new("TextLabel")
-        subLbl.Size = UDim2.new(1, -135, 0, 16)
-        subLbl.Position = UDim2.new(0, 48, 0, 26)
-        subLbl.BackgroundTransparency = 1
-        subLbl.Font = Enum.Font.Gotham
-        subLbl.TextSize = 9.5
-        subLbl.TextColor3 = activeTheme.SubText
-        subLbl.TextXAlignment = Enum.TextXAlignment.Left
-        subLbl.Text = string.format("%s  |  %.2fx  |  %s", formatMoneyPerSec(item.Value or 0), tonumber(item.Scale) or 1, tostring(item.Area or "Unknown"))
-        subLbl.Parent = card
-
-        local actBtn = Instance.new("TextButton")
-        actBtn.Size = UDim2.new(0, 76, 0, 28)
-        actBtn.Position = UDim2.new(1, -82, 0.5, -14)
-        actBtn.BorderSizePixel = 0
-        actBtn.Font = Enum.Font.GothamBold
-        actBtn.TextSize = 11.5
-        local actCorn = Instance.new("UICorner")
-        actCorn.CornerRadius = UDim.new(1, 0)
-        actCorn.Parent = actBtn
-
-        local isThisTarget = (State.targetedSpecificUid == item.Uid)
-        actBtn.BackgroundColor3 = isThisTarget and Color3.fromRGB(240, 65, 60) or activeTheme.Accent
-        actBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        actBtn.Text = isThisTarget and "Stop Steal" or "Steal"
-        actBtn.Parent = card
-
-        State.activeStealButtons[item.Uid] = actBtn
-
-        actBtn.MouseButton1Click:Connect(function()
-            if State.targetedSpecificUid == item.Uid then
-                State.targetedSpecificUid = nil
-                abortStealRoutine()
-                actBtn.BackgroundColor3 = activeTheme.Accent
-                actBtn.Text = "Steal"
-            else
-                if State.isStealingActive then
-                    abortStealRoutine()
-                end
-                State.targetedSpecificUid = item.Uid
-                State.blacklistedEggs[item.Uid] = nil
-                for u, b in pairs(State.activeStealButtons) do
-                    if u == item.Uid then
-                        b.BackgroundColor3 = Color3.fromRGB(240, 65, 60)
-                        b.Text = "Stop Steal"
-                    else
-                        b.BackgroundColor3 = activeTheme.Accent
-                        b.Text = "Steal"
-                    end
-                end
-            end
-        end)
-
-        card.Parent = spCardsHolder
     end
 end
 
-local SettingsTab = Window:AddTab({ Title = "Settings", Icon = "lucide-settings" })
+refreshEggList()
 
-local settingsSection = SettingsTab:AddSection("Theme & Interface")
-
-settingsSection:AddDropdown("ThemeSelect", {
-    Title = "Theme",
-    Description = "Select Cloudy UI theme",
-    Values = { "Cloudy", "Emerald", "HUT RI 81", "Blood Red", "Rimuru Tempest", "Solar", "Neko" },
-    Default = currentSettings.Theme or "Cloudy",
-    Callback = function(themeName)
-        Cloudy:SetTheme(themeName)
-        currentSettings.Theme = themeName
-        saveStuff()
-    end
-})
-
-settingsSection:AddKeybind("ToggleKey", {
-    Title = "Toggle UI Key",
-    Description = "Key to toggle window visibility",
-    Default = "RightControl",
-    Mode = "Toggle",
-    Callback = function()
-    end
-})
-
-settingsSection:AddButton({
-    Title = "Unload Quantum | ID",
-    Description = "Safely close the interface and abort active routines",
-    Callback = function()
-        abortStealRoutine()
-        Cloudy:Destroy()
-    end
-})
-
-task.spawn(function()
-    while true do
-        task.wait(1.5)
-        if StealPanelTab.Container and StealPanelTab.Container.Visible and not State.isStealingActive and renderStealPanel then
-            pcall(renderStealPanel)
+local eggSelectorDropdown = PanelSec:AddDropdown("TargetEggDropdown", {
+    Title = "Target Specific Egg",
+    Description = "Select an egg from live scan to steal specifically",
+    Values = eggTitles,
+    Default = "[Auto Mode]",
+    Callback = function(choice)
+        local chosenUid = eggMap[choice]
+        if chosenUid then
+            if State.isStealingActive then abortStealRoutine() end
+            State.targetedSpecificUid = chosenUid
+            State.blacklistedEggs[chosenUid] = nil
+            statusPara:SetContent(string.format("Target: %s\\nUID: %s", choice, chosenUid))
+        else
+            State.targetedSpecificUid = nil
+            statusPara:SetContent("Target: [Auto Mode - Highest Value Egg]")
         end
     end
-end)
+})
+
+PanelSec:AddButton({
+    Title = "Refresh Egg Scanner",
+    Description = "Scan world for newly spawned eggs",
+    Callback = function()
+        refreshEggList()
+        pcall(function()
+            eggSelectorDropdown:SetValues(eggTitles)
+        end)
+        statusPara:SetContent(string.format("Scanned %d eggs.\\nCurrent: %s", #cachedEggItems, State.targetedSpecificUid and "Custom Target" or "[Auto Mode]"))
+    end
+})
+
+PanelSec:AddButton({
+    Title = "Clear Target (Auto Mode)",
+    Description = "Resume automatic steal of best field egg",
+    Callback = function()
+        State.targetedSpecificUid = nil
+        abortStealRoutine()
+        statusPara:SetContent("Target: [Auto Mode - Highest Value Egg]")
+        pcall(function() eggSelectorDropdown:SetValue("[Auto Mode]") end)
+    end
+})
+
+local SettingsSec = Tabs.Settings:AddSection("Theme & Interface", "solar/palette-bold")
+
+SettingsSec:AddDropdown("ThemeDropdown", {
+    Title = "Interface Theme",
+    Description = "Select theme appearance",
+    Values = { "Cloudy", "Emerald", "Blood Red", "Rimuru Tempest", "Solar", "Neko", "HUT RI 81" },
+    Default = currentSettings.Theme or "Cloudy",
+    Callback = function(themeName)
+        currentSettings.Theme = themeName
+        saveStuff()
+        CloudyLib:SetTheme(themeName)
+    end
+})
+
+SettingsSec:AddSlider("OutboundBoostSlider", {
+    Title = "Outbound Speed Boost",
+    Description = "Speed multiplier when going to egg (1.00x - 1.35x)",
+    Min = 100,
+    Max = 135,
+    Default = math.floor((CONFIG.OutboundSpeedMultiplier or 1.20) * 100),
+    Rounding = 0,
+    Callback = function(val)
+        CONFIG.OutboundSpeedMultiplier = val / 100
+    end
+})
+
+SettingsSec:AddButton({
+    Title = "Save Settings",
+    Description = "Save current configuration to JSON",
+    Callback = function()
+        saveStuff()
+        CloudyLib:Notify({
+            Title = "Quantum | ID",
+            Content = "Settings saved successfully!",
+            Duration = 3
+        })
+    end
+})
+
+local AboutSec = Tabs.Settings:AddSection("About", "solar/info-circle-bold")
+AboutSec:AddParagraph({
+    Title = "Quantum | ID",
+    Content = "Steal an Egg Automation Suite\\nPowered by Cloudy UI Library."
+})
 
 Window:SelectTab(1)
+
+CloudyLib:Notify({
+    Title = "Quantum | ID",
+    Content = "Quantum | ID loaded successfully!",
+    Duration = 4
+})
