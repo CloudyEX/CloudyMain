@@ -14,6 +14,30 @@ local Services = {
 local LocalPlayer = Services.Players.LocalPlayer or Services.Players.PlayerAdded:Wait()
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
+if getrawmetatable and setreadonly and newcclosure then
+    pcall(function()
+        local gmt = getrawmetatable(game)
+        local oldNamecall = gmt.__namecall
+        setreadonly(gmt, false)
+
+        gmt.__namecall = newcclosure(function(self, ...)
+            local method = getnamecallmethod()
+            if method == "Kick" or method == "kick" then
+                return nil
+            end
+            if method == "FireServer" or method == "InvokeServer" then
+                local name = string.lower(tostring(self.Name))
+                if string.find(name, "anticheat") or string.find(name, "ban") or string.find(name, "detect") or string.find(name, "check") or string.find(name, "flag") or string.find(name, "died") or string.find(name, "kill") or string.find(name, "ragdoll") then
+                    return nil
+                end
+            end
+            return oldNamecall(self, ...)
+        end)
+
+        setreadonly(gmt, true)
+    end)
+end
+
 local UniversalCompat = {}
 
 function UniversalCompat.FireProximityPrompt(prompt)
@@ -3333,58 +3357,237 @@ local function flyOutboundElevated(targetPosition, stopDistance, sessionId, targ
     return reached and (sessionId == State.currentStealSession) and isStealEnabled() and not isMapClosed()
 end
 
+local AreaEggSlotIdentity = nil
+pcall(function()
+    local util = Services.ReplicatedStorage:FindFirstChild("Shared") and Services.ReplicatedStorage.Shared:FindFirstChild("Util")
+    if util and util:FindFirstChild("AreaEggSlotIdentity") then
+        AreaEggSlotIdentity = require(util.AreaEggSlotIdentity)
+    end
+end)
+if not AreaEggSlotIdentity then
+    pcall(function()
+        local util = Services.ReplicatedStorage:FindFirstChild("Util")
+        if util and util:FindFirstChild("AreaEggSlotIdentity") then
+            AreaEggSlotIdentity = require(util.AreaEggSlotIdentity)
+        end
+    end)
+end
+
+local function ApplyInstantBypassState(character)
+    if not character then return end
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if not humanoid or not root then return end
+
+    root.AssemblyLinearVelocity = Vector3.zero
+    root.AssemblyAngularVelocity = Vector3.zero
+
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp, true)
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+    humanoid.PlatformStand = false
+
+    local animator = humanoid:FindFirstChildOfClass("Animator")
+    if animator then
+        for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+            track:Stop(0)
+            pcall(function() track:Destroy() end)
+        end
+    end
+
+    for _, part in ipairs(character:GetDescendants()) do
+        if part:IsA("Constraint") or part:IsA("BallSocketConstraint") or part:IsA("RopeConstraint") then
+            pcall(function() part:Destroy() end)
+        end
+    end
+end
+
+local function InstantGrab(prompt)
+    if prompt and prompt:IsA("ProximityPrompt") and prompt.Enabled then
+        prompt.HoldDuration = 0
+        pcall(function() 
+            fireproximityprompt(prompt) 
+        end)
+    end
+end
+
+local function TakeEggRecord(record)
+    if not record or not record.Uid then return end
+    local char = LocalPlayer.Character
+    local hrp = char and (char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart)
+    if not hrp then return end
+
+    local slotKey = nil
+    if AreaEggSlotIdentity and AreaEggSlotIdentity.LooksLikeFirstAreaUid and AreaEggSlotIdentity.LooksLikeFirstAreaUid(record.Uid) then
+        slotKey = AreaEggSlotIdentity.SlotKey(record.AreaId or 1, record.NestId or 1)
+    end
+
+    local net = Services.ReplicatedStorage:FindFirstChild("Packages") and Services.ReplicatedStorage.Packages:FindFirstChild("Networking")
+    local carryRemote = net and net:FindFirstChild("RF/EggWorld/AskFieldEggCarry")
+    if carryRemote then 
+        pcall(function() 
+            carryRemote:InvokeServer({ Uid = record.Uid, FirstAreaSlotKey = slotKey }) 
+        end) 
+    end
+
+    pcall(function()
+        if EggState and EggState.CarryFieldEgg then 
+            EggState.CarryFieldEgg(record.Uid, slotKey) 
+        end
+    end)
+
+    for _, d in ipairs(Services.Workspace:GetDescendants()) do
+        if d:IsA("ProximityPrompt") and (d.Name == "CarryAreaEgg" or d.Name:lower():find("egg")) and d.Enabled then
+            local p = d.Parent
+            if p:IsA("Attachment") then p = p.Parent end
+            if p and p:IsA("BasePart") and (p.Position - hrp.Position).Magnitude < 15 then
+                InstantGrab(d)
+                break
+            end
+        end
+    end
+end
+
+local function AutoTakeEggAtPosition(pos)
+    local char = LocalPlayer.Character
+    local hrp = char and (char:FindFirstChild("HumanoidRootPart") or char.PrimaryPart)
+    if not hrp then return end
+
+    for _, d in ipairs(Services.Workspace:GetDescendants()) do
+        if d:IsA("ProximityPrompt") and d.Enabled then
+            local p = d.Parent
+            if p:IsA("Attachment") then p = p.Parent end
+            if p and p:IsA("BasePart") and (p.Position - pos).Magnitude < 15 then 
+                InstantGrab(d)
+            end
+        end
+    end
+
+    local eggWorld = Services.Workspace:FindFirstChild("EggWorld") or Services.Workspace:FindFirstChild("Eggs") or Services.Workspace:FindFirstChild("FieldEggs")
+    if eggWorld then
+        for _, eggObj in ipairs(eggWorld:GetChildren()) do
+            local primary = eggObj:IsA("BasePart") and eggObj or eggObj:FindFirstChildWhichIsA("BasePart")
+            if primary and (primary.Position - pos).Magnitude < 15 then
+                local uid = eggObj:GetAttribute("Uid") or eggObj.Name
+                local areaId = eggObj:GetAttribute("AreaId") or 1
+                local nestId = eggObj:GetAttribute("NestId") or 1
+
+                TakeEggRecord({
+                    Uid = uid,
+                    AreaId = areaId,
+                    NestId = nestId
+                })
+                break
+            end
+        end
+    end
+end
+
+local function MoveToTargetVeryFast(character, targetPos, speed)
+    local root = character and (character:FindFirstChild("HumanoidRootPart") or character.PrimaryPart)
+    if not root then return false end
+
+    local targetCFrame = CFrame.new(targetPos)
+    local startCFrame = root.CFrame
+    local distance = (targetPos - root.Position).Magnitude
+    
+    local moveSpeed = speed or 350 
+    local travelTime = math.max(0.04, distance / moveSpeed)
+    local startTime = os.clock()
+    
+    while (os.clock() - startTime) < travelTime do
+        if not character or not character.Parent or not root or not root.Parent then break end
+        
+        local alpha = math.clamp((os.clock() - startTime) / travelTime, 0, 1)
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+        
+        root.CFrame = startCFrame:Lerp(targetCFrame, alpha)
+        Services.RunService.Stepped:Wait()
+    end
+
+    if root and root.Parent then
+        root.CFrame = targetCFrame
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+        return true
+    end
+    return false
+end
+
 local function executeInstantOutbound(targetPos, sessionId, targetUid)
     local char, root, hum = getAliveRig()
     if not root or not hum then return false end
 
+    ApplyInstantBypassState(char)
     setCollisions(false)
     if hum then hum.PlatformStand = false end
 
+    local groundY = (targetPos.Y and targetPos.Y > 200) and (targetPos.Y + 1.0) or (CONFIG.GroundAltitude + 1.0)
     local currentPos = root.Position
-    local targetY = (targetPos.Y and targetPos.Y > 200) and (targetPos.Y + 1.0) or (CONFIG.GroundAltitude + 1.0)
 
     if currentPos.X < CONFIG.BoundaryCheckpointX then
-        local mouthPos = Vector3.new(CONFIG.BoundaryCheckpointX, targetY, CONFIG.BaseDropPosition.Z)
-        pcall(function()
-            root.CFrame = CFrame.new(mouthPos) * CFrame.Angles(0, math.rad(90), 0)
-            root.AssemblyLinearVelocity = Vector3.zero
-        end)
-        task.wait(0.04)
-    end
-
-    local _, cRoot = getAliveRig()
-    if not cRoot then return false end
-
-    local targetStandPos = getStandingPosition(targetPos)
-    local startPos = cRoot.Position
-    local delta = Vector3.new(targetStandPos.X - startPos.X, 0, targetStandPos.Z - startPos.Z)
-    local dist = delta.Magnitude
-    local stepSize = 120
-    local steps = math.max(1, math.ceil(dist / stepSize))
-
-    for i = 1, steps do
-        if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
-        local _, curR = getAliveRig()
-        if not curR then return false end
-
-        local frac = math.min(1.0, i / steps)
-        local hopPos = startPos + delta * frac
-        local lookVector = delta.Unit
-        pcall(function()
-            curR.CFrame = CFrame.new(hopPos.X, targetY, hopPos.Z) * CFrame.lookAt(Vector3.zero, lookVector)
-            curR.AssemblyLinearVelocity = Vector3.zero
-        end)
+        local mouthPos = Vector3.new(CONFIG.BoundaryCheckpointX, groundY, CONFIG.BaseDropPosition.Z)
+        MoveToTargetVeryFast(char, mouthPos, 450)
         task.wait(0.02)
     end
 
-    local _, fRoot = getAliveRig()
-    if fRoot then
-        fRoot.CFrame = CFrame.lookAt(targetStandPos, targetPos)
-        fRoot.AssemblyLinearVelocity = Vector3.zero
-        fRoot.AssemblyAngularVelocity = Vector3.zero
+    local targetStandPos = getStandingPosition(targetPos)
+    local arrived = MoveToTargetVeryFast(char, targetStandPos, 400)
+
+    if arrived and root and root.Parent then
+        root.CFrame = CFrame.lookAt(targetStandPos, targetPos)
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+
+        if targetUid then
+            TakeEggRecord({ Uid = targetUid })
+        end
+        AutoTakeEggAtPosition(targetPos)
     end
+
     task.wait(0.04)
-    return true
+    return arrived
+end
+
+local function executeInstantDeliveryHome(targetEgg, sessionId)
+    local char, root, hum = getAliveRig()
+    if not root or not hum then return false end
+
+    ApplyInstantBypassState(char)
+    setCollisions(false)
+    ShieldManager:MuteUGI()
+
+    local groundY = CONFIG.GroundAltitude + 1.0
+    local safeCorridorPos = Vector3.new(565.74, groundY, CONFIG.BaseDropPosition.Z)
+    local dropPos = CONFIG.BaseDropPosition
+
+    local ok1 = MoveToTargetVeryFast(char, safeCorridorPos, 350)
+    if not ok1 or sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then
+        ShieldManager:UnmuteUGI()
+        return not isHoldingEgg()
+    end
+
+    local ok2 = MoveToTargetVeryFast(char, dropPos, 280)
+    if not ok2 or sessionId ~= State.currentStealSession or not isStealEnabled() then
+        ShieldManager:UnmuteUGI()
+        return not isHoldingEgg()
+    end
+
+    dropHeldEggDirect()
+    task.wait(0.25)
+
+    local dropTimeout = os.clock() + 2.0
+    while os.clock() < dropTimeout and isHoldingEgg() do
+        dropHeldEggDirect()
+        task.wait(0.2)
+    end
+
+    ShieldManager:UnmuteUGI()
+    return not isHoldingEgg()
 end
 
 local function travelOutboundToEgg(targetPos, sessionId, targetUid)
@@ -3620,6 +3823,8 @@ WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
                             local mode = currentSettings.OutboundMode or "Walk"
                             if mode == "Walk" then
                                 stealSuccess = executeGroundDeliveryHome(currentTargetEgg, session)
+                            elseif mode == "Instant" then
+                                stealSuccess = executeInstantDeliveryHome(currentTargetEgg, session)
                             else
                                 if canUseFastSteal and isFastStealArea(areaId) then
                                     stealSuccess = executeFastStealDelivery(currentTargetEgg, session)
