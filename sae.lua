@@ -97,7 +97,7 @@ end
 local saveFile = "SyntaxHub_Config.json"
 
 local currentSettings = {
-    OutboundMode = "Fly",
+    OutboundMode = "Walk",
     Theme = "Sapphire",
     Transparency = 0,
     AutoFarm = false,
@@ -2934,26 +2934,21 @@ local function performGroundCheckpoint(targetEgg, currentX, laneZ, sessionId)
         root.AssemblyLinearVelocity = Vector3.zero
         root.AssemblyAngularVelocity = Vector3.zero
     end)
-    task.wait(0.06)
-
-    dropHeldEggDirect()
-    local dropWait = os.clock() + 0.6
-    while os.clock() < dropWait and isHoldingEgg() do
-        if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
-        dropHeldEggDirect()
-        task.wait(0.08)
-    end
     task.wait(0.04)
+
+    if isHoldingEgg() then
+        return true
+    end
 
     if uid and EggState and typeof(EggState.CarryFieldEgg) == "function" then
         pcall(function() EggState.CarryFieldEgg(uid) end)
-        task.wait(0.12)
+        task.wait(0.08)
     end
 
     if not isHoldingEgg() then
         local eggFloorPos = getPhysicalEggPosition(uid, Vector3.new(currentX, checkY, laneZ))
         local grabSuccess = false
-        local retryTimeout = os.clock() + 3.0
+        local retryTimeout = os.clock() + 2.0
 
         while os.clock() < retryTimeout do
             if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
@@ -3182,7 +3177,43 @@ local function executeFastStealDelivery(targetEgg, sessionId)
 end
 
 local function executeGroundDeliveryHome(targetEgg, sessionId)
-    return executeCheckpointedHopsHome(targetEgg, sessionId)
+    local char, root, hum = getAliveRig()
+    if not root or not hum then return false end
+
+    local groundY = CONFIG.GroundAltitude + 1.0
+    local mouthPos = Vector3.new(CONFIG.BoundaryCheckpointX, groundY, CONFIG.BaseDropPosition.Z)
+    local dropPos = CONFIG.BaseDropPosition
+
+    setCollisions(false)
+    ShieldManager:MuteUGI()
+    if hum then hum.PlatformStand = false end
+
+    local currentPos = root.Position
+    if currentPos.X > CONFIG.BoundaryCheckpointX then
+        local ok1 = runAlongGroundSegment(mouthPos, 4.0, sessionId, nil, 1.0, true)
+        if not ok1 or sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then
+            ShieldManager:UnmuteUGI()
+            return not isHoldingEgg()
+        end
+    end
+
+    local ok2 = runAlongGroundSegment(dropPos, 3.0, sessionId, nil, 1.0, false)
+    if not ok2 or sessionId ~= State.currentStealSession or not isStealEnabled() then
+        ShieldManager:UnmuteUGI()
+        return not isHoldingEgg()
+    end
+
+    dropHeldEggDirect()
+    task.wait(0.25)
+
+    local dropTimeout = os.clock() + 2.0
+    while os.clock() < dropTimeout and isHoldingEgg() do
+        dropHeldEggDirect()
+        task.wait(0.2)
+    end
+
+    ShieldManager:UnmuteUGI()
+    return not isHoldingEgg()
 end
 
 local function travelPlaneSegment(targetPos, stopDist, speed, timeout, sessionId, targetUid)
@@ -3357,10 +3388,12 @@ local function executeInstantOutbound(targetPos, sessionId, targetUid)
 end
 
 local function travelOutboundToEgg(targetPos, sessionId, targetUid)
-    local mode = currentSettings.OutboundMode or 'Fly'
+    local mode = currentSettings.OutboundMode or 'Walk'
     local arrived = false
 
-    if mode == 'Instant' then
+    if mode == 'Walk' then
+        arrived = runAlongGroundToEgg(targetPos, nil, sessionId, targetUid)
+    elseif mode == 'Instant' then
         arrived = executeInstantOutbound(targetPos, sessionId, targetUid)
     elseif mode == 'Fly' then
         arrived = flyOutboundElevated(targetPos, 3.5, sessionId, targetUid)
@@ -3584,11 +3617,16 @@ WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
                         stealSuccess = tryDeliverToUfo()
 
                         if not stealSuccess and (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
-                            if canUseFastSteal and isFastStealArea(areaId) then
-                                stealSuccess = executeFastStealDelivery(currentTargetEgg, session)
-                            end
-                            if not stealSuccess and isHoldingEgg() and session == State.currentStealSession and isStealEnabled() then
-                                stealSuccess = executeCheckpointedHopsHome(currentTargetEgg, session)
+                            local mode = currentSettings.OutboundMode or "Walk"
+                            if mode == "Walk" then
+                                stealSuccess = executeGroundDeliveryHome(currentTargetEgg, session)
+                            else
+                                if canUseFastSteal and isFastStealArea(areaId) then
+                                    stealSuccess = executeFastStealDelivery(currentTargetEgg, session)
+                                end
+                                if not stealSuccess and isHoldingEgg() and session == State.currentStealSession and isStealEnabled() then
+                                    stealSuccess = executeCheckpointedHopsHome(currentTargetEgg, session)
+                                end
                             end
                         end
                     end
@@ -3724,10 +3762,10 @@ StealSec:AddToggle("AutoStealToggle", {
 })
 
 StealSec:AddDropdown("OutboundModeDropdown", {
-    Title = "Outbound Mode",
-    Description = "Movement style to egg: Fly or Instant",
-    Values = {"Fly", "Instant"},
-    Default = currentSettings.OutboundMode or "Fly",
+    Title = "Movement Mode",
+    Description = "Steal movement mode: Walk, Fly, or Instant",
+    Values = {"Walk", "Fly", "Instant"},
+    Default = currentSettings.OutboundMode or "Walk",
     Callback = function(val)
         currentSettings.OutboundMode = val
         getgenv().config.outboundMode = val
