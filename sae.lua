@@ -94,10 +94,9 @@ function UniversalCompat.ClickButton(btn)
     return false
 end
 
-local saveFile = "QuantumID_Config.json"
+local saveFile = "SyntaxHub_Config.json"
 
 local currentSettings = {
-    OutboundMode = "Fly",
     Theme = "Sapphire",
     Transparency = 0,
     AutoFarm = false,
@@ -174,7 +173,6 @@ getgenv().config.targetAreas = currentSettings.TargetAreas
 getgenv().config.minRarity = currentSettings.MinRarity
 getgenv().config.autoFarm = currentSettings.AutoFarm
 getgenv().config.fastSteal = currentSettings.FastSteal
-getgenv().config.outboundMode = currentSettings.OutboundMode or 'Fly'
 getgenv().config.autoTreadmill = currentSettings.AutoTreadmill
 getgenv().config.autoUpgradeTreadmill = currentSettings.AutoUpgradeTreadmill
 getgenv().config.autoUpgradeBase = currentSettings.AutoUpgradeBase
@@ -233,8 +231,7 @@ local CONFIG = {
     BoundaryCheckpointX = 600.2,
     SeparationLineX = 552.2,
     FastStealLineDropOffset = 45,
-    FastStealDirectSnapRadius = 65,
-    OutboundSpeedMultiplier = 1.20,
+    FastStealDirectSnapRadius = 45,
     BaseDropPosition = Vector3.new(528.7, 70.8, -364.1)
 }
 
@@ -628,7 +625,7 @@ function StealUIManager:SnapshotNormalHUD()
     table.clear(self.NormalGameplayGuis)
     for _, gui in ipairs(PlayerGui:GetChildren()) do
         if gui:IsA("ScreenGui") and gui.Enabled == true then
-            if gui.Name ~= "QuantumIDGUI" and gui.Name ~= "Cloudy" and gui.Name ~= "RunBackEffects" and gui.Name ~= "DropHeldEgg" then
+            if gui.Name ~= "SyntaxHubGUI" and gui.Name ~= "RunBackEffects" and gui.Name ~= "DropHeldEgg" then
                 self.NormalGameplayGuis[gui] = true
             end
         end
@@ -2590,23 +2587,17 @@ local function getStandingPosition(basePos)
     return Vector3.new(basePos.X, basePos.Y + hipHeight + rootSizeY, basePos.Z)
 end
 
-local function runAlongGroundSegment(targetPos, stopDist, sessionId, targetUid, speedMultiplier, preserveMomentum)
+local function runAlongGroundSegment(targetPos, stopDist, sessionId, targetUid)
     local char, root, hum = getAliveRig()
     if not root or not hum then return false end
     stopDist = stopDist or 3.5
 
-    local baseSpeed = getPlayerCurrentSpeed()
-    local multiplier = tonumber(speedMultiplier) or 1.0
-    if (os.clock() - State.lastServerRollbackTime) < 3.0 then
-        multiplier = 1.0
-    end
-
-    local effectiveSpeed = baseSpeed * multiplier
+    local liveSpeed = getPlayerCurrentSpeed()
     setCollisions(false)
     if hum then hum.PlatformStand = false end
 
     local delta = Vector3.new(targetPos.X - root.Position.X, 0, targetPos.Z - root.Position.Z)
-    local timeout = os.clock() + math.max(8, (delta.Magnitude / math.max(effectiveSpeed, 16)) + 5)
+    local timeout = os.clock() + math.max(8, (delta.Magnitude / math.max(liveSpeed, 16)) + 5)
     local arrived = false
     local lastLiveCheck = 0
 
@@ -2636,21 +2627,13 @@ local function runAlongGroundSegment(targetPos, stopDist, sessionId, targetUid, 
         local flatDiff = Vector3.new(targetPos.X - currentPos.X, 0, targetPos.Z - currentPos.Z)
         if flatDiff.Magnitude <= stopDist then
             arrived = true
-            if not preserveMomentum then
-                cRoot.AssemblyLinearVelocity = Vector3.zero
-                cRoot.AssemblyAngularVelocity = Vector3.zero
-            end
+            cRoot.AssemblyLinearVelocity = Vector3.zero
+            cRoot.AssemblyAngularVelocity = Vector3.zero
             if conn then conn:Disconnect() conn = nil end
             return
         end
 
-        local liveBase = getPlayerCurrentSpeed()
-        local activeMult = multiplier
-        if (os.clock() - State.lastServerRollbackTime) < 3.0 then
-            activeMult = 1.0
-        end
-
-        local curSpeed = liveBase * activeMult
+        local curSpeed = getPlayerCurrentSpeed()
         local dir = flatDiff.Unit
         cRoot.AssemblyLinearVelocity = Vector3.new(dir.X * curSpeed, cRoot.AssemblyLinearVelocity.Y, dir.Z * curSpeed)
         cRoot.CFrame = CFrame.new(currentPos.X, currentPos.Y, currentPos.Z) * CFrame.lookAt(Vector3.zero, dir)
@@ -2661,7 +2644,7 @@ local function runAlongGroundSegment(targetPos, stopDist, sessionId, targetUid, 
     end
 
     local _, fRoot = getAliveRig()
-    if fRoot and not preserveMomentum then
+    if fRoot then
         fRoot.AssemblyLinearVelocity = Vector3.zero
         fRoot.AssemblyAngularVelocity = Vector3.zero
     end
@@ -2675,7 +2658,6 @@ local function runAlongGroundToEgg(targetPos, speed, sessionId, targetUid)
 
     local currentPosInit = root.Position
     local groundY = CONFIG.GroundAltitude + 1.0
-    local outboundMult = CONFIG.OutboundSpeedMultiplier or 1.20
 
     if currentPosInit.X < CONFIG.BoundaryCheckpointX then
         local centerDeliveryPos = Vector3.new(CONFIG.BaseDropPosition.X, groundY, CONFIG.BaseDropPosition.Z)
@@ -2683,20 +2665,20 @@ local function runAlongGroundToEgg(targetPos, speed, sessionId, targetUid)
 
         local lateralDist = math.abs(currentPosInit.Z - CONFIG.BaseDropPosition.Z)
         if lateralDist > 12 or currentPosInit.X < CONFIG.BaseDropPosition.X then
-            local ok = runAlongGroundSegment(centerDeliveryPos, 4.0, sessionId, targetUid, outboundMult, true)
+            local ok = runAlongGroundSegment(centerDeliveryPos, 4.0, sessionId, targetUid)
             if not ok or sessionId ~= State.currentStealSession or not isStealEnabled() then
                 return false
             end
         end
 
-        local ok2 = runAlongGroundSegment(mouthPos, 4.0, sessionId, targetUid, outboundMult, true)
+        local ok2 = runAlongGroundSegment(mouthPos, 4.0, sessionId, targetUid)
         if not ok2 or sessionId ~= State.currentStealSession or not isStealEnabled() then
             return false
         end
     end
 
     local targetStandPos = getStandingPosition(targetPos)
-    local reached = runAlongGroundSegment(targetStandPos, 3.5, sessionId, targetUid, outboundMult, false)
+    local reached = runAlongGroundSegment(targetStandPos, 3.5, sessionId, targetUid)
     if not reached or sessionId ~= State.currentStealSession or not isStealEnabled() then
         return false
     end
@@ -2728,7 +2710,7 @@ local function executeFastStealOutbound(targetPos, sessionId, targetUid)
 
     root.CFrame = CFrame.new(CONFIG.BaseDropPosition)
     root.AssemblyLinearVelocity = Vector3.zero
-    task.wait(0.06)
+    task.wait(0.12)
 
     local inSky = false
     local entranceTimeout = os.clock() + 4.0
@@ -2773,7 +2755,7 @@ local function executeFastStealOutbound(targetPos, sessionId, targetUid)
     end
 
     if not exitedSky then return false end
-    task.wait(0.06)
+    task.wait(0.12)
 
     local _, cRoot = getAliveRig()
     if not cRoot then return false end
@@ -3251,7 +3233,8 @@ local function flyOutboundElevated(targetPosition, stopDistance, sessionId, targ
     StealUIManager:SnapshotNormalHUD()
     stopDistance = stopDistance or 4
 
-    local playerSpeed = math.max(getPlayerCurrentSpeed() * 2.0, 75)
+    local playerSpeed = humanoid.WalkSpeed
+    if not playerSpeed or playerSpeed <= 0 then playerSpeed = 16 end
 
     table.clear(State.activeCollisionsDisabled)
     for _, part in ipairs(char:GetDescendants()) do
@@ -3300,77 +3283,6 @@ local function flyOutboundElevated(targetPosition, stopDistance, sessionId, targ
 
     cleanupFlightState()
     return reached and (sessionId == State.currentStealSession) and isStealEnabled() and not isMapClosed()
-end
-
-local function executeInstantOutbound(targetPos, sessionId, targetUid)
-    local char, root, hum = getAliveRig()
-    if not root or not hum then return false end
-
-    setCollisions(false)
-    if hum then hum.PlatformStand = false end
-
-    local currentPos = root.Position
-    local targetY = (targetPos.Y and targetPos.Y > 200) and (targetPos.Y + 1.0) or (CONFIG.GroundAltitude + 1.0)
-
-    if currentPos.X < CONFIG.BoundaryCheckpointX then
-        local mouthPos = Vector3.new(CONFIG.BoundaryCheckpointX, targetY, CONFIG.BaseDropPosition.Z)
-        pcall(function()
-            root.CFrame = CFrame.new(mouthPos) * CFrame.Angles(0, math.rad(90), 0)
-            root.AssemblyLinearVelocity = Vector3.zero
-        end)
-        task.wait(0.04)
-    end
-
-    local _, cRoot = getAliveRig()
-    if not cRoot then return false end
-
-    local targetStandPos = getStandingPosition(targetPos)
-    local startPos = cRoot.Position
-    local delta = Vector3.new(targetStandPos.X - startPos.X, 0, targetStandPos.Z - startPos.Z)
-    local dist = delta.Magnitude
-    local stepSize = 120
-    local steps = math.max(1, math.ceil(dist / stepSize))
-
-    for i = 1, steps do
-        if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
-        local _, curR = getAliveRig()
-        if not curR then return false end
-
-        local frac = math.min(1.0, i / steps)
-        local hopPos = startPos + delta * frac
-        local lookVector = delta.Unit
-        pcall(function()
-            curR.CFrame = CFrame.new(hopPos.X, targetY, hopPos.Z) * CFrame.lookAt(Vector3.zero, lookVector)
-            curR.AssemblyLinearVelocity = Vector3.zero
-        end)
-        task.wait(0.02)
-    end
-
-    local _, fRoot = getAliveRig()
-    if fRoot then
-        fRoot.CFrame = CFrame.lookAt(targetStandPos, targetPos)
-        fRoot.AssemblyLinearVelocity = Vector3.zero
-        fRoot.AssemblyAngularVelocity = Vector3.zero
-    end
-    task.wait(0.04)
-    return true
-end
-
-local function travelOutboundToEgg(targetPos, sessionId, targetUid)
-    local mode = currentSettings.OutboundMode or 'Fly'
-    local arrived = false
-
-    if mode == 'Instant' then
-        arrived = executeInstantOutbound(targetPos, sessionId, targetUid)
-    elseif mode == 'Fly' then
-        arrived = flyOutboundElevated(targetPos, 3.5, sessionId, targetUid)
-    end
-
-    if not arrived and sessionId == State.currentStealSession and isStealEnabled() and isEggStillValid(targetUid) then
-        arrived = runAlongGroundToEgg(targetPos, nil, sessionId, targetUid)
-    end
-
-    return arrived
 end
 
 getBestEgg = function()
@@ -3567,27 +3479,36 @@ WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
                     return (UFOManager.State.st.Delivered or 0) > d0
                 end
 
-                local arrived = false
-                if canUseFastSteal and isFastStealArea(areaId) then
-                    arrived = executeFastStealOutbound(eggTargetPos, session, targetUid)
-                end
+                if canUseFastSteal then
+                    local arrived = executeFastStealOutbound(eggTargetPos, session, targetUid)
+                    if not arrived and session == State.currentStealSession and isStealEnabled() and isEggStillValid(targetUid) then
+                        arrived = runAlongGroundToEgg(eggTargetPos, nil, session, targetUid)
+                    end
 
-                if not arrived and session == State.currentStealSession and isStealEnabled() and isEggStillValid(targetUid) then
-                    arrived = travelOutboundToEgg(eggTargetPos, session, targetUid)
-                end
+                    if arrived and session == State.currentStealSession and isStealEnabled() then
+                        task.wait(0.04)
+                        local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
 
-                if arrived and session == State.currentStealSession and isStealEnabled() then
-                    task.wait(0.04)
-                    local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
+                        if (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                            stealSuccess = tryDeliverToUfo()
 
-                    if (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
-                        stealSuccess = tryDeliverToUfo()
-
-                        if not stealSuccess and (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
-                            if canUseFastSteal and isFastStealArea(areaId) then
+                            if not stealSuccess and (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
                                 stealSuccess = executeFastStealDelivery(currentTargetEgg, session)
+                                if not stealSuccess and isHoldingEgg() and session == State.currentStealSession and isStealEnabled() then
+                                    stealSuccess = executeCheckpointedHopsHome(currentTargetEgg, session)
+                                end
                             end
-                            if not stealSuccess and isHoldingEgg() and session == State.currentStealSession and isStealEnabled() then
+                        end
+                    end
+                else
+                    local arrived = runAlongGroundToEgg(eggTargetPos, nil, session, targetUid)
+                    if arrived and session == State.currentStealSession and isStealEnabled() then
+                        task.wait(0.04)
+                        local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
+                        if (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                            stealSuccess = tryDeliverToUfo()
+
+                            if not stealSuccess and (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
                                 stealSuccess = executeCheckpointedHopsHome(currentTargetEgg, session)
                             end
                         end
@@ -3720,18 +3641,6 @@ StealSec:AddToggle("AutoStealToggle", {
         if not state then
             abortStealRoutine()
         end
-    end
-})
-
-StealSec:AddDropdown("OutboundModeDropdown", {
-    Title = "Outbound Mode",
-    Description = "Movement style to egg: Fly or Instant",
-    Values = {"Fly", "Instant"},
-    Default = currentSettings.OutboundMode or "Fly",
-    Callback = function(val)
-        currentSettings.OutboundMode = val
-        getgenv().config.outboundMode = val
-        saveStuff()
     end
 })
 
@@ -4236,18 +4145,6 @@ SettingsSec:AddDropdown("ThemeDropdown", {
         currentSettings.Theme = themeName
         saveStuff()
         CloudyLib:SetTheme(themeName)
-    end
-})
-
-SettingsSec:AddSlider("OutboundBoostSlider", {
-    Title = "Outbound Speed Boost",
-    Description = "Speed multiplier when going to egg (1.00x - 1.35x)",
-    Min = 100,
-    Max = 135,
-    Default = math.floor((CONFIG.OutboundSpeedMultiplier or 1.20) * 100),
-    Rounding = 0,
-    Callback = function(val)
-        CONFIG.OutboundSpeedMultiplier = val / 100
     end
 })
 
