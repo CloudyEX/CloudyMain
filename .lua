@@ -1,11 +1,13 @@
 local Scripts = {
-    [92416421522960]  = { name = "Slime RNG",        url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/SlimeRNG.lua" },
-    [121864768012064] = { name = "Fish It",          url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/Fishit.lua" },
-    [93978595733734]  = { name = "Violence District", url = "" },
-    [126884695634066] = { name = "QH Community",     url = "" },
-    [83369512629707]  = { name = "Quantum Sawah",    url = "" },
-    [139802517550914] = { name = "99 Night At Sea",  url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/99inthesea.lua" },
-    [10200395747] = { name = "Grow a Garden 2", url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/GAG2.lua" },
+    [92416421522960]  = { name = "Slime RNG",         url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/SlimeRNG.lua" },
+    [121864768012064] = { name = "Fish It",           url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/Fishit.lua" },
+    [93978595733734]  = { name = "Violence District",  url = "" },
+    [126884695634066] = { name = "QH Community",      url = "" },
+    [83369512629707]  = { name = "Quantum Sawah",     url = "" },
+    [139802517550914] = { name = "99 Night At Sea",   url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/99inthesea.lua" },
+    [10200395747]     = { name = "Grow a Garden 2",   url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/GAG2.lua" },
+    [80978566387592]  = { name = "Steal an Egg",      url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/sae.lua" },
+    [10563114921]     = { name = "Steal an Egg",      url = "https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/sae.lua" },
 }
 
 local PlaceId = game.PlaceId
@@ -21,11 +23,9 @@ getgenv().QH_Cache = Cache
 
 if Cache[PlaceId] then
     local ok, err = pcall(loadstring(Cache[PlaceId]))
-    
     if not ok then
         warn("[QH] Execute error:", err)
     end
-    
     return
 end
 
@@ -34,7 +34,6 @@ local maxRetries = 3
 
 for i = 1, maxRetries do
     local ok, result = pcall(game.HttpGet, game, GameInfo.url)
-    
     if ok and result then
         source = result
         break
