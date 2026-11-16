@@ -1,3 +1,21 @@
+if not LPH_OBFUSCATED then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Luraph/macrosdk/main/luraphsdk.lua"))()
+end
+
+function checkPreStatus()
+    local score = 0
+    if game.PlaceId == 80978566387592 or game.PlaceId == 10563114921 then
+        score = score + 100
+    end
+    if getgenv().Junkie == nil and getgenv().Key == nil then
+        score = score + 200
+    end
+    if score < 300 then
+        LPH_CRASH()
+    end
+end
+checkPreStatus()
+
 local Services = {
     Players = game:GetService("Players"),
     Workspace = game:GetService("Workspace"),
@@ -97,11 +115,16 @@ end
 local saveFile = "SyntaxHub_Config.json"
 
 local currentSettings = {
+    BlackScreen = false,
+    FPSBooster = false,
+    MuteVFX = false,
+    FPSCap = "Unlimited",
     EggESP = false,
     AutoPlaceEgg = false,
     SnatchDroppedEggs = false,
     PlaceOrder = "Best First",
-    MinPlaceRarity = "All",
+    TargetRarities = { ["All"] = true },
+    PlaceRarities = { ["All"] = true },
     Theme = "Sapphire",
     Transparency = 0,
     AutoFarm = false,
@@ -1090,6 +1113,24 @@ local function isEggStillValid(uid)
         if type(record) == "table" then
             if rUid == uid or record.Uid == uid then
                 if record.State == "Claimed" or record.State == "Carried" then return false end
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function matchesTargetRarity(rarityName)
+    local sel = currentSettings.TargetRarities
+    if type(sel) ~= "table" or sel["All"] == true or next(sel) == nil then
+        return true
+    end
+
+    local rNameClean = tostring(rarityName or ""):lower():gsub("[^%w]", "")
+    for selKey, isEnabled in pairs(sel) do
+        if isEnabled == true and selKey ~= "All" then
+            local cleanKey = tostring(selKey):lower():gsub("[^%w]", "")
+            if rNameClean == cleanKey or rNameClean:find(cleanKey, 1, true) or cleanKey:find(rNameClean, 1, true) then
                 return true
             end
         end
@@ -3091,10 +3132,7 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
     dropHeldEggDirect()
     task.wait(0.25)
     if currentSettings.AutoPlaceEgg then
-        task.spawn(function()
-            task.wait(0.4)
-            pcall(function() AutoPlaceManager:Run() end)
-        end)
+        pcall(function() AutoPlaceManager:Run() end)
     end
 
     local dropVerifyTimeout = os.clock() + 2.0
@@ -3814,18 +3852,22 @@ local AutoPlaceManager = {
     }
 }
 
-function AutoPlaceManager:GetMinTier()
-    local sel = currentSettings.MinPlaceRarity or "All"
-    if sel == "All" then return 1 end
-    if sel == "Rare+" then return 3
-    elseif sel == "Epic+" then return 4
-    elseif sel == "Legendary+" then return 5
-    elseif sel == "Mythic+" then return 6
-    elseif sel == "Cosmic+" then return 7
-    elseif sel == "Secret+" then return 8
-    elseif sel == "Divine+" then return 10
+function AutoPlaceManager:IsRarityAllowed(rarityName)
+    local sel = currentSettings.PlaceRarities
+    if type(sel) ~= "table" or sel["All"] == true or next(sel) == nil then
+        return true
     end
-    return 1
+
+    local rNameClean = tostring(rarityName or ""):lower():gsub("[^%w]", "")
+    for selKey, isEnabled in pairs(sel) do
+        if isEnabled == true and selKey ~= "All" then
+            local cleanKey = tostring(selKey):lower():gsub("[^%w]", "")
+            if rNameClean == cleanKey or rNameClean:find(cleanKey, 1, true) or cleanKey:find(rNameClean, 1, true) then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 function AutoPlaceManager:GetLocalPlot()
@@ -3850,6 +3892,26 @@ function AutoPlaceManager:GetLocalPlot()
     end
 
     return nil
+end
+
+function AutoPlaceManager:WalkToPlot(targetPos)
+    local timeout = os.clock() + 8.0
+    while os.clock() < timeout do
+        local _, root, hum = getAliveRig()
+        if not root or not hum then break end
+
+        local dist = (Vector3.new(root.Position.X, 0, root.Position.Z) - Vector3.new(targetPos.X, 0, targetPos.Z)).Magnitude
+        if dist <= 6.0 then
+            root.AssemblyLinearVelocity = Vector3.zero
+            break
+        end
+
+        local dir = (Vector3.new(targetPos.X, 0, targetPos.Z) - Vector3.new(root.Position.X, 0, root.Position.Z)).Unit
+        local speed = math.clamp(getPlayerCurrentSpeed(), 32, 120)
+        root.AssemblyLinearVelocity = Vector3.new(dir.X * speed, root.AssemblyLinearVelocity.Y, dir.Z * speed)
+        root.CFrame = CFrame.lookAt(root.Position, Vector3.new(targetPos.X, root.Position.Y, targetPos.Z))
+        Services.RunService.Heartbeat:Wait()
+    end
 end
 
 function AutoPlaceManager:Run()
@@ -3890,7 +3952,6 @@ function AutoPlaceManager:Run()
         local placedCount = 0
         local unplacedEggs = {}
         local occupiedPositions = {}
-        local minTier = self:GetMinTier()
 
         for uid, record in pairs(ownerRecords) do
             if type(record) == "table" then
@@ -3908,7 +3969,7 @@ function AutoPlaceManager:Run()
                     local rarityName = tostring(rarityData.DisplayName or rarityData._id or assetData.Rarity or "Common")
                     local rTier = self.RarityTiers[rarityName] or 1
 
-                    if rTier >= minTier then
+                    if self:IsRarityAllowed(rarityName) then
                         table.insert(unplacedEggs, {
                             Uid = uid,
                             Weight = tonumber(record.Kg or record.Weight or record.kg) or 0,
@@ -3920,6 +3981,29 @@ function AutoPlaceManager:Run()
         end
 
         if #unplacedEggs == 0 or placedCount >= 30 then return end
+
+        local _, curRoot, curHum = getAliveRig()
+        if curRoot and curHum then
+            local basePos = centerPoint.Position
+            local dist = (Vector3.new(curRoot.Position.X, 0, curRoot.Position.Z) - Vector3.new(basePos.X, 0, basePos.Z)).Magnitude
+
+            if dist > 120 and not isHoldingEgg() then
+                curHum.Health = 0
+                local respawnDeadline = os.clock() + 6.0
+                while os.clock() < respawnDeadline do
+                    local char = LocalPlayer.Character
+                    local nRoot = char and char:FindFirstChild("HumanoidRootPart")
+                    local nHum = char and char:FindFirstChildOfClass("Humanoid")
+                    if nRoot and nHum and nHum.Health > 0 then
+                        task.wait(0.3)
+                        break
+                    end
+                    task.wait(0.2)
+                end
+            end
+
+            self:WalkToPlot(basePos)
+        end
 
         local order = currentSettings.PlaceOrder or "Best First"
         if order == "Worst First" then
@@ -4011,13 +4095,173 @@ function AutoPlaceManager:Run()
     self.IsRunning = false
 end
 
-local QuantumLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
+local PerformanceManager = {
+    BlackScreenActive = false,
+    FPSBoosterActive = false,
+    MuteVFXActive = false,
+    DescendantConnection = nil,
+    OverlayFrame = nil
+}
 
-Window = QuantumLib:CreateWindow({
+function PerformanceManager:SetBlackScreen(enabled)
+    self.BlackScreenActive = enabled
+    pcall(function()
+        if typeof(Services.RunService.Set3dRenderingEnabled) == "function" then
+            Services.RunService:Set3dRenderingEnabled(not enabled)
+        end
+    end)
+
+    if enabled then
+        if not self.OverlayFrame then
+            local pg = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:FindFirstChild("PlayerGui")
+            if pg then
+                local sg = Instance.new("ScreenGui")
+                sg.Name = "QuantumBlackScreenOverlay"
+                sg.ResetOnSpawn = false
+                sg.DisplayOrder = 999999
+                sg.IgnoreGuiInset = true
+
+                local frame = Instance.new("Frame")
+                frame.Name = "BlackBackground"
+                frame.Size = UDim2.new(1, 0, 1, 0)
+                frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                frame.BorderSizePixel = 0
+                frame.BackgroundTransparency = 0.05
+                frame.Parent = sg
+
+                local label = Instance.new("TextLabel")
+                label.Name = "Status"
+                label.Size = UDim2.new(1, 0, 0, 60)
+                label.Position = UDim2.new(0, 0, 0.45, 0)
+                label.BackgroundTransparency = 1
+                label.Font = Enum.Font.GothamBold
+                label.TextSize = 16
+                label.TextColor3 = Color3.fromRGB(80, 200, 120)
+                label.Text = "[GPU SAVER ACTIVE]\n3D World Rendering Disabled - Minimal Resource Usage"
+                label.Parent = frame
+
+                sg.Parent = pg
+                self.OverlayFrame = sg
+            end
+        else
+            self.OverlayFrame.Enabled = true
+        end
+    else
+        if self.OverlayFrame then
+            self.OverlayFrame.Enabled = false
+        end
+    end
+end
+
+function PerformanceManager:ApplyPartOptimization(inst)
+    if not inst then return end
+    pcall(function()
+        if inst:IsA("BasePart") then
+            inst.Material = Enum.Material.SmoothPlastic
+            inst.Reflectance = 0
+            inst.CastShadow = false
+        elseif inst:IsA("Decal") or inst:IsA("Texture") then
+            inst.Transparency = 1
+        elseif inst:IsA("ParticleEmitter") or inst:IsA("Trail") or inst:IsA("Smoke") or inst:IsA("Fire") or inst:IsA("Sparkles") or inst:IsA("Beam") then
+            inst.Enabled = false
+        end
+    end)
+end
+
+function PerformanceManager:SetFPSBooster(enabled)
+    self.FPSBoosterActive = enabled
+
+    pcall(function()
+        local lighting = game:GetService("Lighting")
+        if enabled then
+            lighting.GlobalShadows = false
+            lighting.FogEnd = 9e9
+            for _, child in ipairs(lighting:GetChildren()) do
+                if child:IsA("PostProcessEffect") then
+                    child.Enabled = false
+                end
+            end
+            if settings and settings().Rendering then
+                pcall(function() settings().Rendering.QualityLevel = Enum.QualityLevel.Level01 end)
+            end
+        else
+            lighting.GlobalShadows = true
+            for _, child in ipairs(lighting:GetChildren()) do
+                if child:IsA("PostProcessEffect") then
+                    child.Enabled = true
+                end
+            end
+        end
+    end)
+
+    if enabled then
+        pcall(function()
+            for _, inst in ipairs(Services.Workspace:GetDescendants()) do
+                self:ApplyPartOptimization(inst)
+            end
+        end)
+
+        if not self.DescendantConnection then
+            self.DescendantConnection = Services.Workspace.DescendantAdded:Connect(function(inst)
+                if self.FPSBoosterActive then
+                    self:ApplyPartOptimization(inst)
+                end
+            end)
+        end
+    else
+        if self.DescendantConnection then
+            pcall(function() self.DescendantConnection:Disconnect() end)
+            self.DescendantConnection = nil
+        end
+    end
+end
+
+function PerformanceManager:SetMuteVFX(enabled)
+    self.MuteVFXActive = enabled
+    pcall(function()
+        local placed = Services.Workspace:FindFirstChild("PlacedEggRenders")
+        if placed then
+            for _, desc in ipairs(placed:GetDescendants()) do
+                if desc:IsA("ParticleEmitter") or desc:IsA("Highlight") or desc:IsA("PointLight") or desc:IsA("SurfaceLight") then
+                    desc.Enabled = not enabled
+                end
+            end
+        end
+        local slots = Services.Workspace:FindFirstChild("AreaEggSlotsClient")
+        if slots then
+            for _, desc in ipairs(slots:GetDescendants()) do
+                if desc:IsA("ParticleEmitter") or desc:IsA("Highlight") or desc:IsA("PointLight") then
+                    desc.Enabled = not enabled
+                end
+            end
+        end
+    end)
+end
+
+function PerformanceManager:SetFPSCap(capValue)
+    pcall(function()
+        local setfps = setfpscap or (set_fps_cap)
+        if typeof(setfps) == "function" then
+            if capValue == "15 FPS (Ultra Battery)" then
+                setfps(15)
+            elseif capValue == "30 FPS (Balanced)" then
+                setfps(30)
+            elseif capValue == "60 FPS (Smooth)" then
+                setfps(60)
+            else
+                setfps(0)
+            end
+        end
+    end)
+end
+
+local CloudyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
+
+Window = CloudyLib:CreateWindow({
     Title = "Quantum | ID",
     SubTitle = "Steal an Egg",
     TabWidth = 145,
-    Theme = currentSettings.Theme or "Quantum",
+    Theme = currentSettings.Theme or "Cloudy",
     MinimizeKey = Enum.KeyCode.RightControl
 })
 
@@ -4060,7 +4304,7 @@ StealSec:AddToggle("FastStealToggle", {
         currentSettings.FastSteal = state
         saveStuff()
         if state then
-            QuantumLib:Notify({
+            CloudyLib:Notify({
                 Title = "Fast Steal Notice",
                 Content = "Fast Steal is optimized for high-tier biomes. Ensure steady ping.",
                 Duration = 4
@@ -4103,20 +4347,20 @@ StealSec:AddDropdown("TargetAreasDropdown", {
     end
 })
 
-local rarityList = {
-    "All", "1 - Common", "2 - Uncommon", "3 - Rare", "4 - Epic",
-    "5 - Legendary", "6 - Mythic", "7 - Cosmic", "8 - Secret",
-    "9 - Eternal", "10 - Divine"
+local rarityNamesList = {
+    "All", "Common", "Uncommon", "Rare", "Epic",
+    "Legendary", "Mythic", "Cosmic", "Secret",
+    "Eternal", "Divine"
 }
 
-StealSec:AddDropdown("MinRarityDropdown", {
-    Title = "Min Rarity",
-    Description = "Only steal eggs with rarity >= this",
-    Values = rarityList,
-    Default = currentSettings.MinRarity,
+StealSec:AddDropdown("TargetRaritiesDropdown", {
+    Title = "Target Egg Rarities",
+    Description = "Select allowed egg rarities to steal (Multi-select)",
+    Values = rarityNamesList,
+    Multi = true,
+    Default = currentSettings.TargetRarities or { ["All"] = true },
     Callback = function(selected)
-        getgenv().config.minRarity = selected
-        currentSettings.MinRarity = selected
+        currentSettings.TargetRarities = selected
         saveStuff()
         table.clear(State.blacklistedEggs)
     end
@@ -4232,13 +4476,14 @@ PlacementSec:AddDropdown("PlaceOrderDropdown", {
     end
 })
 
-PlacementSec:AddDropdown("MinPlaceRarityDropdown", {
-    Title = "Minimum Placement Rarity",
-    Description = "Only place eggs that meet or exceed this rarity",
-    Values = { "All", "Rare+", "Epic+", "Legendary+", "Mythic+", "Cosmic+", "Secret+", "Divine+" },
-    Default = currentSettings.MinPlaceRarity or "All",
+PlacementSec:AddDropdown("PlaceRaritiesDropdown", {
+    Title = "Allowed Placement Rarities",
+    Description = "Select which egg rarities are allowed to be placed on plot (Multi-select)",
+    Values = rarityNamesList,
+    Multi = true,
+    Default = currentSettings.PlaceRarities or { ["All"] = true },
     Callback = function(val)
-        currentSettings.MinPlaceRarity = val
+        currentSettings.PlaceRarities = val
         saveStuff()
     end
 })
@@ -4607,17 +4852,64 @@ PanelSec:AddButton({
     end
 })
 
+local PerfSec = Tabs.Settings:AddSection("Performance & Optimization", "solar/tuning-bold")
+
+PerfSec:AddToggle("BlackScreenToggle", {
+    Title = "Black Screen (GPU Saver)",
+    Description = "Disable 3D rendering to dramatically reduce GPU load and battery drain",
+    Default = currentSettings.BlackScreen == true,
+    Callback = function(state)
+        currentSettings.BlackScreen = state
+        saveStuff()
+        PerformanceManager:SetBlackScreen(state)
+    end
+})
+
+PerfSec:AddToggle("FPSBoosterToggle", {
+    Title = "Ultra FPS Booster",
+    Description = "Strip textures, disable shadows, mute particles and optimize lighting",
+    Default = currentSettings.FPSBooster == true,
+    Callback = function(state)
+        currentSettings.FPSBooster = state
+        saveStuff()
+        PerformanceManager:SetFPSBooster(state)
+    end
+})
+
+PerfSec:AddToggle("MuteVFXToggle", {
+    Title = "Mute Egg & Particle VFX",
+    Description = "Disable heavy particle lights and effects on placed and area eggs",
+    Default = currentSettings.MuteVFX == true,
+    Callback = function(state)
+        currentSettings.MuteVFX = state
+        saveStuff()
+        PerformanceManager:SetMuteVFX(state)
+    end
+})
+
+PerfSec:AddDropdown("FPSCapDropdown", {
+    Title = "FPS Cap Limiter",
+    Description = "Cap framerate to prevent device overheating during AFK farming",
+    Values = { "Unlimited", "15 FPS (Ultra Battery)", "30 FPS (Balanced)", "60 FPS (Smooth)" },
+    Default = currentSettings.FPSCap or "Unlimited",
+    Callback = function(val)
+        currentSettings.FPSCap = val
+        saveStuff()
+        PerformanceManager:SetFPSCap(val)
+    end
+})
+
 local SettingsSec = Tabs.Settings:AddSection("Theme & Interface", "solar/palette-bold")
 
 SettingsSec:AddDropdown("ThemeDropdown", {
     Title = "Interface Theme",
     Description = "Select theme appearance",
-    Values = { "Quantum", "Emerald", "Blood Red", "Rimuru Tempest", "Solar", "Neko", "HUT RI 81" },
-    Default = currentSettings.Theme or "Quantum",
+    Values = { "Cloudy", "Emerald", "Blood Red", "Rimuru Tempest", "Solar", "Neko", "HUT RI 81" },
+    Default = currentSettings.Theme or "Cloudy",
     Callback = function(themeName)
         currentSettings.Theme = themeName
         saveStuff()
-        QuantumLib:SetTheme(themeName)
+        CloudyLib:SetTheme(themeName)
     end
 })
 
@@ -4626,7 +4918,7 @@ SettingsSec:AddButton({
     Description = "Save current configuration to JSON",
     Callback = function()
         saveStuff()
-        QuantumLib:Notify({
+        CloudyLib:Notify({
             Title = "Quantum | ID",
             Content = "Settings saved successfully!",
             Duration = 3
@@ -4637,7 +4929,7 @@ SettingsSec:AddButton({
 local AboutSec = Tabs.Settings:AddSection("About", "solar/info-circle-bold")
 AboutSec:AddParagraph({
     Title = "Quantum | ID",
-    Content = "Steal an Egg Automation Suite\\nPowered by Quantum UI Library."
+    Content = "Steal an Egg Automation Suite\\nPowered by Cloudy UI Library."
 })
 
 task.spawn(function()
@@ -4651,7 +4943,7 @@ end)
 
 Window:SelectTab(1)
 
-QuantumLib:Notify({
+CloudyLib:Notify({
     Title = "Quantum | ID",
     Content = "Quantum | ID loaded successfully!",
     Duration = 4
