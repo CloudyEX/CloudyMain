@@ -4525,6 +4525,34 @@ WorkerScheduler:Register("UpgradesAndUtility", 5.0, function()
         end)
     end
 end)
+
+WorkerScheduler:Start()
+
+local CloudyLib
+local okLib, libErr = pcall(function()
+    CloudyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
+end)
+
+if not okLib or not CloudyLib then
+    task.wait(0.5)
+    pcall(function()
+        CloudyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
+    end)
+end
+
+if not CloudyLib then
+    warn("Failed to load CloudyLib: " .. tostring(libErr))
+    return
+end
+
+Window = CloudyLib:CreateWindow({
+    Title = "Quantum | ID",
+    SubTitle = "Steal an Egg",
+    TabWidth = 145,
+    Theme = currentSettings.Theme or "Cloudy",
+    MinimizeKey = Enum.KeyCode.RightControl
+})
+
 activeTheme = {
     Accent = Color3.fromRGB(92, 170, 255),
     Background = Color3.fromRGB(24, 24, 30)
