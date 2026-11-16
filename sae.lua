@@ -99,6 +99,9 @@ local saveFile = "SyntaxHub_Config.json"
 local currentSettings = {
     EggESP = false,
     AutoPlaceEgg = false,
+    SnatchDroppedEggs = false,
+    PlaceOrder = "Best First",
+    MinPlaceRarity = "All",
     Theme = "Sapphire",
     Transparency = 0,
     AutoFarm = false,
@@ -320,7 +323,7 @@ end
 
 local function isStealEnabled()
     if isMapClosed() then return false end
-    return getgenv().config.autoFarm == true or isNormalStealPanelTarget()
+    return getgenv().config.autoFarm == true or isNormalStealPanelTarget() or currentSettings.SnatchDroppedEggs == true
 end
 
 local function isFastStealArea(areaId)
@@ -3357,7 +3360,9 @@ getBestEgg = function()
             local uid = (type(record.Uid) == "string" and record.Uid) or (type(keyUid) == "string" and keyUid) or nil
             record.Uid = uid
             if uid and not isBlacklisted(uid) then
-                if record.State == "Slot" or record.State == "Dropped" or record.State == nil then
+                local isDropped = (record.State == "Dropped")
+                local isSlot = (record.State == "Slot" or record.State == nil)
+                if isSlot or isDropped then
                     local posX = nil
                     local cf = record.BottomCFrame or record.BoundsCFrame or record.CFrame
                     if typeof(cf) == "CFrame" then posX = cf.Position.X
@@ -3802,8 +3807,26 @@ function EggESPManager:Update()
 end
 
 local AutoPlaceManager = {
-    IsRunning = false
+    IsRunning = false,
+    RarityTiers = {
+        Common = 1, Uncommon = 2, Rare = 3, Epic = 4, Legendary = 5,
+        Mythic = 6, Cosmic = 7, Secret = 8, Eternal = 9, Divine = 10
+    }
 }
+
+function AutoPlaceManager:GetMinTier()
+    local sel = currentSettings.MinPlaceRarity or "All"
+    if sel == "All" then return 1 end
+    if sel == "Rare+" then return 3
+    elseif sel == "Epic+" then return 4
+    elseif sel == "Legendary+" then return 5
+    elseif sel == "Mythic+" then return 6
+    elseif sel == "Cosmic+" then return 7
+    elseif sel == "Secret+" then return 8
+    elseif sel == "Divine+" then return 10
+    end
+    return 1
+end
 
 function AutoPlaceManager:GetLocalPlot()
     local plots = Services.Workspace:FindFirstChild("Plots")
@@ -3861,9 +3884,13 @@ function AutoPlaceManager:Run()
         local centerPoint = plot:FindFirstChild("CenterPoint") or petArea
         if not petArea or not centerPoint then return end
 
+        local assetsMod = GameModules:Get("Assets")
+        local assetsDir = assetsMod and assetsMod.Directory
+
         local placedCount = 0
         local unplacedEggs = {}
         local occupiedPositions = {}
+        local minTier = self:GetMinTier()
 
         for uid, record in pairs(ownerRecords) do
             if type(record) == "table" then
@@ -3875,19 +3902,41 @@ function AutoPlaceManager:Run()
                         table.insert(occupiedPositions, record.Placement)
                     end
                 else
-                    table.insert(unplacedEggs, {
-                        Uid = uid,
-                        Weight = tonumber(record.Kg or record.Weight or record.kg) or 0
-                    })
+                    local cat = tostring(record.AssetCategory or record.Category or record.Name or "Unknown")
+                    local assetData = (assetsDir and assetsDir[cat]) or (MasterRegistry and MasterRegistry.PetDatabase and MasterRegistry.PetDatabase[cat]) or {}
+                    local rarityData = (type(assetData.Rarity) == "table" and assetData.Rarity) or {}
+                    local rarityName = tostring(rarityData.DisplayName or rarityData._id or assetData.Rarity or "Common")
+                    local rTier = self.RarityTiers[rarityName] or 1
+
+                    if rTier >= minTier then
+                        table.insert(unplacedEggs, {
+                            Uid = uid,
+                            Weight = tonumber(record.Kg or record.Weight or record.kg) or 0,
+                            RarityTier = rTier
+                        })
+                    end
                 end
             end
         end
 
         if #unplacedEggs == 0 or placedCount >= 30 then return end
 
-        table.sort(unplacedEggs, function(a, b)
-            return a.Weight > b.Weight
-        end)
+        local order = currentSettings.PlaceOrder or "Best First"
+        if order == "Worst First" then
+            table.sort(unplacedEggs, function(a, b)
+                if a.RarityTier == b.RarityTier then
+                    return a.Weight < b.Weight
+                end
+                return a.RarityTier < b.RarityTier
+            end)
+        else
+            table.sort(unplacedEggs, function(a, b)
+                if a.RarityTier == b.RarityTier then
+                    return a.Weight > b.Weight
+                end
+                return a.RarityTier > b.RarityTier
+            end)
+        end
 
         local currentSlotIndex = 0
 
@@ -3962,13 +4011,13 @@ function AutoPlaceManager:Run()
     self.IsRunning = false
 end
 
-local CloudyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
+local QuantumLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
 
-Window = CloudyLib:CreateWindow({
+Window = QuantumLib:CreateWindow({
     Title = "Quantum | ID",
     SubTitle = "Steal an Egg",
     TabWidth = 145,
-    Theme = currentSettings.Theme or "Cloudy",
+    Theme = currentSettings.Theme or "Quantum",
     MinimizeKey = Enum.KeyCode.RightControl
 })
 
@@ -4011,31 +4060,26 @@ StealSec:AddToggle("FastStealToggle", {
         currentSettings.FastSteal = state
         saveStuff()
         if state then
-            CloudyLib:Notify({
+            QuantumLib:Notify({
                 Title = "Fast Steal Notice",
                 Content = "Fast Steal is optimized for high-tier biomes. Ensure steady ping.",
                 Duration = 4
             })
-
-StealSec:AddToggle("AutoPlaceEggToggle", {
-    Title = "Auto Place Egg",
-    Description = "Automatically place inventory eggs onto your base plot",
-    Default = currentSettings.AutoPlaceEgg == true,
-    Callback = function(state)
-        currentSettings.AutoPlaceEgg = state
-        saveStuff()
-        if state then
-            task.spawn(function()
-                pcall(function() AutoPlaceManager:Run() end)
-            end)
-        end
-    end
-})
         else
             if State.isStealingActive and not isHoldingEgg() then
                 abortStealRoutine()
             end
         end
+    end
+})
+
+StealSec:AddToggle("SnatchDroppedEggsToggle", {
+    Title = "Snatch Dropped Eggs",
+    Description = "Instantly intercept and snatch eggs dropped or released by other players",
+    Default = currentSettings.SnatchDroppedEggs == true,
+    Callback = function(state)
+        currentSettings.SnatchDroppedEggs = state
+        saveStuff()
     end
 })
 
@@ -4156,6 +4200,45 @@ UfoSec:AddToggle("UFOTpToggle", {
     Callback = function(state)
         getgenv().config.ufoTp = state
         currentSettings.UFOTp = state
+        saveStuff()
+    end
+})
+
+local PlacementSec = Tabs.Farm:AddSection("Base Plot & Egg Placement", "solar/home-bold")
+
+PlacementSec:AddToggle("AutoPlaceEggToggle", {
+    Title = "Auto Place Egg",
+    Description = "Automatically place inventory eggs onto your base plot",
+    Default = currentSettings.AutoPlaceEgg == true,
+    Callback = function(state)
+        currentSettings.AutoPlaceEgg = state
+        saveStuff()
+        if state then
+            task.spawn(function()
+                pcall(function() AutoPlaceManager:Run() end)
+            end)
+        end
+    end
+})
+
+PlacementSec:AddDropdown("PlaceOrderDropdown", {
+    Title = "Placement Order",
+    Description = "Order priority for placing eggs onto your base plot",
+    Values = { "Best First", "Worst First" },
+    Default = currentSettings.PlaceOrder or "Best First",
+    Callback = function(val)
+        currentSettings.PlaceOrder = val
+        saveStuff()
+    end
+})
+
+PlacementSec:AddDropdown("MinPlaceRarityDropdown", {
+    Title = "Minimum Placement Rarity",
+    Description = "Only place eggs that meet or exceed this rarity",
+    Values = { "All", "Rare+", "Epic+", "Legendary+", "Mythic+", "Cosmic+", "Secret+", "Divine+" },
+    Default = currentSettings.MinPlaceRarity or "All",
+    Callback = function(val)
+        currentSettings.MinPlaceRarity = val
         saveStuff()
     end
 })
@@ -4529,12 +4612,12 @@ local SettingsSec = Tabs.Settings:AddSection("Theme & Interface", "solar/palette
 SettingsSec:AddDropdown("ThemeDropdown", {
     Title = "Interface Theme",
     Description = "Select theme appearance",
-    Values = { "Cloudy", "Emerald", "Blood Red", "Rimuru Tempest", "Solar", "Neko", "HUT RI 81" },
-    Default = currentSettings.Theme or "Cloudy",
+    Values = { "Quantum", "Emerald", "Blood Red", "Rimuru Tempest", "Solar", "Neko", "HUT RI 81" },
+    Default = currentSettings.Theme or "Quantum",
     Callback = function(themeName)
         currentSettings.Theme = themeName
         saveStuff()
-        CloudyLib:SetTheme(themeName)
+        QuantumLib:SetTheme(themeName)
     end
 })
 
@@ -4543,7 +4626,7 @@ SettingsSec:AddButton({
     Description = "Save current configuration to JSON",
     Callback = function()
         saveStuff()
-        CloudyLib:Notify({
+        QuantumLib:Notify({
             Title = "Quantum | ID",
             Content = "Settings saved successfully!",
             Duration = 3
@@ -4554,7 +4637,7 @@ SettingsSec:AddButton({
 local AboutSec = Tabs.Settings:AddSection("About", "solar/info-circle-bold")
 AboutSec:AddParagraph({
     Title = "Quantum | ID",
-    Content = "Steal an Egg Automation Suite\\nPowered by Cloudy UI Library."
+    Content = "Steal an Egg Automation Suite\\nPowered by Quantum UI Library."
 })
 
 task.spawn(function()
@@ -4568,7 +4651,7 @@ end)
 
 Window:SelectTab(1)
 
-CloudyLib:Notify({
+QuantumLib:Notify({
     Title = "Quantum | ID",
     Content = "Quantum | ID loaded successfully!",
     Duration = 4
