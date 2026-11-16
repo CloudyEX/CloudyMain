@@ -101,9 +101,30 @@ local currentSettings = {
     Transparency = 0,
     AutoFarm = false,
     FastSteal = false,
+    StealMode = "High Speed User Normal",
+    LowSpeedMultiplier = 5,
+    LowSpeedBoost = true,
+    HelpFriend = false,
     AutoTreadmill = false,
     AutoUpgradeTreadmill = false,
     AutoUpgradeBase = false,
+    AutoEquipBest = false,
+    AutoAwayEarnings = false,
+    AutoRedeemCodex = false,
+    AuraBat = false,
+    AntiGuardKnockback = true,
+    AntiTreadmill = false,
+    AutoStar = false,
+    AutoRace = false,
+    AutoMechBoss = false,
+    AutoScrambleTrade = false,
+    AutoScrambleReroll = false,
+    AutoFuse = false,
+    AutoSellPet = false,
+    AutoFavPet = false,
+    EggESP = false,
+    EggTracers = false,
+    EggTags = false,
     AutoClaimMastery = false,
     AutoCatchButterfly = false,
     AutoWispQuest = false,
@@ -122,9 +143,13 @@ local currentSettings = {
     BloomSmartTrade = true,
     TaskPriorities = {
         "Auto Steal",
+        "Combat Defense",
         "UFO Event",
         "Enchanted / Bloom Event",
-        "Auto Treadmill"
+        "Special Events",
+        "Pet Barn",
+        "Auto Treadmill",
+        "Automation Upgrades"
     }
 }
 
@@ -144,7 +169,6 @@ local function loadStuff()
                 for k, v in pairs(decoded) do
                     if k == "TargetAreas" and type(v) == "table" then
                         currentSettings.TargetAreas = v
-
                     elseif k == "TaskPriorities" and type(v) == "table" then
                         currentSettings.TaskPriorities = v
                     elseif type(v) == "table" and type(currentSettings[k]) == "table" then
@@ -160,11 +184,7 @@ local function loadStuff()
     if type(currentSettings.TargetAreas) ~= "table" or next(currentSettings.TargetAreas) == nil then
         currentSettings.TargetAreas = { ["All"] = true }
     end
-        if type(currentSettings.MinRarity) ~= "string" or string.find(currentSettings.MinRarity, "table:") then
-        currentSettings.MinRarity = "All"
-    end
-
-    end
+end
 
 loadStuff()
 
@@ -341,19 +361,45 @@ local function getRemote(pathName)
     return remote
 end
 
+local SharedRemotes = nil
+pcall(function()
+    local shared = Services.ReplicatedStorage:FindFirstChild("Shared")
+    local rModule = shared and shared:FindFirstChild("Remotes")
+    if rModule and rModule:IsA("ModuleScript") then
+        SharedRemotes = require(rModule)
+    end
+end)
+
 local Remotes = {
-    AskFieldEggDrop = getRemote("RF/EggWorld/AskFieldEggDrop"),
-    AskFieldEggCarry = getRemote("RF/EggWorld/AskFieldEggCarry"),
-    AskDoff = getRemote("RF/Treadmill/AskDoff"),
-    AskWearStill = getRemote("RF/Treadmill/AskWearStill"),
-    AskSnapshot = getRemote("RF/EggWorld/AskFieldEggSnapshot"),
-    TierRaise = getRemote("RF/Treadmill/AskTierRaise"),
-    BaseTierRaise = getRemote("RE/Homestead/AskBaseTierRaise"),
+    Shared = SharedRemotes,
+    AskFieldEggDrop = (SharedRemotes and SharedRemotes.EggWorld and SharedRemotes.EggWorld.AskFieldEggDrop) or getRemote("RF/EggWorld/AskFieldEggDrop"),
+    AskFieldEggCarry = (SharedRemotes and SharedRemotes.EggWorld and SharedRemotes.EggWorld.AskFieldEggCarry) or getRemote("RF/EggWorld/AskFieldEggCarry"),
+    AskDoff = (SharedRemotes and SharedRemotes.Treadmill and SharedRemotes.Treadmill.AskDoff) or getRemote("RF/Treadmill/AskDoff"),
+    AskWearStill = (SharedRemotes and SharedRemotes.Treadmill and SharedRemotes.Treadmill.AskWearStill) or getRemote("RF/Treadmill/AskWearStill"),
+    AskSnapshot = (SharedRemotes and SharedRemotes.EggWorld and SharedRemotes.EggWorld.AskFieldEggSnapshot) or getRemote("RF/EggWorld/AskFieldEggSnapshot"),
+    TierRaise = (SharedRemotes and SharedRemotes.Treadmill and SharedRemotes.Treadmill.AskTierRaise) or getRemote("RF/Treadmill/AskTierRaise"),
+    BaseTierRaise = (SharedRemotes and SharedRemotes.Homestead and SharedRemotes.Homestead.AskBaseTierRaise) or getRemote("RF/Homestead/AskBaseTierRaise") or getRemote("RE/Homestead/AskBaseTierRaise"),
     AskRigWipe = getRemote("RE/RigSync/AskRigWipe"),
     ClaimNet = getRemote("RF/Butterflies/AskClaimNet"),
     TradeUp = getRemote("RF/Butterflies/AskTradeUp"),
     CraftEssence = getRemote("RF/Butterflies/AskCraftEssence"),
-    WispRequest = getRemote("RF/WispCompanion/Request")
+    WispRequest = getRemote("RF/WispCompanion/Request"),
+    BatTrigger = (SharedRemotes and SharedRemotes.BatSwing and SharedRemotes.BatSwing.Trigger) or getRemote("RE/BatSwing/Trigger"),
+    AskWearFieldBat = (SharedRemotes and SharedRemotes.Codex and SharedRemotes.Codex.AskWearFieldBat) or getRemote("RF/Codex/AskWearFieldBat"),
+    AskRedeemAllCodex = (SharedRemotes and SharedRemotes.Codex and SharedRemotes.Codex.AskRedeemAll) or getRemote("RF/Codex/AskRedeemAll"),
+    WearBestHaul = (SharedRemotes and SharedRemotes.Haul and SharedRemotes.Haul.WearBest) or getRemote("RF/Haul/WearBest"),
+    AwaySummary = (SharedRemotes and SharedRemotes.AwayEarnings and SharedRemotes.AwayEarnings.FetchSummary) or getRemote("RF/AwayEarnings/FetchSummary"),
+    AwayCollect = (SharedRemotes and SharedRemotes.AwayEarnings and SharedRemotes.AwayEarnings.AskCollect) or getRemote("RF/AwayEarnings/AskCollect"),
+    ForestStrike = (SharedRemotes and SharedRemotes.GuardPatrol and SharedRemotes.GuardPatrol.ForestStrike) or getRemote("RE/GuardPatrol/ForestStrike"),
+    AskRenderSnapshot = (SharedRemotes and SharedRemotes.Treadmill and SharedRemotes.Treadmill.AskRenderSnapshot) or getRemote("RF/Treadmill/AskRenderSnapshot"),
+    SellPet = (SharedRemotes and SharedRemotes.PetSatchel and SharedRemotes.PetSatchel.SellPet) or getRemote("RF/PetSatchel/SellPet"),
+    WriteFavourite = (SharedRemotes and SharedRemotes.PetSatchel and SharedRemotes.PetSatchel.WriteFavourite) or getRemote("RE/PetSatchel/WriteFavourite"),
+    Fusery = SharedRemotes and SharedRemotes.Fusery,
+    ShootingStar = SharedRemotes and SharedRemotes.ShootingStar,
+    RaceRally = SharedRemotes and SharedRemotes.RaceRally,
+    MountRace = SharedRemotes and SharedRemotes.MountRace,
+    BossMastery = SharedRemotes and SharedRemotes.BossMastery,
+    ScrambleTradeIn = SharedRemotes and SharedRemotes.ScrambleTradeIn
 }
 
 local function invokeRemote(pathName, ...)
@@ -676,70 +722,15 @@ local ShieldManager = {
 }
 
 function ShieldManager:RebindControls(humanoid)
-    pcall(function()
-        local playerScripts = LocalPlayer:FindFirstChild("PlayerScripts")
-        local playerModule = playerScripts and playerScripts:FindFirstChild("PlayerModule")
-        if playerModule then
-            local controls = require(playerModule):GetControls()
-            if type(controls) == "table" then
-                controls.humanoid = humanoid
-            end
-        end
-    end)
 end
 
 function ShieldManager:CleanupLinks()
-    for _, conn in ipairs(self.Links) do pcall(function() conn:Disconnect() end) end
-    table.clear(self.Links)
 end
 
 function ShieldManager:ApplyHumanoidSwap(character)
-    if not character then return end
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid or humanoid.Health <= 0 then return end
-    if self.CloneHumanoid and self.CloneHumanoid.Parent == character then return end
-
-    self:CleanupLinks()
-    local clone = humanoid:Clone()
-    humanoid.Parent = nil
-    clone.Parent = character
-    Services.Workspace.CurrentCamera.CameraSubject = clone
-    self:RebindControls(clone)
-
-    self.OriginalHumanoid = humanoid
-    self.CloneHumanoid = clone
-
-    table.insert(self.Links, clone:GetPropertyChangedSignal("Health"):Connect(function()
-        if clone and clone.Parent and clone.Health < clone.MaxHealth then
-            clone.Health = clone.MaxHealth
-        end
-    end))
-
-    table.insert(self.Links, humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-        if clone and clone.Parent then
-            clone.WalkSpeed = humanoid.WalkSpeed
-        end
-    end))
-
-    table.insert(self.Links, clone.Died:Connect(function()
-        self:UndoSwap()
-    end))
 end
 
 function ShieldManager:UndoSwap()
-    self:CleanupLinks()
-    local char = LocalPlayer.Character
-    local orig = self.OriginalHumanoid
-    local clone = self.CloneHumanoid
-    self.OriginalHumanoid = nil
-    self.CloneHumanoid = nil
-
-    if orig and clone and char and orig.Parent == nil and clone.Parent == char then
-        orig.Parent = char
-        Services.Workspace.CurrentCamera.CameraSubject = orig
-        self:RebindControls(orig)
-        pcall(function() clone:Destroy() end)
-    end
 end
 
 local function isMonitorAction(fn)
@@ -780,34 +771,612 @@ function ShieldManager:UnmuteUGI()
     table.clear(self.DisabledUGI)
 end
 
-local function resetFlaggedCharacter()
-    if os.clock() - State.lastResetTime < 15 then return end
-    State.lastResetTime = os.clock()
-    State.treadmillFailCount = 0
+local HoverPadManager = {
+    Pad = nil,
+    OwnerId = "Hover_" .. tostring(math.random(100000, 999999)),
+    HeightOverride = nil,
+    PreConn = nil,
+    PostConn = nil
+}
 
-    pcall(function() ShieldManager:UndoSwap() end)
-    if Remotes.AskDoff then
-        pcall(function() Remotes.AskDoff:InvokeServer() end)
+function HoverPadManager:FeetOffset(rootPart, humanoid)
+    if humanoid.RigType == Enum.HumanoidRigType.R15 then
+        return rootPart.Size.Y * 0.5 + math.max(humanoid.HipHeight, 0.5)
+    end
+    return rootPart.Size.Y * 0.5 + 2
+end
+
+function HoverPadManager:Start()
+    if not self.Pad or not self.Pad.Parent then
+        local part = Instance.new("Part")
+        part.Name = "QuantumHoverPad"
+        part:SetAttribute("OwnerId", self.OwnerId)
+        part.Anchored = true
+        part.CanCollide = true
+        part.CanQuery = true
+        part.CanTouch = false
+        part.CastShadow = false
+        part.Transparency = 1
+        part.Material = Enum.Material.SmoothPlastic
+        part.Size = Vector3.new(18, 1.5, 18)
+        part.Parent = Services.Workspace
+        self.Pad = part
     end
 
-    local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if char and hum then
-        pcall(function()
-            hum:UnequipTools()
-            hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
-            hum.BreakJointsOnDeath = true
-            hum.RequiresNeck = true
-            hum.Health = 0
-            hum:ChangeState(Enum.HumanoidStateType.Dead)
-            char:BreakJoints()
+    self:Sync()
+
+    if not self.PreConn then
+        self.PreConn = Services.RunService.PreSimulation:Connect(function()
+            if not self:Sync() then
+                self:Start()
+            end
         end)
-        if Remotes.AskRigWipe then
-            pcall(function() Remotes.AskRigWipe:FireServer(char) end)
+    end
+
+    if not self.PostConn then
+        self.PostConn = Services.RunService.PostSimulation:Connect(function()
+            self:Sync()
+        end)
+    end
+end
+
+function HoverPadManager:Sync(customPos)
+    if not self.Pad or not self.Pad.Parent then return false end
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not root or not hum then return false end
+
+    local pos = (typeof(customPos) == "Vector3" and customPos) or root.Position
+    local y = (self.HeightOverride ~= nil and self.HeightOverride) or pos.Y
+    local size = (self.HeightOverride ~= nil and math.max(18, hum.WalkSpeed * 2 / 15)) or 18
+
+    if math.abs(self.Pad.Size.X - size) > 0.5 then
+        self.Pad.Size = Vector3.new(size, 1.5, size)
+    end
+
+    self.Pad.CFrame = CFrame.new(pos.X, y - self:FeetOffset(root, hum) - 0.75 - 0.05, pos.Z)
+    return true
+end
+
+function HoverPadManager:Stop()
+    self.HeightOverride = nil
+    if self.PreConn then
+        pcall(self.PreConn.Disconnect, self.PreConn)
+        self.PreConn = nil
+    end
+    if self.PostConn then
+        pcall(self.PostConn.Disconnect, self.PostConn)
+        self.PostConn = nil
+    end
+    if self.Pad then
+        pcall(self.Pad.Destroy, self.Pad)
+        self.Pad = nil
+    end
+end
+
+local AntiCheatBypass = {
+    GuardStrikeAnchor = nil,
+    GuardStrikeGeneration = 0,
+    GuardStickConn = nil,
+    IsTreadmillResetting = false,
+    SwingSequence = 0,
+    RagdollHooksInstalled = false
+}
+
+function AntiCheatBypass:TreadmillReset(cancelCondition)
+    if self.IsTreadmillResetting then return false end
+    self.IsTreadmillResetting = true
+
+    local function shouldCancel()
+        return cancelCondition ~= nil and cancelCondition()
+    end
+
+    local success = false
+    pcall(function()
+        if not Remotes.AskWearStill or not Remotes.AskDoff or shouldCancel() then return end
+
+        local char = LocalPlayer.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if not root or not hum then return end
+
+        local targetCFrame = nil
+        if State.myTreadmill and State.myTreadmill:IsA("BasePart") then
+            local offset = HoverPadManager:FeetOffset(root, hum)
+            targetCFrame = State.myTreadmill.CFrame * CFrame.new(0, State.myTreadmill.Size.Y * 0.5 + offset + 0.05, 0)
+        end
+
+        if not targetCFrame then return end
+
+        HoverPadManager:Start()
+        root.CFrame = targetCFrame
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+        task.wait(0.05)
+
+        local wearTimeout = os.clock() + 0.7
+        while os.clock() < wearTimeout and not shouldCancel() do
+            pcall(function() Remotes.AskWearStill:InvokeServer() end)
+            task.wait(0.08)
+            local isMounted = false
+            pcall(function()
+                if Remotes.AskRenderSnapshot then
+                    local snap = Remotes.AskRenderSnapshot:InvokeServer()
+                    if type(snap) == "table" and table.find(snap, LocalPlayer.UserId) then
+                        isMounted = true
+                    end
+                end
+            end)
+            if isMounted then break end
+        end
+
+        task.wait(0.15)
+
+        local doffTimeout = os.clock() + 0.7
+        while os.clock() < doffTimeout and not shouldCancel() do
+            pcall(function() Remotes.AskDoff:InvokeServer() end)
+            task.wait(0.08)
+            local isMounted = true
+            pcall(function()
+                if Remotes.AskRenderSnapshot then
+                    local snap = Remotes.AskRenderSnapshot:InvokeServer()
+                    if type(snap) == "table" and not table.find(snap, LocalPlayer.UserId) then
+                        isMounted = false
+                    end
+                end
+            end)
+            if not isMounted then
+                success = true
+                break
+            end
+        end
+        HoverPadManager:Stop()
+    end)
+
+    self.IsTreadmillResetting = false
+    return success
+end
+
+function AntiCheatBypass:ForestGuardModel()
+    local world = Services.Workspace:FindFirstChild("World") or Services.Workspace:FindFirstChild("__OBJECTS")
+    local areas = world and world:FindFirstChild("Areas")
+    local guardAreas = areas and areas:FindFirstChild("GuardAreas")
+    local forest = guardAreas and guardAreas:FindFirstChild("Forest")
+    return forest and forest:FindFirstChild("Guard")
+end
+
+function AntiCheatBypass:TriggerGuardHit(primerUid)
+    local guard = self:ForestGuardModel()
+    local gRoot = guard and guard:FindFirstChild("HumanoidRootPart")
+    if not gRoot then return end
+
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+
+    local gPos = gRoot.Position
+    local fwd = gRoot.CFrame.LookVector * 2.5
+    local anchorPos = Vector3.new(gPos.X + fwd.X, root.Position.Y, gPos.Z + fwd.Z)
+    self.GuardStrikeAnchor = anchorPos
+
+    root.CFrame = CFrame.lookAt(anchorPos, Vector3.new(gPos.X, anchorPos.Y, gPos.Z))
+    root.AssemblyLinearVelocity = Vector3.zero
+
+    local collider = guard:FindFirstChild("Collider") or gRoot
+    if collider and firetouchinterest then
+        pcall(function()
+            firetouchinterest(root, collider, 0)
+            firetouchinterest(root, collider, 1)
+        end)
+    end
+
+    if Remotes.ForestStrike then
+        pcall(function()
+            Remotes.ForestStrike:FireServer({
+                EggUid = primerUid,
+                GuardCFrame = gRoot.CFrame
+            })
+        end)
+    end
+end
+
+function AntiCheatBypass:StartGuardStrike(primerUid)
+    self.GuardStrikeGeneration = self.GuardStrikeGeneration + 1
+    local currentGen = self.GuardStrikeGeneration
+
+    task.spawn(function()
+        local strikeEnd = os.clock() + 1.5
+        while os.clock() < strikeEnd and self.GuardStrikeGeneration == currentGen do
+            self:TriggerGuardHit(primerUid)
+            local checkEnd = os.clock() + 0.05
+            local hitLanded = false
+            while os.clock() < checkEnd do
+                local char = LocalPlayer.Character
+                local hum = char and char:FindFirstChildOfClass("Humanoid")
+                local r = char and char:FindFirstChild("HumanoidRootPart")
+                if hum and r then
+                    if hum.PlatformStand or hum.Sit or r.AssemblyLinearVelocity.Magnitude > 18 then
+                        hitLanded = true
+                        break
+                    end
+                end
+                Services.RunService.Heartbeat:Wait()
+            end
+            if hitLanded then break end
+        end
+
+        if self.GuardStrikeGeneration == currentGen then
+            local settleEnd = os.clock() + 0.35
+            while os.clock() < settleEnd do
+                local char = LocalPlayer.Character
+                local root = char and char:FindFirstChild("HumanoidRootPart")
+                local hum = char and char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    pcall(function()
+                        hum.PlatformStand = false
+                        hum.Sit = false
+                        hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+                    end)
+                end
+                if root and self.GuardStrikeAnchor then
+                    root.CFrame = CFrame.new(self.GuardStrikeAnchor)
+                    root.AssemblyLinearVelocity = Vector3.zero
+                    root.AssemblyAngularVelocity = Vector3.zero
+                end
+                Services.RunService.Heartbeat:Wait()
+            end
+        end
+    end)
+end
+
+function AntiCheatBypass:StopGuardStrike()
+    self.GuardStrikeGeneration = self.GuardStrikeGeneration + 1
+    self.GuardStrikeAnchor = nil
+end
+
+function AntiCheatBypass:ResolveHoldSeconds(areaId, multiplier)
+    local str = tostring(areaId or ""):lower()
+    local base = 8
+    local minSec = 3.5
+
+    if str:find("enchanted") then
+        base, minSec = 18, 12
+    elseif str:find("light") or str:find("dark") then
+        base, minSec = 16, 10
+    elseif str:find("titan") or str:find("cosmic") or str:find("cherry") then
+        base, minSec = 10, 8
+    end
+
+    local mult = math.clamp(tonumber(multiplier) or 5, 1, 10)
+    local calculated = math.max(minSec, base * ((11 - mult) / 6))
+    return calculated
+end
+
+function AntiCheatBypass:InstallRagdollHooks()
+    if self.RagdollHooksInstalled then return end
+    self.RagdollHooksInstalled = true
+
+    task.spawn(function()
+        local ragdollMod = nil
+        pcall(function()
+            local shared = Services.ReplicatedStorage:FindFirstChild("Shared")
+            local mod = shared and shared:FindFirstChild("Ragdoll")
+            if mod and mod:IsA("ModuleScript") then
+                ragdollMod = require(mod)
+            end
+        end)
+
+        if ragdollMod and type(ragdollMod) == "table" then
+            for _, fnName in ipairs({ "ApplyClientRagdoll", "Ragdoll", "TimedRagdoll", "TimedRagdollAsync" }) do
+                if type(ragdollMod[fnName]) == "function" then
+                    local origFn = ragdollMod[fnName]
+                    ragdollMod[fnName] = function(...)
+                        if currentSettings.AntiGuardKnockback then
+                            local char = LocalPlayer.Character
+                            local hum = char and char:FindFirstChildOfClass("Humanoid")
+                            local root = char and char:FindFirstChild("HumanoidRootPart")
+                            if hum then
+                                pcall(function()
+                                    hum.PlatformStand = false
+                                    hum.Sit = false
+                                    hum:ChangeState(Enum.HumanoidStateType.GettingUp)
+                                end)
+                            end
+                            if root then
+                                root.AssemblyLinearVelocity = Vector3.zero
+                                root.AssemblyAngularVelocity = Vector3.zero
+                            end
+                            return
+                        end
+                        return origFn(...)
+                    end
+                end
+            end
+        end
+    end)
+end
+
+AntiCheatBypass:InstallRagdollHooks()
+
+local CombatManager = {
+    LastBatSwing = 0,
+    SwingSeq = 0
+}
+
+function CombatManager:Step()
+    if not currentSettings.AuraBat then return end
+    if os.clock() - self.LastBatSwing < 0.25 then return end
+
+    local char = LocalPlayer.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+
+    local targetFound = false
+    local targetPos = nil
+
+    local guard = AntiCheatBypass:ForestGuardModel()
+    local gRoot = guard and guard:FindFirstChild("HumanoidRootPart")
+    if gRoot and (gRoot.Position - root.Position).Magnitude <= 20 then
+        targetFound = true
+        targetPos = gRoot.Position
+    end
+
+    if not targetFound then
+        for _, pl in ipairs(Services.Players:GetPlayers()) do
+            if pl ~= LocalPlayer and pl.Character then
+                local pRoot = pl.Character:FindFirstChild("HumanoidRootPart")
+                local pHum = pl.Character:FindFirstChildOfClass("Humanoid")
+                if pRoot and pHum and pHum.Health > 0 and (pRoot.Position - root.Position).Magnitude <= 18 then
+                    targetFound = true
+                    targetPos = pRoot.Position
+                    break
+                end
+            end
+        end
+    end
+
+    if targetFound and Remotes.BatTrigger then
+        self.LastBatSwing = os.clock()
+        self.SwingSeq = self.SwingSeq + 1
+        pcall(function()
+            if Remotes.AskWearFieldBat then
+                Remotes.AskWearFieldBat:InvokeServer()
+            end
+        end)
+        local sig = string.format("%d:%d:%d", LocalPlayer.UserId, self.SwingSeq, math.floor(workspace:GetServerTimeNow() * 1000))
+        pcall(function()
+            Remotes.BatTrigger:FireServer(nil, sig)
+        end)
+    end
+end
+
+local SpecialEventsManager = {
+    LastStarCheck = 0,
+    LastRaceCheck = 0,
+    LastBossCheck = 0,
+    LastScrambleCheck = 0
+}
+
+function SpecialEventsManager:ProcessStar()
+    if not currentSettings.AutoStar then return end
+    if os.clock() - self.LastStarCheck < 2.0 then return end
+    self.LastStarCheck = os.clock()
+
+    local starRemote = Remotes.ShootingStar
+    if not starRemote then return end
+
+    local world = Services.Workspace:FindFirstChild("World") or Services.Workspace:FindFirstChild("__OBJECTS")
+    local star = world and (world:FindFirstChild("ShootingStar") or world:FindFirstChild("StarItem"))
+    if star and star:IsA("BasePart") then
+        local char = LocalPlayer.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if root then
+            local dist = (star.Position - root.Position).Magnitude
+            if dist < 600 then
+                HoverPadManager:Start()
+                root.CFrame = CFrame.new(star.Position + Vector3.new(0, 3, 0))
+                task.wait(0.1)
+                pcall(function()
+                    if starRemote.AskClaim or starRemote.Claim then
+                        local rem = starRemote.AskClaim or starRemote.Claim
+                        if rem:IsA("RemoteFunction") then rem:InvokeServer() else rem:FireServer() end
+                    end
+                end)
+                HoverPadManager:Stop()
+            end
         end
     end
 end
 
+function SpecialEventsManager:ProcessRace()
+    if not currentSettings.AutoRace then return end
+    if os.clock() - self.LastRaceCheck < 1.0 then return end
+    self.LastRaceCheck = os.clock()
+
+    if Remotes.MountRace and Remotes.MountRace.PowerUp then
+        pcall(function()
+            Remotes.MountRace.PowerUp:FireServer()
+        end)
+    end
+
+    if Remotes.RaceRally and Remotes.RaceRally.AskClaimMilestone then
+        pcall(function()
+            if Remotes.RaceRally.AskClaimMilestone:IsA("RemoteFunction") then
+                Remotes.RaceRally.AskClaimMilestone:InvokeServer()
+            end
+        end)
+    end
+end
+
+function SpecialEventsManager:ProcessMechBoss()
+    if not currentSettings.AutoMechBoss then return end
+    if os.clock() - self.LastBossCheck < 3.0 then return end
+    self.LastBossCheck = os.clock()
+
+    if Remotes.BossMastery and Remotes.BossMastery.AskUseMutationConsumable then
+        pcall(function()
+            Remotes.BossMastery.AskUseMutationConsumable:InvokeServer()
+        end)
+    end
+end
+
+function SpecialEventsManager:ProcessScramble()
+    if not currentSettings.AutoScrambleTrade and not currentSettings.AutoScrambleReroll then return end
+    if os.clock() - self.LastScrambleCheck < 5.0 then return end
+    self.LastScrambleCheck = os.clock()
+
+    if currentSettings.AutoScrambleTrade and Remotes.ScrambleTradeIn and Remotes.ScrambleTradeIn.AskTradeIn then
+        pcall(function()
+            Remotes.ScrambleTradeIn.AskTradeIn:InvokeServer()
+        end)
+    end
+
+    if currentSettings.AutoScrambleReroll and Remotes.ScrambleTradeIn and Remotes.ScrambleTradeIn.AskReroll then
+        pcall(function()
+            Remotes.ScrambleTradeIn.AskReroll:InvokeServer()
+        end)
+    end
+end
+
+local PetAutomationManager = {
+    LastAction = 0
+}
+
+function PetAutomationManager:Process()
+    if os.clock() - self.LastAction < 4.0 then return end
+    self.LastAction = os.clock()
+
+    if currentSettings.AutoFuse and Remotes.Fusery and Remotes.Fusery.BeginFuse then
+        pcall(function()
+            Remotes.Fusery.BeginFuse:InvokeServer()
+            task.wait(0.2)
+            if Remotes.Fusery.ConfirmBriefing then Remotes.Fusery.ConfirmBriefing:InvokeServer() end
+            task.wait(0.2)
+            if Remotes.Fusery.FinishReveal then Remotes.Fusery.FinishReveal:InvokeServer() end
+        end)
+    end
+
+    if currentSettings.AutoFavPet and Remotes.WriteFavourite then
+        pcall(function()
+            local saveModule = require(Services.ReplicatedStorage.Shared.Save)
+            local data = (saveModule.Peek or saveModule.Get)()
+            if data and type(data.Inventory) == "table" then
+                for k, v in pairs(data.Inventory) do
+                    if type(v) == "table" and not v.IsFavorite then
+                        pcall(function()
+                            if Remotes.WriteFavourite:IsA("RemoteFunction") then
+                                Remotes.WriteFavourite:InvokeServer(k, true)
+                            else
+                                Remotes.WriteFavourite:FireServer(k, true)
+                            end
+                        end)
+                    end
+                end
+            end
+        end)
+    end
+end
+
+local EggESPManager = {
+    Drawings = {},
+    Billboards = {}
+}
+
+function EggESPManager:Clear()
+    for _, b in pairs(self.Billboards) do
+        pcall(function() b:Destroy() end)
+    end
+    table.clear(self.Billboards)
+end
+
+function EggESPManager:Update()
+    if not currentSettings.EggESP then
+        self:Clear()
+        return
+    end
+
+    local camera = Services.Workspace.CurrentCamera
+    if not camera then return end
+
+    local currentUids = {}
+    local fieldEggs = getFieldEggs()
+    if type(fieldEggs) == "table" then
+        for uid, eggData in pairs(fieldEggs) do
+            currentUids[uid] = true
+            local eggPos = nil
+            if typeof(eggData) == "table" then
+                local cf = eggData.BottomCFrame or eggData.CFrame or eggData.Position
+                if typeof(cf) == "CFrame" then eggPos = cf.Position
+                elseif typeof(cf) == "Vector3" then eggPos = cf end
+            end
+
+            if eggPos and not self.Billboards[uid] then
+                pcall(function()
+                    local attachPart = Instance.new("Part")
+                    attachPart.Name = "ESP_Attach"
+                    attachPart.Size = Vector3.new(1, 1, 1)
+                    attachPart.CFrame = CFrame.new(eggPos)
+                    attachPart.Anchored = true
+                    attachPart.CanCollide = false
+                    attachPart.Transparency = 1
+                    attachPart.Parent = Services.Workspace
+
+                    local bb = Instance.new("BillboardGui")
+                    bb.Name = "EggESP"
+                    bb.Adornee = attachPart
+                    bb.Size = UDim2.new(0, 140, 0, 45)
+                    bb.StudsOffset = Vector3.new(0, 3, 0)
+                    bb.AlwaysOnTop = true
+
+                    local nameLbl = Instance.new("TextLabel")
+                    nameLbl.Size = UDim2.new(1, 0, 0.5, 0)
+                    nameLbl.BackgroundTransparency = 1
+                    nameLbl.Font = Enum.Font.GothamBold
+                    nameLbl.TextSize = 12
+                    nameLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    nameLbl.TextStrokeTransparency = 0.2
+                    nameLbl.Text = tostring(eggData.Name or "Egg")
+                    nameLbl.Parent = bb
+
+                    local valLbl = Instance.new("TextLabel")
+                    valLbl.Position = UDim2.new(0, 0, 0.5, 0)
+                    valLbl.Size = UDim2.new(1, 0, 0.5, 0)
+                    valLbl.BackgroundTransparency = 1
+                    valLbl.Font = Enum.Font.GothamMedium
+                    valLbl.TextSize = 10
+                    valLbl.TextColor3 = Color3.fromRGB(255, 215, 0)
+                    valLbl.TextStrokeTransparency = 0.3
+                    valLbl.Text = formatMoneyPerSec(eggData.Value or eggData.MoneyPerSecond or 0)
+                    valLbl.Parent = bb
+
+                    bb.Parent = attachPart
+                    self.Billboards[uid] = attachPart
+                end)
+            end
+        end
+    end
+
+    for uid, part in pairs(self.Billboards) do
+        if not currentUids[uid] then
+            pcall(function() part:Destroy() end)
+            self.Billboards[uid] = nil
+        end
+    end
+end
+
+local function resetFlaggedCharacter()
+    if os.clock() - State.lastResetTime < 10 then return end
+    State.lastResetTime = os.clock()
+    State.treadmillFailCount = 0
+
+    local ok = AntiCheatBypass:TreadmillReset()
+    if not ok then
+        pcall(function()
+            if Remotes.AskDoff then Remotes.AskDoff:InvokeServer() end
+        end)
+    end
+end
 local function abortStealRoutine()
     State.currentStealSession = State.currentStealSession + 1
     State.isStealingActive = false
@@ -3080,13 +3649,262 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
     return not isHoldingEgg()
 end
 
-local function executeFastStealDelivery(targetEgg, sessionId)
+local function executeFlyOutbound(targetPos, sessionId, targetUid)
+    local _, root, hum = getAliveRig()
+    if not root or not hum then return false end
+
+    setCollisions(false)
+    ShieldManager:MuteUGI()
+
+    local animator = hum:FindFirstChildWhichIsA("Animator")
+    if animator then
+        pcall(function()
+            for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+                track:Stop(0)
+            end
+        end)
+    end
+
+    local animate = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Animate")
+    if animate then pcall(function() animate.Disabled = true end) end
+
+    HoverPadManager.HeightOverride = 110
+    HoverPadManager:Start()
+
+    local startPos = root.Position
+    local flyTarget = Vector3.new(targetPos.X, 110, targetPos.Z)
+    local playerSpeed = math.max(getPlayerCurrentSpeed(), 85)
+
+    local horizDist = Vector3.new(flyTarget.X - startPos.X, 0, flyTarget.Z - startPos.Z).Magnitude
+    local timeout = os.clock() + math.clamp(horizDist / playerSpeed * 1.5 + 8, 10, 60)
+
+    while os.clock() < timeout do
+        Services.RunService.Heartbeat:Wait()
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isEggStillValid(targetUid) then
+            HoverPadManager:Stop()
+            if animate then pcall(function() animate.Disabled = false end) end
+            setCollisions(true)
+            ShieldManager:UnmuteUGI()
+            return false
+        end
+
+        local curPos = root.Position
+        local diff = Vector3.new(flyTarget.X - curPos.X, 0, flyTarget.Z - curPos.Z)
+        if diff.Magnitude <= 6 then break end
+
+        local stepDist = math.min(diff.Magnitude, playerSpeed * 0.08)
+        local nextPos = curPos + diff.Unit * stepDist
+        root.CFrame = CFrame.new(Vector3.new(nextPos.X, 110, nextPos.Z), Vector3.new(flyTarget.X, 110, flyTarget.Z))
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+        HoverPadManager:Sync(root.Position)
+    end
+
+    local groundTimeout = os.clock() + 4.0
+    while os.clock() < groundTimeout do
+        Services.RunService.Heartbeat:Wait()
+        if sessionId ~= State.currentStealSession or not isStealEnabled() then break end
+        local curPos = root.Position
+        local toEgg = targetPos - curPos
+        if toEgg.Magnitude <= 5 then break end
+
+        local stepY = math.min(toEgg.Magnitude, 35)
+        root.CFrame = CFrame.new(curPos + toEgg.Unit * stepY)
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+        HoverPadManager:Sync(root.Position)
+    end
+
+    HoverPadManager:Stop()
+    if animate then pcall(function() animate.Disabled = false end) end
+    setCollisions(true)
+    ShieldManager:UnmuteUGI()
+    return isEggStillValid(targetUid)
+end
+
+local function executeFlyDelivery(targetEgg, sessionId, helpFriend)
+    local _, root, hum = getAliveRig()
+    if not root or not hum then return false end
+
+    setCollisions(false)
+    ShieldManager:MuteUGI()
+
+    local animator = hum:FindFirstChildWhichIsA("Animator")
+    if animator then
+        pcall(function()
+            for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+                track:Stop(0)
+            end
+        end)
+    end
+
+    local animate = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Animate")
+    if animate then pcall(function() animate.Disabled = true end) end
+
+    HoverPadManager.HeightOverride = 110
+    HoverPadManager:Start()
+
+    local laneZ = math.clamp(root.Position.Z, -425, -300)
+    local targetX = (helpFriend and (CONFIG.SeparationLineX + 15)) or (CONFIG.SeparationLineX - 25)
+    local deliverTarget = Vector3.new(targetX, 110, laneZ)
+    local playerSpeed = math.max(getPlayerCurrentSpeed(), 85)
+
+    local horizDist = math.abs(root.Position.X - targetX)
+    local timeout = os.clock() + math.clamp(horizDist / playerSpeed * 1.5 + 8, 10, 60)
+
+    while os.clock() < timeout do
+        Services.RunService.Heartbeat:Wait()
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then
+            break
+        end
+
+        local curPos = root.Position
+        local diffX = deliverTarget.X - curPos.X
+        if math.abs(diffX) <= 6 then break end
+
+        local stepX = math.min(math.abs(diffX), playerSpeed * 0.08) * math.sign(diffX)
+        root.CFrame = CFrame.new(Vector3.new(curPos.X + stepX, 110, laneZ))
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+        HoverPadManager:Sync(root.Position)
+    end
+
+    local landPos = Vector3.new(targetX, CONFIG.GroundAltitude + 1.5, laneZ)
+    local landTimeout = os.clock() + 3.0
+    while os.clock() < landTimeout do
+        Services.RunService.Heartbeat:Wait()
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then break end
+        local curPos = root.Position
+        local diff = landPos - curPos
+        if diff.Magnitude <= 3 then break end
+        root.CFrame = CFrame.new(curPos + diff.Unit * math.min(diff.Magnitude, 30))
+        root.AssemblyLinearVelocity = Vector3.zero
+        HoverPadManager:Sync(root.Position)
+    end
+
+    if helpFriend and isHoldingEgg() then
+        if Remotes.AskFieldEggDrop then
+            pcall(function()
+                if Remotes.AskFieldEggDrop:IsA("RemoteFunction") then
+                    Remotes.AskFieldEggDrop:InvokeServer()
+                else
+                    Remotes.AskFieldEggDrop:FireServer()
+                end
+            end)
+        end
+    end
+
+    HoverPadManager:Stop()
+    if animate then pcall(function() animate.Disabled = false end) end
+    setCollisions(true)
+    ShieldManager:UnmuteUGI()
+    return not isHoldingEgg() or helpFriend
+end
+
+local function executeZigZagOutbound(targetPos, sessionId, targetUid)
+    local _, root, hum = getAliveRig()
+    if not root or not hum then return false end
+
+    setCollisions(false)
+    ShieldManager:MuteUGI()
+    HoverPadManager:Start()
+
+    local playerSpeed = math.max(getPlayerCurrentSpeed(), 75)
+    local startTime = os.clock()
+    local timeout = startTime + 45.0
+
+    while os.clock() < timeout do
+        Services.RunService.Heartbeat:Wait()
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isEggStillValid(targetUid) then
+            HoverPadManager:Stop()
+            setCollisions(true)
+            ShieldManager:UnmuteUGI()
+            return false
+        end
+
+        local curPos = root.Position
+        local dir = targetPos - curPos
+        local dist = dir.Magnitude
+        if dist <= 5 then break end
+
+        local fwd = dir.Unit
+        local perp = Vector3.new(-fwd.Z, 0, fwd.X).Unit
+        local lateralOffset = perp * (math.sin(os.clock() * 8) * 12)
+
+        local step = math.min(dist, playerSpeed * 0.08)
+        local nextPos = curPos + fwd * step + lateralOffset * 0.15
+        root.CFrame = CFrame.lookAt(nextPos, nextPos + fwd)
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+        HoverPadManager:Sync(root.Position)
+    end
+
+    HoverPadManager:Stop()
+    setCollisions(true)
+    ShieldManager:UnmuteUGI()
+    return isEggStillValid(targetUid)
+end
+
+local function executeZigZagDelivery(targetEgg, sessionId, helpFriend)
+    local _, root, hum = getAliveRig()
+    if not root or not hum then return false end
+
+    setCollisions(false)
+    ShieldManager:MuteUGI()
+    HoverPadManager:Start()
+
+    local laneZ = math.clamp(root.Position.Z, -425, -300)
+    local targetX = (helpFriend and (CONFIG.SeparationLineX + 15)) or (CONFIG.SeparationLineX - 25)
+    local deliverTarget = Vector3.new(targetX, CONFIG.GroundAltitude + 1.0, laneZ)
+    local playerSpeed = math.max(getPlayerCurrentSpeed(), 75)
+    local timeout = os.clock() + 45.0
+
+    while os.clock() < timeout do
+        Services.RunService.Heartbeat:Wait()
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then
+            break
+        end
+
+        local curPos = root.Position
+        local diffX = deliverTarget.X - curPos.X
+        if math.abs(diffX) <= 5 then break end
+
+        local fwd = (deliverTarget - curPos).Unit
+        local perp = Vector3.new(-fwd.Z, 0, fwd.X).Unit
+        local lateralOffset = perp * (math.sin(os.clock() * 8) * 12)
+
+        local step = math.min(math.abs(diffX), playerSpeed * 0.08)
+        local nextPos = curPos + fwd * step + lateralOffset * 0.15
+        root.CFrame = CFrame.new(nextPos)
+        root.AssemblyLinearVelocity = Vector3.zero
+        HoverPadManager:Sync(root.Position)
+    end
+
+    if helpFriend and isHoldingEgg() then
+        if Remotes.AskFieldEggDrop then
+            pcall(function()
+                if Remotes.AskFieldEggDrop:IsA("RemoteFunction") then
+                    Remotes.AskFieldEggDrop:InvokeServer()
+                else
+                    Remotes.AskFieldEggDrop:FireServer()
+                end
+            end)
+        end
+    end
+
+    HoverPadManager:Stop()
+    setCollisions(true)
+    ShieldManager:UnmuteUGI()
+    return not isHoldingEgg() or helpFriend
+end
+
+local function executeFastStealDelivery(targetEgg, sessionId, helpFriend)
     local _, root, hum = getAliveRig()
     if not root or not hum then return false end
 
     local uid = targetEgg.Uid
     local laneZ = math.clamp(root.Position.Z, -425, -300)
-    local dropTargetPos = Vector3.new(CONFIG.SeparationLineX + CONFIG.FastStealLineDropOffset, CONFIG.GroundAltitude + 1.0, laneZ)
+    local dropTargetPos = Vector3.new((helpFriend and (CONFIG.SeparationLineX + 15)) or (CONFIG.SeparationLineX + CONFIG.FastStealLineDropOffset), CONFIG.GroundAltitude + 1.0, laneZ)
     local playerSpeed = getPlayerCurrentSpeed()
 
     setCollisions(false)
@@ -3116,6 +3934,21 @@ local function executeFastStealDelivery(targetEgg, sessionId)
     end
     task.wait(0.1)
 
+    if helpFriend then
+        if Remotes.AskFieldEggDrop then
+            pcall(function()
+                if Remotes.AskFieldEggDrop:IsA("RemoteFunction") then
+                    Remotes.AskFieldEggDrop:InvokeServer()
+                else
+                    Remotes.AskFieldEggDrop:FireServer()
+                end
+            end)
+        end
+        setCollisions(true)
+        ShieldManager:UnmuteUGI()
+        return true
+    end
+
     local checkpointOk = performGroundCheckpoint(targetEgg, dropTargetPos.X, laneZ, sessionId)
     if not checkpointOk and not isHoldingEgg() then
         setCollisions(true)
@@ -3128,34 +3961,20 @@ local function executeFastStealDelivery(targetEgg, sessionId)
     local corridorStep = 55
 
     while currentX - corridorStep > safeTarget.X do
-        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then break end
-        local nextX = currentX - corridorStep
-        local _, hRoot = getAliveRig()
-        if hRoot then
-            pcall(function()
-                hRoot.CFrame = CFrame.new(nextX, CONFIG.GroundAltitude + 1.0, safeTarget.Z) * CFrame.Angles(0, math.rad(90), 0)
-                hRoot.AssemblyLinearVelocity = Vector3.zero
-            end)
-        end
-        task.wait(CONFIG.HopGap)
-        currentX = nextX
+        currentX = currentX - corridorStep
+        local _, loopRoot = getAliveRig()
+        if not loopRoot then break end
+        loopRoot.CFrame = CFrame.new(currentX, CONFIG.GroundAltitude + 1.0, laneZ) * CFrame.Angles(0, math.rad(90), 0)
+        loopRoot.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.04)
+        if not isHoldingEgg() or sessionId ~= State.currentStealSession then break end
     end
 
-    local _, fRoot, fHum = getAliveRig()
-    if fRoot then
-        fRoot.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
-        fRoot.AssemblyLinearVelocity = Vector3.zero
-    end
-    task.wait(0.15)
-    if fHum then fHum.PlatformStand = false end
-
-    dropHeldEggDirect()
-    task.wait(0.25)
-
-    local dropVerifyTimeout = os.clock() + 2.0
-    while os.clock() < dropVerifyTimeout and isHoldingEgg() do
-        dropHeldEggDirect()
-        task.wait(0.2)
+    local _, finalRoot = getAliveRig()
+    if finalRoot and isHoldingEgg() then
+        finalRoot.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.0, laneZ) * CFrame.Angles(0, math.rad(90), 0)
+        finalRoot.AssemblyLinearVelocity = Vector3.zero
+        task.wait(0.12)
     end
 
     setCollisions(true)
@@ -3431,8 +4250,7 @@ WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
             local session = State.currentStealSession
 
             hopOffTreadmill()
-            ShieldManager:ApplyHumanoidSwap(char)
-            task.wait(0.08)
+            task.wait(0.05)
 
             local targetCFrame = currentTargetEgg.BottomCFrame or currentTargetEgg.BoundsCFrame or currentTargetEgg.CFrame
             local eggTargetPos = nil
@@ -3448,8 +4266,9 @@ WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
             if eggTargetPos then
                 local areaId = currentTargetEgg.AreaId
                 local isUfoEgg = UFOManager and UFOManager.IsUfoEgg and UFOManager:IsUfoEgg(currentTargetEgg, targetUid)
-                local canUfoTp = (getgenv().config.ufoTp == true) and isUfoEgg and root and ((root.Position - eggTargetPos).Magnitude >= 1000)
+                local canUfoTp = (getgenv().config.ufoTp == true) and isUfoEgg and ((root and (root.Position - eggTargetPos).Magnitude >= 1000) or false)
                 local canUseFastSteal = ((getgenv().config.fastSteal == true and isFastStealArea(areaId)) or canUfoTp)
+                local stealMode = currentSettings.StealMode or "High Speed User Normal"
 
                 local function tryDeliverToUfo()
                     if not isUfoEgg then return false end
@@ -3479,37 +4298,85 @@ WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
                     return (UFOManager.State.st.Delivered or 0) > d0
                 end
 
-                if canUseFastSteal then
-                    local arrived = executeFastStealOutbound(eggTargetPos, session, targetUid)
-                    if not arrived and session == State.currentStealSession and isStealEnabled() and isEggStillValid(targetUid) then
-                        arrived = runAlongGroundToEgg(eggTargetPos, nil, session, targetUid)
+                if cleanName(areaId):find("forest", 1, true) ~= nil then
+                    AntiCheatBypass:StartGuardStrike(targetUid)
+                end
+
+                if stealMode == "Low Speed User" then
+                    local holdTime = AntiCheatBypass:ResolveHoldSeconds(areaId, currentSettings.LowSpeedMultiplier)
+                    if currentSettings.LowSpeedBoost and cleanName(areaId):find("forest", 1, true) == nil then
+                        holdTime = math.max(2.5, holdTime * 0.6)
                     end
+                    task.wait(holdTime)
 
-                    if arrived and session == State.currentStealSession and isStealEnabled() then
-                        task.wait(0.04)
-                        local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
-
-                        if (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
-                            stealSuccess = tryDeliverToUfo()
-
-                            if not stealSuccess and (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
-                                stealSuccess = executeFastStealDelivery(currentTargetEgg, session)
-                                if not stealSuccess and isHoldingEgg() and session == State.currentStealSession and isStealEnabled() then
-                                    stealSuccess = executeCheckpointedHopsHome(currentTargetEgg, session)
-                                end
-                            end
-                        end
-                    end
-                else
                     local arrived = runAlongGroundToEgg(eggTargetPos, nil, session, targetUid)
                     if arrived and session == State.currentStealSession and isStealEnabled() then
                         task.wait(0.04)
                         local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
                         if (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
-                            stealSuccess = tryDeliverToUfo()
+                            stealSuccess = executeFastStealDelivery(currentTargetEgg, session, currentSettings.HelpFriend)
+                        end
+                    end
 
+                elseif stealMode == "High Speed User (Fly)" then
+                    local arrived = executeFlyOutbound(eggTargetPos, session, targetUid)
+                    if arrived and session == State.currentStealSession and isStealEnabled() then
+                        task.wait(0.04)
+                        local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
+                        if (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                            stealSuccess = tryDeliverToUfo()
                             if not stealSuccess and (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
-                                stealSuccess = executeCheckpointedHopsHome(currentTargetEgg, session)
+                                stealSuccess = executeFlyDelivery(currentTargetEgg, session, currentSettings.HelpFriend)
+                            end
+                        end
+                    end
+
+                elseif stealMode == "Zig-Zag High Speed User" then
+                    local arrived = executeZigZagOutbound(eggTargetPos, session, targetUid)
+                    if arrived and session == State.currentStealSession and isStealEnabled() then
+                        task.wait(0.04)
+                        local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
+                        if (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                            stealSuccess = tryDeliverToUfo()
+                            if not stealSuccess and (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                                stealSuccess = executeZigZagDelivery(currentTargetEgg, session, currentSettings.HelpFriend)
+                            end
+                        end
+                    end
+
+                else
+                    if canUseFastSteal then
+                        local arrived = executeFastStealOutbound(eggTargetPos, session, targetUid)
+                        if not arrived and session == State.currentStealSession and isStealEnabled() and isEggStillValid(targetUid) then
+                            arrived = runAlongGroundToEgg(eggTargetPos, nil, session, targetUid)
+                        end
+
+                        if arrived and session == State.currentStealSession and isStealEnabled() then
+                            task.wait(0.04)
+                            local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
+
+                            if (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                                stealSuccess = tryDeliverToUfo()
+
+                                if not stealSuccess and (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                                    stealSuccess = executeFastStealDelivery(currentTargetEgg, session, currentSettings.HelpFriend)
+                                    if not stealSuccess and isHoldingEgg() and session == State.currentStealSession and isStealEnabled() then
+                                        stealSuccess = executeCheckpointedHopsHome(currentTargetEgg, session)
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        local arrived = runAlongGroundToEgg(eggTargetPos, nil, session, targetUid)
+                        if arrived and session == State.currentStealSession and isStealEnabled() then
+                            task.wait(0.04)
+                            local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
+                            if (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                                stealSuccess = tryDeliverToUfo()
+
+                                if not stealSuccess and (grabbed or isHoldingEgg()) and session == State.currentStealSession and isStealEnabled() then
+                                    stealSuccess = executeCheckpointedHopsHome(currentTargetEgg, session)
+                                end
                             end
                         end
                     end
@@ -3518,7 +4385,6 @@ WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
 
             if session == State.currentStealSession then
                 State.isStealingActive = false
-                ShieldManager:UndoSwap()
                 cleanupFlightState()
                 PriorityManager:Release("Steal")
 
@@ -3529,92 +4395,136 @@ WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
                     end
                     State.targetedSpecificUid = nil
                 end
-            else
-                State.isStealingActive = false
-                ShieldManager:UndoSwap()
-                cleanupFlightState()
-                if PriorityManager then
-                    PriorityManager:Release("Steal")
-                    PriorityManager:Release("Auto Steal")
+
+                if not stealSuccess and isStealEnabled() and targetUid and not isEggStillValid(targetUid) then
+                    blacklistEgg(targetUid, 15)
                 end
             end
         end
     end
 
-    local isStealBusy = State.isStealingActive or isHoldingEgg()
+    local isStealBusy = State.isStealingActive or (isStealEnabled() and not isMapClosed())
     local canTreadmill = getgenv().config.autoTreadmill and not isStealBusy and PriorityManager:CanRun("Treadmill")
 
     if canTreadmill and getAliveRig() then
-        ShieldManager:UndoSwap()
         findMyPlot()
-        local _, cRoot, cHum = getAliveRig()
-        if cRoot and cHum then
-            if State.myTreadmill then
-                local tPos = State.myTreadmill.Position + Vector3.new(0, 3, 0)
-                local dist = (cRoot.Position - tPos).Magnitude
-                if dist > 4 then
-                    cHum.PlatformStand = false
-                    cHum.Sit = false
-                    local speed = cHum.WalkSpeed
-                    if not speed or speed <= 0 then speed = 16 end
-                    local travelDuration = math.clamp(dist / math.max(speed, 16), 0.3, 3)
-                    local tw = Services.TweenService:Create(cRoot, TweenInfo.new(travelDuration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                        CFrame = CFrame.new(tPos) * cRoot.CFrame.Rotation
-                    })
-                    tw:Play()
-                    tw.Completed:Wait()
-                end
+        local myPlot = State.myPlot
+        local slotNum = myPlot and myPlot.Name
 
-                local _, postRoot, postHum = getAliveRig()
-                if postRoot and not postRoot.Anchored then
-                    if postHum then
-                        postHum.PlatformStand = false
-                        postHum.Sit = false
-                    end
-                    if Remotes.AskWearStill and not isStealBusy and PriorityManager:CanRun("Treadmill") then
-                        pcall(function() Remotes.AskWearStill:InvokeServer() end)
-                    end
-                    task.wait(0.35)
-                    local _, verifyRoot = getAliveRig()
-                    if verifyRoot and not verifyRoot.Anchored then
-                        State.treadmillFailCount = State.treadmillFailCount + 1
-                        if State.treadmillFailCount >= 8 then
-                            resetFlaggedCharacter()
-                        elseif State.treadmillFailCount == 4 and Remotes.AskDoff then
-                            pcall(function() Remotes.AskDoff:InvokeServer() end)
-                        end
-                    else
-                        State.treadmillFailCount = 0
-                    end
-                else
-                    State.treadmillFailCount = 0
-                end
-            else
-                State.treadmillFailCount = 0
-            end
-        end
-    else
-        if not canTreadmill and getgenv().config.autoTreadmill then
+        if State.myTreadmill then
+            local tPos = State.myTreadmill.Position + Vector3.new(0, 3, 0)
             local _, curRoot = getAliveRig()
-            if curRoot and curRoot.Anchored then
-                hopOffTreadmill()
+
+            if curRoot and (curRoot.Position - tPos).Magnitude > 6 then
+                curRoot.CFrame = CFrame.new(tPos)
+                curRoot.AssemblyLinearVelocity = Vector3.zero
+                task.wait(0.08)
+            end
+
+            if Remotes.AskWearStill and not isStealBusy and PriorityManager:CanRun("Treadmill") then
+                pcall(function()
+                    Remotes.AskWearStill:InvokeServer()
+                end)
+            end
+        else
+            State.treadmillFailCount = State.treadmillFailCount + 1
+            if State.treadmillFailCount >= 10 then
+                resetFlaggedCharacter()
             end
         end
     end
+
+    if not canTreadmill and getgenv().config.autoTreadmill then
+        hopOffTreadmill()
+    end
+
+    if currentSettings.AntiTreadmill and not getgenv().config.autoTreadmill then
+        pcall(function()
+            if Remotes.AskDoff then Remotes.AskDoff:InvokeServer() end
+        end)
+    end
 end)
 
-WorkerScheduler:Start()
+WorkerScheduler:Register("CombatDefense", 0.25, function()
+    CombatManager:Step()
+end)
 
-local CloudyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
+WorkerScheduler:Register("SpecialEvents", 1.0, function()
+    SpecialEventsManager:ProcessStar()
+    SpecialEventsManager:ProcessRace()
+    SpecialEventsManager:ProcessMechBoss()
+    SpecialEventsManager:ProcessScramble()
+end)
 
-Window = CloudyLib:CreateWindow({
-    Title = "Quantum | ID",
-    SubTitle = "Steal an Egg",
-    TabWidth = 145,
-    Theme = currentSettings.Theme or "Cloudy",
-    MinimizeKey = Enum.KeyCode.RightControl
-})
+WorkerScheduler:Register("PetBarn", 3.0, function()
+    PetAutomationManager:Process()
+end)
 
+WorkerScheduler:Register("EggESP", 1.5, function()
+    EggESPManager:Update()
+end)
+
+WorkerScheduler:Register("UpgradesAndUtility", 5.0, function()
+    if currentSettings.AutoUpgradeBase then
+        pcall(function()
+            if Remotes.BaseTierRaise then
+                if Remotes.BaseTierRaise:IsA("RemoteFunction") then
+                    Remotes.BaseTierRaise:InvokeServer()
+                else
+                    Remotes.BaseTierRaise:FireServer()
+                end
+            end
+        end)
+    end
+
+    if currentSettings.AutoUpgradeTreadmill then
+        pcall(function()
+            if Remotes.TierRaise then
+                if Remotes.TierRaise:IsA("RemoteFunction") then
+                    Remotes.TierRaise:InvokeServer()
+                else
+                    Remotes.TierRaise:FireServer()
+                end
+            end
+        end)
+    end
+
+    if currentSettings.AutoEquipBest then
+        pcall(function()
+            if Remotes.WearBestHaul then
+                if Remotes.WearBestHaul:IsA("RemoteFunction") then
+                    Remotes.WearBestHaul:InvokeServer()
+                else
+                    Remotes.WearBestHaul:FireServer()
+                end
+            end
+        end)
+    end
+
+    if currentSettings.AutoAwayEarnings then
+        pcall(function()
+            if Remotes.AwayCollect then
+                if Remotes.AwayCollect:IsA("RemoteFunction") then
+                    Remotes.AwayCollect:InvokeServer({ Kind = "Claim" })
+                else
+                    Remotes.AwayCollect:FireServer({ Kind = "Claim" })
+                end
+            end
+        end)
+    end
+
+    if currentSettings.AutoRedeemCodex then
+        pcall(function()
+            if Remotes.AskRedeemAllCodex then
+                if Remotes.AskRedeemAllCodex:IsA("RemoteFunction") then
+                    Remotes.AskRedeemAllCodex:InvokeServer()
+                else
+                    Remotes.AskRedeemAllCodex:FireServer()
+                end
+            end
+        end)
+    end
+end)
 activeTheme = {
     Accent = Color3.fromRGB(92, 170, 255),
     Background = Color3.fromRGB(24, 24, 30)
@@ -3622,8 +4532,12 @@ activeTheme = {
 
 local Tabs = {
     Farm = Window:AddTab({ Title = "Farm", Icon = "solar/gamepad-bold" }),
+    Combat = Window:AddTab({ Title = "Combat", Icon = "solar/shield-bold" }),
+    Events = Window:AddTab({ Title = "Events", Icon = "solar/fire-bold" }),
+    Pets = Window:AddTab({ Title = "Pets", Icon = "solar/star-bold" }),
     Priority = Window:AddTab({ Title = "Priority", Icon = "solar/sort-vertical-bold" }),
     StealPanel = Window:AddTab({ Title = "Steal Panel", Icon = "solar/database-bold" }),
+    Visuals = Window:AddTab({ Title = "Visuals", Icon = "solar/eye-bold" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "solar/settings-bold" })
 }
 
@@ -3644,64 +4558,97 @@ StealSec:AddToggle("AutoStealToggle", {
     end
 })
 
+StealSec:AddDropdown("StealModeDropdown", {
+    Title = "Steal Mode",
+    Description = "Select steal pathing method",
+    Values = { "Low Speed User", "High Speed User Normal", "High Speed User (Fly)", "Zig-Zag High Speed User" },
+    Default = currentSettings.StealMode or "High Speed User Normal",
+    Callback = function(mode)
+        currentSettings.StealMode = mode
+        saveStuff()
+    end
+})
+
+StealSec:AddSlider("LowSpeedMultiplierSlider", {
+    Title = "Low Speed Multiplier",
+    Description = "Calibrated area hold speed (Higher = faster grab, Lower = safer hold)",
+    Min = 1,
+    Max = 10,
+    Default = currentSettings.LowSpeedMultiplier or 5,
+    Callback = function(val)
+        currentSettings.LowSpeedMultiplier = val
+        saveStuff()
+    end
+})
+
+StealSec:AddToggle("LowSpeedBoostToggle", {
+    Title = "Low Speed Boost",
+    Description = "Accelerated steals on non-forest areas for Low Speed mode",
+    Default = currentSettings.LowSpeedBoost ~= false,
+    Callback = function(state)
+        currentSettings.LowSpeedBoost = state
+        saveStuff()
+    end
+})
+
+StealSec:AddToggle("HelpFriendToggle", {
+    Title = "Help Friend",
+    Description = "Drops egg right before safe zone line for friend to grab",
+    Default = currentSettings.HelpFriend == true,
+    Callback = function(state)
+        currentSettings.HelpFriend = state
+        saveStuff()
+    end
+})
+
 StealSec:AddToggle("FastStealToggle", {
-    Title = "Fast Steal",
-    Description = "Only works on Titan temple and above areas",
+    Title = "Fast Steal (Titan / Light / Enchanted)",
+    Description = "Instant horizontal ground pathing for supported areas",
     Default = currentSettings.FastSteal,
     Callback = function(state)
         getgenv().config.fastSteal = state
         currentSettings.FastSteal = state
         saveStuff()
-        if state then
-            CloudyLib:Notify({
-                Title = "Fast Steal Notice",
-                Content = "Fast Steal is optimized for high-tier biomes. Ensure steady ping.",
-                Duration = 4
-            })
-        else
-            if State.isStealingActive and not isHoldingEgg() then
-                abortStealRoutine()
-            end
+        if not state and State.isStealingActive and not isHoldingEgg() then
+            abortStealRoutine()
         end
     end
 })
 
-local areaList = {
-    "All", "Forest", "Lake", "Desert", "Jungle", "Snow", 
-    "Volcano", "Abyss Ocean", "Prehistoric", "Cosmic", 
-    "Cherry Blossom", "Titan Temple", "Light Dark", "Enchanted Forest"
+local availableAreas = {
+    "All", "Forest", "Snow", "Desert", "Beach", "Mine",
+    "Graveyard", "Atlantis", "Volcano", "Cloud",
+    "Candy", "Space", "Steampunk", "Cyberpunk",
+    "Underworld", "Fairyland", "Dark", "Light",
+    "Titan", "Cosmic", "Cherry"
 }
 
 StealSec:AddDropdown("TargetAreasDropdown", {
     Title = "Target Areas",
-    Description = "Select target biome areas",
-    Values = areaList,
+    Description = "Select which areas to farm",
+    Values = availableAreas,
     Multi = true,
     Default = currentSettings.TargetAreas,
-    Callback = function(selectedMap)
-        getgenv().config.targetAreas = selectedMap
-        currentSettings.TargetAreas = selectedMap
+    Callback = function(selected)
+        currentSettings.TargetAreas = selected
         saveStuff()
-        table.clear(State.blacklistedEggs)
     end
 })
 
-local rarityList = {
+local availableRarities = {
     "All", "1 - Common", "2 - Uncommon", "3 - Rare", "4 - Epic",
     "5 - Legendary", "6 - Mythic", "7 - Cosmic", "8 - Secret",
     "9 - Eternal", "10 - Divine"
 }
 
 StealSec:AddDropdown("MinRarityDropdown", {
-    Title = "Min Rarity",
-    Description = "Only steal eggs with rarity >= this",
-    Values = rarityList,
+    Title = "Minimum Rarity",
+    Description = "Minimum rarity required to steal",
+    Values = availableRarities,
     Default = currentSettings.MinRarity,
     Callback = function(selected)
-        getgenv().config.minRarity = selected
         currentSettings.MinRarity = selected
         saveStuff()
-        table.clear(State.blacklistedEggs)
     end
 })
 
@@ -3709,16 +4656,105 @@ local TreadmillSec = Tabs.Farm:AddSection("Automation Treadmill", "solar/running
 
 TreadmillSec:AddToggle("AutoTreadmillToggle", {
     Title = "Auto Treadmill",
-    Description = "Gain treadmill speed when idle",
+    Description = "Automatically step on owned treadmill between steals",
     Default = currentSettings.AutoTreadmill,
     Callback = function(state)
         getgenv().config.autoTreadmill = state
         currentSettings.AutoTreadmill = state
         saveStuff()
+        if not state then
+            hopOffTreadmill()
+        end
     end
 })
 
-local UfoSec = Tabs.Farm:AddSection("UFO Event", "solar/ufo-bold")
+local UpgradesSec = Tabs.Farm:AddSection("Automation Upgrades & Utility", "solar/chart-bold")
+
+UpgradesSec:AddToggle("AutoUpgradeBaseToggle", {
+    Title = "Auto Upgrade Base",
+    Description = "Automatically purchases base tier upgrades",
+    Default = currentSettings.AutoUpgradeBase,
+    Callback = function(state)
+        getgenv().config.autoUpgradeBase = state
+        currentSettings.AutoUpgradeBase = state
+        saveStuff()
+    end
+})
+
+UpgradesSec:AddToggle("AutoUpgradeTreadmillToggle", {
+    Title = "Auto Upgrade Treadmill",
+    Description = "Automatically upgrades your personal treadmill tier",
+    Default = currentSettings.AutoUpgradeTreadmill,
+    Callback = function(state)
+        getgenv().config.autoUpgradeTreadmill = state
+        currentSettings.AutoUpgradeTreadmill = state
+        saveStuff()
+    end
+})
+
+UpgradesSec:AddToggle("AutoEquipBestToggle", {
+    Title = "Auto Equip Best Haul",
+    Description = "Automatically equips best haul bags/pets",
+    Default = currentSettings.AutoEquipBest,
+    Callback = function(state)
+        currentSettings.AutoEquipBest = state
+        saveStuff()
+    end
+})
+
+UpgradesSec:AddToggle("AutoAwayEarningsToggle", {
+    Title = "Auto Claim Away Earnings",
+    Description = "Automatically claims offline / away earnings",
+    Default = currentSettings.AutoAwayEarnings,
+    Callback = function(state)
+        currentSettings.AutoAwayEarnings = state
+        saveStuff()
+    end
+})
+
+UpgradesSec:AddToggle("AutoRedeemCodexToggle", {
+    Title = "Auto Redeem Codex",
+    Description = "Automatically redeems codex rewards",
+    Default = currentSettings.AutoRedeemCodex,
+    Callback = function(state)
+        currentSettings.AutoRedeemCodex = state
+        saveStuff()
+    end
+})
+
+local CombatSec = Tabs.Combat:AddSection("Combat & Defense", "solar/shield-bold")
+
+CombatSec:AddToggle("AuraBatToggle", {
+    Title = "Aura Bat (God Mode)",
+    Description = "Equips field bat and auto swings against guards & nearby players",
+    Default = currentSettings.AuraBat,
+    Callback = function(state)
+        currentSettings.AuraBat = state
+        saveStuff()
+    end
+})
+
+CombatSec:AddToggle("AntiGuardKnockbackToggle", {
+    Title = "Anti Guard Knockback",
+    Description = "Cancels ragdoll, PlatformStand, and Sit states from guards",
+    Default = currentSettings.AntiGuardKnockback,
+    Callback = function(state)
+        currentSettings.AntiGuardKnockback = state
+        saveStuff()
+    end
+})
+
+CombatSec:AddToggle("AntiTreadmillToggle", {
+    Title = "Anti Treadmill Blocker",
+    Description = "Immediately forces dismount if caught on unintended treadmills",
+    Default = currentSettings.AntiTreadmill,
+    Callback = function(state)
+        currentSettings.AntiTreadmill = state
+        saveStuff()
+    end
+})
+
+local UfoSec = Tabs.Events:AddSection("UFO Event", "solar/ufo-bold")
 
 UfoSec:AddToggle("AutoUFOToggle", {
     Title = "Auto UFO",
@@ -3736,7 +4772,7 @@ UfoSec:AddToggle("AutoUFOToggle", {
 
 UfoSec:AddToggle("CollectUFORocksToggle", {
     Title = "Collect UFO Debris",
-    Description = "Collect space rocks across the world",
+    Description = "Pick up space rock debris around crash sites",
     Default = currentSettings.UFORocks,
     Callback = function(state)
         getgenv().config.ufoRocks = state
@@ -3764,7 +4800,7 @@ UfoSec:AddToggle("FarmRareUFOToggle", {
 
 UfoSec:AddToggle("AutoTradeDebrisToggle", {
     Title = "Auto Trade Debris",
-    Description = "Trade space rocks at Alien Camp",
+    Description = "Exchange space debris with researcher NPC",
     Default = currentSettings.UFOTrade,
     Callback = function(state)
         getgenv().config.ufoTrade = state
@@ -3777,7 +4813,7 @@ UfoSec:AddToggle("AutoTradeDebrisToggle", {
 })
 
 UfoSec:AddToggle("UFOTpToggle", {
-    Title = "Teleport If Far From Egg",
+    Title = "UFO Rapid Travel",
     Description = "Rapid travel to distant UFO eggs",
     Default = currentSettings.UFOTp,
     Callback = function(state)
@@ -3787,11 +4823,11 @@ UfoSec:AddToggle("UFOTpToggle", {
     end
 })
 
-local BloomSec = Tabs.Farm:AddSection("Enchanted / Bloom Event", "solar/leaf-bold")
+local BloomSec = Tabs.Events:AddSection("Enchanted / Bloom Event", "solar/leaf-bold")
 
 BloomSec:AddToggle("AutoButterflyToggle", {
     Title = "Auto Butterfly Bloom",
-    Description = "Safe ground-level butterfly catching",
+    Description = "Catch butterflies, work fusery & wisp quest",
     Default = currentSettings.AutoCatchButterfly,
     Callback = function(state)
         getgenv().config.autoCatchButterfly = state
@@ -3802,11 +4838,10 @@ BloomSec:AddToggle("AutoButterflyToggle", {
 
 BloomSec:AddDropdown("BloomCatchModeDropdown", {
     Title = "Catch Mode",
-    Description = "Stand in center or ground chase",
-    Values = {"Stand", "Chase"},
+    Description = "Select movement style for catching butterflies",
+    Values = { "Stand", "Fly", "Walk" },
     Default = currentSettings.BloomCatchMode or "Stand",
     Callback = function(selected)
-        getgenv().config.bloomCatchMode = selected
         currentSettings.BloomCatchMode = selected
         saveStuff()
     end
@@ -3814,25 +4849,22 @@ BloomSec:AddDropdown("BloomCatchModeDropdown", {
 
 BloomSec:AddDropdown("BloomCatchPriorityDropdown", {
     Title = "Catch Priority",
-    Description = "Priority order for Chase mode",
-    Values = {"Rarest", "Nearest"},
+    Description = "Prioritize rare butterflies or closest ones",
+    Values = { "Rarest", "Closest" },
     Default = currentSettings.BloomCatchPriority or "Rarest",
     Callback = function(selected)
-        getgenv().config.bloomCatchPriority = selected
         currentSettings.BloomCatchPriority = selected
         saveStuff()
     end
 })
 
 BloomSec:AddSlider("CatchSpeedSlider", {
-    Title = "Catch Speed",
-    Description = "Ground movement speed for Chase mode",
-    Min = 100,
+    Title = "Catch Movement Speed",
+    Description = "Speed cap during event movement",
+    Min = 50,
     Max = 600,
     Default = currentSettings.ButterflySpeed or 320,
-    Rounding = 0,
     Callback = function(val)
-        getgenv().config.butterflySpeed = val
         currentSettings.ButterflySpeed = val
         saveStuff()
     end
@@ -3850,11 +4882,10 @@ BloomSec:AddToggle("AutoTradeUpToggle", {
 })
 
 BloomSec:AddToggle("BloomSmartTradeToggle", {
-    Title = "Smart Trade For Essence",
-    Description = "Only trade exact counts needed for essence",
+    Title = "Smart Trade Up",
+    Description = "Only trade up when needed for fusery quest",
     Default = currentSettings.BloomSmartTrade ~= false,
     Callback = function(state)
-        getgenv().config.bloomSmartTrade = state
         currentSettings.BloomSmartTrade = state
         saveStuff()
     end
@@ -3862,7 +4893,7 @@ BloomSec:AddToggle("BloomSmartTradeToggle", {
 
 BloomSec:AddToggle("AutoCraftEssenceToggle", {
     Title = "Auto Craft Essence",
-    Description = "Craft mutation essence at shrine inside tree",
+    Description = "Craft butterfly essence at alchemy station",
     Default = currentSettings.AutoCraftEssence,
     Callback = function(state)
         getgenv().config.autoCraftEssence = state
@@ -3873,7 +4904,7 @@ BloomSec:AddToggle("AutoCraftEssenceToggle", {
 
 BloomSec:AddToggle("AutoWispQuestToggle", {
     Title = "Auto Wisp Quest",
-    Description = "Accept, progress & claim wisp companion quests",
+    Description = "Complete spirit wisp side-quests inside tree",
     Default = currentSettings.AutoWispQuest,
     Callback = function(state)
         getgenv().config.autoWispQuest = state
@@ -3882,30 +4913,132 @@ BloomSec:AddToggle("AutoWispQuestToggle", {
     end
 })
 
-local UpgradesSec = Tabs.Farm:AddSection("Automation Upgrades", "solar/chart-bold")
+local SpecialEventsSec = Tabs.Events:AddSection("Special Server Events", "solar/star-bold")
 
-UpgradesSec:AddToggle("AutoUpgradeTreadmillToggle", {
-    Title = "Auto Upgrade Treadmill",
-    Description = "Auto buy next tier treadmill",
-    Default = currentSettings.AutoUpgradeTreadmill,
+SpecialEventsSec:AddToggle("AutoStarToggle", {
+    Title = "Auto Shooting Star",
+    Description = "Automatically tracks and collects fallen shooting stars",
+    Default = currentSettings.AutoStar,
     Callback = function(state)
-        getgenv().config.autoUpgradeTreadmill = state
-        currentSettings.AutoUpgradeTreadmill = state
+        currentSettings.AutoStar = state
         saveStuff()
     end
 })
 
-UpgradesSec:AddToggle("AutoUpgradeBaseToggle", {
-    Title = "Auto Upgrade Base",
-    Description = "Auto buy homestead base expansion",
-    Default = currentSettings.AutoUpgradeBase,
+SpecialEventsSec:AddToggle("AutoRaceToggle", {
+    Title = "Auto Race Rally",
+    Description = "Automatically powers up and claims race rally milestones",
+    Default = currentSettings.AutoRace,
     Callback = function(state)
-        getgenv().config.autoUpgradeBase = state
-        currentSettings.AutoUpgradeBase = state
+        currentSettings.AutoRace = state
         saveStuff()
     end
 })
 
+SpecialEventsSec:AddToggle("AutoMechBossToggle", {
+    Title = "Auto Mech Boss",
+    Description = "Automatically uses mutation consumables during boss fights",
+    Default = currentSettings.AutoMechBoss,
+    Callback = function(state)
+        currentSettings.AutoMechBoss = state
+        saveStuff()
+    end
+})
+
+SpecialEventsSec:AddToggle("AutoScrambleTradeToggle", {
+    Title = "Auto Dr Scramble Trade-In",
+    Description = "Automates pet sacrifices at Dr Scramble's lab",
+    Default = currentSettings.AutoScrambleTrade,
+    Callback = function(state)
+        currentSettings.AutoScrambleTrade = state
+        saveStuff()
+    end
+})
+
+SpecialEventsSec:AddToggle("AutoScrambleRerollToggle", {
+    Title = "Auto Dr Scramble Reroll",
+    Description = "Spends daily free recipe rerolls automatically",
+    Default = currentSettings.AutoScrambleReroll,
+    Callback = function(state)
+        currentSettings.AutoScrambleReroll = state
+        saveStuff()
+    end
+})
+
+local PetSec = Tabs.Pets:AddSection("Pet Barn Automation", "solar/paw-bold")
+
+PetSec:AddToggle("AutoFuseToggle", {
+    Title = "Auto Fuse Pets",
+    Description = "Automatically submits pets to fusery biome",
+    Default = currentSettings.AutoFuse,
+    Callback = function(state)
+        currentSettings.AutoFuse = state
+        saveStuff()
+    end
+})
+
+PetSec:AddToggle("AutoFavToggle", {
+    Title = "Auto Favorite Rare Pets",
+    Description = "Locks high-rarity inventory pets from being sold",
+    Default = currentSettings.AutoFavPet,
+    Callback = function(state)
+        currentSettings.AutoFavPet = state
+        saveStuff()
+    end
+})
+
+PetSec:AddButton({
+    Title = "Equip Best Haul Pets",
+    Callback = function()
+        if Remotes.WearBestHaul then
+            pcall(function()
+                if Remotes.WearBestHaul:IsA("RemoteFunction") then
+                    Remotes.WearBestHaul:InvokeServer()
+                else
+                    Remotes.WearBestHaul:FireServer()
+                end
+            end)
+        end
+    end
+})
+
+PetSec:AddButton({
+    Title = "Unfavorite All Pets",
+    Callback = function()
+        pcall(function()
+            local saveModule = require(Services.ReplicatedStorage.Shared.Save)
+            local data = (saveModule.Peek or saveModule.Get)()
+            if data and type(data.Inventory) == "table" and Remotes.WriteFavourite then
+                for k, v in pairs(data.Inventory) do
+                    if type(v) == "table" and v.IsFavorite then
+                        pcall(function()
+                            if Remotes.WriteFavourite:IsA("RemoteFunction") then
+                                Remotes.WriteFavourite:InvokeServer(k, false)
+                            else
+                                Remotes.WriteFavourite:FireServer(k, false)
+                            end
+                        end)
+                    end
+                end
+            end
+        end)
+    end
+})
+
+local VisualsSec = Tabs.Visuals:AddSection("Egg Visuals & ESP", "solar/eye-bold")
+
+VisualsSec:AddToggle("EggESPToggle", {
+    Title = "Egg ESP",
+    Description = "Renders billboard tags for active field eggs",
+    Default = currentSettings.EggESP,
+    Callback = function(state)
+        currentSettings.EggESP = state
+        saveStuff()
+        if not state then
+            EggESPManager:Clear()
+        end
+    end
+})
 local PrioSec = Tabs.Priority:AddSection("Task Execution Sequence", "solar/sort-vertical-bold")
 
 local function formatPrioText()
