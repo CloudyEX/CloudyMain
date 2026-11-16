@@ -1,4 +1,106 @@
-local Services = {
+loca
+local AntiGuardManager = {
+    Enabled = true,
+    Neutralized = {},
+    Connections = {}
+}
+
+function AntiGuardManager:NeutralizeModel(model)
+    if not model or not model:IsA("Model") then return end
+    if self.Neutralized[model] then return end
+    self.Neutralized[model] = true
+
+    local hum = model:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum.WalkSpeed = 0
+    end
+
+    local hrp = model:FindFirstChild("HumanoidRootPart") or model.PrimaryPart
+    if hrp then
+        hrp.Anchored = true
+        hrp.CanCollide = false
+        hrp.CanTouch = false
+    end
+
+    for _, desc in ipairs(model:GetDescendants()) do
+        if desc:IsA("BasePart") then
+            desc.CanCollide = false
+            desc.CanTouch = false
+        elseif desc:IsA("TouchTransmitter") then
+            pcall(function() desc:Destroy() end)
+        end
+    end
+end
+
+function AntiGuardManager:ScanAll()
+    if not self.Enabled then return end
+
+    local world = Services.Workspace:FindFirstChild("World")
+    local areas = world and world:FindFirstChild("Areas")
+    local guardAreas = areas and areas:FindFirstChild("GuardAreas")
+    if guardAreas then
+        for _, biomeFolder in ipairs(guardAreas:GetChildren()) do
+            for _, item in ipairs(biomeFolder:GetChildren()) do
+                if item:IsA("Model") then
+                    self:NeutralizeModel(item)
+                end
+            end
+        end
+    end
+
+    local underscoreGuards = Services.Workspace:FindFirstChild("_Guards")
+    if underscoreGuards then
+        for _, item in ipairs(underscoreGuards:GetChildren()) do
+            if item:IsA("Model") then
+                self:NeutralizeModel(item)
+            end
+        end
+    end
+
+    for _, item in ipairs(Services.Workspace:GetChildren()) do
+        if item:IsA("Model") and string.find(string.lower(item.Name), "guard") then
+            self:NeutralizeModel(item)
+        end
+    end
+end
+
+function AntiGuardManager:Start()
+    self:ScanAll()
+
+    local conn = Services.Workspace.DescendantAdded:Connect(function(desc)
+        if not self.Enabled then return end
+        if desc:IsA("Model") then
+            local parent = desc.Parent
+            local pName = parent and parent.Name or ""
+            local pParent = parent and parent.Parent
+            local ppName = pParent and pParent.Name or ""
+            if ppName == "GuardAreas" or pName == "_Guards" or string.find(string.lower(desc.Name), "guard") then
+                task.defer(function() self:NeutralizeModel(desc) end)
+            end
+        elseif desc:IsA("TouchTransmitter") then
+            local pModel = desc:FindFirstAncestorOfClass("Model")
+            if pModel and (self.Neutralized[pModel] or string.find(string.lower(pModel.Name), "guard")) then
+                pcall(function() desc:Destroy() end)
+            end
+        end
+    end)
+    table.insert(self.Connections, conn)
+
+    local steppedConn = Services.RunService.Stepped:Connect(function()
+        if not self.Enabled then return end
+        local char = LocalPlayer.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                if hum.PlatformStand then hum.PlatformStand = false end
+                if hum.Sit then hum.Sit = false end
+            end
+        end
+    end)
+    table.insert(self.Connections, steppedConn)
+end
+
+l Services = {
     Players = game:GetService("Players"),
     Workspace = game:GetService("Workspace"),
     RunService = game:GetService("RunService"),
@@ -2693,6 +2795,82 @@ local function runAlongGroundToEgg(targetPos, speed, sessionId, targetUid)
     return true
 end
 
+local function executeFastGlideOutbound(targetPos, sessionId, targetUid)
+    local char, root, hum = getAliveRig()
+    if not root or not hum then return false end
+
+    local targetStandPos = getStandingPosition(targetPos)
+    local currentPos = root.Position
+    local startY = math.max(currentPos.Y, CONFIG.FlightAltitude or 71.5)
+
+    setCollisions(false)
+    if hum then hum.PlatformStand = false end
+
+    local glideAltitude = math.max(startY, targetStandPos.Y + 2.0)
+    root.CFrame = CFrame.new(currentPos.X, glideAltitude, currentPos.Z)
+
+    local stepDistance = 70.0
+    local stepDelay = 0.03
+    local flatDiff = Vector3.new(targetStandPos.X - root.Position.X, 0, targetStandPos.Z - root.Position.Z)
+    local maxSteps = math.ceil(flatDiff.Magnitude / stepDistance) + 15
+    local currentStep = 0
+
+    while currentStep < maxSteps do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() or isMapClosed() then
+            return false
+        end
+
+        local _, cRoot = getAliveRig()
+        if not cRoot then return false end
+
+        if targetUid and (currentStep % 4 == 0) then
+            if not isEggStillValid(targetUid) then
+                blacklistEgg(targetUid, 15)
+                return false
+            end
+        end
+
+        local curPos = cRoot.Position
+        local toTarget = Vector3.new(targetStandPos.X - curPos.X, 0, targetStandPos.Z - curPos.Z)
+        local dist = toTarget.Magnitude
+
+        if dist <= 4.0 then
+            break
+        end
+
+        local dir = toTarget.Unit
+        local moveDist = math.min(dist, stepDistance)
+        local nextPos = curPos + (dir * moveDist)
+        local curAltitude = math.max(glideAltitude, targetStandPos.Y + 1.5)
+
+        cRoot.CFrame = CFrame.new(nextPos.X, curAltitude, nextPos.Z) * CFrame.lookAt(Vector3.zero, dir)
+        cRoot.AssemblyLinearVelocity = Vector3.zero
+        cRoot.AssemblyAngularVelocity = Vector3.zero
+
+        currentStep = currentStep + 1
+        task.wait(stepDelay)
+    end
+
+    local _, fRoot = getAliveRig()
+    if fRoot then
+        setCollisions(false)
+        fRoot.CFrame = CFrame.lookAt(targetStandPos, targetPos)
+        fRoot.AssemblyLinearVelocity = Vector3.zero
+        fRoot.AssemblyAngularVelocity = Vector3.zero
+    end
+
+    task.wait(0.05)
+    return (sessionId == State.currentStealSession) and isStealEnabled()
+end
+
+local function travelOutboundToEgg(targetPos, sessionId, targetUid)
+    if getgenv().config.outboundMode == "Normal Ground Run" then
+        return runAlongGroundToEgg(targetPos, nil, sessionId, targetUid)
+    else
+        return executeFastGlideOutbound(targetPos, sessionId, targetUid)
+    end
+end
+
 local function executeFastStealOutbound(targetPos, sessionId, targetUid)
     local world = Services.Workspace:FindFirstChild("World") or Services.Workspace:FindFirstChild("__OBJECTS")
     local build = world and world:FindFirstChild("Build")
@@ -2702,7 +2880,7 @@ local function executeFastStealOutbound(targetPos, sessionId, targetUid)
     local exitPart = zone and zone:FindFirstChild("ExitPart", true)
 
     if not entrance or not exitPart then
-        return runAlongGroundToEgg(targetPos, nil, sessionId, targetUid)
+        return travelOutboundToEgg(targetPos, sessionId, targetUid)
     end
 
     local _, root = getAliveRig()
@@ -2732,7 +2910,7 @@ local function executeFastStealOutbound(targetPos, sessionId, targetUid)
     end
 
     if not inSky then
-        return runAlongGroundToEgg(targetPos, nil, sessionId, targetUid)
+        return travelOutboundToEgg(targetPos, sessionId, targetUid)
     end
 
     local exitedSky = false
@@ -2769,7 +2947,7 @@ local function executeFastStealOutbound(targetPos, sessionId, targetUid)
         task.wait(0.05)
         return true
     else
-        return runAlongGroundToEgg(targetPos, nil, sessionId, targetUid)
+        return travelOutboundToEgg(targetPos, sessionId, targetUid)
     end
 end
 
@@ -3482,7 +3660,7 @@ WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
                 if canUseFastSteal then
                     local arrived = executeFastStealOutbound(eggTargetPos, session, targetUid)
                     if not arrived and session == State.currentStealSession and isStealEnabled() and isEggStillValid(targetUid) then
-                        arrived = runAlongGroundToEgg(eggTargetPos, nil, session, targetUid)
+                        arrived = travelOutboundToEgg(eggTargetPos, session, targetUid)
                     end
 
                     if arrived and session == State.currentStealSession and isStealEnabled() then
@@ -3501,7 +3679,7 @@ WorkerScheduler:Register("StealAndTreadmill", 0.25, function()
                         end
                     end
                 else
-                    local arrived = runAlongGroundToEgg(eggTargetPos, nil, session, targetUid)
+                    local arrived = travelOutboundToEgg(eggTargetPos, session, targetUid)
                     if arrived and session == State.currentStealSession and isStealEnabled() then
                         task.wait(0.04)
                         local grabbed = instantGrabAtPosition(targetUid, eggTargetPos, session, false)
@@ -3663,6 +3841,29 @@ StealSec:AddToggle("FastStealToggle", {
                 abortStealRoutine()
             end
         end
+    end
+})
+
+StealSec:AddToggle("AntiGuardToggle", {
+    Title = "Anti Guard",
+    Description = "Neutralize guard hitboxes and disable ragdoll",
+    Default = getgenv().config.antiGuard ~= false,
+    Callback = function(state)
+        getgenv().config.antiGuard = state
+        AntiGuardManager.Enabled = state
+        if state then
+            AntiGuardManager:ScanAll()
+        end
+    end
+})
+
+StealSec:AddDropdown("OutboundModeDropdown", {
+    Title = "Outbound Travel Mode",
+    Description = "Movement method when traveling to egg",
+    Values = { "Fast Glide (Recommended)", "Normal Ground Run" },
+    Default = getgenv().config.outboundMode or "Fast Glide (Recommended)",
+    Callback = function(choice)
+        getgenv().config.outboundMode = choice
     end
 })
 
@@ -4166,6 +4367,8 @@ AboutSec:AddParagraph({
     Title = "Quantum | ID",
     Content = "Steal an Egg Automation Suite\\nPowered by Cloudy UI Library."
 })
+
+AntiGuardManager:Start()
 
 Window:SelectTab(1)
 
