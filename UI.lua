@@ -11,7 +11,7 @@ local a, b = {
                 "ModuleScript",
                 {"Themes"},
                 {
-                    {56, "ModuleScript", {"Cloudy"}},
+                    {56, "ModuleScript", {"Quantum"}},
                     {50, "ModuleScript", {"Emerald"}},
                     {49, "ModuleScript", {"HUT RI 81"}},
                     {52, "ModuleScript", {"Blood Red"}},
@@ -300,7 +300,7 @@ local aa = {
             Window = nil,
             WindowFrame = nil,
             Unloaded = false,
-            Theme = "Cloudy",
+            Theme = "Quantum",
             FischBypass = (game and game.GameId == 5750914919) or false,
             DialogOpen = false,
             UseAcrylic = false,
@@ -1057,7 +1057,7 @@ local aa = {
                     MinimizeIcon = D.MinimizeIcon or D.FloatingIcon,
                 }
             x.Window = E
-            x:SetTheme(D.Theme or "Cloudy")
+            x:SetTheme(D.Theme or "Quantum")
             if D.Font then
                 task.defer(function()
                     x.InterfaceManager:ApplyFont(D.Font)
@@ -1071,8 +1071,8 @@ local aa = {
             local thms = e(o.Themes)
             if not thms[thmKey] then
                 local lower = tostring(D):lower():gsub("[%s_%-]+", "")
-                if lower:find("cloudy") then
-                    thmKey = "Cloudy"
+                if lower:find("quantum") or lower:find("cloudy") then
+                    thmKey = "Quantum"
                 elseif lower:find("hut") or lower:find("81") or lower:find("ri") then
                     thmKey = "HUT RI 81"
                 elseif lower:find("emerald") then
@@ -1086,7 +1086,7 @@ local aa = {
                 elseif lower:find("neko") or lower:find("pink") then
                     thmKey = "Neko"
                 else
-                    thmKey = "Cloudy"
+                    thmKey = "Quantum"
                 end
             end
             if x.Window and (thms[thmKey] or type(thmKey) == "table") then
@@ -1342,7 +1342,7 @@ local aa = {
 
         local InterfaceManager = {}
         InterfaceManager.Folder = "FluentSettings"
-        InterfaceManager.Settings = { Theme="Cloudy", Acrylic=false, Transparency=true, Animated=false, MenuKeybind="LeftControl", Font="GothamSSm", DisableBG=false, Favorites={} }
+        InterfaceManager.Settings = { Theme="Quantum", Acrylic=false, Transparency=true, Animated=false, MenuKeybind="LeftControl", Font="GothamSSm", DisableBG=false, Favorites={} }
         function InterfaceManager:SetFolder(folder) self.Folder=folder; self:BuildFolderTree() end
         function InterfaceManager:SetLibrary(lib) self.Library=lib end
         function InterfaceManager:BuildFolderTree()
@@ -1849,6 +1849,9 @@ local aa = {
         if getgenv then
             pcall(function() getgenv().Fluent_Themes = e(o.Themes) end)
             getgenv().Fluent = x
+            getgenv().Quantum = x
+            getgenv().QuantumLib = x
+            getgenv().CloudyLib = x
             pcall(function()
                 getgenv().SaveManager           = x.SaveManager
                 getgenv().InterfaceManager      = x.InterfaceManager
@@ -5047,8 +5050,8 @@ local aa = {
             local t = i[currentThemeName]
             if not t then
                 local lower = tostring(currentThemeName):lower():gsub("[%s_%-]+", "")
-                if lower:find("cloudy") then
-                    t = i["Cloudy"]
+                if lower:find("quantum") or lower:find("cloudy") then
+                    t = i["Quantum"]
                 elseif lower:find("hut") or lower:find("81") or lower:find("ri") then
                     t = i["HUT RI 81"]
                 elseif lower:find("emerald") then
@@ -5087,7 +5090,7 @@ local aa = {
             if _noInheritFallbackKeys[m] then
                 return false
             end
-            local fallbacks = { "Cloudy", "Emerald", "HUT RI 81", "Blood Red", "Rimuru Tempest", "Solar", "Neko" }
+            local fallbacks = { "Quantum", "Emerald", "HUT RI 81", "Blood Red", "Rimuru Tempest", "Solar", "Neko" }
             for _, fbName in ipairs(fallbacks) do
                 local fb = i[fbName]
                 if fb and fb[m] ~= nil then
@@ -5134,7 +5137,10 @@ local aa = {
                 local bgParent = x.Window.AcrylicPaint.Frame
                 if bgParent then
                     local bgImg = bgParent:FindFirstChild("__ThemeBG")
-                    local bgVal = thm and thm.Background
+                    local bgVal = (thm and thm.Background) or "rbxassetid://91972457917292"
+                    if tostring(bgVal) == "" then
+                        bgVal = "rbxassetid://91972457917292"
+                    end
                     if bgVal and tostring(bgVal) ~= "" then
                         if not bgImg then
                             bgImg = Instance.new("ImageLabel")
@@ -6147,7 +6153,6 @@ local aa = {
                     local winW = winFrame.AbsoluteSize.X
                     local popW = math.clamp(math.floor(winW * 0.42), 200, 240)
 
-                    -- Menempel di sisi kanan UI window, dari paling atas (Y=0) sampai paling bawah (Scale.Y=1)
                     v.Size = UDim2.new(0, popW, 1, 0)
                     v.Position = UDim2.new(1, -popW, 0, 0)
                 end, 0
@@ -6382,7 +6387,14 @@ local aa = {
                         end
                     end
                     local btnChildren = {K, L, e("UICorner",{CornerRadius=UDim.new(0,6)})}
-                    for _,sw in ipairs(swatches) do table.insert(btnChildren,sw) end
+                    for _,sw in ipairs(swatches) do
+                        sw.Active = false
+                        table.insert(btnChildren,sw)
+                    end
+
+                    K.Active = false
+                    L.Active = false
+
                     local M, N =
                         (e(
                         "TextButton",
@@ -6391,48 +6403,43 @@ local aa = {
                             BackgroundTransparency = 1,
                             ZIndex = 23,
                             Text = "",
+                            AutoButtonColor = false,
                             Parent = t,
                             ThemeTag = {BackgroundColor3 = "DropdownOption"}
                         },
                         btnChildren
                     ))
+
                     if j.Multi then
                         N = l.Value[I]
                     else
                         N = l.Value == I
                     end
+
                     local O, P = c.SpringMotor(1, M, "BackgroundTransparency")
                     local Q, R = c.SpringMotor(1, K, "BackgroundTransparency")
                     local S = d.SingleMotor.new(6)
+
                     S:onStep(
                         function(T)
                             K.Size = UDim2.new(0, 4, 0, T)
                         end
                     )
+
                     c.AddSignal(
                         M.MouseEnter,
                         function()
                             P(N and 0.85 or 0.89)
                         end
                     )
+
                     c.AddSignal(
                         M.MouseLeave,
                         function()
                             P(N and 0.89 or 1)
                         end
                     )
-                    c.AddSignal(
-                        M.MouseButton1Down,
-                        function()
-                            P(0.92)
-                        end
-                    )
-                    c.AddSignal(
-                        M.MouseButton1Up,
-                        function()
-                            P(N and 0.85 or 0.89)
-                        end
-                    )
+
                     function J.UpdateButton(T)
                         if j.Multi then
                             N = l.Value[I]
@@ -6446,33 +6453,127 @@ local aa = {
                         S:setGoal(d.Spring.new(N and 14 or 6, {frequency = 6}))
                         R(N and 0 or 1)
                     end
-                    L.InputBegan:Connect(
-                        function(T)
-                            if
-                                T.UserInputType == Enum.UserInputType.MouseButton1 or
-                                    T.UserInputType == Enum.UserInputType.Touch
-                             then
-                                local U = not N
-                                if l:GetActiveValues() == 1 and not U and not j.AllowNull then
-                                else
-                                    if j.Multi then
-                                        N = U
-                                        l.Value[I] = N and true or nil
-                                    else
-                                        N = U
-                                        l.Value = N and I or nil
-                                        for V, W in next, D do
-                                            W:UpdateButton()
-                                        end
-                                    end
-                                    J:UpdateButton()
-                                    l:Display()
-                                    k:SafeCallback(l.Callback, l.Value)
-                                    k:SafeCallback(l.Changed, l.Value)
-                                end
+
+                    local function triggerSelect()
+                        local U = not N
+                        if l:GetActiveValues() == 1 and not U and not j.AllowNull then
+                            return
+                        end
+
+                        if j.Multi then
+                            N = U
+                            l.Value[I] = N and true or nil
+                        else
+                            N = U
+                            l.Value = N and I or nil
+                            for V, W in next, D do
+                                W:UpdateButton()
                             end
                         end
-                    )
+
+                        J:UpdateButton()
+                        l:Display()
+                        k:SafeCallback(l.Callback, l.Value)
+                        k:SafeCallback(l.Changed, l.Value)
+                    end
+
+                    local activeInput = nil
+                    local startPos = Vector2.zero
+                    local startCanvasY = 0
+                    local startTime = 0
+                    local isDragging = false
+                    local canvasConn = nil
+                    local moveConn = nil
+                    local endConn = nil
+
+                    local function cleanupGesture()
+                        if canvasConn then
+                            canvasConn:Disconnect()
+                            canvasConn = nil
+                        end
+                        if moveConn then
+                            moveConn:Disconnect()
+                            moveConn = nil
+                        end
+                        if endConn then
+                            endConn:Disconnect()
+                            endConn = nil
+                        end
+                        activeInput = nil
+                    end
+
+                    local function onItemInputBegan(input)
+                        if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+                            return
+                        end
+
+                        cleanupGesture()
+
+                        activeInput = input
+                        startPos = Vector2.new(input.Position.X, input.Position.Y)
+                        startCanvasY = t.CanvasPosition.Y
+                        startTime = os.clock()
+                        isDragging = false
+
+                        P(0.92)
+
+                        canvasConn = t:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
+                            if math.abs(t.CanvasPosition.Y - startCanvasY) > 2 then
+                                isDragging = true
+                                P(N and 0.89 or 1)
+                            end
+                        end)
+
+                        moveConn = ag.InputChanged:Connect(function(moveInput)
+                            if moveInput == activeInput or moveInput.UserInputType == Enum.UserInputType.MouseMovement or moveInput.UserInputType == Enum.UserInputType.Touch then
+                                local currentPos = Vector2.new(moveInput.Position.X, moveInput.Position.Y)
+                                if (currentPos - startPos).Magnitude > 7 then
+                                    isDragging = true
+                                    P(N and 0.89 or 1)
+                                end
+                            end
+                        end)
+
+                        endConn = ag.InputEnded:Connect(function(endInput)
+                            local matches = false
+                            if endInput == activeInput then
+                                matches = true
+                            elseif activeInput and (endInput.UserInputType == activeInput.UserInputType) then
+                                matches = true
+                            end
+
+                            if matches then
+                                local currentEndPos = Vector2.new(endInput.Position.X, endInput.Position.Y)
+                                local dist = (currentEndPos - startPos).Magnitude
+                                local canvasDelta = math.abs(t.CanvasPosition.Y - startCanvasY)
+                                local wasDragging = isDragging or (dist > 7) or (canvasDelta > 2)
+                                local duration = os.clock() - startTime
+
+                                cleanupGesture()
+
+                                P(N and 0.85 or (N and 0.89 or 1))
+
+                                if wasDragging or duration > 0.85 then
+                                    return
+                                end
+
+                                local bPos = M.AbsolutePosition
+                                local bSize = M.AbsoluteSize
+                                local inX = currentEndPos.X >= bPos.X and currentEndPos.X <= bPos.X + bSize.X
+                                local inY = currentEndPos.Y >= bPos.Y and currentEndPos.Y <= bPos.Y + bSize.Y
+
+                                if not (inX and inY) then
+                                    return
+                                end
+
+                                triggerSelect()
+                            end
+                        end)
+                    end
+
+                    c.AddSignal(M.InputBegan, onItemInputBegan)
+                    M.Destroying:Connect(cleanupGesture)
+
                     J:UpdateButton()
                     l:Display()
                     D[M] = J
@@ -9143,14 +9244,14 @@ local aa = {
     [47] = function()
         local af = {
             Names = {
-                "Cloudy", "Emerald", "HUT RI 81", "Blood Red", "Rimuru Tempest", "Solar", "Neko"
+                "Quantum", "Emerald", "HUT RI 81", "Blood Red", "Rimuru Tempest", "Solar", "Neko"
             }
         }
 
-        af["Cloudy"] = {
-            Name = "Cloudy",
+        af["Quantum"] = {
+            Name = "Quantum",
             Accent = Color3.fromRGB(220, 225, 232),
-            Background = "rbxassetid://125037768754460",
+            Background = "rbxassetid://91972457917292",
             BackgroundTransparency = 0.68,
             AcrylicMain = Color3.fromRGB(18, 20, 24),
             AcrylicBorder = Color3.fromRGB(140, 145, 155),
@@ -9228,7 +9329,7 @@ local aa = {
         af["Emerald"] = {
             Name = "Emerald",
             Accent = Color3.fromRGB(16, 160, 95),
-            Background = "rbxassetid://100391623230690",
+            Background = "rbxassetid://91972457917292",
             BackgroundTransparency = 0.68,
             AcrylicMain = Color3.fromRGB(8, 16, 11),
             AcrylicBorder = Color3.fromRGB(14, 120, 70),
@@ -9288,7 +9389,7 @@ local aa = {
         af["HUT RI 81"] = {
             Name = "HUT RI 81",
             Accent = Color3.fromRGB(220, 20, 30),
-            Background = "rbxassetid://72205077312597",
+            Background = "rbxassetid://91972457917292",
             BackgroundTransparency = 0.68,
             AcrylicMain = Color3.fromRGB(160, 16, 24),
             AcrylicBorder = Color3.fromRGB(220, 30, 40),
@@ -9366,7 +9467,7 @@ local aa = {
         af["Blood Red"] = {
             Name = "Blood Red",
             Accent = Color3.fromRGB(200, 20, 30),
-            Background = "rbxassetid://121343473918667",
+            Background = "rbxassetid://91972457917292",
             BackgroundTransparency = 0.68,
             AcrylicMain = Color3.fromRGB(25, 5, 8),
             AcrylicBorder = Color3.fromRGB(140, 15, 20),
@@ -9426,7 +9527,7 @@ local aa = {
         af["Rimuru Tempest"] = {
             Name = "Rimuru Tempest",
             Accent = Color3.fromRGB(0, 195, 255),
-            Background = "rbxassetid://133652514200333",
+            Background = "rbxassetid://91972457917292",
             BackgroundTransparency = 0.68,
             AcrylicMain = Color3.fromRGB(8, 18, 32),
             AcrylicBorder = Color3.fromRGB(0, 140, 230),
@@ -9504,7 +9605,7 @@ local aa = {
         af["Solar"] = {
             Name = "Solar",
             Accent = Color3.fromRGB(255, 200, 20),
-            Background = "rbxassetid://83078153431765",
+            Background = "rbxassetid://91972457917292",
             BackgroundTransparency = 0.68,
             AcrylicMain = Color3.fromRGB(24, 18, 6),
             AcrylicBorder = Color3.fromRGB(180, 130, 20),
@@ -9582,7 +9683,7 @@ local aa = {
         af["Neko"] = {
             Name = "Neko",
             Accent = Color3.fromRGB(255, 105, 180),
-            Background = "rbxassetid://111901135222937",
+            Background = "rbxassetid://91972457917292",
             BackgroundTransparency = 0.68,
             AcrylicMain = Color3.fromRGB(28, 12, 22),
             AcrylicBorder = Color3.fromRGB(230, 90, 165),
@@ -9657,7 +9758,9 @@ local aa = {
             }),
         }
 
-        af["cloudy"] = af["Cloudy"]
+        af["quantum"] = af["Quantum"]
+        af["Cloudy"] = af["Quantum"]
+        af["cloudy"] = af["Quantum"]
         af["BloodRed"] = af["Blood Red"]
         af["blood red"] = af["Blood Red"]
         af["bloodred"] = af["Blood Red"]
