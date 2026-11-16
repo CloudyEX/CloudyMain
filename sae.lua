@@ -98,6 +98,7 @@ local saveFile = "SyntaxHub_Config.json"
 
 local currentSettings = {
     EggESP = false,
+    AutoPlaceEgg = false,
     Theme = "Sapphire",
     Transparency = 0,
     AutoFarm = false,
@@ -234,6 +235,24 @@ local CONFIG = {
     FastStealLineDropOffset = 45,
     FastStealDirectSnapRadius = 45,
     BaseDropPosition = Vector3.new(528.7, 70.8, -364.1)
+}
+
+local AreaLocations = {
+    ["Forest"] = Vector3.new(596.6, 69.4, -317.1),
+    ["Lake"] = Vector3.new(743.3, 69.6, -419.0),
+    ["Desert"] = Vector3.new(949.8, 69.0, -311.5),
+    ["Jungle"] = Vector3.new(1187.6, 68.5, -421.5),
+    ["Snow"] = Vector3.new(1492.3, 75.1, -303.8),
+    ["Volcano"] = Vector3.new(1876.0, 71.3, -415.4),
+    ["Abyss Ocean"] = Vector3.new(2283.0, 74.1, -311.7),
+    ["Prehistoric"] = Vector3.new(2809.1, 70.9, -416.7),
+    ["Stormlands"] = Vector3.new(3360.0, 76.6, -330.2),
+    ["Cosmic"] = Vector3.new(3932.6, 79.6, -416.7),
+    ["Cherry Blossom"] = Vector3.new(4570.0, 77.1, -316.1),
+    ["Titan Temple"] = Vector3.new(5339.3, 76.8, -417.1),
+    ["Light Dark"] = Vector3.new(6204.3, 76.8, -311.3),
+    ["Enchanted Forest"] = Vector3.new(7238.8, 84.1, -395.9),
+    ["Alien"] = Vector3.new(8128.8, 84.1, -330.9)
 }
 
 local function formatMoneyPerSec(val)
@@ -3068,6 +3087,12 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
 
     dropHeldEggDirect()
     task.wait(0.25)
+    if currentSettings.AutoPlaceEgg then
+        task.spawn(function()
+            task.wait(0.4)
+            pcall(function() AutoPlaceManager:Run() end)
+        end)
+    end
 
     local dropVerifyTimeout = os.clock() + 2.0
     while os.clock() < dropVerifyTimeout and isHoldingEgg() do
@@ -3402,6 +3427,12 @@ WorkerScheduler:Register("EventsCombat", 0.35, function()
     if PriorityManager:Acquire("Bloom", 15.0) then
         pcall(function() BloomManager:Process() end)
         PriorityManager:Release("Bloom")
+    end
+end)
+
+WorkerScheduler:Register("AutoPlaceEggWorker", 3.0, function()
+    if currentSettings.AutoPlaceEgg and not State.isStealing then
+        pcall(function() AutoPlaceManager:Run() end)
     end
 end)
 
@@ -3770,6 +3801,167 @@ function EggESPManager:Update()
     end
 end
 
+local AutoPlaceManager = {
+    IsRunning = false
+}
+
+function AutoPlaceManager:GetLocalPlot()
+    local plots = Services.Workspace:FindFirstChild("Plots")
+    if not plots then return nil end
+
+    local myName = string.lower(LocalPlayer.Name)
+    local myDisplay = string.lower(LocalPlayer.DisplayName)
+
+    for _, plot in ipairs(plots:GetChildren()) do
+        local sign = plot:FindFirstChild("PlotSign")
+        local playerSign = sign and sign:FindFirstChild("PlayerPlotSign")
+        local frame = playerSign and playerSign:FindFirstChild("Frame")
+        local nameLabel = frame and frame:FindFirstChild("PlayerName")
+
+        if nameLabel and nameLabel.Text then
+            local cleanText = string.lower(string.gsub(nameLabel.Text, "<[^>]+>", ""))
+            if string.find(cleanText, myName) or string.find(cleanText, myDisplay) then
+                return plot
+            end
+        end
+    end
+
+    return nil
+end
+
+function AutoPlaceManager:Run()
+    if self.IsRunning or not currentSettings.AutoPlaceEgg then return end
+    self.IsRunning = true
+
+    local ok, err = pcall(function()
+        local es = GameModules:Get("EggState") or EggState or getEggState()
+        if not es then return end
+
+        local readOwner = es.ReadOwnerEggs or es.GetOwnerRuntimeRecords
+        local wearTool = es.WearEggTool or es.RequestEquipTool
+        local plantEgg = es.PlantEgg or es.RequestPlaceEgg
+
+        if not readOwner or not plantEgg then return end
+
+        local getid = getthreadidentity or get_thread_identity
+        local setid = setthreadidentity or set_thread_identity
+        local oldId = getid and getid()
+        if setid then pcall(setid, 8) end
+
+        local ownerRecords = readOwner(LocalPlayer.UserId)
+        if setid and oldId then pcall(setid, oldId) end
+
+        if type(ownerRecords) ~= "table" then return end
+
+        local plot = self:GetLocalPlot()
+        if not plot then return end
+
+        local toUpdate = plot:FindFirstChild("ToUpdate")
+        local petArea = toUpdate and toUpdate:FindFirstChild("PetArea")
+        local centerPoint = plot:FindFirstChild("CenterPoint") or petArea
+        if not petArea or not centerPoint then return end
+
+        local placedCount = 0
+        local unplacedEggs = {}
+        local occupiedPositions = {}
+
+        for uid, record in pairs(ownerRecords) do
+            if type(record) == "table" then
+                if record.Placement ~= nil then
+                    placedCount = placedCount + 1
+                    if typeof(record.Placement) == "CFrame" then
+                        table.insert(occupiedPositions, record.Placement.Position)
+                    elseif typeof(record.Placement) == "Vector3" then
+                        table.insert(occupiedPositions, record.Placement)
+                    end
+                else
+                    table.insert(unplacedEggs, {
+                        Uid = uid,
+                        Weight = tonumber(record.Kg or record.Weight or record.kg) or 0
+                    })
+                end
+            end
+        end
+
+        if #unplacedEggs == 0 or placedCount >= 30 then return end
+
+        table.sort(unplacedEggs, function(a, b)
+            return a.Weight > b.Weight
+        end)
+
+        local currentSlotIndex = 0
+
+        for _, eggData in ipairs(unplacedEggs) do
+            if placedCount >= 30 or not currentSettings.AutoPlaceEgg then break end
+
+            local uid = eggData.Uid
+            local targetCFrame = nil
+
+            while currentSlotIndex < 30 do
+                local n10 = 10
+                local widthX = petArea.Size.X - 6
+                local lengthZ = petArea.Size.Z - 6
+                local stepX = widthX / n10
+                local row = math.floor(currentSlotIndex / n10)
+                local col = currentSlotIndex % n10
+                local offsetX = -(widthX / 2) + stepX / 2 + col * stepX
+                local offsetZ = -(lengthZ / 2) + 3 + row * 6
+                local worldPos = petArea.CFrame * Vector3.new(offsetX, 0, offsetZ)
+                local objPos = centerPoint.CFrame:PointToObjectSpace(worldPos)
+                local candidateCFrame = CFrame.new(objPos.X, -0.5, objPos.Z)
+
+                local isOccupied = false
+                for _, occPos in ipairs(occupiedPositions) do
+                    if (occPos - candidateCFrame.Position).Magnitude < 1.0 then
+                        isOccupied = true
+                        break
+                    end
+                end
+
+                if not isOccupied then
+                    targetCFrame = candidateCFrame
+                    break
+                end
+
+                currentSlotIndex = currentSlotIndex + 1
+            end
+
+            if not targetCFrame then break end
+
+            if wearTool then
+                pcall(wearTool, uid)
+                task.wait(0.12)
+            end
+
+            local placeSuccess, placeErr = false, nil
+            if setid then pcall(setid, 8) end
+            local callOk, res1, res2 = pcall(plantEgg, uid, targetCFrame)
+            if setid and oldId then pcall(setid, oldId) end
+
+            if callOk then
+                placeSuccess = (res1 == true or res1 == nil)
+                placeErr = res2 or res1
+            end
+
+            if placeSuccess then
+                table.insert(occupiedPositions, targetCFrame.Position)
+                placedCount = placedCount + 1
+                currentSlotIndex = currentSlotIndex + 1
+                task.wait(0.15)
+            else
+                local errStr = string.lower(tostring(placeErr or ""))
+                if string.find(errStr, "full") or string.find(errStr, "limit") or string.find(errStr, "capacity") or string.find(errStr, "maximum") then
+                    break
+                end
+                currentSlotIndex = currentSlotIndex + 1
+                task.wait(0.1)
+            end
+        end
+    end)
+
+    self.IsRunning = false
+end
+
 local CloudyLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/CloudyEX/CloudyMain/refs/heads/main/UI.lua"))()
 
 Window = CloudyLib:CreateWindow({
@@ -3824,6 +4016,21 @@ StealSec:AddToggle("FastStealToggle", {
                 Content = "Fast Steal is optimized for high-tier biomes. Ensure steady ping.",
                 Duration = 4
             })
+
+StealSec:AddToggle("AutoPlaceEggToggle", {
+    Title = "Auto Place Egg",
+    Description = "Automatically place inventory eggs onto your base plot",
+    Default = currentSettings.AutoPlaceEgg == true,
+    Callback = function(state)
+        currentSettings.AutoPlaceEgg = state
+        saveStuff()
+        if state then
+            task.spawn(function()
+                pcall(function() AutoPlaceManager:Run() end)
+            end)
+        end
+    end
+})
         else
             if State.isStealingActive and not isHoldingEgg() then
                 abortStealRoutine()
@@ -3834,8 +4041,8 @@ StealSec:AddToggle("FastStealToggle", {
 
 local areaList = {
     "All", "Forest", "Lake", "Desert", "Jungle", "Snow", 
-    "Volcano", "Abyss Ocean", "Prehistoric", "Cosmic", 
-    "Cherry Blossom", "Titan Temple", "Light Dark", "Enchanted Forest"
+    "Volcano", "Abyss Ocean", "Prehistoric", "Stormlands", "Cosmic", 
+    "Cherry Blossom", "Titan Temple", "Light Dark", "Enchanted Forest", "Alien"
 }
 
 StealSec:AddDropdown("TargetAreasDropdown", {
