@@ -3077,7 +3077,6 @@ local function performGroundCheckpoint(targetEgg, currentX, laneZ, sessionId)
     if not root then return false end
     if humanoid then humanoid.PlatformStand = false end
 
-    local uid = (targetEgg and targetEgg.Uid) or (EggState and EggState.CarryUid)
     local checkY = CONFIG.GroundAltitude + 1.0
 
     pcall(function()
@@ -3085,35 +3084,8 @@ local function performGroundCheckpoint(targetEgg, currentX, laneZ, sessionId)
         root.AssemblyLinearVelocity = Vector3.zero
         root.AssemblyAngularVelocity = Vector3.zero
     end)
-    task.wait(0.06)
-
-    dropHeldEggDirect()
-    local dropWait = os.clock() + 0.6
-    while os.clock() < dropWait and isHoldingEgg() do
-        if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
-        dropHeldEggDirect()
-        task.wait(0.08)
-    end
     task.wait(0.04)
 
-    if uid and EggState and typeof(EggState.CarryFieldEgg) == "function" then
-        pcall(function() EggState.CarryFieldEgg(uid) end)
-        task.wait(0.12)
-    end
-
-    if not isHoldingEgg() then
-        local eggFloorPos = getPhysicalEggPosition(uid, Vector3.new(currentX, checkY, laneZ))
-        local grabSuccess = false
-        local retryTimeout = os.clock() + 3.0
-
-        while os.clock() < retryTimeout do
-            if sessionId ~= State.currentStealSession or not isStealEnabled() then return false end
-            grabSuccess = instantGrabAtPosition(uid, eggFloorPos, sessionId, false)
-            if grabSuccess and isHoldingEgg() then break end
-            Services.RunService.Heartbeat:Wait()
-        end
-    end
-    task.wait(0.04)
     return isHoldingEgg()
 end
 
@@ -3177,34 +3149,29 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
 
         if math.abs(lastCheckpointX - currentX) >= interval then
             lastCheckpointX = currentX
-            local ok = performGroundCheckpoint(targetEgg, currentX, laneZ, sessionId)
-            if not ok and not isHoldingEgg() then
-                ShieldManager:UnmuteUGI()
-                StealUIManager:Unlock()
-                cleanupFlightState()
-                return false
-            end
+            pcall(function()
+                cRoot.AssemblyLinearVelocity = Vector3.zero
+            end)
+            task.wait(0.04)
         end
     end
 
-    if isHoldingEgg() then
-        currentX = boundaryX
-        pcall(function()
-            local _, bRoot = getAliveRig()
-            if bRoot then
-                bRoot.CFrame = CFrame.new(boundaryX, groundY, laneZ) * CFrame.Angles(0, math.rad(90), 0)
-                bRoot.AssemblyLinearVelocity = Vector3.zero
-            end
-        end)
-        task.wait(0.08)
-        local boundaryOk = performGroundCheckpoint(targetEgg, boundaryX, laneZ, sessionId)
-        if not boundaryOk and not isHoldingEgg() then
-            ShieldManager:UnmuteUGI()
-            StealUIManager:Unlock()
-            cleanupFlightState()
-            return false
-        end
+    if not isHoldingEgg() then
+        ShieldManager:UnmuteUGI()
+        StealUIManager:Unlock()
+        cleanupFlightState()
+        return false
     end
+
+    currentX = boundaryX
+    pcall(function()
+        local _, bRoot = getAliveRig()
+        if bRoot then
+            bRoot.CFrame = CFrame.new(boundaryX, groundY, laneZ) * CFrame.Angles(0, math.rad(90), 0)
+            bRoot.AssemblyLinearVelocity = Vector3.zero
+        end
+    end)
+    task.wait(CONFIG.HopGap)
 
     local corridorStep = 45
     while currentX - corridorStep > safeTarget.X do
@@ -3234,22 +3201,30 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
     task.wait(0.15)
     if fHum then fHum.PlatformStand = false end
 
-    dropHeldEggDirect()
-    task.wait(0.25)
-    if currentSettings.AutoPlaceEgg then
-        pcall(function() AutoPlaceManager:Run() end)
+    local depositDeadline = os.clock() + 3.5
+    while os.clock() < depositDeadline and isHoldingEgg() do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() then break end
+        local _, curR = getAliveRig()
+        if curR and (curR.Position - safeTarget).Magnitude > 8 then
+            pcall(function()
+                curR.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
+                curR.AssemblyLinearVelocity = Vector3.zero
+            end)
+        end
+        task.wait(0.1)
     end
 
-    local dropVerifyTimeout = os.clock() + 2.0
-    while os.clock() < dropVerifyTimeout and isHoldingEgg() do
-        dropHeldEggDirect()
+    local banked = not isHoldingEgg()
+
+    if banked and currentSettings.AutoPlaceEgg then
         task.wait(0.2)
+        pcall(function() AutoPlaceManager:Run() end)
     end
 
     StealUIManager:Unlock()
     ShieldManager:UnmuteUGI()
     cleanupFlightState()
-    return not isHoldingEgg()
+    return banked
 end
 
 local function executeFastStealDelivery(targetEgg, sessionId)
@@ -3286,14 +3261,7 @@ local function executeFastStealDelivery(targetEgg, sessionId)
         cRoot.CFrame = CFrame.new(dropTargetPos) * CFrame.Angles(0, math.rad(90), 0)
         cRoot.AssemblyLinearVelocity = Vector3.zero
     end
-    task.wait(0.1)
-
-    local checkpointOk = performGroundCheckpoint(targetEgg, dropTargetPos.X, laneZ, sessionId)
-    if not checkpointOk and not isHoldingEgg() then
-        setCollisions(true)
-        ShieldManager:UnmuteUGI()
-        return false
-    end
+    task.wait(0.05)
 
     local currentX = dropTargetPos.X
     local safeTarget = CONFIG.BaseDropPosition
@@ -3321,18 +3289,29 @@ local function executeFastStealDelivery(targetEgg, sessionId)
     task.wait(0.15)
     if fHum then fHum.PlatformStand = false end
 
-    dropHeldEggDirect()
-    task.wait(0.25)
+    local depositDeadline = os.clock() + 3.5
+    while os.clock() < depositDeadline and isHoldingEgg() do
+        if sessionId ~= State.currentStealSession or not isStealEnabled() then break end
+        local _, curR = getAliveRig()
+        if curR and (curR.Position - safeTarget).Magnitude > 8 then
+            pcall(function()
+                curR.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
+                curR.AssemblyLinearVelocity = Vector3.zero
+            end)
+        end
+        task.wait(0.1)
+    end
 
-    local dropVerifyTimeout = os.clock() + 2.0
-    while os.clock() < dropVerifyTimeout and isHoldingEgg() do
-        dropHeldEggDirect()
+    local banked = not isHoldingEgg()
+
+    if banked and currentSettings.AutoPlaceEgg then
         task.wait(0.2)
+        pcall(function() AutoPlaceManager:Run() end)
     end
 
     setCollisions(true)
     ShieldManager:UnmuteUGI()
-    return not isHoldingEgg()
+    return banked
 end
 
 local function executeGroundDeliveryHome(targetEgg, sessionId)
