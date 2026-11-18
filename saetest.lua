@@ -3098,6 +3098,7 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
     local baseStep = CONFIG.HopDistance
     local stepSize = (playerSpeed < 100) and math.max(34, playerSpeed * 0.45) or math.min(baseStep, math.max(60, playerSpeed * 0.75))
     local interval = CONFIG.CheckpointInterval
+    local relayX = CONFIG.SeparationLineX + 2.5
     local safeTarget = CONFIG.BaseDropPosition
 
     local laneZ = math.clamp(root.Position.Z, -425, -300)
@@ -3174,7 +3175,7 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
     task.wait(CONFIG.HopGap)
 
     local corridorStep = 45
-    while currentX - corridorStep > safeTarget.X do
+    while currentX - corridorStep > relayX do
         if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then
             break
         end
@@ -3183,7 +3184,7 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
         local _, cRoot = getAliveRig()
         if cRoot then
             pcall(function()
-                cRoot.CFrame = CFrame.new(nextX, groundY, safeTarget.Z) * CFrame.Angles(0, math.rad(90), 0)
+                cRoot.CFrame = CFrame.new(nextX, groundY, laneZ) * CFrame.Angles(0, math.rad(90), 0)
                 cRoot.AssemblyLinearVelocity = Vector3.zero
             end)
         end
@@ -3191,27 +3192,89 @@ local function executeCheckpointedHopsHome(targetEgg, sessionId)
         currentX = nextX
     end
 
-    local _, fRoot, fHum = getAliveRig()
-    if fRoot then
+    local _, rRoot = getAliveRig()
+    if rRoot then
         pcall(function()
-            fRoot.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
-            fRoot.AssemblyLinearVelocity = Vector3.zero
+            rRoot.CFrame = CFrame.new(relayX, groundY, laneZ) * CFrame.Angles(0, math.rad(90), 0)
+            rRoot.AssemblyLinearVelocity = Vector3.zero
         end)
     end
-    task.wait(0.15)
-    if fHum then fHum.PlatformStand = false end
+    task.wait(0.08)
 
-    local depositDeadline = os.clock() + 3.5
-    while os.clock() < depositDeadline and isHoldingEgg() do
-        if sessionId ~= State.currentStealSession or not isStealEnabled() then break end
-        local _, curR = getAliveRig()
-        if curR and (curR.Position - safeTarget).Magnitude > 8 then
+    if isHoldingEgg() then
+        local uid = (targetEgg and targetEgg.Uid) or (EggState and EggState.CarryUid)
+        dropHeldEggDirect()
+
+        local dropWait = os.clock() + 0.45
+        while os.clock() < dropWait and isHoldingEgg() do
+            task.wait(0.04)
+        end
+
+        local eggFloorPos = getPhysicalEggPosition(uid, Vector3.new(relayX, groundY, laneZ))
+        local regrabDeadline = os.clock() + 2.5
+
+        while os.clock() < regrabDeadline do
+            if sessionId ~= State.currentStealSession or not isStealEnabled() then break end
+            local _, cRoot, cHum = getAliveRig()
+            if not cRoot then break end
+            if cHum then cHum.PlatformStand = false end
+
+            cRoot.CFrame = CFrame.new(eggFloorPos.X, groundY + 1.2, eggFloorPos.Z) * CFrame.Angles(0, math.rad(90), 0)
+            cRoot.AssemblyLinearVelocity = Vector3.zero
+
+            if uid and Remotes.AskFieldEggCarry then
+                pcall(function() Remotes.AskFieldEggCarry:InvokeServer({ Uid = uid }) end)
+            end
+            if uid and EggState and typeof(EggState.CarryFieldEgg) == "function" then
+                pcall(function() EggState.CarryFieldEgg(uid) end)
+            end
+
+            local eggModel = uid and (Services.Workspace:FindFirstChild(uid) or (Services.Workspace:FindFirstChild("AreaEggSlotsClient") and Services.Workspace.AreaEggSlotsClient:FindFirstChild(uid)))
+            local targetPrompt = eggModel and eggModel:FindFirstChildWhichIsA("ProximityPrompt", true)
+            if not targetPrompt then
+                local parts = Services.Workspace:GetPartBoundsInRadius(eggFloorPos, 12)
+                for _, part in ipairs(parts) do
+                    local p = part:FindFirstChildWhichIsA("ProximityPrompt", true)
+                    if p and p.Enabled then targetPrompt = p break end
+                end
+            end
+            if targetPrompt and targetPrompt.Enabled then
+                targetPrompt.HoldDuration = 0
+                targetPrompt.RequiresLineOfSight = false
+                UniversalCompat.FireProximityPrompt(targetPrompt)
+            end
+
+            for _ = 1, 2 do
+                Services.RunService.Heartbeat:Wait()
+                if isHoldingEgg() then break end
+            end
+            if isHoldingEgg() then break end
+        end
+    end
+
+    if isHoldingEgg() then
+        local _, fRoot, fHum = getAliveRig()
+        if fRoot then
             pcall(function()
-                curR.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
-                curR.AssemblyLinearVelocity = Vector3.zero
+                fRoot.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z) * CFrame.Angles(0, math.rad(90), 0)
+                fRoot.AssemblyLinearVelocity = Vector3.zero
             end)
         end
-        task.wait(0.1)
+        task.wait(0.15)
+        if fHum then fHum.PlatformStand = false end
+
+        local depositDeadline = os.clock() + 3.5
+        while os.clock() < depositDeadline and isHoldingEgg() do
+            if sessionId ~= State.currentStealSession or not isStealEnabled() then break end
+            local _, curR = getAliveRig()
+            if curR and (curR.Position - safeTarget).Magnitude > 8 then
+                pcall(function()
+                    curR.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
+                    curR.AssemblyLinearVelocity = Vector3.zero
+                end)
+            end
+            task.wait(0.1)
+        end
     end
 
     local banked = not isHoldingEgg()
@@ -3233,16 +3296,16 @@ local function executeFastStealDelivery(targetEgg, sessionId)
 
     local uid = targetEgg.Uid
     local laneZ = math.clamp(root.Position.Z, -425, -300)
-    local dropTargetPos = Vector3.new(CONFIG.SeparationLineX + CONFIG.FastStealLineDropOffset, CONFIG.GroundAltitude + 1.0, laneZ)
+    local relayX = CONFIG.SeparationLineX + 2.5
     local playerSpeed = getPlayerCurrentSpeed()
 
     setCollisions(false)
     ShieldManager:MuteUGI()
 
     local startTime = os.clock()
-    local travelTimeout = math.max(12, ((root.Position.X - dropTargetPos.X) / playerSpeed) + 6)
+    local travelTimeout = math.max(12, ((root.Position.X - relayX) / playerSpeed) + 6)
 
-    while root.Position.X > dropTargetPos.X + 2.0 and (os.clock() - startTime) < travelTimeout do
+    while root.Position.X > relayX + 2.0 and (os.clock() - startTime) < travelTimeout do
         Services.RunService.Heartbeat:Wait()
         if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then
             setCollisions(true)
@@ -3258,48 +3321,83 @@ local function executeFastStealDelivery(targetEgg, sessionId)
 
     local _, cRoot = getAliveRig()
     if cRoot then
-        cRoot.CFrame = CFrame.new(dropTargetPos) * CFrame.Angles(0, math.rad(90), 0)
+        cRoot.CFrame = CFrame.new(relayX, CONFIG.GroundAltitude + 1.0, laneZ) * CFrame.Angles(0, math.rad(90), 0)
         cRoot.AssemblyLinearVelocity = Vector3.zero
     end
-    task.wait(0.05)
+    task.wait(0.08)
 
-    local currentX = dropTargetPos.X
+    if isHoldingEgg() then
+        dropHeldEggDirect()
+
+        local dropWait = os.clock() + 0.45
+        while os.clock() < dropWait and isHoldingEgg() do
+            task.wait(0.04)
+        end
+
+        local eggFloorPos = getPhysicalEggPosition(uid, Vector3.new(relayX, CONFIG.GroundAltitude + 1.0, laneZ))
+        local regrabDeadline = os.clock() + 2.5
+
+        while os.clock() < regrabDeadline do
+            if sessionId ~= State.currentStealSession or not isStealEnabled() then break end
+            local _, curRoot, curHum = getAliveRig()
+            if not curRoot then break end
+            if curHum then curHum.PlatformStand = false end
+
+            curRoot.CFrame = CFrame.new(eggFloorPos.X, CONFIG.GroundAltitude + 1.2, eggFloorPos.Z) * CFrame.Angles(0, math.rad(90), 0)
+            curRoot.AssemblyLinearVelocity = Vector3.zero
+
+            if uid and Remotes.AskFieldEggCarry then
+                pcall(function() Remotes.AskFieldEggCarry:InvokeServer({ Uid = uid }) end)
+            end
+            if uid and EggState and typeof(EggState.CarryFieldEgg) == "function" then
+                pcall(function() EggState.CarryFieldEgg(uid) end)
+            end
+
+            local eggModel = uid and (Services.Workspace:FindFirstChild(uid) or (Services.Workspace:FindFirstChild("AreaEggSlotsClient") and Services.Workspace.AreaEggSlotsClient:FindFirstChild(uid)))
+            local targetPrompt = eggModel and eggModel:FindFirstChildWhichIsA("ProximityPrompt", true)
+            if not targetPrompt then
+                local parts = Services.Workspace:GetPartBoundsInRadius(eggFloorPos, 12)
+                for _, part in ipairs(parts) do
+                    local p = part:FindFirstChildWhichIsA("ProximityPrompt", true)
+                    if p and p.Enabled then targetPrompt = p break end
+                end
+            end
+            if targetPrompt and targetPrompt.Enabled then
+                targetPrompt.HoldDuration = 0
+                targetPrompt.RequiresLineOfSight = false
+                UniversalCompat.FireProximityPrompt(targetPrompt)
+            end
+
+            for _ = 1, 2 do
+                Services.RunService.Heartbeat:Wait()
+                if isHoldingEgg() then break end
+            end
+            if isHoldingEgg() then break end
+        end
+    end
+
     local safeTarget = CONFIG.BaseDropPosition
-    local corridorStep = 55
-
-    while currentX - corridorStep > safeTarget.X do
-        if sessionId ~= State.currentStealSession or not isStealEnabled() or not isHoldingEgg() then break end
-        local nextX = currentX - corridorStep
-        local _, hRoot = getAliveRig()
-        if hRoot then
-            pcall(function()
-                hRoot.CFrame = CFrame.new(nextX, CONFIG.GroundAltitude + 1.0, safeTarget.Z) * CFrame.Angles(0, math.rad(90), 0)
-                hRoot.AssemblyLinearVelocity = Vector3.zero
-            end)
+    if isHoldingEgg() then
+        local _, fRoot, fHum = getAliveRig()
+        if fRoot then
+            fRoot.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z) * CFrame.Angles(0, math.rad(90), 0)
+            fRoot.AssemblyLinearVelocity = Vector3.zero
         end
-        task.wait(CONFIG.HopGap)
-        currentX = nextX
-    end
+        task.wait(0.15)
+        if fHum then fHum.PlatformStand = false end
 
-    local _, fRoot, fHum = getAliveRig()
-    if fRoot then
-        fRoot.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
-        fRoot.AssemblyLinearVelocity = Vector3.zero
-    end
-    task.wait(0.15)
-    if fHum then fHum.PlatformStand = false end
-
-    local depositDeadline = os.clock() + 3.5
-    while os.clock() < depositDeadline and isHoldingEgg() do
-        if sessionId ~= State.currentStealSession or not isStealEnabled() then break end
-        local _, curR = getAliveRig()
-        if curR and (curR.Position - safeTarget).Magnitude > 8 then
-            pcall(function()
-                curR.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
-                curR.AssemblyLinearVelocity = Vector3.zero
-            end)
+        local depositDeadline = os.clock() + 3.5
+        while os.clock() < depositDeadline and isHoldingEgg() do
+            if sessionId ~= State.currentStealSession or not isStealEnabled() then break end
+            local _, curR = getAliveRig()
+            if curR and (curR.Position - safeTarget).Magnitude > 8 then
+                pcall(function()
+                    curR.CFrame = CFrame.new(safeTarget.X, CONFIG.GroundAltitude + 1.2, safeTarget.Z)
+                    curR.AssemblyLinearVelocity = Vector3.zero
+                end)
+            end
+            task.wait(0.1)
         end
-        task.wait(0.1)
     end
 
     local banked = not isHoldingEgg()
